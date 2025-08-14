@@ -45,7 +45,10 @@ export function JobMatcherPage() {
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema)
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+        desiredJobTitle: '',
+    }
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
