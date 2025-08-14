@@ -22,6 +22,7 @@ import {
   Users,
   Settings,
   LogOut,
+  Loader2,
 } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
