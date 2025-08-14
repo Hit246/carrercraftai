@@ -1,7 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   SidebarProvider,
   Sidebar,
@@ -20,18 +21,39 @@ import {
   Briefcase,
   Users,
   Settings,
+  LogOut,
 } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { AuthProvider, useAuth } from '@/hooks/use-auth';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function AppLayoutContent({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading, logout } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+
+  if (loading || !user) {
+    return (
+        <div className="flex h-screen w-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
+
   const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`);
 
   const getPageTitle = () => {
@@ -40,6 +62,11 @@ export default function AppLayout({
     if (isActive('/job-matcher')) return 'Job Matcher';
     if (isActive('/candidate-matcher')) return 'Candidate Matcher';
     return 'CareerCraft AI';
+  }
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
   }
 
   return (
@@ -94,11 +121,14 @@ export default function AppLayout({
           <div className="flex items-center gap-3">
              <Avatar className="h-9 w-9">
               <AvatarImage src="https://placehold.co/100x100.png" alt="@user" data-ai-hint="profile picture" />
-              <AvatarFallback>DU</AvatarFallback>
+              <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col">
-                <span className="text-sm font-medium">Demo User</span>
-                <span className="text-xs text-muted-foreground">user@example.com</span>
+            <div className="flex flex-col truncate">
+                <span className="text-sm font-medium truncate">{user.email}</span>
+                <button onClick={handleLogout} className="text-xs text-muted-foreground hover:text-foreground text-left flex items-center gap-1">
+                  <LogOut className="w-3 h-3"/>
+                  Logout
+                </button>
             </div>
           </div>
         </SidebarFooter>
@@ -122,3 +152,15 @@ export default function AppLayout({
     </SidebarProvider>
   );
 }
+
+export default function AppLayout({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+      return (
+          <AuthProvider>
+              <AppLayoutContent>{children}</AppLayoutContent>
+          </AuthProvider>
+      )
+  }

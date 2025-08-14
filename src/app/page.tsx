@@ -22,10 +22,10 @@ export default function Home() {
           </nav>
           <div className="flex items-center gap-2">
              <Button variant="ghost" asChild>
-                <Link href="/dashboard">Log In</Link>
+                <Link href="/login">Log In</Link>
             </Button>
             <Button asChild>
-              <Link href="/dashboard">Get Started Free</Link>
+              <Link href="/signup">Get Started Free</Link>
             </Button>
           </div>
         </div>
