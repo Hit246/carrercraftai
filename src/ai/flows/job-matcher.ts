@@ -27,7 +27,7 @@ const JobMatcherOutputSchema = z.object({
       title: z.string().describe('The title of the job.'),
       company: z.string().describe('The company offering the job.'),
       description: z.string().describe('A brief description of the job.'),
-      url: z.string().url().describe('The URL to the job posting.'),
+      url: z.string().describe('The URL to the job posting.'),
       matchScore: z.number().describe('A score indicating how well the job matches the resume.'),
     })
   ).describe('A list of job suggestions based on the resume.'),
