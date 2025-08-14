@@ -8,19 +8,36 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { jobMatcherAction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Briefcase, ExternalLink } from 'lucide-react';
+import { Loader2, Briefcase, ExternalLink, Upload } from 'lucide-react';
 import type { JobMatcherOutput } from '@/ai/flows/job-matcher';
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Label } from './ui/label';
+
 
 const formSchema = z.object({
-  resumeText: z.string().min(100, { message: 'Please paste your full resume content.' }),
+    resumeFile: z.instanceof(File).refine(
+        (file) => file.size > 0, 'Please upload your resume.'
+      ).refine(
+        (file) => ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type),
+        "Please upload a PDF or DOCX file."
+      ),
   desiredJobTitle: z.string().optional(),
 });
+
+const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
 export function JobMatcherPage() {
   const [jobSuggestions, setJobSuggestions] = useState<JobMatcherOutput['jobSuggestions'] | null>(null);
@@ -28,11 +45,7 @@ export function JobMatcherPage() {
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      resumeText: '',
-      desiredJobTitle: '',
-    },
+    resolver: zodResolver(formSchema)
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -40,7 +53,11 @@ export function JobMatcherPage() {
     setJobSuggestions(null);
 
     try {
-        const result = await jobMatcherAction(values);
+        const resumeDataUri = await fileToDataUri(values.resumeFile);
+        const result = await jobMatcherAction({ 
+            resumeDataUri,
+            desiredJobTitle: values.desiredJobTitle
+         });
         setJobSuggestions(result.jobSuggestions);
     } catch (error) {
         console.error(error);
@@ -71,16 +88,20 @@ export function JobMatcherPage() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="resumeText"
+                  name="resumeFile"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Your Resume Content</FormLabel>
+                      <FormLabel>Your Resume</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder="Paste your resume here..."
-                          className="h-48 resize-y"
-                          {...field}
-                        />
+                        <div className="relative">
+                            <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input
+                                type="file"
+                                className="pl-10"
+                                accept=".pdf,.docx"
+                                onChange={(e) => field.onChange(e.target.files?.[0])}
+                            />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

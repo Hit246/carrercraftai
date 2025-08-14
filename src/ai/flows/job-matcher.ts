@@ -12,7 +12,11 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const JobMatcherInputSchema = z.object({
-  resumeText: z.string().describe('The text content of the user\'s resume.'),
+  resumeDataUri: z
+  .string()
+  .describe(
+    'A resume as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:<mimetype>;base64,<encoded_data>.'
+  ),
   desiredJobTitle: z.string().optional().describe('The user\'s desired job title, if any.'),
 });
 export type JobMatcherInput = z.infer<typeof JobMatcherInputSchema>;
@@ -41,7 +45,7 @@ const prompt = ai.definePrompt({
   prompt: `You are an AI job matching expert. Given a resume and optionally a desired job title, you will suggest relevant job opportunities.
 
 Resume:
-{{resumeText}}
+{{media url=resumeDataUri}}
 
 Desired Job Title (if any):
 {{desiredJobTitle}}
