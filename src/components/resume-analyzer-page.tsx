@@ -6,16 +6,32 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { analyzeResumeAction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Sparkles, CheckCircle, XCircle, Lightbulb } from 'lucide-react';
+import { Loader2, Sparkles, CheckCircle, XCircle, Lightbulb, Upload } from 'lucide-react';
 import type { AnalyzeResumeOutput } from '@/ai/flows/resume-analyzer';
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
-  resumeText: z.string().min(100, { message: 'Please paste your full resume content for an effective analysis.' }),
+  resumeFile: z.instanceof(File).refine(
+    (file) => file.size > 0, 'Please upload your resume.'
+  ).refine(
+    (file) => ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type),
+    "Please upload a PDF or DOCX file."
+  )
 });
+
+const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
 export function ResumeAnalyzerPage() {
   const [analysisResult, setAnalysisResult] = useState<AnalyzeResumeOutput | null>(null);
@@ -24,9 +40,6 @@ export function ResumeAnalyzerPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      resumeText: '',
-    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -34,7 +47,8 @@ export function ResumeAnalyzerPage() {
     setAnalysisResult(null);
 
     try {
-        const result = await analyzeResumeAction({ resumeText: values.resumeText });
+        const resumeDataUri = await fileToDataUri(values.resumeFile);
+        const result = await analyzeResumeAction({ resumeDataUri });
         setAnalysisResult(result);
     } catch (error) {
         console.error(error);
@@ -56,7 +70,7 @@ export function ResumeAnalyzerPage() {
             <Sparkles className="text-primary"/> AI Resume Analyzer
           </CardTitle>
           <CardDescription>
-            Paste your resume content below to get AI-powered feedback. This is a premium feature, unlocked for this demo.
+            Upload your resume (PDF or DOCX) to get AI-powered feedback. This is a premium feature, unlocked for this demo.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,16 +78,20 @@ export function ResumeAnalyzerPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
-                name="resumeText"
+                name="resumeFile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Resume Content</FormLabel>
+                    <FormLabel>Resume File</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Paste your resume here..."
-                        className="min-h-[250px] resize-y"
-                        {...field}
-                      />
+                        <div className="relative">
+                            <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input
+                                type="file"
+                                className="pl-10"
+                                accept=".pdf,.docx"
+                                onChange={(e) => field.onChange(e.target.files?.[0])}
+                            />
+                        </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -2,6 +2,7 @@
 
 import {
   analyzeResume,
+  AnalyzeResumeInput,
   AnalyzeResumeOutput,
 } from '@/ai/flows/resume-analyzer';
 import {
@@ -15,16 +16,11 @@ import {
   CandidateMatcherOutput,
 } from '@/ai/flows/candidate-matcher';
 
-interface AnalyzeResumeActionInput {
-    resumeText: string;
-}
-
 export async function analyzeResumeAction(
-  input: AnalyzeResumeActionInput
+  input: AnalyzeResumeInput
 ): Promise<AnalyzeResumeOutput> {
   // In a real app, you would check the user's subscription tier here before proceeding.
-  const resumeDataUri = `data:text/plain;base64,${Buffer.from(input.resumeText).toString('base64')}`;
-  return await analyzeResume({ resumeDataUri });
+  return await analyzeResume(input);
 }
 
 export async function jobMatcherAction(
