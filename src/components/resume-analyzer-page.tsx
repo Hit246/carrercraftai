@@ -40,15 +40,17 @@ export function ResumeAnalyzerPage() {
   const [analysisResult, setAnalysisResult] = useState<AnalyzeResumeOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { isPro } = useAuth();
+  const { isPro, credits, useCredit } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
+  const canUseFeature = isPro || credits > 0;
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if(!isPro) {
+    if(!canUseFeature) {
         router.push('/pricing');
         return;
     }
@@ -57,6 +59,9 @@ export function ResumeAnalyzerPage() {
     setAnalysisResult(null);
 
     try {
+        if (!isPro) {
+            useCredit();
+        }
         const resumeDataUri = await fileToDataUri(values.resumeFile);
         const result = await analyzeResumeAction({ resumeDataUri });
         setAnalysisResult(result);
@@ -78,9 +83,9 @@ export function ResumeAnalyzerPage() {
              <Alert variant="pro">
                 <Crown />
                 <AlertTitle>This is a Pro Feature</AlertTitle>
-                <AlertDescription>
-                    Please upgrade to a Pro account to use the AI Resume Analyzer.
-                    <Button onClick={() => router.push('/pricing')} className="ml-4">Upgrade Now</Button>
+                <AlertDescription className="flex justify-between items-center">
+                    <span>You have {credits} free credits remaining. Upgrade for unlimited use.</span>
+                    <Button onClick={() => router.push('/pricing')} size="sm">Upgrade Now</Button>
                 </AlertDescription>
             </Alert>
         )}
@@ -110,7 +115,7 @@ export function ResumeAnalyzerPage() {
                                 className="pl-10"
                                 accept=".pdf,.docx"
                                 onChange={(e) => field.onChange(e.target.files?.[0])}
-                                disabled={!isPro}
+                                disabled={!canUseFeature && !isLoading}
                             />
                         </div>
                     </FormControl>
@@ -118,7 +123,7 @@ export function ResumeAnalyzerPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isLoading || !isPro} size="lg" className="w-full">
+              <Button type="submit" disabled={isLoading || !canUseFeature} size="lg" className="w-full">
                 {isLoading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</>
                 ) : (

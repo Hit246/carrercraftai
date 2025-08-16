@@ -34,11 +34,11 @@ export const ResumeBuilder = () => {
         linkedin: 'linkedin.com/in/johndoe',
         summary: 'A passionate software engineer with 5+ years of experience in building scalable web applications and leading projects from ideation to deployment.',
         experience: [
-            { id: 1, title: 'Senior Developer', company: 'Tech Corp', dates: '2020 - Present', description: 'Led the development of a new microservices-based platform, improving system scalability by 40%.' },
-            { id: 2, title: 'Junior Developer', company: 'Innovate LLC', dates: '2018 - 2020', description: 'Contributed to the frontend development of a major e-commerce website using React and Redux.' }
+            { id: 1, title: 'Senior Developer', company: 'Tech Corp', dates: '2020 - Present', description: '- Led the development of a new microservices-based platform, improving system scalability by 40%.\n- Collaborated with cross-functional teams to define, design, and ship new features.\n- Mentored junior developers and conducted code reviews to maintain code quality.' },
+            { id: 2, title: 'Junior Developer', company: 'Innovate LLC', dates: '2018 - 2020', description: '- Contributed to the frontend development of a major e-commerce website using React and Redux.\n- Implemented responsive UI components that improved user experience on mobile devices.\n- Fixed bugs and improved application performance.' }
         ],
         education: [{ id: 1, school: 'University of Technology', degree: 'B.S. in Computer Science', dates: '2014 - 2018' }],
-        skills: 'React, Node.js, TypeScript, Next.js, PostgreSQL, Docker, AWS'
+        skills: 'React, Node.js, TypeScript, Next.js, PostgreSQL, Docker, AWS, GraphQL, REST APIs'
     });
 
     const handleAddExperience = () => {
@@ -61,28 +61,42 @@ export const ResumeBuilder = () => {
             description: "PDF and DOCX export would be implemented here in a full application.",
         });
     }
+    
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { id, value } = e.target;
+        setResumeData(prev => ({ ...prev, [id]: value }));
+    };
+
+    const handleNestedChange = (section: 'experience' | 'education', id: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setResumeData(prev => ({
+            ...prev,
+            [section]: prev[section].map(item => item.id === id ? { ...item, [name]: value } : item)
+        }));
+    };
+
 
     return (
         <div className="grid lg:grid-cols-2 gap-8 h-full">
-            <div className="space-y-6 overflow-y-auto pr-4 -mr-4">
+            <div className="space-y-6 overflow-y-auto pr-4 -mr-4 pb-8">
                 <Card>
                     <CardHeader>
                         <CardTitle>Personal Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid sm:grid-cols-2 gap-4">
-                            <div className="space-y-1.5"><Label htmlFor="name">Full Name</Label><Input id="name" defaultValue={resumeData.name} /></div>
-                            <div className="space-y-1.5"><Label htmlFor="title">Title</Label><Input id="title" defaultValue={resumeData.title} /></div>
-                            <div className="space-y-1.5"><Label htmlFor="phone">Phone</Label><Input id="phone" defaultValue={resumeData.phone} /></div>
-                            <div className="space-y-1.5"><Label htmlFor="email">Email</Label><Input id="email" defaultValue={resumeData.email} /></div>
+                            <div className="space-y-1.5"><Label htmlFor="name">Full Name</Label><Input id="name" value={resumeData.name} onChange={handleInputChange} /></div>
+                            <div className="space-y-1.5"><Label htmlFor="title">Title</Label><Input id="title" value={resumeData.title} onChange={handleInputChange} /></div>
+                            <div className="space-y-1.5"><Label htmlFor="phone">Phone</Label><Input id="phone" value={resumeData.phone} onChange={handleInputChange} /></div>
+                            <div className="space-y-1.5"><Label htmlFor="email">Email</Label><Input id="email" value={resumeData.email} onChange={handleInputChange} /></div>
                         </div>
-                         <div className="space-y-1.5"><Label htmlFor="linkedin">LinkedIn</Label><Input id="linkedin" defaultValue={resumeData.linkedin} /></div>
+                         <div className="space-y-1.5"><Label htmlFor="linkedin">LinkedIn</Label><Input id="linkedin" value={resumeData.linkedin} onChange={handleInputChange} /></div>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader><CardTitle>Professional Summary</CardTitle></CardHeader>
-                    <CardContent><Textarea defaultValue={resumeData.summary} rows={5} /></CardContent>
+                    <CardContent><Textarea id="summary" value={resumeData.summary} onChange={handleInputChange} rows={5} /></CardContent>
                 </Card>
 
                 <Card>
@@ -91,16 +105,33 @@ export const ResumeBuilder = () => {
                         <Button variant="ghost" size="sm" onClick={handleAddExperience}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {resumeData.experience.map((exp, index) => (
+                        {resumeData.experience.map((exp) => (
                             <div key={exp.id} className="p-4 border rounded-lg relative space-y-2">
                                 <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleRemoveExperience(exp.id)}><Trash2 className="h-4 w-4" /></Button>
-                                <Input placeholder="Job Title" defaultValue={exp.title} />
-                                <Input placeholder="Company" defaultValue={exp.company} />
-                                <Input placeholder="Dates" defaultValue={exp.dates} />
-                                <Textarea placeholder="Description" defaultValue={exp.description}/>
+                                <Input name="title" placeholder="Job Title" value={exp.title} onChange={(e) => handleNestedChange('experience', exp.id, e)} />
+                                <Input name="company" placeholder="Company" value={exp.company} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
+                                <Input name="dates" placeholder="Dates (e.g., Jan 2020 - Present)" value={exp.dates} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
+                                <Textarea name="description" placeholder="Description (use bullet points starting with -)" value={exp.description} onChange={(e) => handleNestedChange('experience', exp.id, e)} rows={4}/>
                             </div>
                         ))}
                     </CardContent>
+                </Card>
+
+                 <Card>
+                    <CardHeader><CardTitle>Education</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                         {resumeData.education.map((edu) => (
+                            <div key={edu.id} className="p-4 border rounded-lg relative space-y-2">
+                                <Input name="school" placeholder="School or University" value={edu.school} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                                <Input name="degree" placeholder="Degree (e.g., B.S. in Computer Science)" value={edu.degree} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                                <Input name="dates" placeholder="Dates (e.g., 2014 - 2018)" value={edu.dates} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader><CardTitle>Skills</CardTitle></CardHeader>
+                    <CardContent><Textarea id="skills" placeholder="Comma-separated skills (e.g., React, Node.js, Python)" value={resumeData.skills} onChange={handleInputChange} rows={3} /></CardContent>
                 </Card>
 
             </div>
@@ -118,49 +149,54 @@ export const ResumeBuilder = () => {
                     </div>
                 </div>
                 <Card className="flex-1">
-                    <CardContent className="p-6 sm:p-8 font-body text-sm">
-                        <div className="text-center border-b pb-4 mb-4">
-                            <h2 className="text-3xl font-bold font-headline">{resumeData.name}</h2>
-                            <p className="text-muted-foreground">{resumeData.title}</p>
-                            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs mt-2">
+                    <CardContent className="p-6 sm:p-8 font-body text-sm bg-white text-gray-800 shadow-lg h-full overflow-y-auto">
+                        <div className="text-center border-b-2 border-gray-200 pb-4 mb-6">
+                            <h2 className="text-4xl font-bold font-headline text-gray-900">{resumeData.name}</h2>
+                            <p className="text-lg text-primary font-semibold mt-1">{resumeData.title}</p>
+                            <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-gray-600 mt-3">
                                 <span>{resumeData.phone}</span>
-                                <span className="text-muted-foreground">|</span>
                                 <span>{resumeData.email}</span>
-                                <span className="text-muted-foreground">|</span>
                                 <span>{resumeData.linkedin}</span>
                             </div>
                         </div>
-                        <div>
-                            <h3 className="text-lg font-bold font-headline mb-2 text-primary">Summary</h3>
-                            <p>{resumeData.summary}</p>
+                        <div className="mb-6">
+                            <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Summary</h3>
+                            <p className="text-gray-700">{resumeData.summary}</p>
                         </div>
-                        <div className="mt-4">
-                            <h3 className="text-lg font-bold font-headline mb-2 text-primary">Experience</h3>
+                        <div className="mb-6">
+                            <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Experience</h3>
                             {resumeData.experience.map(exp => (
-                                <div key={exp.id} className="mb-3">
-                                    <div className="flex justify-between">
-                                        <h4 className="font-semibold">{exp.title} at {exp.company}</h4>
-                                        <p className="font-medium text-muted-foreground">{exp.dates}</p>
+                                <div key={exp.id} className="mb-4">
+                                    <div className="flex justify-between items-baseline">
+                                        <h4 className="text-base font-semibold text-gray-800">{exp.title}</h4>
+                                        <p className="text-xs font-medium text-gray-600">{exp.dates}</p>
                                     </div>
-                                    <p className="mt-1">{exp.description}</p>
+                                    <p className="text-sm font-medium text-gray-700">{exp.company}</p>
+                                    <ul className="mt-2 list-disc list-inside text-gray-700 space-y-1">
+                                        {exp.description.split('\n').map((line, i) => line.trim() && <li key={i}>{line.replace(/^-/, '').trim()}</li>)}
+                                    </ul>
                                 </div>
                             ))}
                         </div>
-                         <div className="mt-4">
-                            <h3 className="text-lg font-bold font-headline mb-2 text-primary">Education</h3>
+                         <div className="mb-6">
+                            <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Education</h3>
                             {resumeData.education.map(edu => (
-                                <div key={edu.id} className="mb-3">
+                                <div key={edu.id} className="mb-2">
                                     <div className="flex justify-between">
-                                        <h4 className="font-semibold">{edu.school}</h4>
-                                        <p className="font-medium text-muted-foreground">{edu.dates}</p>
+                                        <h4 className="text-base font-semibold text-gray-800">{edu.school}</h4>
+                                        <p className="text-xs font-medium text-gray-600">{edu.dates}</p>
                                     </div>
-                                    <p className="mt-1">{edu.degree}</p>
+                                    <p className="text-sm text-gray-700">{edu.degree}</p>
                                 </div>
                             ))}
                         </div>
-                         <div className="mt-4">
-                            <h3 className="text-lg font-bold font-headline mb-2 text-primary">Skills</h3>
-                            <p>{resumeData.skills}</p>
+                         <div>
+                            <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Skills</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {resumeData.skills.split(',').map(skill => skill.trim() && (
+                                    <span key={skill} className="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-full">{skill.trim()}</span>
+                                ))}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

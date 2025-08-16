@@ -42,7 +42,7 @@ export function CoverLetterGeneratorPage() {
   const [coverLetter, setCoverLetter] = useState<GenerateCoverLetterOutput['coverLetter'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { isPro, user } = useAuth();
+  const { isPro, user, credits, useCredit } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -51,9 +51,11 @@ export function CoverLetterGeneratorPage() {
         jobDescription: '',
     }
   });
+  
+  const canUseFeature = isPro || credits > 0;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if(!isPro) {
+    if(!canUseFeature) {
         router.push('/pricing');
         return;
     }
@@ -62,6 +64,9 @@ export function CoverLetterGeneratorPage() {
     setCoverLetter(null);
 
     try {
+        if (!isPro) {
+            useCredit();
+        }
         const resumeDataUri = await fileToDataUri(values.resumeFile);
         const result = await generateCoverLetterAction({ 
             resumeDataUri,
@@ -87,9 +92,9 @@ export function CoverLetterGeneratorPage() {
              <Alert variant="pro">
                 <Crown />
                 <AlertTitle>This is a Pro Feature</AlertTitle>
-                <AlertDescription>
-                    Please upgrade to a Pro account to use the AI Cover Letter Generator.
-                    <Button onClick={() => router.push('/pricing')} className="ml-4">Upgrade Now</Button>
+                <AlertDescription className="flex justify-between items-center">
+                    <span>You have {credits} free credits remaining. Upgrade for unlimited use.</span>
+                    <Button onClick={() => router.push('/pricing')} size="sm">Upgrade Now</Button>
                 </AlertDescription>
             </Alert>
         )}
@@ -119,7 +124,7 @@ export function CoverLetterGeneratorPage() {
                                 className="pl-10"
                                 accept=".pdf,.docx"
                                 onChange={(e) => field.onChange(e.target.files?.[0])}
-                                disabled={!isPro}
+                                disabled={!canUseFeature || isLoading}
                             />
                         </div>
                       </FormControl>
@@ -138,14 +143,14 @@ export function CoverLetterGeneratorPage() {
                         placeholder="Paste the job description here..."
                         className="h-48 resize-y"
                         {...field}
-                        disabled={!isPro}
+                        disabled={!canUseFeature || isLoading}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isLoading || !isPro} size="lg" className="w-full">
+              <Button type="submit" disabled={isLoading || !canUseFeature} size="lg" className="w-full">
                 {isLoading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Cover Letter...</>
                 ) : (
