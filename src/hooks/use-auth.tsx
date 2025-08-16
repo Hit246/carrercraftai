@@ -23,6 +23,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const FREE_CREDITS = 3;
+const CREATOR_EMAIL = 'hitarth0236@gmail.com';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -40,17 +41,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (user) {
-        // User is signed in, check their status
-        const savedPlan = (localStorage.getItem('plan') as Plan) || 'free';
-        setPlan(savedPlan);
-
-        const savedCredits = localStorage.getItem('credits');
-        if (savedCredits === null) {
-          // New user or first time logging in on this browser
-          localStorage.setItem('credits', String(FREE_CREDITS));
-          setCredits(FREE_CREDITS);
+        // Special access for the creator
+        if (user.email === CREATOR_EMAIL) {
+          setPlan('recruiter');
+          setCredits(Infinity);
         } else {
-          setCredits(parseInt(savedCredits, 10));
+          // Regular user logic
+          const savedPlan = (localStorage.getItem('plan') as Plan) || 'free';
+          setPlan(savedPlan);
+
+          const savedCredits = localStorage.getItem('credits');
+          if (savedCredits === null) {
+            localStorage.setItem('credits', String(FREE_CREDITS));
+            setCredits(FREE_CREDITS);
+          } else {
+            setCredits(parseInt(savedCredits, 10));
+          }
         }
       } else {
         // User is signed out, reset state
@@ -86,16 +92,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const upgradeToPro = () => {
+    if (user?.email === CREATOR_EMAIL) return;
     localStorage.setItem('plan', 'pro');
     setPlan('pro');
   }
 
   const upgradeToRecruiter = () => {
+    if (user?.email === CREATOR_EMAIL) return;
     localStorage.setItem('plan', 'recruiter');
     setPlan('recruiter');
   }
 
   const useCredit = () => {
+    if (user?.email === CREATOR_EMAIL) return;
     if (plan === 'free' && credits > 0) {
         const newCredits = credits - 1;
         setCredits(newCredits);
