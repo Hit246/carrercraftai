@@ -18,8 +18,8 @@ export default function Home() {
           </Link>
           <nav className="hidden md:flex gap-6 items-center text-sm font-medium">
             <Link href="#features" className="text-muted-foreground transition-colors hover:text-foreground">Features</Link>
-            <Link href="/dashboard" className="text-muted-foreground transition-colors hover:text-foreground">Resume Builder</Link>
-            <Link href="/candidate-matcher" className="text-muted-foreground transition-colors hover:text-foreground">For Recruiters</Link>
+            <Link href="/login" className="text-muted-foreground transition-colors hover:text-foreground">Resume Builder</Link>
+            <Link href="/login" className="text-muted-foreground transition-colors hover:text-foreground">For Recruiters</Link>
           </nav>
           <div className="flex items-center gap-2">
              <Button variant="ghost" asChild>
@@ -46,7 +46,7 @@ export default function Home() {
             </p>
             <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
               <Button size="lg" asChild className="w-full sm:w-auto">
-                <Link href="/dashboard">Create My Resume</Link>
+                <Link href="/signup">Create My Resume</Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
                 <Link href="#features">Explore Features</Link>
