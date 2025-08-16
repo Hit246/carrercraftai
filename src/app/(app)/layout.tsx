@@ -26,7 +26,8 @@ import {
   Loader2,
   Crown,
   LifeBuoy,
-  Users2
+  Users2,
+  Home
 } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -58,7 +59,10 @@ function AppLayoutContent({
     )
   }
 
-  const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`);
+  const isActive = (path: string) => {
+    if (path === '/dashboard') return pathname === path;
+    return pathname.startsWith(path);
+  }
 
   const getPageTitle = () => {
     if (isActive('/dashboard')) return 'Dashboard';
@@ -105,6 +109,14 @@ function AppLayoutContent({
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
+            <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive('/')}>
+                    <Link href="/">
+                    <Home />
+                    <span>Home</span>
+                    </Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={isActive('/dashboard')}>
                 <Link href="/dashboard">
