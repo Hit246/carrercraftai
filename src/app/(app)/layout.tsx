@@ -24,7 +24,9 @@ import {
   LogOut,
   FileText,
   Loader2,
-  Crown
+  Crown,
+  LifeBuoy,
+  Users2
 } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -64,6 +66,8 @@ function AppLayoutContent({
     if (isActive('/job-matcher')) return 'Job Matcher';
     if (isActive('/cover-letter-generator')) return 'Cover Letter Generator';
     if (isActive('/candidate-matcher')) return 'Candidate Matcher';
+    if (isActive('/team')) return 'Team Management';
+    if (isActive('/support')) return 'Support';
     if (isActive('/pricing')) return 'Upgrade to Pro';
     return 'CareerCraft AI';
   }
@@ -144,6 +148,24 @@ function AppLayoutContent({
                   <Badge variant="outline" className="ml-auto">Recruiters</Badge>
                 </Link>
               </SidebarMenuButton>
+            </SidebarMenuItem>
+             {plan === 'recruiter' && (
+                <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/team')}>
+                        <Link href="/team">
+                        <Users2 />
+                        <span>Team Management</span>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            )}
+             <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive('/support')}>
+                    <Link href="/support">
+                    <LifeBuoy />
+                    <span>Support</span>
+                    </Link>
+                </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
