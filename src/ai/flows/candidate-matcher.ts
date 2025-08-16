@@ -21,7 +21,7 @@ export type CandidateMatcherInput = z.infer<typeof CandidateMatcherInputSchema>;
 const CandidateMatcherOutputSchema = z.object({
   candidateMatches: z.array(
     z.object({
-      resumeId: z.string().describe('The id of the resume that matches the job description'),
+      resumeId: z.string().describe('A unique identifier for the resume that matches the job description, such as "Resume 1", "Resume 2", etc.'),
       matchScore: z.number().describe('A score indicating how well the candidate matches the job description. Higher scores indicate a better match.'),
       justification: z.string().describe('A short justification for why this candidate was selected.'),
     })
@@ -43,10 +43,10 @@ You will be provided with a job description and a database of resumes. Your task
 
 Job Description: {{{jobDescription}}}
 
-Resumes:
+Resumes (each separated by '~~~'):
 {{{resumeDatabase}}}
 
-For each resume, assess its relevance to the job description and provide a match score (0-100) and a brief justification for your assessment.
+For each resume, assign a unique ID (e.g., "Resume 1", "Resume 2"). Assess its relevance to the job description and provide a match score (0-100) and a brief justification for your assessment.
 Return the candidates that have the highest match scores.
 
 Ensure that the output is a valid JSON object conforming to the CandidateMatcherOutputSchema.

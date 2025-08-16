@@ -21,9 +21,9 @@ const AnalyzeResumeInputSchema = z.object({
 export type AnalyzeResumeInput = z.infer<typeof AnalyzeResumeInputSchema>;
 
 const AnalyzeResumeOutputSchema = z.object({
-  strengths: z.string().describe('The strengths of the resume.'),
-  weaknesses: z.string().describe('The weaknesses of the resume.'),
-  suggestions: z.string().describe('Suggestions for improving the resume.'),
+  strengths: z.string().describe('The specific strengths of the resume, citing examples from the document.'),
+  weaknesses: z.string().describe('The specific weaknesses of the resume, citing examples and explaining why they are weak.'),
+  suggestions: z.string().describe('Actionable suggestions for improving the resume, tied directly to the identified weaknesses.'),
 });
 export type AnalyzeResumeOutput = z.infer<typeof AnalyzeResumeOutputSchema>;
 
@@ -35,11 +35,15 @@ const prompt = ai.definePrompt({
   name: 'analyzeResumePrompt',
   input: {schema: AnalyzeResumeInputSchema},
   output: {schema: AnalyzeResumeOutputSchema},
-  prompt: `You are a resume expert. You will analyze the resume and provide feedback on its strengths, weaknesses, and areas for improvement.
+  prompt: `You are an expert career coach and resume critic. You will analyze the provided resume in detail and provide constructive, specific, and actionable feedback.
 
   Analyze the following resume:
-
   {{media url=resumeDataUri}}
+
+  Provide feedback with the following structure:
+  - Strengths: What does the resume do well? Be specific and reference parts of the resume.
+  - Weaknesses: What are the weak points? Where can it be improved? Be specific and reference the parts of the resume that are weak.
+  - Suggestions: Provide concrete suggestions for improvement for each of the identified weaknesses.
   `,
 });
 

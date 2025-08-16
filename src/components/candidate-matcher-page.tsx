@@ -6,11 +6,12 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { candidateMatcherAction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Users, FileSearch } from 'lucide-react';
+import { Loader2, Users, FileSearch, Upload } from 'lucide-react';
 import type { CandidateMatcherOutput } from '@/ai/flows/candidate-matcher';
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -18,11 +19,24 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
   jobDescription: z.string().min(50, { message: 'Please provide a detailed job description.' }),
-  resumeDatabase: z.string().min(100, { message: 'Please paste at least one resume.' }).refine(
-    (val) => val.includes('```'),
-    { message: 'Please separate resumes with triple backticks (```) on a new line.' }
-  ),
+  resumeFile: z.instanceof(File).refine(
+    (file) => file.size > 0, 'Please upload a resume file.'
+  ).refine(
+    (file) => file.type === "text/plain",
+    "Please upload a TXT file."
+  )
 });
+
+const fileToString = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+};
 
 export function CandidateMatcherPage() {
   const [candidateMatches, setCandidateMatches] = useState<CandidateMatcherOutput['candidateMatches'] | null>(null);
@@ -33,7 +47,6 @@ export function CandidateMatcherPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       jobDescription: '',
-      resumeDatabase: '',
     },
   });
 
@@ -42,7 +55,11 @@ export function CandidateMatcherPage() {
     setCandidateMatches(null);
 
     try {
-        const result = await candidateMatcherAction(values);
+        const resumeDatabase = await fileToString(values.resumeFile);
+        const result = await candidateMatcherAction({
+            jobDescription: values.jobDescription,
+            resumeDatabase
+        });
         setCandidateMatches(result.candidateMatches.sort((a,b) => b.matchScore - a.matchScore));
     } catch (error) {
         console.error(error);
@@ -64,7 +81,7 @@ export function CandidateMatcherPage() {
             <Users className="text-primary"/> AI Candidate Matcher
           </CardTitle>
           <CardDescription>
-            For recruiters and hiring managers. Paste a job description and a list of resumes to find the best-fit candidates for your role.
+            For recruiters and hiring managers. Paste a job description and upload a single TXT file containing multiple resumes to find the best-fit candidates.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -88,19 +105,26 @@ export function CandidateMatcherPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
+                 <FormField
                   control={form.control}
-                  name="resumeDatabase"
+                  name="resumeFile"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Candidate Resumes</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder={'Paste resumes here, separated by ``` on a new line.\n\nExample:\nResume 1 text...\n```\nResume 2 text...'}
-                          className="h-64 resize-y"
-                          {...field}
-                        />
+                      <FormLabel>Candidate Resumes File</FormLabel>
+                       <FormControl>
+                        <div className="relative">
+                            <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input
+                                type="file"
+                                className="pl-10"
+                                accept=".txt"
+                                onChange={(e) => field.onChange(e.target.files?.[0])}
+                            />
+                        </div>
                       </FormControl>
+                      <FormDescription>
+                        Upload a single .txt file with resumes separated by ~~~ on a new line.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
