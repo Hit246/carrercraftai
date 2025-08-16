@@ -5,13 +5,16 @@ import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, sign
 import { auth } from '@/lib/firebase';
 import type { AuthCredential } from 'firebase/auth';
 
+type Plan = 'free' | 'pro' | 'recruiter';
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  isPro: boolean;
+  plan: Plan;
   credits: number;
   useCredit: () => void;
   upgradeToPro: () => void;
+  upgradeToRecruiter: () => void;
   logout: () => Promise<void>;
   login: (email:string, password:string) => Promise<any>;
   signup: (email:string, password:string) => Promise<any>;
@@ -24,12 +27,12 @@ const FREE_CREDITS = 3;
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isPro, setIsPro] = useState(false);
+  const [plan, setPlan] = useState<Plan>('free');
   const [credits, setCredits] = useState(0);
 
   useEffect(() => {
-    const proStatus = localStorage.getItem('isPro') === 'true';
-    if(proStatus) setIsPro(true);
+    const savedPlan = localStorage.getItem('plan') as Plan | null;
+    if(savedPlan) setPlan(savedPlan);
     
     const savedCredits = localStorage.getItem('credits');
     setCredits(savedCredits ? parseInt(savedCredits, 10) : FREE_CREDITS);
@@ -38,8 +41,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(user);
       if (user) {
         // User is signed in, check their status
-        const proStatus = localStorage.getItem('isPro') === 'true';
-        setIsPro(proStatus);
+        const savedPlan = (localStorage.getItem('plan') as Plan) || 'free';
+        setPlan(savedPlan);
 
         const savedCredits = localStorage.getItem('credits');
         if (savedCredits === null) {
@@ -51,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } else {
         // User is signed out, reset state
-        setIsPro(false);
+        setPlan('free');
         setCredits(FREE_CREDITS);
       }
       setLoading(false);
@@ -69,24 +72,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Set initial credits for new user
     localStorage.setItem('credits', String(FREE_CREDITS));
     setCredits(FREE_CREDITS);
+    localStorage.setItem('plan', 'free');
+    setPlan('free');
     return userCredential;
   }
 
   const logout = () => {
-    localStorage.removeItem('isPro');
+    localStorage.removeItem('plan');
     localStorage.removeItem('credits');
-    setIsPro(false);
+    setPlan('free');
     setCredits(0);
     return signOut(auth);
   };
   
   const upgradeToPro = () => {
-    localStorage.setItem('isPro', 'true');
-    setIsPro(true);
+    localStorage.setItem('plan', 'pro');
+    setPlan('pro');
+  }
+
+  const upgradeToRecruiter = () => {
+    localStorage.setItem('plan', 'recruiter');
+    setPlan('recruiter');
   }
 
   const useCredit = () => {
-    if (!isPro && credits > 0) {
+    if (plan === 'free' && credits > 0) {
         const newCredits = credits - 1;
         setCredits(newCredits);
         localStorage.setItem('credits', String(newCredits));
@@ -96,10 +106,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const value = {
     user,
     loading,
-    isPro,
+    plan,
     credits,
     useCredit,
     upgradeToPro,
+    upgradeToRecruiter,
     logout,
     login,
     signup,

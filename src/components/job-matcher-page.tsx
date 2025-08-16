@@ -45,7 +45,7 @@ export function JobMatcherPage() {
   const [jobSuggestions, setJobSuggestions] = useState<JobMatcherOutput['jobSuggestions'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { isPro, credits, useCredit } = useAuth();
+  const { plan, credits, useCredit } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -55,10 +55,15 @@ export function JobMatcherPage() {
     }
   });
 
-  const canUseFeature = isPro || credits > 0;
+  const canUseFeature = plan !== 'free' || credits > 0;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!canUseFeature) {
+        toast({
+          title: "Upgrade to Pro",
+          description: "You've used all your free credits. Please upgrade to continue.",
+          variant: "destructive",
+        })
         router.push('/pricing');
         return;
     }
@@ -67,7 +72,7 @@ export function JobMatcherPage() {
     setJobSuggestions(null);
 
     try {
-        if (!isPro) {
+        if (plan === 'free') {
             useCredit();
         }
         const resumeDataUri = await fileToDataUri(values.resumeFile);
@@ -91,12 +96,12 @@ export function JobMatcherPage() {
   return (
     <div className="grid lg:grid-cols-12 gap-8">
       <div className="lg:col-span-4 xl:col-span-3">
-        {!isPro && (
+        {plan === 'free' && (
              <Alert variant="pro" className="mb-4">
                 <Crown />
                 <AlertTitle>This is a Pro Feature</AlertTitle>
                 <AlertDescription>
-                     You have {credits} free credits remaining.
+                     You have {credits} free credits remaining. Upgrade for unlimited use.
                 </AlertDescription>
             </Alert>
         )}

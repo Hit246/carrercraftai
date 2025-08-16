@@ -39,7 +39,7 @@ function AppLayoutContent({
   }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logout, isPro, upgradeToPro } = useAuth();
+  const { user, loading, logout, plan } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -71,6 +71,23 @@ function AppLayoutContent({
   const handleLogout = async () => {
     await logout();
     router.push('/');
+  }
+
+  const getPlanBadge = () => {
+    if (plan === 'recruiter') {
+        return <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>
+    }
+    if (plan === 'pro') {
+        return <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>
+    }
+    return (
+        <Button variant="ghost" size="sm" className="ml-auto" asChild>
+            <Link href="/pricing">
+                <Crown className="w-4 h-4 mr-2"/>
+                Upgrade
+            </Link>
+        </Button>
+    )
   }
 
   return (
@@ -143,16 +160,7 @@ function AppLayoutContent({
                   Logout
                 </button>
             </div>
-            {isPro ? (
-                <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>
-            ) : (
-                <Button variant="ghost" size="sm" className="ml-auto" asChild>
-                    <Link href="/pricing">
-                        <Crown className="w-4 h-4 mr-2"/>
-                        Upgrade
-                    </Link>
-                </Button>
-            )}
+            {getPlanBadge()}
           </div>
         </SidebarFooter>
       </Sidebar>

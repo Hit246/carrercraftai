@@ -11,11 +11,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Users, FileSearch, Upload } from 'lucide-react';
+import { Loader2, Users, FileSearch, Upload, Crown } from 'lucide-react';
 import type { CandidateMatcherOutput } from '@/ai/flows/candidate-matcher';
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formSchema = z.object({
   jobDescription: z.string().min(50, { message: 'Please provide a detailed job description.' }),
@@ -42,6 +45,8 @@ export function CandidateMatcherPage() {
   const [candidateMatches, setCandidateMatches] = useState<CandidateMatcherOutput['candidateMatches'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { plan } = useAuth();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,7 +55,19 @@ export function CandidateMatcherPage() {
     },
   });
 
+  const canUseFeature = plan === 'recruiter';
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!canUseFeature) {
+        toast({
+            title: "Upgrade to Recruiter Plan",
+            description: "This feature is only available on the Recruiter plan.",
+            variant: "destructive",
+        });
+        router.push('/pricing');
+        return;
+    }
+
     setIsLoading(true);
     setCandidateMatches(null);
 
@@ -75,6 +92,16 @@ export function CandidateMatcherPage() {
 
   return (
     <div className="space-y-8">
+      {!canUseFeature && (
+        <Alert variant="pro">
+            <Crown />
+            <AlertTitle>This is a Recruiter Feature</AlertTitle>
+            <AlertDescription className="flex justify-between items-center">
+                <span>Upgrade to the Recruiter plan to access the AI Candidate Matcher.</span>
+                <Button onClick={() => router.push('/pricing')} size="sm">Upgrade Now</Button>
+            </AlertDescription>
+        </Alert>
+      )}
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-headline flex items-center gap-2">
@@ -99,6 +126,7 @@ export function CandidateMatcherPage() {
                           placeholder="Paste the job description here..."
                           className="h-64 resize-y"
                           {...field}
+                          disabled={!canUseFeature || isLoading}
                         />
                       </FormControl>
                       <FormMessage />
@@ -119,6 +147,7 @@ export function CandidateMatcherPage() {
                                 className="pl-10"
                                 accept=".txt"
                                 onChange={(e) => field.onChange(e.target.files?.[0])}
+                                disabled={!canUseFeature || isLoading}
                             />
                         </div>
                       </FormControl>
@@ -130,7 +159,7 @@ export function CandidateMatcherPage() {
                   )}
                 />
               </div>
-              <Button type="submit" disabled={isLoading} size="lg" className="w-full">
+              <Button type="submit" disabled={isLoading || !canUseFeature} size="lg" className="w-full">
                 {isLoading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finding Candidates...</>
                 ) : (
@@ -167,7 +196,7 @@ export function CandidateMatcherPage() {
                         <TableRow>
                             <TableCell colSpan={3} className="h-24 text-center">
                                 <FileSearch className="mx-auto h-8 w-8 text-muted-foreground mb-2"/>
-                                No candidates found yet. Results will appear here.
+                               {canUseFeature ? "No candidates found yet. Results will appear here." : "Upgrade to the Recruiter plan to find candidates."}
                             </TableCell>
                         </TableRow>
                     )}

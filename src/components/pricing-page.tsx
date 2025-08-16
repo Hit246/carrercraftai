@@ -4,23 +4,30 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
-import { Check, Crown } from "lucide-react"
+import { Check, Crown, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export function PricingPage() {
-  const { isPro, upgradeToPro } = useAuth();
+  const { plan, upgradeToPro, upgradeToRecruiter } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
-  const handleUpgrade = () => {
-    // In a real application, this would redirect to a checkout page (e.g., Stripe).
-    // For this prototype, we'll just simulate the upgrade.
+  const handleUpgradePro = () => {
     upgradeToPro();
     toast({
-        title: "Upgrade Successful!",
+        title: "Upgrade to Pro Successful!",
         description: "You now have access to all Pro features.",
     });
     router.push('/dashboard');
+  }
+
+  const handleUpgradeRecruiter = () => {
+    upgradeToRecruiter();
+    toast({
+        title: "Upgrade to Recruiter Successful!",
+        description: "You now have access to all Recruiter features.",
+    });
+    router.push('/candidate-matcher');
   }
 
   return (
@@ -34,7 +41,7 @@ export function PricingPage() {
         </p>
       </div>
 
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+      <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl w-full">
         <Card>
           <CardHeader>
             <CardTitle>Free Plan</CardTitle>
@@ -45,20 +52,22 @@ export function PricingPage() {
             <ul className="space-y-2 text-left">
               <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Intuitive Resume Builder</li>
               <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Professional Templates</li>
-              <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Manual Content Editing</li>
+              <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> 3 AI Credits</li>
+              <li className="flex items-center gap-2 text-muted-foreground"><Crown className="h-5 w-5" /> Unlimited AI Features</li>
+               <li className="flex items-center gap-2 text-muted-foreground"><Users className="h-5 w-5" /> AI Candidate Matcher</li>
             </ul>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="w-full" disabled>
+            <Button variant="outline" className="w-full" disabled={plan === 'free'}>
               Your Current Plan
             </Button>
           </CardFooter>
         </Card>
 
         <Card className="border-primary border-2 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-primary"></div>
-            <div className="absolute -top-8 -right-8 bg-primary/20 text-primary p-4 rounded-full flex items-center justify-center transform rotate-45">
-                 <Crown className="w-12 h-12" />
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-accent"></div>
+            <div className="absolute -top-12 -right-12 bg-primary/20 text-primary p-4 rounded-full flex items-center justify-center transform rotate-45">
+                 <Crown className="w-16 h-16" />
             </div>
           <CardHeader>
             <CardTitle>Pro Plan</CardTitle>
@@ -68,20 +77,48 @@ export function PricingPage() {
             <p className="text-4xl font-bold font-headline">$10<span className="text-lg font-normal text-muted-foreground">/month</span></p>
              <ul className="space-y-2 text-left">
               <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Everything in Free, plus:</li>
-              <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> AI Resume Analyzer</li>
-              <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> AI Job Matcher</li>
-              <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> AI Cover Letter Generator</li>
+              <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> Unlimited AI Resume Analyzer</li>
+              <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> Unlimited AI Job Matcher</li>
+              <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> Unlimited AI Cover Letter Generator</li>
               <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Priority Support</li>
+              <li className="flex items-center gap-2 text-muted-foreground"><Users className="h-5 w-5" /> AI Candidate Matcher</li>
             </ul>
           </CardContent>
           <CardFooter>
-            {isPro ? (
+            {plan === 'pro' ? (
                 <Button className="w-full" disabled>
-                    You are a Pro!
+                    Your Current Plan
                 </Button>
             ) : (
-                <Button className="w-full" onClick={handleUpgrade}>
+                <Button className="w-full" onClick={handleUpgradePro} disabled={plan === 'recruiter'}>
                     Upgrade to Pro
+                </Button>
+            )}
+          </CardFooter>
+        </Card>
+
+         <Card>
+          <CardHeader>
+            <CardTitle>Recruiter Plan</CardTitle>
+            <CardDescription>For hiring managers and recruitment agencies.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-4xl font-bold font-headline">$49<span className="text-lg font-normal text-muted-foreground">/month</span></p>
+             <ul className="space-y-2 text-left">
+              <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Everything in Pro, plus:</li>
+              <li className="flex items-center gap-2 font-semibold"><Users className="h-5 w-5 text-blue-500" /> Unlimited AI Candidate Matcher</li>
+              <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Team Management Tools</li>
+              <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Dedicated Support</li>
+            </ul>
+          </CardContent>
+          <CardFooter>
+            {plan === 'recruiter' ? (
+                 <Button className="w-full" disabled>
+                    Your Current Plan
+                </Button>
+            ) : (
+                <Button className="w-full" variant="secondary" onClick={handleUpgradeRecruiter}>
+                    Upgrade to Recruiter
                 </Button>
             )}
           </CardFooter>

@@ -40,17 +40,22 @@ export function ResumeAnalyzerPage() {
   const [analysisResult, setAnalysisResult] = useState<AnalyzeResumeOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { isPro, credits, useCredit } = useAuth();
+  const { plan, credits, useCredit } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
-  const canUseFeature = isPro || credits > 0;
+  const canUseFeature = plan !== 'free' || credits > 0;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!canUseFeature) {
+        toast({
+          title: "Upgrade to Pro",
+          description: "You've used all your free credits. Please upgrade to continue.",
+          variant: "destructive",
+        })
         router.push('/pricing');
         return;
     }
@@ -59,7 +64,7 @@ export function ResumeAnalyzerPage() {
     setAnalysisResult(null);
 
     try {
-        if (!isPro) {
+        if (plan === 'free') {
             useCredit();
         }
         const resumeDataUri = await fileToDataUri(values.resumeFile);
@@ -79,7 +84,7 @@ export function ResumeAnalyzerPage() {
 
   return (
     <div className="space-y-8">
-        {!isPro && (
+        {plan === 'free' && (
              <Alert variant="pro">
                 <Crown />
                 <AlertTitle>This is a Pro Feature</AlertTitle>
@@ -115,7 +120,7 @@ export function ResumeAnalyzerPage() {
                                 className="pl-10"
                                 accept=".pdf,.docx"
                                 onChange={(e) => field.onChange(e.target.files?.[0])}
-                                disabled={!canUseFeature && !isLoading}
+                                disabled={!canUseFeature || isLoading}
                             />
                         </div>
                     </FormControl>
