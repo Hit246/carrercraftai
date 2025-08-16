@@ -21,6 +21,7 @@ export function HomeHeader() {
         </Link>
         <nav className="hidden md:flex gap-6 items-center text-sm font-medium">
           <Link href="#features" className="text-muted-foreground transition-colors hover:text-foreground">Features</Link>
+          <Link href="#pricing" className="text-muted-foreground transition-colors hover:text-foreground">Pricing</Link>
           <Link href="/login" className="text-muted-foreground transition-colors hover:text-foreground">Resume Builder</Link>
           <Link href="/login" className="text-muted-foreground transition-colors hover:text-foreground">For Recruiters</Link>
         </nav>

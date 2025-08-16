@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { FileText, Briefcase, Users, Sparkles } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { FileText, Briefcase, Users, Sparkles, Check, Crown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider } from '@/hooks/use-auth';
 import { HomeHeader } from '@/components/home-header';
@@ -89,6 +89,84 @@ function HomePageContent() {
                   <p className="text-muted-foreground">For recruiters: efficiently find the best candidates for your roles from a diverse pool of qualified resumes.</p>
                 </CardContent>
               </Card>
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" className="py-24 md:py-32">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+                <p className="font-semibold text-primary">Pricing</p>
+                <h3 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">The right plan for your needs</h3>
+                <p className="mt-4 text-muted-foreground text-lg">
+                    Choose the plan that’s right for you and take the next step in your career.
+                </p>
+            </div>
+
+            <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl w-full mx-auto">
+                <Card>
+                <CardHeader>
+                    <CardTitle>Free</CardTitle>
+                    <CardDescription>For getting started and building a foundational resume.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <p className="text-4xl font-bold font-headline">$0<span className="text-lg font-normal text-muted-foreground">/month</span></p>
+                    <ul className="space-y-2 text-left">
+                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Intuitive Resume Builder</li>
+                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Professional Templates</li>
+                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> 3 AI Credits</li>
+                    </ul>
+                </CardContent>
+                <CardFooter>
+                    <Button asChild variant="outline" className="w-full">
+                        <Link href="/signup">Get Started</Link>
+                    </Button>
+                </CardFooter>
+                </Card>
+
+                <Card className="border-primary border-2 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-accent"></div>
+                    <div className="absolute -top-12 -right-12 bg-primary/20 text-primary p-4 rounded-full flex items-center justify-center transform rotate-45">
+                        <Crown className="w-16 h-16" />
+                    </div>
+                <CardHeader>
+                    <CardTitle>Pro</CardTitle>
+                    <CardDescription>For professionals who want to stand out and land their dream job.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <p className="text-4xl font-bold font-headline">$10<span className="text-lg font-normal text-muted-foreground">/month</span></p>
+                    <ul className="space-y-2 text-left">
+                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Everything in Free, plus:</li>
+                    <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> Unlimited AI Features</li>
+                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Priority Support</li>
+                    </ul>
+                </CardContent>
+                <CardFooter>
+                    <Button asChild className="w-full">
+                       <Link href="/signup">Choose Pro</Link>
+                    </Button>
+                </CardFooter>
+                </Card>
+
+                <Card>
+                <CardHeader>
+                    <CardTitle>Recruiter</CardTitle>
+                    <CardDescription>For hiring managers and recruitment agencies.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <p className="text-4xl font-bold font-headline">$49<span className="text-lg font-normal text-muted-foreground">/month</span></p>
+                    <ul className="space-y-2 text-left">
+                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Everything in Pro, plus:</li>
+                    <li className="flex items-center gap-2 font-semibold"><Users className="h-5 w-5 text-blue-500" /> AI Candidate Matcher</li>
+                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Team Management Tools</li>
+                    </ul>
+                </CardContent>
+                <CardFooter>
+                    <Button asChild variant="secondary" className="w-full">
+                       <Link href="/signup">Contact Sales</Link>
+                    </Button>
+                </CardFooter>
+                </Card>
             </div>
           </div>
         </section>
