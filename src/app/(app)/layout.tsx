@@ -22,14 +22,15 @@ import {
   Users,
   Settings,
   LogOut,
+  FileText,
   Loader2,
+  Crown
 } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
-import { Skeleton } from '@/components/ui/skeleton';
 
 function AppLayoutContent({
     children,
@@ -38,7 +39,7 @@ function AppLayoutContent({
   }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, isPro, upgradeToPro } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -61,7 +62,9 @@ function AppLayoutContent({
     if (isActive('/dashboard')) return 'Dashboard';
     if (isActive('/resume-analyzer')) return 'Resume Analyzer';
     if (isActive('/job-matcher')) return 'Job Matcher';
+    if (isActive('/cover-letter-generator')) return 'Cover Letter Generator';
     if (isActive('/candidate-matcher')) return 'Candidate Matcher';
+    if (isActive('/pricing')) return 'Upgrade to Pro';
     return 'CareerCraft AI';
   }
 
@@ -94,7 +97,7 @@ function AppLayoutContent({
                 <Link href="/resume-analyzer">
                   <Sparkles />
                   <span>Resume Analyzer</span>
-                  <Badge variant="outline" className="ml-auto">AI</Badge>
+                  <Badge variant="outline" className="ml-auto">AI Pro</Badge>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -103,7 +106,16 @@ function AppLayoutContent({
                 <Link href="/job-matcher">
                   <Briefcase />
                   <span>Job Matcher</span>
-                  <Badge variant="outline" className="ml-auto">AI</Badge>
+                  <Badge variant="outline" className="ml-auto">AI Pro</Badge>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive('/cover-letter-generator')}>
+                <Link href="/cover-letter-generator">
+                  <FileText />
+                  <span>Cover Letter Generator</span>
+                  <Badge variant="outline" className="ml-auto">AI Pro</Badge>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -131,6 +143,16 @@ function AppLayoutContent({
                   Logout
                 </button>
             </div>
+            {isPro ? (
+                <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>
+            ) : (
+                <Button variant="ghost" size="sm" className="ml-auto" asChild>
+                    <Link href="/pricing">
+                        <Crown className="w-4 h-4 mr-2"/>
+                        Upgrade
+                    </Link>
+                </Button>
+            )}
           </div>
         </SidebarFooter>
       </Sidebar>

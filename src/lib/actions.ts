@@ -15,6 +15,11 @@ import {
   CandidateMatcherInput,
   CandidateMatcherOutput,
 } from '@/ai/flows/candidate-matcher';
+import {
+    generateCoverLetter,
+    GenerateCoverLetterInput,
+    GenerateCoverLetterOutput,
+} from '@/ai/flows/cover-letter-generator';
 
 export async function analyzeResumeAction(
   input: AnalyzeResumeInput
@@ -35,4 +40,11 @@ export async function candidateMatcherAction(
 ): Promise<CandidateMatcherOutput> {
   // In a real app, you would check the company's subscription tier here.
   return await candidateMatcher(input);
+}
+
+export async function generateCoverLetterAction(
+  input: GenerateCoverLetterInput
+): Promise<GenerateCoverLetterOutput> {
+  // In a real app, you would check the user's subscription tier here.
+  return await generateCoverLetter(input);
 }

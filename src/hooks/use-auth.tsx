@@ -8,6 +8,8 @@ import type { AuthCredential } from 'firebase/auth';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isPro: boolean;
+  upgradeToPro: () => void;
   logout: () => Promise<void>;
   login: (email:string, password:string) => Promise<any>;
   signup: (email:string, password:string) => Promise<any>;
@@ -18,12 +20,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isPro, setIsPro] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
     });
+
+    // Check for pro status in local storage
+    const proStatus = localStorage.getItem('isPro') === 'true';
+    if(proStatus) setIsPro(true);
 
     return () => unsubscribe();
   }, []);
@@ -37,12 +44,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const logout = () => {
+    localStorage.removeItem('isPro');
+    setIsPro(false);
     return signOut(auth);
   };
+  
+  const upgradeToPro = () => {
+    localStorage.setItem('isPro', 'true');
+    setIsPro(true);
+  }
 
   const value = {
     user,
     loading,
+    isPro,
+    upgradeToPro,
     logout,
     login,
     signup,

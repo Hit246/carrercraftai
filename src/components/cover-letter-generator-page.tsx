@@ -5,24 +5,26 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { analyzeResumeAction } from '@/lib/actions';
+import { generateCoverLetterAction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Sparkles, CheckCircle, XCircle, Lightbulb, Upload, Crown } from 'lucide-react';
-import type { AnalyzeResumeOutput } from '@/ai/flows/resume-analyzer';
+import { Loader2, FileText, Upload, Crown } from 'lucide-react';
+import type { GenerateCoverLetterOutput } from '@/ai/flows/cover-letter-generator';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const formSchema = z.object({
-  resumeFile: z.instanceof(File).refine(
-    (file) => file.size > 0, 'Please upload your resume.'
-  ).refine(
-    (file) => ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type),
-    "Please upload a PDF or DOCX file."
-  )
+    resumeFile: z.instanceof(File).refine(
+        (file) => file.size > 0, 'Please upload your resume.'
+      ).refine(
+        (file) => ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type),
+        "Please upload a PDF or DOCX file."
+      ),
+    jobDescription: z.string().min(50, { message: 'Please provide a detailed job description.' }),
 });
 
 const fileToDataUri = (file: File): Promise<string> => {
@@ -34,17 +36,20 @@ const fileToDataUri = (file: File): Promise<string> => {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-  };
+};
 
-export function ResumeAnalyzerPage() {
-  const [analysisResult, setAnalysisResult] = useState<AnalyzeResumeOutput | null>(null);
+export function CoverLetterGeneratorPage() {
+  const [coverLetter, setCoverLetter] = useState<GenerateCoverLetterOutput['coverLetter'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { isPro } = useAuth();
+  const { isPro, user } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+        jobDescription: '',
+    }
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -54,17 +59,21 @@ export function ResumeAnalyzerPage() {
     }
     
     setIsLoading(true);
-    setAnalysisResult(null);
+    setCoverLetter(null);
 
     try {
         const resumeDataUri = await fileToDataUri(values.resumeFile);
-        const result = await analyzeResumeAction({ resumeDataUri });
-        setAnalysisResult(result);
+        const result = await generateCoverLetterAction({ 
+            resumeDataUri,
+            jobDescription: values.jobDescription,
+            userName: user?.displayName || user?.email || 'The Applicant'
+         });
+        setCoverLetter(result.coverLetter);
     } catch (error) {
         console.error(error);
         toast({
-          title: "Analysis Failed",
-          description: "Something went wrong while analyzing your resume. Please try again.",
+          title: "Cover Letter Generation Failed",
+          description: "Something went wrong. Please try again.",
           variant: "destructive",
         })
     } finally {
@@ -79,30 +88,30 @@ export function ResumeAnalyzerPage() {
                 <Crown />
                 <AlertTitle>This is a Pro Feature</AlertTitle>
                 <AlertDescription>
-                    Please upgrade to a Pro account to use the AI Resume Analyzer.
+                    Please upgrade to a Pro account to use the AI Cover Letter Generator.
                     <Button onClick={() => router.push('/pricing')} className="ml-4">Upgrade Now</Button>
                 </AlertDescription>
             </Alert>
         )}
-      <Card className="max-w-4xl mx-auto">
+      <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-headline flex items-center gap-2">
-            <Sparkles className="text-primary"/> AI Resume Analyzer
+            <FileText className="text-primary"/> AI Cover Letter Generator
           </CardTitle>
           <CardDescription>
-            Upload your resume (PDF or DOCX) to get AI-powered feedback.
+            Create a compelling, tailored cover letter in seconds.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="resumeFile"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Resume File</FormLabel>
-                    <FormControl>
+               <FormField
+                  control={form.control}
+                  name="resumeFile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Your Resume</FormLabel>
+                      <FormControl>
                         <div className="relative">
                             <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
@@ -113,6 +122,24 @@ export function ResumeAnalyzerPage() {
                                 disabled={!isPro}
                             />
                         </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              <FormField
+                control={form.control}
+                name="jobDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Paste the job description here..."
+                        className="h-48 resize-y"
+                        {...field}
+                        disabled={!isPro}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -120,50 +147,31 @@ export function ResumeAnalyzerPage() {
               />
               <Button type="submit" disabled={isLoading || !isPro} size="lg" className="w-full">
                 {isLoading ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating Cover Letter...</>
                 ) : (
-                  'Analyze My Resume'
+                  'Generate Cover Letter'
                 )}
               </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
+        
+        {coverLetter && (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Your Generated Cover Letter</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Textarea 
+                        value={coverLetter} 
+                        readOnly 
+                        className="h-[500px] bg-secondary/50"
+                    />
+                </CardContent>
+            </Card>
+        )}
 
-    {analysisResult && (
-        <div className="mt-8 space-y-6 max-w-4xl mx-auto">
-            <h3 className="text-xl font-headline text-center">Analysis Results</h3>
-            <div className="space-y-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-                        <CheckCircle className="w-6 h-6 text-primary" />
-                        <CardTitle>Strengths</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground">{analysisResult.strengths}</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-                        <XCircle className="w-6 h-6 text-destructive" />
-                        <CardTitle>Weaknesses</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground">{analysisResult.weaknesses}</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-                        <Lightbulb className="w-6 h-6 text-accent" />
-                        <CardTitle>Suggestions for Improvement</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground">{analysisResult.suggestions}</p>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
-    )}
     </div>
   );
 }

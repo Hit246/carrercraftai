@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,13 +11,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Briefcase, ExternalLink, Upload } from 'lucide-react';
+import { Loader2, Briefcase, ExternalLink, Upload, Crown } from 'lucide-react';
 import type { JobMatcherOutput } from '@/ai/flows/job-matcher';
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from './ui/label';
-
+import { useAuth } from '@/hooks/use-auth';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const formSchema = z.object({
     resumeFile: z.instanceof(File).refine(
@@ -43,6 +45,8 @@ export function JobMatcherPage() {
   const [jobSuggestions, setJobSuggestions] = useState<JobMatcherOutput['jobSuggestions'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { isPro } = useAuth();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,6 +56,11 @@ export function JobMatcherPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if(!isPro) {
+        router.push('/pricing');
+        return;
+    }
+    
     setIsLoading(true);
     setJobSuggestions(null);
 
@@ -77,13 +86,22 @@ export function JobMatcherPage() {
   return (
     <div className="grid lg:grid-cols-12 gap-8">
       <div className="lg:col-span-4 xl:col-span-3">
+        {!isPro && (
+             <Alert variant="pro" className="mb-4">
+                <Crown />
+                <AlertTitle>This is a Pro Feature</AlertTitle>
+                <AlertDescription>
+                    Please upgrade to a Pro account to use the AI Job Matcher.
+                </AlertDescription>
+            </Alert>
+        )}
         <Card className="sticky top-4">
           <CardHeader>
             <CardTitle className="text-xl font-headline flex items-center gap-2">
               <Briefcase className="text-primary"/> AI Job Matcher
             </CardTitle>
             <CardDescription>
-              Find jobs that fit your profile. This is a premium feature, unlocked for this demo.
+              Find jobs that fit your profile.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -103,6 +121,7 @@ export function JobMatcherPage() {
                                 className="pl-10"
                                 accept=".pdf,.docx"
                                 onChange={(e) => field.onChange(e.target.files?.[0])}
+                                disabled={!isPro}
                             />
                         </div>
                       </FormControl>
@@ -117,13 +136,13 @@ export function JobMatcherPage() {
                     <FormItem>
                       <FormLabel>Desired Job Title (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Frontend Developer" {...field} />
+                        <Input placeholder="e.g., Frontend Developer" {...field} disabled={!isPro}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button type="submit" disabled={isLoading} className="w-full">
+                <Button type="submit" disabled={isLoading || !isPro} className="w-full">
                   {isLoading ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finding Jobs...</>
                   ) : (
@@ -157,7 +176,7 @@ export function JobMatcherPage() {
           {!isLoading && !jobSuggestions && (
               <Card className="flex flex-col items-center justify-center p-10 text-center border-dashed min-h-[300px]">
                   <Briefcase className="w-12 h-12 text-muted-foreground" />
-                  <p className="mt-4 text-muted-foreground">Your job suggestions will appear here.</p>
+                  <p className="mt-4 text-muted-foreground">{isPro ? "Your job suggestions will appear here." : "Upgrade to Pro to find jobs."}</p>
               </Card>
           )}
           {jobSuggestions && (
