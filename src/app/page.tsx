@@ -12,7 +12,8 @@ function HomePageContent() {
     <div className="flex flex-col min-h-dvh bg-background">
       <HomeHeader />
       <main className="flex-1">
-        <section className="py-24 md:py-32 lg:py-40">
+        <section className="relative py-24 md:py-32 lg:py-40">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent -z-10"/>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
              <Badge variant="outline" className="mb-4 py-1 px-3 rounded-full text-primary border-primary/50">
               <Sparkles className="w-4 h-4 mr-2 -ml-1"/>
@@ -106,7 +107,7 @@ function HomePageContent() {
             <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl w-full mx-auto">
                 <Card>
                 <CardHeader>
-                    <CardTitle>Free</CardTitle>
+                    <CardTitle className="font-headline">Free</CardTitle>
                     <CardDescription>For getting started and building a foundational resume.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -125,12 +126,9 @@ function HomePageContent() {
                 </Card>
 
                 <Card className="border-primary border-2 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary to-accent"></div>
-                    <div className="absolute -top-12 -right-12 bg-primary/20 text-primary p-4 rounded-full flex items-center justify-center transform rotate-45">
-                        <Crown className="w-16 h-16" />
-                    </div>
+                     <Badge className="absolute top-4 right-4" variant="secondary">Most Popular</Badge>
                 <CardHeader>
-                    <CardTitle>Pro</CardTitle>
+                    <CardTitle className="font-headline">Pro</CardTitle>
                     <CardDescription>For professionals who want to stand out and land their dream job.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -150,7 +148,7 @@ function HomePageContent() {
 
                 <Card>
                 <CardHeader>
-                    <CardTitle>Recruiter</CardTitle>
+                    <CardTitle className="font-headline">Recruiter</CardTitle>
                     <CardDescription>For hiring managers and recruitment agencies.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
