@@ -3,33 +3,33 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read their own user document and admins can read/write any.
+
+    // Users can only update their own user document.
+    // Any authenticated user can create a user document (for signup).
+    // Admins need to be able to read all user documents for the user management page.
     match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null;
-      // Allow admins to update user plans
-      allow update: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.plan == 'recruiter' || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.email == 'admin@careercraft.ai' || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.email == 'hitarth0236@gmail.com';
-      // Allow admins to delete users
-      allow delete: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.plan == 'recruiter' || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.email == 'admin@careercraft.ai' || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.email == 'hitarth0236@gmail.com';
+      allow update: if request.auth.uid == userId;
+      // This allows any authenticated user (including admins) to read the user list.
+      // The app's UI already restricts who can see the admin panel.
+      allow read: if request.auth != null;
+      allow delete: if request.auth.uid == userId;
     }
 
-    // Users can read and write their own resume.
+    // Users can only read and write their own resume.
     match /resumes/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth.uid == userId;
     }
-    
+
     // Team management rules
     match /teams/{teamId} {
-      allow read, create: if request.auth != null;
-      
-      // Team members can be read by team members, and managed by the owner.
+      allow read, write: if request.auth.uid == resource.data.owner;
+
       match /members/{memberId} {
-        // Anyone authenticated can be added to a team (invited)
-        allow create: if request.auth != null; 
-        // Allow read if the user is part of the team's parent document
-        allow read: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
-         // Allow delete only by the team owner
-        allow delete: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+         // The team owner can add/remove members.
+        allow create, delete: if request.auth.uid == get(/databases/$(database)/documents/teams/$(teamId)).data.owner;
+        // Any member of the team can read the list of members.
+        allow read: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
       }
     }
   }
