@@ -8,12 +8,16 @@ import { Check, Crown, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export function PricingPage() {
-  const { plan, upgradeToPro, upgradeToRecruiter } = useAuth();
+  const { user, plan, upgradeToPro, upgradeToRecruiter } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
-  const handleUpgradePro = () => {
-    upgradeToPro();
+  const handleUpgradePro = async () => {
+    if (!user) {
+        router.push('/login');
+        return;
+    }
+    await upgradeToPro();
     toast({
         title: "Upgrade to Pro Successful!",
         description: "You now have access to all Pro features.",
@@ -21,8 +25,12 @@ export function PricingPage() {
     router.push('/dashboard');
   }
 
-  const handleUpgradeRecruiter = () => {
-    upgradeToRecruiter();
+  const handleUpgradeRecruiter = async () => {
+    if (!user) {
+        router.push('/login');
+        return;
+    }
+    await upgradeToRecruiter();
     toast({
         title: "Upgrade to Recruiter Successful!",
         description: "You now have access to all Recruiter features.",
@@ -59,7 +67,7 @@ export function PricingPage() {
           </CardContent>
           <CardFooter>
             <Button variant="outline" className="w-full" disabled={plan === 'free'}>
-              Your Current Plan
+              {plan === 'free' ? 'Your Current Plan' : 'Get Started'}
             </Button>
           </CardFooter>
         </Card>
@@ -91,7 +99,7 @@ export function PricingPage() {
                 </Button>
             ) : (
                 <Button className="w-full" onClick={handleUpgradePro} disabled={plan === 'recruiter'}>
-                    Upgrade to Pro
+                    {plan === 'recruiter' ? 'Included in Recruiter' : 'Upgrade to Pro'}
                 </Button>
             )}
           </CardFooter>

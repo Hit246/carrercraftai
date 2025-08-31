@@ -73,7 +73,7 @@ export function JobMatcherPage() {
 
     try {
         if (plan === 'free') {
-            useCredit();
+            await useCredit();
         }
         const resumeDataUri = await fileToDataUri(values.resumeFile);
         const result = await jobMatcherAction({ 
@@ -131,7 +131,7 @@ export function JobMatcherPage() {
                                 className="pl-10"
                                 accept=".pdf,.docx"
                                 onChange={(e) => field.onChange(e.target.files?.[0])}
-                                disabled={!canUseFeature || isLoading}
+                                disabled={isLoading}
                             />
                         </div>
                       </FormControl>
@@ -146,7 +146,7 @@ export function JobMatcherPage() {
                     <FormItem>
                       <FormLabel>Desired Job Title (Optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Frontend Developer" {...field} disabled={!canUseFeature || isLoading}/>
+                        <Input placeholder="e.g., Frontend Developer" {...field} disabled={isLoading}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

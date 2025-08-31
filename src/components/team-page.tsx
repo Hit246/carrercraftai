@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,37 +15,27 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Badge } from './ui/badge';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, onSnapshot, doc, deleteDoc, getDoc, setDoc, query, where } from 'firebase/firestore';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
 });
 
 interface TeamMember {
-  id: number;
-  name: string;
+  id: string;
+  name?: string;
   email: string;
   role: 'Admin' | 'Member';
 }
-
-const initialTeamMembers: TeamMember[] = [
-    { id: 1, name: 'Alice Johnson', email: 'alice@example.com', role: 'Admin' },
-    { id: 2, name: 'Bob Williams', email: 'bob@example.com', role: 'Member' },
-    { id: 3, name: 'Charlie Brown', email: 'charlie@example.com', role: 'Member' },
-];
 
 export function TeamPage() {
   const { toast } = useToast();
   const { plan, user } = useAuth();
   const router = useRouter();
-  const [teamMembers, setTeamMembers] = useState(initialTeamMembers);
-
-  useEffect(() => {
-    if (plan !== 'recruiter') {
-        router.push('/pricing');
-    }
-  }, [plan, router]);
-
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamId, setTeamId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,6 +43,43 @@ export function TeamPage() {
       email: '',
     },
   });
+
+  const getOrCreateTeam = useCallback(async (userId: string) => {
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    let currentTeamId = userSnap.data()?.teamId;
+
+    if (!currentTeamId) {
+      const teamRef = await addDoc(collection(db, 'teams'), {
+        owner: userId,
+        createdAt: new Date(),
+      });
+      currentTeamId = teamRef.id;
+      await setDoc(userRef, { teamId: currentTeamId }, { merge: true });
+    }
+    setTeamId(currentTeamId);
+  }, []);
+  
+  useEffect(() => {
+    if (user && plan === 'recruiter') {
+      getOrCreateTeam(user.uid);
+    } else if(plan !== 'recruiter' && plan !== 'free') {
+        router.push('/pricing');
+    }
+  }, [user, plan, router, getOrCreateTeam]);
+
+  useEffect(() => {
+    if (!teamId) return;
+
+    const teamMembersRef = collection(db, `teams/${teamId}/members`);
+    const unsubscribe = onSnapshot(teamMembersRef, (snapshot) => {
+      const members = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TeamMember));
+      setTeamMembers(members);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [teamId]);
 
   if (plan !== 'recruiter') {
     return (
@@ -69,30 +96,56 @@ export function TeamPage() {
     );
   }
 
-  function onInvite(values: z.infer<typeof formSchema>) {
-    toast({
-      title: "Invitation Sent!",
-      description: `An invitation has been sent to ${values.email}.`,
-    });
-    // In a real app, this would trigger an email and update the database.
-    // For this prototype, we'll just add them to the list with a temporary name.
-    const newMember: TeamMember = {
-        id: Date.now(),
-        name: `Invited User`,
-        email: values.email,
-        role: 'Member'
+  async function onInvite(values: z.infer<typeof formSchema>) {
+    if (!teamId || !user) return;
+
+    // Check if user is already in the team
+    const isAlreadyMember = teamMembers.some(member => member.email === values.email);
+    if(isAlreadyMember) {
+        toast({
+            title: "Member Already Exists",
+            description: `${values.email} is already part of your team.`,
+            variant: "destructive"
+        });
+        return;
     }
-    setTeamMembers(prev => [...prev, newMember]);
-    form.reset();
+
+    try {
+        await addDoc(collection(db, `teams/${teamId}/members`), {
+            email: values.email,
+            role: 'Member',
+            addedBy: user.email
+        });
+
+        toast({
+        title: "Invitation Sent!",
+        description: `An invitation has been sent to ${values.email}. They will have access once they sign up with this email.`,
+        });
+        form.reset();
+    } catch (error) {
+        toast({
+            title: "Error inviting member",
+            description: "There was a problem inviting the new member. Please try again.",
+            variant: "destructive"
+          });
+    }
   }
 
-  function onRemove(id: number) {
-    setTeamMembers(prev => prev.filter(member => member.id !== id));
-    toast({
-        title: "Member Removed",
-        description: "The team member has been removed successfully.",
-        variant: "destructive"
-      });
+  async function onRemove(id: string) {
+    if (!teamId) return;
+    try {
+        await deleteDoc(doc(db, `teams/${teamId}/members`, id));
+        toast({
+            title: "Member Removed",
+            description: "The team member has been removed successfully.",
+          });
+    } catch {
+        toast({
+            title: "Error",
+            description: "Failed to remove the team member.",
+            variant: "destructive"
+          });
+    }
   }
 
   return (
@@ -114,17 +167,21 @@ export function TeamPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {teamMembers.map((member) => (
+                                {isLoading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={3} className="text-center h-24">Loading team members...</TableCell>
+                                    </TableRow>
+                                ) : teamMembers.map((member) => (
                                 <TableRow key={member.id}>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <Avatar>
-                                                <AvatarImage src={`https://placehold.co/100x100.png?text=${member.name[0]}`} data-ai-hint="avatar placeholder" />
-                                                <AvatarFallback>{member.name[0]}</AvatarFallback>
+                                                <AvatarImage src={`https://placehold.co/100x100.png?text=${member.email[0]}`} data-ai-hint="avatar placeholder" />
+                                                <AvatarFallback>{member.email[0].toUpperCase()}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className="font-medium">{member.name}</p>
-                                                <p className="text-sm text-muted-foreground">{member.email}</p>
+                                                <p className="font-medium">{member.name || member.email}</p>
+                                                {!member.name && <p className="text-sm text-muted-foreground">Invited</p>}
                                             </div>
                                         </div>
                                     </TableCell>

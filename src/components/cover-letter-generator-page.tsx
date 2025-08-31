@@ -70,7 +70,7 @@ export function CoverLetterGeneratorPage() {
 
     try {
         if (plan === 'free') {
-            useCredit();
+            await useCredit();
         }
         const resumeDataUri = await fileToDataUri(values.resumeFile);
         const result = await generateCoverLetterAction({ 
@@ -129,7 +129,7 @@ export function CoverLetterGeneratorPage() {
                                 className="pl-10"
                                 accept=".pdf,.docx"
                                 onChange={(e) => field.onChange(e.target.files?.[0])}
-                                disabled={!canUseFeature || isLoading}
+                                disabled={isLoading}
                             />
                         </div>
                       </FormControl>
@@ -148,7 +148,7 @@ export function CoverLetterGeneratorPage() {
                         placeholder="Paste the job description here..."
                         className="h-48 resize-y"
                         {...field}
-                        disabled={!canUseFeature || isLoading}
+                        disabled={isLoading}
                       />
                     </FormControl>
                     <FormMessage />

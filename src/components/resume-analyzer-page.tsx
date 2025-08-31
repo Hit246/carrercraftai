@@ -65,7 +65,7 @@ export function ResumeAnalyzerPage() {
 
     try {
         if (plan === 'free') {
-            useCredit();
+            await useCredit();
         }
         const resumeDataUri = await fileToDataUri(values.resumeFile);
         const result = await analyzeResumeAction({ resumeDataUri });
@@ -120,7 +120,7 @@ export function ResumeAnalyzerPage() {
                                 className="pl-10"
                                 accept=".pdf,.docx"
                                 onChange={(e) => field.onChange(e.target.files?.[0])}
-                                disabled={!canUseFeature || isLoading}
+                                disabled={isLoading}
                             />
                         </div>
                     </FormControl>

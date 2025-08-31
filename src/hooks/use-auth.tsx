@@ -1,9 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, Auth, ParsedToken } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import type { AuthCredential } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+
 
 type Plan = 'free' | 'pro' | 'recruiter';
 
@@ -12,9 +13,9 @@ interface AuthContextType {
   loading: boolean;
   plan: Plan;
   credits: number;
-  useCredit: () => void;
-  upgradeToPro: () => void;
-  upgradeToRecruiter: () => void;
+  useCredit: () => Promise<void>;
+  upgradeToPro: () => Promise<void>;
+  upgradeToRecruiter: () => Promise<void>;
   logout: () => Promise<void>;
   login: (email:string, password:string) => Promise<any>;
   signup: (email:string, password:string) => Promise<any>;
@@ -32,36 +33,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [credits, setCredits] = useState(0);
 
   useEffect(() => {
-    const savedPlan = localStorage.getItem('plan') as Plan | null;
-    if(savedPlan) setPlan(savedPlan);
-    
-    const savedCredits = localStorage.getItem('credits');
-    setCredits(savedCredits ? parseInt(savedCredits, 10) : FREE_CREDITS);
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       if (user) {
-        // Special access for the creator
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+
         if (user.email === CREATOR_EMAIL) {
           setPlan('recruiter');
           setCredits(Infinity);
+        } else if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setPlan(userData.plan || 'free');
+          setCredits(userData.credits ?? FREE_CREDITS);
         } else {
-          // Regular user logic
-          const savedPlan = (localStorage.getItem('plan') as Plan) || 'free';
-          setPlan(savedPlan);
-
-          const savedCredits = localStorage.getItem('credits');
-          if (savedCredits === null) {
-            localStorage.setItem('credits', String(FREE_CREDITS));
-            setCredits(FREE_CREDITS);
-          } else {
-            setCredits(parseInt(savedCredits, 10));
-          }
+          // New user, create their doc
+           await setDoc(userRef, { 
+            email: user.email, 
+            plan: 'free', 
+            credits: FREE_CREDITS 
+          });
+          setPlan('free');
+          setCredits(FREE_CREDITS);
         }
       } else {
         // User is signed out, reset state
         setPlan('free');
-        setCredits(FREE_CREDITS);
+        setCredits(0);
       }
       setLoading(false);
     });
@@ -75,40 +73,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signup = async (email:string, password:string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    // Set initial credits for new user
-    localStorage.setItem('credits', String(FREE_CREDITS));
-    setCredits(FREE_CREDITS);
-    localStorage.setItem('plan', 'free');
+    const user = userCredential.user;
+    // Set initial doc for new user
+    await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        plan: 'free',
+        credits: FREE_CREDITS,
+        teamId: null,
+    });
     setPlan('free');
+    setCredits(FREE_CREDITS);
     return userCredential;
   }
 
   const logout = () => {
-    localStorage.removeItem('plan');
-    localStorage.removeItem('credits');
     setPlan('free');
     setCredits(0);
     return signOut(auth);
   };
   
-  const upgradeToPro = () => {
-    if (user?.email === CREATOR_EMAIL) return;
-    localStorage.setItem('plan', 'pro');
+  const upgradeToPro = async () => {
+    if (!user || user.email === CREATOR_EMAIL) return;
+    const userRef = doc(db, 'users', user.uid);
+    await updateDoc(userRef, { plan: 'pro' });
     setPlan('pro');
   }
 
-  const upgradeToRecruiter = () => {
-    if (user?.email === CREATOR_EMAIL) return;
-    localStorage.setItem('plan', 'recruiter');
+  const upgradeToRecruiter = async () => {
+    if (!user || user.email === CREATOR_EMAIL) return;
+    const userRef = doc(db, 'users', user.uid);
+    await updateDoc(userRef, { plan: 'recruiter' });
     setPlan('recruiter');
   }
 
-  const useCredit = () => {
-    if (user?.email === CREATOR_EMAIL) return;
+  const useCredit = async () => {
+    if (!user || user.email === CREATOR_EMAIL) return;
     if (plan === 'free' && credits > 0) {
         const newCredits = credits - 1;
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, { credits: newCredits });
         setCredits(newCredits);
-        localStorage.setItem('credits', String(newCredits));
     }
   }
 

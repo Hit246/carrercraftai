@@ -1,13 +1,17 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Download, Bot } from 'lucide-react';
+import { PlusCircle, Trash2, Download, Bot, Save } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import Link from 'next/link';
+import { useAuth } from '@/hooks/use-auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Skeleton } from './ui/skeleton';
 
 interface Experience {
     id: number;
@@ -24,35 +28,73 @@ interface Education {
     dates: string;
 }
 
+interface ResumeData {
+    name: string;
+    title: string;
+    phone: string;
+    email: string;
+    linkedin: string;
+    summary: string;
+    experience: Experience[];
+    education: Education[];
+    skills: string;
+}
+
+const initialResumeData: ResumeData = {
+    name: 'John Doe',
+    title: 'Software Engineer',
+    phone: '123-456-7890',
+    email: 'john.doe@email.com',
+    linkedin: 'linkedin.com/in/johndoe',
+    summary: 'A passionate software engineer with 5+ years of experience in building scalable web applications and leading projects from ideation to deployment.',
+    experience: [
+        { id: 1, title: 'Senior Developer', company: 'Tech Corp', dates: '2020 - Present', description: '- Led the development of a new microservices-based platform, improving system scalability by 40%.\n- Collaborated with cross-functional teams to define, design, and ship new features.\n- Mentored junior developers and conducted code reviews to maintain code quality.' },
+        { id: 2, title: 'Junior Developer', company: 'Innovate LLC', dates: '2018 - 2020', description: '- Contributed to the frontend development of a major e-commerce website using React and Redux.\n- Implemented responsive UI components that improved user experience on mobile devices.\n- Fixed bugs and improved application performance.' }
+    ],
+    education: [{ id: 1, school: 'University of Technology', degree: 'B.S. in Computer Science', dates: '2014 - 2018' }],
+    skills: 'React, Node.js, TypeScript, Next.js, PostgreSQL, Docker, AWS, GraphQL, REST APIs'
+}
+
 export const ResumeBuilder = () => {
     const { toast } = useToast();
-    const [resumeData, setResumeData] = useState({
-        name: 'John Doe',
-        title: 'Software Engineer',
-        phone: '123-456-7890',
-        email: 'john.doe@email.com',
-        linkedin: 'linkedin.com/in/johndoe',
-        summary: 'A passionate software engineer with 5+ years of experience in building scalable web applications and leading projects from ideation to deployment.',
-        experience: [
-            { id: 1, title: 'Senior Developer', company: 'Tech Corp', dates: '2020 - Present', description: '- Led the development of a new microservices-based platform, improving system scalability by 40%.\n- Collaborated with cross-functional teams to define, design, and ship new features.\n- Mentored junior developers and conducted code reviews to maintain code quality.' },
-            { id: 2, title: 'Junior Developer', company: 'Innovate LLC', dates: '2018 - 2020', description: '- Contributed to the frontend development of a major e-commerce website using React and Redux.\n- Implemented responsive UI components that improved user experience on mobile devices.\n- Fixed bugs and improved application performance.' }
-        ],
-        education: [{ id: 1, school: 'University of Technology', degree: 'B.S. in Computer Science', dates: '2014 - 2018' }],
-        skills: 'React, Node.js, TypeScript, Next.js, PostgreSQL, Docker, AWS, GraphQL, REST APIs'
-    });
+    const { user, loading: authLoading } = useAuth();
+    const [resumeData, setResumeData] = React.useState<ResumeData | null>(null);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [isSaving, setIsSaving] = React.useState(false);
+
+    React.useEffect(() => {
+        const loadResumeData = async () => {
+            if (user) {
+                setIsLoading(true);
+                const resumeRef = doc(db, 'resumes', user.uid);
+                const resumeSnap = await getDoc(resumeRef);
+                if (resumeSnap.exists()) {
+                    setResumeData(resumeSnap.data() as ResumeData);
+                } else {
+                    setResumeData(initialResumeData);
+                }
+                setIsLoading(false);
+            }
+        };
+        if (!authLoading) {
+            loadResumeData();
+        }
+    }, [user, authLoading]);
 
     const handleAddExperience = () => {
-        setResumeData(prev => ({
+        if (!resumeData) return;
+        setResumeData(prev => prev && {
             ...prev,
             experience: [...prev.experience, { id: Date.now(), title: '', company: '', dates: '', description: '' }]
-        }));
+        });
     };
     
     const handleRemoveExperience = (id: number) => {
-        setResumeData(prev => ({
+        if (!resumeData) return;
+        setResumeData(prev => prev && {
             ...prev,
             experience: prev.experience.filter(exp => exp.id !== id)
-        }));
+        });
     };
 
     const handleExport = () => {
@@ -61,19 +103,59 @@ export const ResumeBuilder = () => {
             description: "PDF and DOCX export would be implemented here in a full application.",
         });
     }
+
+    const handleSave = async () => {
+        if (!user || !resumeData) return;
+        setIsSaving(true);
+        try {
+            const resumeRef = doc(db, 'resumes', user.uid);
+            await setDoc(resumeRef, resumeData);
+            toast({
+                title: "Resume Saved!",
+                description: "Your resume has been successfully saved to the database.",
+            });
+        } catch (error) {
+            console.error("Error saving resume: ", error);
+            toast({
+                title: "Error",
+                description: "Could not save your resume. Please try again.",
+                variant: "destructive"
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    }
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target;
-        setResumeData(prev => ({ ...prev, [id]: value }));
+        setResumeData(prev => prev && ({ ...prev, [id]: value }));
     };
 
     const handleNestedChange = (section: 'experience' | 'education', id: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setResumeData(prev => ({
+        setResumeData(prev => prev && ({
             ...prev,
             [section]: prev[section].map(item => item.id === id ? { ...item, [name]: value } : item)
         }));
     };
+
+    if (isLoading || authLoading) {
+        return (
+             <div className="grid lg:grid-cols-2 gap-8 h-full">
+                <div className="space-y-6">
+                    <Card><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
+                    <Card><CardHeader><Skeleton className="h-6 w-1/3" /></CardHeader><CardContent><Skeleton className="h-32 w-full" /></CardContent></Card>
+                     <Card><CardHeader><Skeleton className="h-6 w-1/3" /></CardHeader><CardContent><Skeleton className="h-40 w-full" /></CardContent></Card>
+                </div>
+                <div className="flex flex-col gap-4">
+                     <Skeleton className="h-10 w-full" />
+                    <Card className="flex-1"><CardContent className="p-6 sm:p-8"><Skeleton className="h-full w-full" /></CardContent></Card>
+                </div>
+            </div>
+        )
+    }
+    
+    if (!resumeData) return null;
 
 
     return (
@@ -140,6 +222,9 @@ export const ResumeBuilder = () => {
                 <div className="flex justify-between items-center">
                     <h3 className="font-headline text-lg">Live Preview</h3>
                     <div className="flex gap-2">
+                         <Button onClick={handleSave} disabled={isSaving}>
+                           <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
+                        </Button>
                         <Button variant="secondary" asChild>
                            <Link href="/resume-analyzer"><Bot className="mr-2 h-4 w-4" /> AI Analyze</Link>
                         </Button>
