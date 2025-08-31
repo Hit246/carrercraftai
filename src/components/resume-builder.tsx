@@ -12,6 +12,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from './ui/skeleton';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface Experience {
     id: number;
@@ -61,6 +63,8 @@ export const ResumeBuilder = () => {
     const [resumeData, setResumeData] = React.useState<ResumeData | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
+    const resumePreviewRef = React.useRef<HTMLDivElement>(null);
+
 
     React.useEffect(() => {
         const loadResumeData = async () => {
@@ -98,9 +102,79 @@ export const ResumeBuilder = () => {
     };
 
     const handleExport = () => {
+        const input = resumePreviewRef.current;
+        if (!input) {
+            toast({
+                title: "Error",
+                description: "Could not find the resume to export.",
+                variant: "destructive"
+            });
+            return;
+        }
+    
         toast({
-            title: "Export Functionality",
-            description: "PDF and DOCX export would be implemented here in a full application.",
+            title: "Generating PDF...",
+            description: "Please wait while your resume is being exported.",
+        });
+    
+        html2canvas(input, {
+            scale: 2, // Higher scale for better quality
+            useCORS: true,
+            logging: false,
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'pt',
+                format: 'a4'
+            });
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const ratio = canvasWidth / canvasHeight;
+            const width = pdfWidth;
+            const height = width / ratio;
+    
+            // If the content is taller than the page, we'll need to split it
+            if (height > pdfHeight) {
+                // This is a simplified approach. For a perfect multi-page solution,
+                // you might need a more complex logic to split the content gracefully.
+                const pageHeight = pdfHeight;
+                let position = 0;
+                let page = 1;
+                while (position < canvasHeight) {
+                    const pageCanvas = document.createElement('canvas');
+                    pageCanvas.width = canvasWidth;
+                    pageCanvas.height = pageHeight * (canvas.width/pdfWidth);
+                    const pageCtx = pageCanvas.getContext('2d');
+                    if (pageCtx) {
+                        pageCtx.drawImage(canvas, 0, position, canvasWidth, pageCanvas.height, 0, 0, pageCanvas.width, pageCanvas.height);
+                        const pageImgData = pageCanvas.toDataURL('image/png');
+                        if (page > 1) {
+                            pdf.addPage();
+                        }
+                        pdf.addImage(pageImgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                        position += pageCanvas.height;
+                        page++;
+                    }
+                }
+            } else {
+                pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+            }
+    
+            pdf.save(`${resumeData?.name || 'resume'}.pdf`);
+            toast({
+                title: "Download Complete!",
+                description: "Your resume has been downloaded as a PDF.",
+            });
+        }).catch(err => {
+            toast({
+                title: "Export Failed",
+                description: "Something went wrong while generating the PDF.",
+                variant: "destructive"
+            });
+            console.error(err);
         });
     }
 
@@ -234,53 +308,55 @@ export const ResumeBuilder = () => {
                     </div>
                 </div>
                 <Card className="flex-1">
-                    <CardContent className="p-6 sm:p-8 font-body text-sm bg-white text-gray-800 shadow-lg h-full overflow-y-auto">
-                        <div className="text-center border-b-2 border-gray-200 pb-4 mb-6">
-                            <h2 className="text-4xl font-bold font-headline text-gray-900">{resumeData.name}</h2>
-                            <p className="text-lg text-primary font-semibold mt-1">{resumeData.title}</p>
-                            <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-gray-600 mt-3">
-                                <span>{resumeData.phone}</span>
-                                <span>{resumeData.email}</span>
-                                <span>{resumeData.linkedin}</span>
+                    <CardContent className="p-0 h-full overflow-y-auto">
+                        <div ref={resumePreviewRef} className="p-6 sm:p-8 font-body text-sm bg-white text-gray-800 shadow-lg h-full">
+                            <div className="text-center border-b-2 border-gray-200 pb-4 mb-6">
+                                <h2 className="text-4xl font-bold font-headline text-gray-900">{resumeData.name}</h2>
+                                <p className="text-lg text-primary font-semibold mt-1">{resumeData.title}</p>
+                                <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-gray-600 mt-3">
+                                    <span>{resumeData.phone}</span>
+                                    <span>{resumeData.email}</span>
+                                    <span>{resumeData.linkedin}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="mb-6">
-                            <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Summary</h3>
-                            <p className="text-gray-700">{resumeData.summary}</p>
-                        </div>
-                        <div className="mb-6">
-                            <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Experience</h3>
-                            {resumeData.experience.map(exp => (
-                                <div key={exp.id} className="mb-4">
-                                    <div className="flex justify-between items-baseline">
-                                        <h4 className="text-base font-semibold text-gray-800">{exp.title}</h4>
-                                        <p className="text-xs font-medium text-gray-600">{exp.dates}</p>
+                            <div className="mb-6">
+                                <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Summary</h3>
+                                <p className="text-gray-700">{resumeData.summary}</p>
+                            </div>
+                            <div className="mb-6">
+                                <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Experience</h3>
+                                {resumeData.experience.map(exp => (
+                                    <div key={exp.id} className="mb-4">
+                                        <div className="flex justify-between items-baseline">
+                                            <h4 className="text-base font-semibold text-gray-800">{exp.title}</h4>
+                                            <p className="text-xs font-medium text-gray-600">{exp.dates}</p>
+                                        </div>
+                                        <p className="text-sm font-medium text-gray-700">{exp.company}</p>
+                                        <ul className="mt-2 list-disc list-inside text-gray-700 space-y-1">
+                                            {exp.description.split('\n').map((line, i) => line.trim() && <li key={i}>{line.replace(/^-/, '').trim()}</li>)}
+                                        </ul>
                                     </div>
-                                    <p className="text-sm font-medium text-gray-700">{exp.company}</p>
-                                    <ul className="mt-2 list-disc list-inside text-gray-700 space-y-1">
-                                        {exp.description.split('\n').map((line, i) => line.trim() && <li key={i}>{line.replace(/^-/, '').trim()}</li>)}
-                                    </ul>
-                                </div>
-                            ))}
-                        </div>
-                         <div className="mb-6">
-                            <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Education</h3>
-                            {resumeData.education.map(edu => (
-                                <div key={edu.id} className="mb-2">
-                                    <div className="flex justify-between">
-                                        <h4 className="text-base font-semibold text-gray-800">{edu.school}</h4>
-                                        <p className="text-xs font-medium text-gray-600">{edu.dates}</p>
-                                    </div>
-                                    <p className="text-sm text-gray-700">{edu.degree}</p>
-                                </div>
-                            ))}
-                        </div>
-                         <div>
-                            <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Skills</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {resumeData.skills.split(',').map(skill => skill.trim() && (
-                                    <span key={skill} className="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-full">{skill.trim()}</span>
                                 ))}
+                            </div>
+                             <div className="mb-6">
+                                <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Education</h3>
+                                {resumeData.education.map(edu => (
+                                    <div key={edu.id} className="mb-2">
+                                        <div className="flex justify-between">
+                                            <h4 className="text-base font-semibold text-gray-800">{edu.school}</h4>
+                                            <p className="text-xs font-medium text-gray-600">{edu.dates}</p>
+                                        </div>
+                                        <p className="text-sm text-gray-700">{edu.degree}</p>
+                                    </div>
+                                ))}
+                            </div>
+                             <div>
+                                <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Skills</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {resumeData.skills.split(',').map(skill => skill.trim() && (
+                                        <span key={skill} className="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-full">{skill.trim()}</span>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </CardContent>
