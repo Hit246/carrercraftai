@@ -8,7 +8,7 @@
 
 An AI-powered platform designed to empower job seekers and recruiters. Build stunning resumes, receive intelligent feedback, discover matching job opportunities, and streamline the hiring process.
 
-![CareerCraft AI Screenshot](https://placehold.co/1200x600/222226/ffffff?text=CareerCraft%20AI%20Screenshot&font=inter)
+![CareerCraft AI Screenshot](./user_image.png)
 
 ## ✨ Key Features
 
