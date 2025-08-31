@@ -150,7 +150,9 @@ export function ResumeAnalyzerPage() {
                         <CardTitle>Strengths</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-muted-foreground">{analysisResult.strengths}</p>
+                        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-2">
+                            {analysisResult.strengths.map((item, index) => <li key={index}>{item}</li>)}
+                        </ul>
                     </CardContent>
                 </Card>
                 <Card>
@@ -159,16 +161,20 @@ export function ResumeAnalyzerPage() {
                         <CardTitle>Weaknesses</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-muted-foreground">{analysisResult.weaknesses}</p>
+                        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-2">
+                            {analysisResult.weaknesses.map((item, index) => <li key={index}>{item}</li>)}
+                        </ul>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-                        <Lightbulb className="w-6 h-6 text-accent" />
+                        <Lightbulb className="w-6 h-6 text-amber-500" />
                         <CardTitle>Suggestions for Improvement</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-muted-foreground">{analysisResult.suggestions}</p>
+                        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-2">
+                             {analysisResult.suggestions.map((item, index) => <li key={index}>{item}</li>)}
+                        </ul>
                     </CardContent>
                 </Card>
             </div>
