@@ -117,8 +117,12 @@ export const ResumeBuilder = () => {
             description: "Please wait while your resume is being exported.",
         });
     
+        // A4 page dimensions in pt: 595.28 x 841.89
+        const a4Width = 595.28;
+        const a4Height = 841.89;
+    
         html2canvas(input, {
-            scale: 2, // Higher scale for better quality
+            scale: 2,
             useCORS: true,
             logging: false,
         }).then(canvas => {
@@ -128,42 +132,30 @@ export const ResumeBuilder = () => {
                 unit: 'pt',
                 format: 'a4'
             });
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
+    
             const canvasWidth = canvas.width;
             const canvasHeight = canvas.height;
-            const ratio = canvasWidth / canvasHeight;
-            const width = pdfWidth;
-            const height = width / ratio;
+            const canvasRatio = canvasWidth / canvasHeight;
+            const a4Ratio = a4Width / a4Height;
     
-            // If the content is taller than the page, we'll need to split it
-            if (height > pdfHeight) {
-                // This is a simplified approach. For a perfect multi-page solution,
-                // you might need a more complex logic to split the content gracefully.
-                const pageHeight = pdfHeight;
-                let position = 0;
-                let page = 1;
-                while (position < canvasHeight) {
-                    const pageCanvas = document.createElement('canvas');
-                    pageCanvas.width = canvasWidth;
-                    pageCanvas.height = pageHeight * (canvas.width/pdfWidth);
-                    const pageCtx = pageCanvas.getContext('2d');
-                    if (pageCtx) {
-                        pageCtx.drawImage(canvas, 0, position, canvasWidth, pageCanvas.height, 0, 0, pageCanvas.width, pageCanvas.height);
-                        const pageImgData = pageCanvas.toDataURL('image/png');
-                        if (page > 1) {
-                            pdf.addPage();
-                        }
-                        pdf.addImage(pageImgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                        position += pageCanvas.height;
-                        page++;
-                    }
-                }
+            let finalWidth, finalHeight;
+    
+            // Scale the image to fit within the A4 page, maintaining aspect ratio
+            if (canvasRatio > a4Ratio) {
+                finalWidth = a4Width;
+                finalHeight = a4Width / canvasRatio;
             } else {
-                pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+                finalHeight = a4Height;
+                finalWidth = a4Height * canvasRatio;
             }
     
+            // Center the image on the page
+            const x = (a4Width - finalWidth) / 2;
+            const y = (a4Height - finalHeight) / 2;
+    
+            pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
             pdf.save(`${resumeData?.name || 'resume'}.pdf`);
+            
             toast({
                 title: "Download Complete!",
                 description: "Your resume has been downloaded as a PDF.",

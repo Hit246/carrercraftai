@@ -75,6 +75,7 @@ function AppLayoutContent({
     if (isActive('/team')) return 'Team Management';
     if (isActive('/support')) return 'Support';
     if (isActive('/pricing')) return 'Upgrade to Pro';
+    if (isActive('/profile')) return 'Profile Settings';
     return 'CareerCraft AI';
   }
 
@@ -211,8 +212,10 @@ function AppLayoutContent({
              </h2>
           </div>
           <ThemeSwitcher />
-          <Button variant="outline" size="icon">
-            <Settings className="h-5 w-5" />
+          <Button variant="outline" size="icon" asChild>
+            <Link href="/profile">
+                <Settings className="h-5 w-5" />
+            </Link>
           </Button>
         </header>
         <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
