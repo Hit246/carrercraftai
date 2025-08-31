@@ -130,7 +130,7 @@ function AppLayoutContent({
                 <Link href="/resume-analyzer">
                   <Sparkles />
                   <span>Resume Analyzer</span>
-                  <Badge variant="outline" className="ml-auto">AI Pro</Badge>
+                   {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -139,7 +139,7 @@ function AppLayoutContent({
                 <Link href="/job-matcher">
                   <Briefcase />
                   <span>Job Matcher</span>
-                  <Badge variant="outline" className="ml-auto">AI Pro</Badge>
+                  {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -148,7 +148,7 @@ function AppLayoutContent({
                 <Link href="/cover-letter-generator">
                   <FileText />
                   <span>Cover Letter Generator</span>
-                  <Badge variant="outline" className="ml-auto">AI Pro</Badge>
+                   {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -157,7 +157,7 @@ function AppLayoutContent({
                 <Link href="/candidate-matcher">
                   <Users />
                   <span>Candidate Matcher</span>
-                  <Badge variant="outline" className="ml-auto">Recruiters</Badge>
+                  {plan !== 'recruiter' && <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
