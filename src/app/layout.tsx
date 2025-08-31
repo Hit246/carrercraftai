@@ -1,7 +1,12 @@
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "@/components/theme-provider";
 
+
+// Even though we're using a client component, we can still export metadata
+// See: https://nextjs.org/docs/app/building-your-application/rendering/client-components#metadata
 export const metadata: Metadata = {
   title: "CareerCraft AI",
   description: "Craft the perfect resume and find your dream job with AI.",
@@ -27,8 +32,15 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        {children}
-        <Toaster />
+         <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+            {children}
+            <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

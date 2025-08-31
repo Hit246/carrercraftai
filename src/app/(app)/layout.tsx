@@ -35,7 +35,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { ThemeSwitcher } from '@/components/theme-switcher';
-import { ThemeProvider } from '@/components/theme-provider';
 
 function AppLayoutContent({
     children,
@@ -228,14 +227,7 @@ export default function AppLayout({
   }) {
       return (
           <AuthProvider>
-            <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-            >
               <AppLayoutContent>{children}</AppLayoutContent>
-            </ThemeProvider>
           </AuthProvider>
       )
   }
