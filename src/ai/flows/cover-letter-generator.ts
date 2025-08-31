@@ -35,21 +35,23 @@ const prompt = ai.definePrompt({
   name: 'generateCoverLetterPrompt',
   input: {schema: GenerateCoverLetterInputSchema},
   output: {schema: GenerateCoverLetterOutputSchema},
-  prompt: `You are a professional career coach and expert cover letter writer. Your task is to generate a compelling and personalized cover letter for a job application.
+  prompt: `You are a professional career coach and expert cover letter writer. Your task is to generate a compelling and personalized cover letter for a job application. The tone should be professional, confident, and enthusiastic.
 
 You will be provided with the applicant's resume, the job description, and the applicant's name.
 
-- The cover letter should be tailored to the specific job description, highlighting the applicant's most relevant skills and experiences from their resume.
-- It should have a professional tone and structure.
-- Address the cover letter to the "Hiring Manager" if no specific name is available.
-- The applicant's name is {{{userName}}}. Ensure the letter is signed off with their name.
-- The output should be a single string in Markdown format.
+**Applicant's Name**: {{{userName}}}
 
-Applicant's Resume:
+**Job Description**:
+{{{jobDescription}}}
+
+**Applicant's Resume**:
 {{media url=resumeDataUri}}
 
-Job Description:
-{{{jobDescription}}}
+**Instructions**:
+1.  **Structure**: The cover letter must have a clear introduction, body, and conclusion.
+2.  **Personalization**: Directly address the requirements in the job description. In the body paragraphs, highlight 2-3 key skills or experiences from the resume that are most relevant to the job.
+3.  **Tone**: Maintain a professional and confident tone.
+4.  **Formatting**: Address the letter to the "Hiring Manager". Sign off with the applicant's name, "{{{userName}}}". The output must be a single string in Markdown format.
 `,
 });
 

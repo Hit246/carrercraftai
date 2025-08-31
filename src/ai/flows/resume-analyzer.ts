@@ -35,16 +35,16 @@ const prompt = ai.definePrompt({
   name: 'analyzeResumePrompt',
   input: {schema: AnalyzeResumeInputSchema},
   output: {schema: AnalyzeResumeOutputSchema},
-  prompt: `You are an expert career coach and resume critic. You will analyze the provided resume in detail and provide constructive, specific, and actionable feedback.
+  prompt: `You are a world-class career coach and expert resume critic. Your task is to provide a detailed, constructive, and highly specific analysis of the provided resume.
 
-  Analyze the following resume:
-  {{media url=resumeDataUri}}
+Analyze the following resume for clarity, impact, and keyword optimization:
+{{media url=resumeDataUri}}
 
-  Provide feedback with the following structure:
-  - Strengths: What does the resume do well? Be specific and reference parts of the resume.
-  - Weaknesses: What are the weak points? Where can it be improved? Be specific and reference the parts of the resume that are weak.
-  - Suggestions: Provide concrete suggestions for improvement for each of the identified weaknesses.
-  `,
+Provide your feedback using the following strict structure:
+- **Strengths**: Identify what the resume does exceptionally well. Be specific. For example, mention strong action verbs, quantifiable achievements, or a clear layout.
+- **Weaknesses**: Pinpoint the weak areas. Is the summary generic? Are the bullet points just a list of duties instead of accomplishments? Is the formatting inconsistent? Be specific and reference the parts of the resume that are weak.
+- **Suggestions for Improvement**: For each weakness identified, provide a concrete, actionable suggestion. For example, instead of saying "Improve bullet points," suggest rephrasing a specific bullet point to include a quantifiable result.
+`,
 });
 
 const analyzeResumeFlow = ai.defineFlow(

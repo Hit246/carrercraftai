@@ -27,8 +27,8 @@ const JobMatcherOutputSchema = z.object({
       title: z.string().describe('The title of the job.'),
       company: z.string().describe('The company offering the job.'),
       description: z.string().describe('A brief description of the job.'),
-      url: z.string().describe('The URL to the job posting.'),
-      matchScore: z.number().describe('A score indicating how well the job matches the resume.'),
+      url: z.string().url().describe('A plausible but fictional URL to the job posting.'),
+      matchScore: z.number().min(0).max(100).describe('A score (0-100) indicating how well the job matches the resume.'),
     })
   ).describe('A list of job suggestions based on the resume.'),
 });
@@ -42,15 +42,22 @@ const prompt = ai.definePrompt({
   name: 'jobMatcherPrompt',
   input: {schema: JobMatcherInputSchema},
   output: {schema: JobMatcherOutputSchema},
-  prompt: `You are an AI job matching expert. Given a resume and optionally a desired job title, you will suggest relevant job opportunities.
+  prompt: `You are an AI career placement expert. Your task is to analyze the given resume and generate a list of 5 relevant, plausible, but fictional job opportunities.
 
-Resume:
+Analyze this resume:
 {{media url=resumeDataUri}}
 
-Desired Job Title (if any):
-{{desiredJobTitle}}
+Desired Job Title (if provided):
+{{{desiredJobTitle}}}
 
-Please suggest relevant job opportunities in JSON format. Include the job title, company, a brief description, the URL to the job posting, and a match score (0-1) indicating how well the job matches the resume.
+Based on the resume's skills and experience, create 5 job suggestions. For each suggestion:
+- **Title**: A realistic job title.
+- **Company**: A fictional but plausible company name.
+- **Description**: A brief, engaging job description (2-3 sentences).
+- **URL**: A valid but fictional URL, like https://www.fictional-company.com/careers/job-title.
+- **Match Score**: A score from 0 to 100 indicating how well the candidate's resume aligns with the fictional job.
+
+Return the suggestions as a valid JSON object.
 `,
 });
 
