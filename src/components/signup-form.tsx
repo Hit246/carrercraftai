@@ -22,7 +22,7 @@ const formSchema = z.object({
 export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { signup } = useAuth();
+  const { signup, isAdmin } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -37,7 +37,11 @@ export function SignupForm() {
     setIsLoading(true);
     try {
       await signup(values.email, values.password);
-      router.push('/dashboard');
+      if(values.email === 'admin@careercraft.ai') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (error: any) {
         toast({
             title: 'Sign-up Failed',

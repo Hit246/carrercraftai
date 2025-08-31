@@ -27,7 +27,8 @@ import {
   Crown,
   LifeBuoy,
   Users2,
-  Home
+  Home,
+  Shield,
 } from 'lucide-react';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -43,7 +44,7 @@ function AppLayoutContent({
   }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logout, plan } = useAuth();
+  const { user, loading, logout, plan, isAdmin } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -66,7 +67,7 @@ function AppLayoutContent({
   }
 
   const getPageTitle = () => {
-    if (isActive('/dashboard')) return 'Dashboard';
+    if (isActive('/dashboard')) return 'Home';
     if (isActive('/resume-analyzer')) return 'Resume Analyzer';
     if (isActive('/job-matcher')) return 'Job Matcher';
     if (isActive('/cover-letter-generator')) return 'Cover Letter Generator';
@@ -110,20 +111,20 @@ function AppLayoutContent({
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/dashboard')}>
-                    <Link href="/dashboard">
-                    <Home />
-                    <span>Home</span>
-                    </Link>
-                </SidebarMenuButton>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive('/dashboard')}>
+                <Link href="/dashboard">
+                  <Home />
+                  <span>Home</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive('/resume-analyzer')}>
                     <Link href="/resume-analyzer">
                     <Sparkles />
                     <span>Resume Analyzer</span>
-                    {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    {(plan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -132,7 +133,7 @@ function AppLayoutContent({
                     <Link href="/job-matcher">
                     <Briefcase />
                     <span>Job Matcher</span>
-                    {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    {(plan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -141,7 +142,7 @@ function AppLayoutContent({
                     <Link href="/cover-letter-generator">
                     <FileText />
                     <span>Cover Letter Generator</span>
-                    {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    {(plan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -172,6 +173,16 @@ function AppLayoutContent({
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
+             {isAdmin && (
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname.startsWith('/admin')}>
+                  <Link href="/admin/dashboard">
+                    <Shield />
+                    <span>Admin Panel</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter className="p-4 mt-auto border-t">

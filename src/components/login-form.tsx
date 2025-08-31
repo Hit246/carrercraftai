@@ -37,7 +37,11 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       await login(values.email, values.password);
-      router.push('/dashboard');
+      if (values.email === 'admin@careercraft.ai' || values.email === 'hitarth0236@gmail.com') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (error: any) {
       toast({
         title: 'Login Failed',

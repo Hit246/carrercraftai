@@ -11,6 +11,7 @@ type Plan = 'free' | 'pro' | 'recruiter';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   plan: Plan;
   credits: number;
   useCredit: () => Promise<void>;
@@ -24,22 +25,32 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const FREE_CREDITS = 3;
+const ADMIN_EMAIL = 'admin@careercraft.ai';
 const CREATOR_EMAIL = 'hitarth0236@gmail.com';
+
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [plan, setPlan] = useState<Plan>('free');
   const [credits, setCredits] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       if (user) {
+        // Check for admin
+        if (user.email === ADMIN_EMAIL || user.email === CREATOR_EMAIL) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+
         const userRef = doc(db, 'users', user.uid);
         const userDoc = await getDoc(userRef);
 
-        if (user.email === CREATOR_EMAIL) {
+        if (user.email === CREATOR_EMAIL || user.email === ADMIN_EMAIL) {
           setPlan('recruiter');
           setCredits(Infinity);
         } else if (userDoc.exists()) {
@@ -58,6 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } else {
         // User is signed out, reset state
+        setIsAdmin(false);
         setPlan('free');
         setCredits(0);
       }
@@ -80,6 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         plan: 'free',
         credits: FREE_CREDITS,
         teamId: null,
+        createdAt: new Date(),
     });
     setPlan('free');
     setCredits(FREE_CREDITS);
@@ -89,6 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setPlan('free');
     setCredits(0);
+    setIsAdmin(false);
     return signOut(auth);
   };
   
@@ -119,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const value = {
     user,
     loading,
+    isAdmin,
     plan,
     credits,
     useCredit,
