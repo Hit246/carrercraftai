@@ -19,6 +19,9 @@ const formSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
+const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+
+
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -37,7 +40,7 @@ export function LoginForm() {
     setIsLoading(true);
     try {
       await login(values.email, values.password);
-      if (values.email === 'admin@careercraft.ai' || values.email === 'hitarth0236@gmail.com') {
+      if (ADMIN_EMAILS.includes(values.email)) {
         router.push('/admin/dashboard');
       } else {
         router.push('/dashboard');

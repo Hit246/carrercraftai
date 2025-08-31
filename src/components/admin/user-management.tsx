@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Crown, User } from 'lucide-react';
+import { MoreHorizontal, Trash2, Crown, User, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
@@ -37,6 +37,8 @@ interface UserData {
   createdAt?: { seconds: number };
 }
 
+const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+
 export function UserManagementPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,8 +49,7 @@ export function UserManagementPage() {
     const usersCollectionRef = collection(db, 'users');
     const usersSnapshot = await getDocs(usersCollectionRef);
     const usersList = usersSnapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() } as UserData))
-      .filter(user => user.email !== 'admin@careercraft.ai' && user.email !== 'hitarth0236@gmail.com');
+      .map((doc) => ({ id: doc.id, ...doc.data() } as UserData));
     setUsers(usersList);
     setIsLoading(false);
   };
@@ -147,7 +148,9 @@ export function UserManagementPage() {
                     </TableCell>
                   </TableRow>
                 ))
-              : users.map((user) => (
+              : users.map((user) => {
+                const isUserAdmin = ADMIN_EMAILS.includes(user.email);
+                return (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -156,13 +159,20 @@ export function UserManagementPage() {
                           <AvatarFallback>{user.email[0].toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium">{user.email}</p>
+                          <p className="font-medium flex items-center gap-2">
+                            {user.email}
+                            {isUserAdmin && <Shield className="h-4 w-4 text-primary" />}
+                          </p>
                           <p className="text-sm text-muted-foreground">{user.id}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getPlanBadgeVariant(user.plan)}>{user.plan}</Badge>
+                       {isUserAdmin ? (
+                        <Badge>Admin</Badge>
+                       ) : (
+                        <Badge variant={getPlanBadgeVariant(user.plan)}>{user.plan}</Badge>
+                       )}
                     </TableCell>
                     <TableCell>
                       {user.createdAt
@@ -170,54 +180,56 @@ export function UserManagementPage() {
                         : 'N/A'}
                     </TableCell>
                     <TableCell className="text-right">
-                      <AlertDialog>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')}>
-                              <User className="mr-2 h-4 w-4" />
-                              Set to Free
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pro')}>
-                              <Crown className="mr-2 h-4 w-4" />
-                              Set to Pro
-                            </DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'recruiter')}>
-                              <User className="mr-2 h-4 w-4" />
-                              Set to Recruiter
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                             <AlertDialogTrigger asChild>
-                                <DropdownMenuItem className="text-destructive focus:text-destructive">
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete User
-                                </DropdownMenuItem>
-                            </AlertDialogTrigger>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                         <AlertDialogContent>
-                            <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the user's
-                                data from Firestore. To fully remove them, you must also delete them from the Firebase Authentication console.
-                            </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      {!isUserAdmin && (
+                        <AlertDialog>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')}>
+                                <User className="mr-2 h-4 w-4" />
+                                Set to Free
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pro')}>
+                                <Crown className="mr-2 h-4 w-4" />
+                                Set to Pro
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'recruiter')}>
+                                <User className="mr-2 h-4 w-4" />
+                                Set to Recruiter
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete User
+                                  </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <AlertDialogContent>
+                              <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the user's
+                                  data from Firestore. To fully remove them, you must also delete them from the Firebase Authentication console.
+                              </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                              </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </TableCell>
                   </TableRow>
-                ))}
+                )})}
           </TableBody>
         </Table>
       </CardContent>

@@ -25,8 +25,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const FREE_CREDITS = 3;
-const ADMIN_EMAIL = 'admin@careercraft.ai';
-const CREATOR_EMAIL = 'hitarth0236@gmail.com';
+const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
 
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -41,7 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(user);
       if (user) {
         // Check for admin
-        if (user.email === ADMIN_EMAIL || user.email === CREATOR_EMAIL) {
+        if (user.email && ADMIN_EMAILS.includes(user.email)) {
           setIsAdmin(true);
         } else {
           setIsAdmin(false);
@@ -50,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userRef = doc(db, 'users', user.uid);
         const userDoc = await getDoc(userRef);
 
-        if (user.email === CREATOR_EMAIL || user.email === ADMIN_EMAIL) {
+        if (user.email && ADMIN_EMAILS.includes(user.email)) {
           setPlan('recruiter');
           setCredits(Infinity);
         } else if (userDoc.exists()) {
@@ -107,21 +106,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const upgradeToPro = async () => {
-    if (!user || user.email === CREATOR_EMAIL) return;
+    if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
     await updateDoc(userRef, { plan: 'pro' });
     setPlan('pro');
   }
 
   const upgradeToRecruiter = async () => {
-    if (!user || user.email === CREATOR_EMAIL) return;
+    if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
     await updateDoc(userRef, { plan: 'recruiter' });
     setPlan('recruiter');
   }
 
   const useCredit = async () => {
-    if (!user || user.email === CREATOR_EMAIL) return;
+    if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     if (plan === 'free' && credits > 0) {
         const newCredits = credits - 1;
         const userRef = doc(db, 'users', user.uid);
