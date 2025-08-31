@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
-import { MoveRight } from 'lucide-react';
+import { LayoutDashboard, MoveRight } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Skeleton } from './ui/skeleton';
 
@@ -33,7 +33,10 @@ export function HomeHeader() {
             </div>
           ) : user ? (
             <Button asChild>
-              <Link href="/dashboard">Go to Dashboard <MoveRight className="ml-2"/></Link>
+              <Link href="/dashboard">
+                <LayoutDashboard className="mr-2" />
+                Dashboard
+              </Link>
             </Button>
           ) : (
             <>
