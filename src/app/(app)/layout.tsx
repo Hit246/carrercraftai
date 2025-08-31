@@ -34,6 +34,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
+import { ThemeSwitcher } from '@/components/theme-switcher';
+import { ThemeProvider } from '@/components/theme-provider';
 
 function AppLayoutContent({
     children,
@@ -110,8 +112,8 @@ function AppLayoutContent({
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/')}>
-                    <Link href="/">
+                <SidebarMenuButton asChild isActive={isActive('/dashboard')}>
+                    <Link href="/dashboard">
                     <Home />
                     <span>Home</span>
                     </Link>
@@ -206,6 +208,7 @@ function AppLayoutContent({
                 {getPageTitle()}
              </h2>
           </div>
+          <ThemeSwitcher />
           <Button variant="outline" size="icon">
             <Settings className="h-5 w-5" />
           </Button>
@@ -225,7 +228,14 @@ export default function AppLayout({
   }) {
       return (
           <AuthProvider>
+            <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+            >
               <AppLayoutContent>{children}</AppLayoutContent>
+            </ThemeProvider>
           </AuthProvider>
       )
   }
