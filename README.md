@@ -113,10 +113,9 @@ For the application to interact with Firestore securely, you must deploy the pro
 
 ## ✍️ Author
 
-- **Your Name**
-- **GitHub:** [your-username](https://github.com/your-username)
-- **LinkedIn:** [Your Name](https://www.linkedin.com/in/your-profile/)
-- **Twitter:** [@your-handle](https://twitter.com/your-handle)
+- **CHAUHAN HITARTH**
+- **GitHub:** [Hit246](https://github.com/Hit246)
+- **LinkedIn:** [Chauhan Hitarth](https://www.linkedin.com/in/Chauhan Hitarth/)
 
 ## 📄 License
 
