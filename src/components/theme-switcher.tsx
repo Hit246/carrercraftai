@@ -23,10 +23,10 @@ export function ThemeSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-          <DropdownMenuRadioItem value="theme-default">Default</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="theme-violet">Violet</DropdownMenuRadio.item>
-          <DropdownMenuRadioItem value="theme-green">Green</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="theme-orange">Orange</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="default">Default</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="violet">Violet</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="green">Green</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="orange">Orange</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>

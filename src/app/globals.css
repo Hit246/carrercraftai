@@ -74,37 +74,37 @@
     --sidebar-ring: 217 91% 60%;
   }
 
-  .theme-violet {
+  .violet {
     --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 210 20% 98%;
     --ring: 262.1 83.3% 57.8%;
   }
 
-  .dark.theme-violet {
+  .dark .violet {
     --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 210 20% 98%;
     --ring: 263.4 70% 50.4%;
   }
 
-  .theme-green {
+  .green {
     --primary: 142.1 76.2% 36.3%;
     --primary-foreground: 144.9 80.4% 97.3%;
     --ring: 142.1 76.2% 36.3%;
   }
   
-  .dark.theme-green {
+  .dark .green {
     --primary: 142.1 76.2% 36.3%;
     --primary-foreground: 144.9 80.4% 97.3%;
     --ring: 142.1 76.2% 36.3%;
   }
 
-  .theme-orange {
+  .orange {
     --primary: 24.6 95% 53.1%;
     --primary-foreground: 60 9.1% 97.8%;
     --ring: 24.6 95% 53.1%;
   }
 
-  .dark.theme-orange {
+  .dark .orange {
     --primary: 24.6 95% 53.1%;
     --primary-foreground: 60 9.1% 97.8%;
     --ring: 24.6 95% 53.1%;
