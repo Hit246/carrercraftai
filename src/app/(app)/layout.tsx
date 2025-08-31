@@ -103,7 +103,7 @@ function AppLayoutContent({
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader className="p-4">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <Logo className="h-7 w-7 text-primary" />
             <span className="text-lg font-semibold font-headline">CareerCraft AI</span>
           </Link>
@@ -117,14 +117,6 @@ function AppLayoutContent({
                     <span>Home</span>
                     </Link>
                 </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/dashboard')}>
-                <Link href="/dashboard">
-                  <LayoutDashboard />
-                  <span>Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive('/resume-analyzer')}>
