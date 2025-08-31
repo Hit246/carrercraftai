@@ -5,12 +5,14 @@ import { collection, getDocs, orderBy, query, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart, Users, UserPlus, Crown, Handshake } from "lucide-react";
-import { ResponsiveContainer, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import { Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { formatDistanceToNow } from 'date-fns';
 import { Skeleton } from "../ui/skeleton";
+import type { ChartConfig } from '@/components/ui/chart';
 
 interface UserData {
     id: string;
@@ -24,6 +26,25 @@ interface PlanCount {
     pro: number;
     recruiter: number;
 }
+
+const chartConfig = {
+    count: {
+        label: "Users",
+    },
+    free: {
+        label: "Free",
+        color: "hsl(var(--chart-1))",
+    },
+    pro: {
+        label: "Pro",
+        color: "hsl(var(--chart-2))",
+    },
+    recruiter: {
+        label: "Recruiter",
+        color: "hsl(var(--chart-3))",
+    },
+} satisfies ChartConfig;
+
 
 export function AdminDashboard() {
     const [userCount, setUserCount] = useState<number | null>(null);
@@ -75,17 +96,6 @@ export function AdminDashboard() {
         { name: 'Recruiter', count: planDistribution.recruiter, fill: 'var(--color-recruiter)' },
     ] : [];
 
-    const CustomTooltip = ({ active, payload, label }: any) => {
-        if (active && payload && payload.length) {
-          return (
-            <div className="p-2 bg-background border rounded-lg shadow-lg">
-              <p className="font-bold">{`${label} : ${payload[0].value}`}</p>
-            </div>
-          );
-        }
-        return null;
-      };
-
     return (
         <div className="space-y-8">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -130,18 +140,15 @@ export function AdminDashboard() {
                                 <Skeleton className="h-full w-full" />
                             </div>
                         ) : (
-                            <ResponsiveContainer width="100%" height={350}>
-                                <BarChart data={chartData} style={{
-                                    '--color-free': 'hsl(var(--chart-1))',
-                                    '--color-pro': 'hsl(var(--chart-2))',
-                                    '--color-recruiter': 'hsl(var(--chart-3))',
-                                } as React.CSSProperties}>
-                                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false}/>
-                                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`}/>
-                                    <Tooltip content={<CustomTooltip />}/>
-                                    <Bar dataKey="count" radius={[4, 4, 0, 0]} />
+                            <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+                                <BarChart accessibilityLayer data={chartData}>
+                                    <CartesianGrid vertical={false} />
+                                    <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
+                                    <YAxis />
+                                    <ChartTooltip content={<ChartTooltipContent />} />
+                                    <Bar dataKey="count" radius={4} />
                                 </BarChart>
-                            </ResponsiveContainer>
+                            </ChartContainer>
                         )}
                     </CardContent>
                 </Card>
