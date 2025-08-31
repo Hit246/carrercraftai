@@ -126,40 +126,40 @@ function AppLayoutContent({
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/resume-analyzer')}>
-                <Link href="/resume-analyzer">
-                  <Sparkles />
-                  <span>Resume Analyzer</span>
-                   {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
-                </Link>
-              </SidebarMenuButton>
+                <SidebarMenuButton asChild isActive={isActive('/resume-analyzer')}>
+                    <Link href="/resume-analyzer">
+                    <Sparkles />
+                    <span>Resume Analyzer</span>
+                    {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    </Link>
+                </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/job-matcher')}>
-                <Link href="/job-matcher">
-                  <Briefcase />
-                  <span>Job Matcher</span>
-                  {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
-                </Link>
-              </SidebarMenuButton>
+                <SidebarMenuButton asChild isActive={isActive('/job-matcher')}>
+                    <Link href="/job-matcher">
+                    <Briefcase />
+                    <span>Job Matcher</span>
+                    {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    </Link>
+                </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/cover-letter-generator')}>
-                <Link href="/cover-letter-generator">
-                  <FileText />
-                  <span>Cover Letter Generator</span>
-                   {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
-                </Link>
-              </SidebarMenuButton>
+                <SidebarMenuButton asChild isActive={isActive('/cover-letter-generator')}>
+                    <Link href="/cover-letter-generator">
+                    <FileText />
+                    <span>Cover Letter Generator</span>
+                    {plan === 'free' && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    </Link>
+                </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/candidate-matcher')}>
-                <Link href="/candidate-matcher">
-                  <Users />
-                  <span>Candidate Matcher</span>
-                  {plan !== 'recruiter' && <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>}
-                </Link>
-              </SidebarMenuButton>
+                <SidebarMenuButton asChild isActive={isActive('/candidate-matcher')}>
+                    <Link href="/candidate-matcher">
+                    <Users />
+                    <span>Candidate Matcher</span>
+                    {plan !== 'recruiter' && <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>}
+                    </Link>
+                </SidebarMenuButton>
             </SidebarMenuItem>
              {plan === 'recruiter' && (
                 <SidebarMenuItem>
