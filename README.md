@@ -49,8 +49,8 @@ Follow these instructions to get a copy of the project up and running on your lo
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/careercraft-ai.git
-cd careercraft-ai
+git clone https://github.com/Hit246/careercraftai.git
+cd careercraftai
 ```
 
 ### 2. Install Dependencies
@@ -110,6 +110,13 @@ For the application to interact with Firestore securely, you must deploy the pro
 3.  In the Firebase Console, navigate to **Firestore Database > Rules**.
 4.  Paste the content into the editor, replacing any existing rules.
 5.  Click **Publish**.
+
+## ✍️ Author
+
+- **Your Name**
+- **GitHub:** [your-username](https://github.com/your-username)
+- **LinkedIn:** [Your Name](https://www.linkedin.com/in/your-profile/)
+- **Twitter:** [@your-handle](https://twitter.com/your-handle)
 
 ## 📄 License
 
