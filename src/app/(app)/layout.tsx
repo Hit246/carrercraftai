@@ -30,12 +30,12 @@ import {
   Home,
   Shield,
 } from 'lucide-react';
-import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import Image from 'next/image';
 
 function AppLayoutContent({
     children,
@@ -106,7 +106,7 @@ function AppLayoutContent({
       <Sidebar>
         <SidebarHeader className="p-4">
           <Link href="/" className="flex items-center gap-2">
-            <Logo className="h-7 w-7 text-primary" />
+            <Image src="/logo.png" alt="CareerCraft AI" width={28} height={28} />
             <span className="text-lg font-semibold font-headline">CareerCraft AI</span>
           </Link>
         </SidebarHeader>
