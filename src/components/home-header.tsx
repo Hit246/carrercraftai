@@ -15,7 +15,7 @@ export function HomeHeader() {
     <header className="container mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex h-20 items-center justify-between gap-8">
         <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <Image src="/logo.jpg" alt="CareerCraft AI Logo" width={32} height={32} />
+          <Image src="/logo.jpg" alt="CareerCraft AI Logo" width={32} height={32} className="rounded-full object-cover" />
           <h1 className="text-2xl font-bold font-headline text-foreground">
             CareerCraft AI
           </h1>
@@ -54,3 +54,5 @@ export function HomeHeader() {
     </header>
   );
 }
+
+    
