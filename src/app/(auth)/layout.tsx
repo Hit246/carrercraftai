@@ -1,6 +1,6 @@
 import { AuthProvider } from '@/hooks/use-auth';
-import { Logo } from '@/components/icons';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function AuthLayout({
   children,
@@ -13,7 +13,7 @@ export default function AuthLayout({
         <header className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex h-20 items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                    <Logo className="h-8 w-8 text-primary" />
+                    <Image src="/logo.png" alt="CareerCraft AI Logo" width={32} height={32} />
                     <h1 className="text-2xl font-bold font-headline text-foreground">
                     CareerCraft AI
                     </h1>

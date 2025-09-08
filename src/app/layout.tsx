@@ -10,6 +10,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 export const metadata: Metadata = {
   title: "CareerCraft AI",
   description: "Craft the perfect resume and find your dream job with AI.",
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({
