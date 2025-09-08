@@ -4,7 +4,7 @@ import Image from "next/image";
 export function Logo(props: SVGProps<SVGSVGElement> & {width?: number, height?: number}) {
   return (
     <Image 
-      src="/logo.png" 
+      src="/logo.jpg" 
       alt="CareerCraft AI Logo" 
       width={props.width || 24} 
       height={props.height || 24} 
