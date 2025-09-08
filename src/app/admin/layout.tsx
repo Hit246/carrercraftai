@@ -68,7 +68,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
       <Sidebar>
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-2">
-            <Image src="/logo.jpg" alt="CareerCraft AI" width={28} height={28} />
+            <Image src="/logo.jpg" alt="CareerCraft AI" width={28} height={28} className="rounded-full object-cover" />
             <span className="text-lg font-semibold font-headline">Admin Panel</span>
           </div>
         </SidebarHeader>
@@ -146,3 +146,5 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     </AuthProvider>
   );
 }
+
+    

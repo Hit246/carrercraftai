@@ -14,7 +14,7 @@ export default function AuthLayout({
         <header className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex h-20 items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                    <Image src="/logo.jpg" alt="CareerCraft AI Logo" width={32} height={32} />
+                    <Image src="/logo.jpg" alt="CareerCraft AI Logo" width={32} height={32} className="rounded-full object-cover" />
                     <h1 className="text-2xl font-bold font-headline text-foreground">
                     CareerCraft AI
                     </h1>
@@ -28,3 +28,5 @@ export default function AuthLayout({
     </AuthProvider>
   );
 }
+
+    
