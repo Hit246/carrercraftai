@@ -139,7 +139,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user) throw new Error("Not authenticated");
     await updateProfile(user, profile);
     // Create a new user object to force re-render in components
-    setUser({ ...user });
+    setUser({ ...user, ...profile });
   }
 
   const value = {
