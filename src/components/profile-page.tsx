@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
-import { Crown, User, Handshake, Loader2 } from 'lucide-react';
+import { Crown, User, Handshake, Loader2, Upload, ExternalLink, ShieldCheck } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -17,18 +17,23 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { uploadFile } from '@/lib/firebase';
-
+import Link from 'next/link';
 
 const formSchema = z.object({
     displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }).optional(),
     photoFile: z.instanceof(File).optional(),
 });
 
+const paymentFormSchema = z.object({
+    proofFile: z.instanceof(File).refine(file => file.size > 0, "Please upload a file."),
+})
+
 export function ProfilePage() {
-    const { user, plan, loading, logout, updateUserProfile } = useAuth();
+    const { user, plan, loading, userData, logout, updateUserProfile, updatePaymentProof } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploadingProof, setIsUploadingProof] = useState(false);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -36,6 +41,10 @@ export function ProfilePage() {
         values: {
             displayName: user?.displayName || '',
         }
+    });
+
+    const paymentForm = useForm<z.infer<typeof paymentFormSchema>>({
+        resolver: zodResolver(paymentFormSchema)
     });
 
     const handleLogout = async () => {
@@ -87,6 +96,30 @@ export function ProfilePage() {
         }
     }
 
+    const onPaymentSubmit = async (values: z.infer<typeof paymentFormSchema>) => {
+        if (!user) return;
+        setIsUploadingProof(true);
+        try {
+            const proofUrl = await uploadFile(values.proofFile, `payment_proofs/${user.uid}/${values.proofFile.name}`);
+            await updatePaymentProof(proofUrl);
+            toast({
+                title: 'Payment Proof Uploaded',
+                description: 'Your payment proof has been submitted for review.',
+            });
+            paymentForm.reset();
+        } catch (error) {
+            console.error("Failed to upload proof", error);
+            toast({
+                title: 'Upload Failed',
+                description: 'There was an error uploading your payment proof. Please try again.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsUploadingProof(false);
+        }
+    }
+
+
     const getPlanBadge = () => {
         switch (plan) {
             case 'pro':
@@ -126,13 +159,13 @@ export function ProfilePage() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto space-y-6">
              <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <Card>
                         <CardHeader>
                             <CardTitle>My Profile</CardTitle>
-                            <CardDescription>Manage your account settings and subscription plan.</CardDescription>
+                            <CardDescription>Manage your account settings.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                              <div className="flex items-center gap-4">
@@ -143,7 +176,7 @@ export function ProfilePage() {
                                  <FormField
                                     control={form.control}
                                     name="photoFile"
-                                    render={({ field }) => (
+                                    render={() => (
                                     <FormItem className="flex-1">
                                         <Label>Profile Picture</Label>
                                         <Input
@@ -175,18 +208,6 @@ export function ProfilePage() {
                                 <Label htmlFor="email">Email Address</Label>
                                 <Input id="email" value={user.email || ''} readOnly disabled />
                             </div>
-
-                            <div className="space-y-2">
-                                <Label>Subscription Plan</Label>
-                                <div className="flex items-center gap-4">
-                                    {getPlanBadge()}
-                                    {plan !== 'recruiter' && (
-                                        <Button variant="outline" size="sm" onClick={() => router.push('/pricing')}>
-                                            Upgrade Plan
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
                         </CardContent>
                         <CardFooter className="flex justify-between">
                             <Button variant="outline" onClick={handleLogout}>Log Out</Button>
@@ -198,6 +219,81 @@ export function ProfilePage() {
                     </Card>
                 </form>
             </Form>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>My Subscription</CardTitle>
+                    <CardDescription>Manage your subscription plan and payment details.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                            <Label>Current Plan</Label>
+                            <div className="mt-1">{getPlanBadge()}</div>
+                        </div>
+                        {plan !== 'recruiter' && (
+                            <Button variant="outline" size="sm" onClick={() => router.push('/pricing')}>
+                                Upgrade Plan
+                            </Button>
+                        )}
+                    </div>
+                    
+                    { (plan === 'pro' || plan === 'recruiter') && (
+                        <div className="space-y-4">
+                            {userData?.planUpdatedAt && (
+                                <div className="space-y-1">
+                                    <Label>Last Upgrade Date</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        {new Date(userData.planUpdatedAt).toLocaleDateString()}
+                                    </p>
+                                </div>
+                            )}
+
+                             <div className="space-y-2">
+                                <Label>Payment Proof</Label>
+                                {userData?.paymentProofURL ? (
+                                    <div className="flex items-center gap-2 text-sm text-green-600">
+                                        <ShieldCheck className="h-5 w-5" />
+                                        <span>Proof submitted.</span>
+                                        <Button variant="link" size="sm" asChild className="p-0 h-auto">
+                                            <Link href={userData.paymentProofURL} target="_blank" rel="noopener noreferrer">
+                                                View Proof <ExternalLink className="ml-1 h-3 w-3" />
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <Form {...paymentForm}>
+                                        <form onSubmit={paymentForm.handleSubmit(onPaymentSubmit)} className="flex items-center gap-4">
+                                            <FormField
+                                                control={paymentForm.control}
+                                                name="proofFile"
+                                                render={({ field }) => (
+                                                <FormItem className="flex-1">
+                                                     <FormControl>
+                                                        <Input
+                                                            type="file"
+                                                            accept="image/*,.pdf"
+                                                            onChange={(e) => field.onChange(e.target.files?.[0])}
+                                                            disabled={isUploadingProof}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <Button type="submit" disabled={isUploadingProof}>
+                                                {isUploadingProof ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                                                Upload
+                                            </Button>
+                                        </form>
+                                    </Form>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                </CardContent>
+            </Card>
         </div>
     );
 }

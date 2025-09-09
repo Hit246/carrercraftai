@@ -13,12 +13,20 @@ interface UserProfile {
     photoURL?: string | null;
 }
 
+interface UserData {
+    plan: Plan;
+    credits: number;
+    planUpdatedAt?: Date | null;
+    paymentProofURL?: string | null;
+}
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
   plan: Plan;
   credits: number;
+  userData: UserData | null;
   useCredit: () => Promise<void>;
   upgradeToPro: () => Promise<void>;
   upgradeToRecruiter: () => Promise<void>;
@@ -26,6 +34,7 @@ interface AuthContextType {
   login: (email:string, password:string) => Promise<any>;
   signup: (email:string, password:string) => Promise<any>;
   updateUserProfile: (profile: UserProfile) => Promise<void>;
+  updatePaymentProof: (url: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,6 +49,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [plan, setPlan] = useState<Plan>('free');
   const [credits, setCredits] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userData, setUserData] = useState<UserData| null>(null);
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -56,27 +67,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userDoc = await getDoc(userRef);
 
         if (user.email && ADMIN_EMAILS.includes(user.email)) {
-          setPlan('recruiter');
-          setCredits(Infinity);
+          const adminData = {
+            plan: 'recruiter' as Plan,
+            credits: Infinity,
+            planUpdatedAt: new Date(),
+          };
+          setPlan(adminData.plan);
+          setCredits(adminData.credits);
+          setUserData(adminData);
         } else if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setPlan(userData.plan || 'free');
-          setCredits(userData.credits ?? FREE_CREDITS);
+          const data = userDoc.data() as UserData;
+          setUserData(data);
+          setPlan(data.plan || 'free');
+          setCredits(data.credits ?? FREE_CREDITS);
         } else {
           // New user, create their doc
            await setDoc(userRef, { 
             email: user.email, 
             plan: 'free', 
-            credits: FREE_CREDITS 
+            credits: FREE_CREDITS,
+            createdAt: new Date(),
+            planUpdatedAt: null,
+            paymentProofURL: null,
           });
           setPlan('free');
           setCredits(FREE_CREDITS);
+          setUserData({ plan: 'free', credits: FREE_CREDITS});
         }
       } else {
         // User is signed out, reset state
         setIsAdmin(false);
         setPlan('free');
         setCredits(0);
+        setUserData(null);
       }
       setLoading(false);
     });
@@ -91,16 +114,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (email:string, password:string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    // Set initial doc for new user
-    await setDoc(doc(db, "users", user.uid), {
+    const initialUserData = {
         email: user.email,
-        plan: 'free',
+        plan: 'free' as Plan,
         credits: FREE_CREDITS,
         teamId: null,
         createdAt: new Date(),
-    });
+        planUpdatedAt: null,
+        paymentProofURL: null,
+    };
+    // Set initial doc for new user
+    await setDoc(doc(db, "users", user.uid), initialUserData);
     setPlan('free');
     setCredits(FREE_CREDITS);
+    setUserData(initialUserData);
     return userCredential;
   }
 
@@ -114,15 +141,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const upgradeToPro = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
-    await updateDoc(userRef, { plan: 'pro' });
+    const newPlanData = { plan: 'pro', planUpdatedAt: new Date() };
+    await updateDoc(userRef, newPlanData);
     setPlan('pro');
+    setUserData(prev => prev ? {...prev, ...newPlanData} : newPlanData as UserData);
   }
 
   const upgradeToRecruiter = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
-    await updateDoc(userRef, { plan: 'recruiter' });
+    const newPlanData = { plan: 'recruiter', planUpdatedAt: new Date() };
+    await updateDoc(userRef, newPlanData);
     setPlan('recruiter');
+    setUserData(prev => prev ? {...prev, ...newPlanData} : newPlanData as UserData);
   }
 
   const useCredit = async () => {
@@ -142,12 +173,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser({ ...user, ...profile });
   }
 
+  const updatePaymentProof = async (url: string) => {
+    if (!user) throw new Error("Not authenticated");
+    const userRef = doc(db, 'users', user.uid);
+    await updateDoc(userRef, { paymentProofURL: url });
+    setUserData(prev => prev ? {...prev, paymentProofURL: url } : { paymentProofURL: url } as UserData);
+  }
+
   const value = {
     user,
     loading,
     isAdmin,
     plan,
     credits,
+    userData,
     useCredit,
     upgradeToPro,
     upgradeToRecruiter,
@@ -155,6 +194,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login,
     signup,
     updateUserProfile,
+    updatePaymentProof,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
