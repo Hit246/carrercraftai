@@ -1,12 +1,17 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 
 type Plan = 'free' | 'pro' | 'recruiter';
+
+interface UserProfile {
+    displayName?: string | null;
+    photoURL?: string | null;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -20,6 +25,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   login: (email:string, password:string) => Promise<any>;
   signup: (email:string, password:string) => Promise<any>;
+  updateUserProfile: (profile: UserProfile) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -129,6 +135,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  const updateUserProfile = async (profile: UserProfile) => {
+    if (!user) throw new Error("Not authenticated");
+    await updateProfile(user, profile);
+    // Create a new user object to force re-render in components
+    setUser({ ...user });
+  }
+
   const value = {
     user,
     loading,
@@ -141,6 +154,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     logout,
     login,
     signup,
+    updateUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -190,11 +190,11 @@ function AppLayoutContent({
         <SidebarFooter className="p-4 mt-auto border-t">
           <div className="flex items-center gap-3">
              <Avatar className="h-9 w-9">
-              <AvatarImage src="https://placehold.co/100x100.png" alt="@user" data-ai-hint="profile picture" />
-              <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
+              <AvatarImage src={user.photoURL || "https://placehold.co/100x100.png"} alt={user.displayName || user.email || "user"} data-ai-hint="profile picture" />
+              <AvatarFallback>{user.displayName?.[0] || user.email?.[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col truncate">
-                <span className="text-sm font-medium truncate">{user.email}</span>
+                <span className="text-sm font-medium truncate">{user.displayName || user.email}</span>
                 <button onClick={handleLogout} className="text-xs text-muted-foreground hover:text-foreground text-left flex items-center gap-1">
                   <LogOut className="w-3 h-3"/>
                   Logout
