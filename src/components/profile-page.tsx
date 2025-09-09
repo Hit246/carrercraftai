@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from './ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { uploadFile } from '@/lib/firebase';
 
 
 const formSchema = z.object({
@@ -28,6 +29,7 @@ export function ProfilePage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
+    const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -40,17 +42,27 @@ export function ProfilePage() {
         await logout();
         router.push('/');
     }
+    
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            form.setValue('photoFile', file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPhotoPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        if (!user) return;
         setIsSaving(true);
         try {
-            let photoURL: string | undefined = undefined;
+            let photoURL: string | undefined = user.photoURL || undefined;
+
             if (values.photoFile) {
-                 // In a real app, you would upload this file to Firebase Storage
-                 // and get the URL. For this demo, we'll use a placeholder.
-                 // This part needs a proper implementation with file uploads.
-                 photoURL = 'https://placehold.co/100x100.png'; // Placeholder URL
-                 toast({ title: 'Note', description: "File upload is a demo. Using a placeholder image." });
+                 photoURL = await uploadFile(values.photoFile, `avatars/${user.uid}`);
             }
 
             await updateUserProfile({
@@ -62,7 +74,9 @@ export function ProfilePage() {
                 title: 'Profile Updated',
                 description: 'Your profile has been successfully updated.',
             });
+            setPhotoPreview(null); // Clear preview after successful upload
         } catch (error) {
+            console.error(error);
             toast({
                 title: 'Error',
                 description: 'Failed to update profile.',
@@ -123,7 +137,7 @@ export function ProfilePage() {
                         <CardContent className="space-y-6">
                              <div className="flex items-center gap-4">
                                 <Avatar className="h-16 w-16">
-                                    <AvatarImage src={user.photoURL || `https://placehold.co/100x100.png?text=${user.email?.[0].toUpperCase()}`} />
+                                    <AvatarImage src={photoPreview || user.photoURL || `https://placehold.co/100x100.png?text=${user.email?.[0].toUpperCase()}`} />
                                     <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                  <FormField
@@ -135,7 +149,7 @@ export function ProfilePage() {
                                         <Input
                                             type="file"
                                             accept="image/*"
-                                            onChange={(e) => field.onChange(e.target.files?.[0])}
+                                            onChange={handlePhotoChange}
                                         />
                                         <FormMessage />
                                     </FormItem>
