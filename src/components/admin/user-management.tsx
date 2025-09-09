@@ -23,10 +23,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Crown, User, Shield } from 'lucide-react';
+import { MoreHorizontal, Trash2, Crown, User, Shield, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import Link from 'next/link';
 
 type Plan = 'free' | 'pro' | 'recruiter';
 
@@ -35,6 +36,8 @@ interface UserData {
   email: string;
   plan: Plan;
   createdAt?: { seconds: number };
+  planUpdatedAt?: { seconds: number };
+  paymentProofURL?: string;
 }
 
 const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
@@ -49,7 +52,8 @@ export function UserManagementPage() {
     const usersCollectionRef = collection(db, 'users');
     const usersSnapshot = await getDocs(usersCollectionRef);
     const usersList = usersSnapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() } as UserData));
+      .map((doc) => ({ id: doc.id, ...doc.data() } as UserData))
+      .sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     setUsers(usersList);
     setIsLoading(false);
   };
@@ -61,7 +65,7 @@ export function UserManagementPage() {
   const handlePlanChange = async (userId: string, newPlan: Plan) => {
     const userRef = doc(db, 'users', userId);
     try {
-      await updateDoc(userRef, { plan: newPlan });
+      await updateDoc(userRef, { plan: newPlan, planUpdatedAt: newPlan !== 'free' ? new Date() : null });
       toast({
         title: 'Plan Updated',
         description: `User's plan has been changed to ${newPlan}.`,
@@ -120,7 +124,8 @@ export function UserManagementPage() {
             <TableRow>
               <TableHead>User</TableHead>
               <TableHead>Subscription Plan</TableHead>
-              <TableHead>Joined</TableHead>
+              <TableHead>Payment Proof</TableHead>
+              <TableHead>Last Upgraded</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -137,12 +142,9 @@ export function UserManagementPage() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-6 w-20" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-32" />
-                    </TableCell>
+                    <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell className="text-right">
                       <Skeleton className="h-8 w-8 ml-auto" />
                     </TableCell>
@@ -175,8 +177,19 @@ export function UserManagementPage() {
                        )}
                     </TableCell>
                     <TableCell>
-                      {user.createdAt
-                        ? new Date(user.createdAt.seconds * 1000).toLocaleDateString()
+                        {user.paymentProofURL ? (
+                            <Button variant="link" asChild size="sm" className="h-auto p-0">
+                                <Link href={user.paymentProofURL} target="_blank" rel="noopener noreferrer">
+                                    View Proof <ExternalLink className="ml-1 h-3 w-3"/>
+                                </Link>
+                            </Button>
+                        ) : (
+                            <span className="text-xs text-muted-foreground">None</span>
+                        )}
+                    </TableCell>
+                    <TableCell>
+                      {user.planUpdatedAt
+                        ? new Date(user.planUpdatedAt.seconds * 1000).toLocaleDateString()
                         : 'N/A'}
                     </TableCell>
                     <TableCell className="text-right">
