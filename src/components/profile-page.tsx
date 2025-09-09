@@ -192,7 +192,7 @@ export function ProfilePage() {
                             <Button variant="outline" onClick={handleLogout}>Log Out</Button>
                             <Button type="submit" disabled={isSaving}>
                                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Save Changes
+                                {isSaving ? 'Saving...' : 'Save Changes'}
                             </Button>
                         </CardFooter>
                     </Card>
