@@ -58,32 +58,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       if (user) {
-        // Check for admin
-        if (user.email && ADMIN_EMAILS.includes(user.email)) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
+        const userIsAdmin = user.email && ADMIN_EMAILS.includes(user.email);
+        setIsAdmin(userIsAdmin);
 
         const userRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userRef);
+        let userDoc = await getDoc(userRef);
 
-        if (user.email && ADMIN_EMAILS.includes(user.email)) {
-          const adminData = {
-            plan: 'recruiter' as Plan,
-            credits: Infinity,
-            planUpdatedAt: new Date(),
-          };
-          setPlan(adminData.plan);
-          setCredits(adminData.credits);
-          setUserData(adminData);
-        } else if (userDoc.exists()) {
+        if (userIsAdmin) {
+          // If user is admin, ensure their DB record reflects recruiter status
+          if (!userDoc.exists() || userDoc.data().plan !== 'recruiter') {
+            const adminData = {
+              email: user.email,
+              plan: 'recruiter' as Plan,
+              credits: Infinity,
+              createdAt: userDoc.exists() ? userDoc.data().createdAt : new Date(),
+              planUpdatedAt: new Date(),
+            };
+            await setDoc(userRef, adminData, { merge: true });
+            userDoc = await getDoc(userRef); // Re-fetch doc after update
+          }
+        }
+        
+        if (userDoc.exists()) {
           const data = userDoc.data() as UserData;
           setUserData(data);
           setPlan(data.plan || 'free');
-          setCredits(data.credits ?? FREE_CREDITS);
+          setCredits(data.credits ?? (data.plan === 'free' ? FREE_CREDITS : Infinity));
         } else {
-          // This case handles user creation logic, which is now mostly in signup.
+          // This case handles user creation for non-admins, now mostly in signup.
           // It can serve as a fallback if a user exists in Auth but not Firestore.
            await setDoc(userRef, { 
             email: user.email, 
