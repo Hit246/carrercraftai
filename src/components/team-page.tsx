@@ -45,83 +45,84 @@ export function TeamPage() {
       email: '',
     },
   });
-
-  useEffect(() => {
-    if (!user || plan !== 'recruiter') {
-        setIsLoading(false);
-        return;
-    }
-
-    const getTeamAndListen = async () => {
+  
+    // Effect to find or create the team for a recruiter
+    useEffect(() => {
+      const findOrCreateTeam = async () => {
+        if (!user || plan !== 'recruiter') {
+          setIsLoading(false);
+          return;
+        }
+  
         setIsLoading(true);
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
-        let currentTeamId = userSnap.data()?.teamId;
-
-        if (!currentTeamId) {
-            try {
-                const teamRef = await addDoc(collection(db, 'teams'), {
-                    owner: user.uid,
-                    createdAt: new Date(),
-                });
-                currentTeamId = teamRef.id;
-                await setDoc(userRef, { teamId: currentTeamId }, { merge: true });
-                setTeamId(currentTeamId);
-            } catch (error) {
-                console.error("Failed to create team:", error);
-                toast({ title: "Error", description: "Could not create your team.", variant: "destructive"});
-                setIsLoading(false);
-                return;
-            }
-        } else {
-            setTeamId(currentTeamId);
+        try {
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+          let currentTeamId = userSnap.data()?.teamId;
+  
+          if (!currentTeamId) {
+            // Create team if it doesn't exist
+            const teamRef = await addDoc(collection(db, 'teams'), {
+              owner: user.uid,
+              createdAt: new Date(),
+            });
+            currentTeamId = teamRef.id;
+            await setDoc(userRef, { teamId: currentTeamId }, { merge: true });
+          }
+          setTeamId(currentTeamId);
+        } catch (error) {
+          console.error("Failed to find or create team:", error);
+          toast({ title: "Error", description: "Could not create your team.", variant: "destructive"});
+          setIsLoading(false);
         }
-
-        if (!currentTeamId) {
-            setIsLoading(false);
-            return;
-        }
-
-        const teamRef = doc(db, 'teams', currentTeamId);
-        const membersRef = collection(db, `teams/${currentTeamId}/members`);
-
-        const unsubscribe = onSnapshot(query(membersRef), async (snapshot) => {
-            const members = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TeamMember));
-            
-            try {
-                const teamSnap = await getDoc(teamRef);
-                const ownerId = teamSnap.data()?.owner;
-                if(ownerId) {
-                    const ownerUserSnap = await getDoc(doc(db, 'users', ownerId));
-                    if(ownerUserSnap.exists()){
-                        const ownerData = ownerUserSnap.data();
-                        const owner: TeamMember = {
-                            id: ownerUserSnap.id,
-                            uid: ownerUserSnap.id,
-                            email: ownerData.email,
-                            role: 'Admin',
-                            name: ownerData.displayName || ownerData.email,
-                        };
-                        setTeamOwner(owner);
-                        const allMembers = [owner, ...members.filter(m => m.email !== owner.email)];
-                        setTeamMembers(allMembers);
-                    }
-                } else {
-                    setTeamMembers(members);
-                }
-            } catch (error) {
-                console.error("Error fetching team details:", error);
-                toast({ title: "Error", description: "Could not load team details.", variant: "destructive"});
-            } finally {
-                setIsLoading(false);
+      };
+  
+      findOrCreateTeam();
+    }, [user, plan, toast]);
+  
+    // Effect to listen for team members once teamId is set
+    useEffect(() => {
+      if (!teamId) return;
+  
+      const teamRef = doc(db, 'teams', teamId);
+      const membersRef = collection(db, `teams/${teamId}/members`);
+  
+      const unsubscribe = onSnapshot(query(membersRef), async (snapshot) => {
+        const members = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TeamMember));
+        
+        try {
+          const teamSnap = await getDoc(teamRef);
+          const ownerId = teamSnap.data()?.owner;
+  
+          if (ownerId) {
+            const ownerUserSnap = await getDoc(doc(db, 'users', ownerId));
+            if (ownerUserSnap.exists()) {
+              const ownerData = ownerUserSnap.data();
+              const owner: TeamMember = {
+                id: ownerUserSnap.id,
+                uid: ownerUserSnap.id,
+                email: ownerData.email,
+                role: 'Admin',
+                name: ownerData.displayName || ownerData.email,
+              };
+              setTeamOwner(owner);
+              const allMembers = [owner, ...members.filter(m => m.email !== owner.email)];
+              setTeamMembers(allMembers);
             }
-        });
-
-        return () => unsubscribe();
-    };
-
-    getTeamAndListen();
-}, [user, plan, toast]);
+          } else {
+            setTeamMembers(members);
+            setTeamOwner(null);
+          }
+        } catch (error) {
+          console.error("Error fetching team details:", error);
+          toast({ title: "Error", description: "Could not load team details.", variant: "destructive"});
+        } finally {
+          setIsLoading(false);
+        }
+      });
+  
+      return () => unsubscribe();
+    }, [teamId, toast]);
 
 
   if (plan !== 'recruiter' && !isLoading) {
