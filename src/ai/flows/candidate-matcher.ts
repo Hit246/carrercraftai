@@ -1,4 +1,3 @@
-// This file uses server-side code.
 'use server';
 
 /**
@@ -14,7 +13,9 @@ import {z} from 'genkit';
 
 const CandidateMatcherInputSchema = z.object({
   jobDescription: z.string().describe('The description of the job.'),
-  resumeDatabase: z.string().describe('A string containing multiple resumes, separated by triple backticks, that will be used as the candidate database.'),
+  resumeDataUris: z.array(z.string()).describe(
+    "A list of resumes, each provided as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+  ),
 });
 export type CandidateMatcherInput = z.infer<typeof CandidateMatcherInputSchema>;
 
@@ -39,19 +40,23 @@ const prompt = ai.definePrompt({
   output: {schema: CandidateMatcherOutputSchema},
   prompt: `You are an expert recruiter specializing in matching candidates to job descriptions.
 
-You will be provided with a job description and a database of resumes. Your task is to identify the top 5 candidates whose skills and experience best align with the job requirements.
+You will be provided with a job description and a database of resumes. Your task is to identify the top candidates whose skills and experience best align with the job requirements.
 
 **Job Description**:
 {{{jobDescription}}}
 
-**Resumes (each separated by '~~~')**:
-{{{resumeDatabase}}}
+**Resumes**:
+{{#each resumeDataUris}}
+--- Start of Resume {{@index}} ---
+{{media url=this}}
+--- End of Resume {{@index}} ---
+{{/each}}
 
 **Instructions**:
-1.  Assign a unique ID to each resume (e.g., "Resume 1", "Resume 2").
+1.  Assign a unique ID to each resume based on its index (e.g., "Resume 1" for index 0, "Resume 2" for index 1).
 2.  For each resume, assess its relevance to the job description and provide a match score from 0-100.
 3.  Provide a detailed justification for your assessment, explaining *why* the candidate is a good match by cross-referencing their skills with the job requirements.
-4.  Return only the top 5 candidates with the highest match scores.
+4.  Return all candidates, sorted by their match score in descending order.
 
 Ensure that the output is a valid JSON object conforming to the CandidateMatcherOutputSchema.
 `,
