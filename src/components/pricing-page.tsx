@@ -6,47 +6,54 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { Check, Crown, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { PaymentDialog } from "./payment-dialog"
+
+type PlanToUpgrade = 'pro' | 'recruiter' | null;
 
 export function PricingPage() {
   const { user, plan, requestProUpgrade, requestRecruiterUpgrade } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
+  const [planToUpgrade, setPlanToUpgrade] = useState<PlanToUpgrade>(null);
 
-  const handleUpgradePro = async () => {
+  const handleUpgrade = async (selectedPlan: 'pro' | 'recruiter') => {
     if (!user) {
         router.push('/login');
         return;
     }
-    try {
-      await requestProUpgrade();
-      toast({
-          title: "Upgrade Request Submitted!",
-          description: "Your request for the Pro plan is pending. Please upload your payment proof on your profile page.",
-      });
-      router.push('/order-status');
-    } catch (error) {
-      toast({ title: "Error", description: "Failed to submit upgrade request.", variant: "destructive" });
-    }
+    setPlanToUpgrade(selectedPlan);
   }
 
-  const handleUpgradeRecruiter = async () => {
-    if (!user) {
-        router.push('/login');
-        return;
-    }
-     try {
-      await requestRecruiterUpgrade();
+  const onPaymentConfirm = async () => {
+    if (!planToUpgrade) return;
+
+    try {
+      if (planToUpgrade === 'pro') {
+        await requestProUpgrade();
+      } else {
+        await requestRecruiterUpgrade();
+      }
       toast({
           title: "Upgrade Request Submitted!",
-          description: "Your request for the Recruiter plan is pending. Please upload your payment proof on your profile page.",
+          description: "Your request is pending. Please upload your payment proof on your profile page.",
       });
       router.push('/order-status');
     } catch (error) {
       toast({ title: "Error", description: "Failed to submit upgrade request.", variant: "destructive" });
+    } finally {
+      setPlanToUpgrade(null);
     }
   }
 
   return (
+    <>
+    <PaymentDialog 
+      isOpen={!!planToUpgrade}
+      onClose={() => setPlanToUpgrade(null)}
+      onConfirm={onPaymentConfirm}
+      plan={planToUpgrade}
+    />
     <div className="flex flex-col items-center text-center">
       <div className="max-w-2xl">
         <h1 className="text-4xl font-bold font-headline tracking-tight lg:text-5xl">
@@ -106,7 +113,7 @@ export function PricingPage() {
                     Your Current Plan
                 </Button>
             ) : (
-                <Button className="w-full" onClick={handleUpgradePro} disabled={plan === 'recruiter' || plan === 'pending'}>
+                <Button className="w-full" onClick={() => handleUpgrade('pro')} disabled={plan === 'recruiter' || plan === 'pending'}>
                     {plan === 'recruiter' ? 'Included in Recruiter' : (plan === 'pending' ? 'Request Pending' : 'Upgrade to Pro')}
                 </Button>
             )}
@@ -133,7 +140,7 @@ export function PricingPage() {
                     Your Current Plan
                 </Button>
             ) : (
-                <Button className="w-full" variant="secondary" onClick={handleUpgradeRecruiter} disabled={plan === 'pending'}>
+                <Button className="w-full" variant="secondary" onClick={() => handleUpgrade('recruiter')} disabled={plan === 'pending'}>
                      {plan === 'pending' ? 'Request Pending' : 'Upgrade to Recruiter'}
                 </Button>
             )}
@@ -141,5 +148,6 @@ export function PricingPage() {
         </Card>
       </div>
     </div>
+    </>
   )
 }
