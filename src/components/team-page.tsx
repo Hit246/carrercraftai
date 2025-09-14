@@ -36,6 +36,7 @@ export function TeamPage() {
   const router = useRouter();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [teamId, setTeamId] = useState<string | null>(null);
+  const [teamOwner, setTeamOwner] = useState<TeamMember | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -75,15 +76,39 @@ export function TeamPage() {
   useEffect(() => {
     if (!teamId) return;
 
-    const teamMembersRef = collection(db, `teams/${teamId}/members`);
-    const unsubscribe = onSnapshot(teamMembersRef, (snapshot) => {
-      const members = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TeamMember));
-      setTeamMembers(members);
-      setIsLoading(false);
+    const teamRef = doc(db, 'teams', teamId);
+    const membersRef = collection(db, `teams/${teamId}/members`);
+
+    const unsubscribe = onSnapshot(query(membersRef), async (snapshot) => {
+        const members = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TeamMember));
+        
+        const teamSnap = await getDoc(teamRef);
+        const ownerId = teamSnap.data()?.owner;
+        if(ownerId) {
+            const ownerUserSnap = await getDoc(doc(db, 'users', ownerId));
+            if(ownerUserSnap.exists()){
+                const ownerData = ownerUserSnap.data();
+                const owner: TeamMember = {
+                    id: ownerUserSnap.id,
+                    uid: ownerUserSnap.id,
+                    email: ownerData.email,
+                    role: 'Admin',
+                    name: ownerData.displayName || ownerData.email,
+                };
+                setTeamOwner(owner);
+                // Add owner to the top of the list if not already there
+                const allMembers = [owner, ...members.filter(m => m.email !== owner.email)];
+                setTeamMembers(allMembers);
+            }
+        } else {
+            setTeamMembers(members);
+        }
+
+        setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [teamId]);
+}, [teamId]);
 
   if (plan !== 'recruiter') {
     return (
@@ -101,7 +126,14 @@ export function TeamPage() {
   }
 
   async function onInvite(values: z.infer<typeof formSchema>) {
-    if (!teamId || !user) return;
+    if (!teamId || !user || !teamOwner || user.uid !== teamOwner.uid) {
+        toast({
+            title: "Permission Denied",
+            description: "Only the team owner can invite new members.",
+            variant: "destructive"
+        });
+        return;
+    }
 
     const isAlreadyMember = teamMembers.some(member => member.email === values.email);
     if(isAlreadyMember) {
