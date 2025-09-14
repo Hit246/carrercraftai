@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2, Users, FileSearch, Upload, Crown } from 'lucide-react';
 import type { CandidateMatcherOutput } from '@/ai/flows/candidate-matcher';
 import { useToast } from "@/hooks/use-toast";
@@ -21,24 +21,32 @@ import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+const MAX_FILES = 10;
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 const formSchema = z.object({
   jobDescription: z.string().min(50, { message: 'Please provide a detailed job description.' }),
-  resumeFile: z.instanceof(File).refine(
-    (file) => file.size > 0, 'Please upload a resume file.'
-  ).refine(
-    (file) => file.type === "text/plain",
-    "Please upload a TXT file."
-  )
+  resumeFiles: z.custom<FileList>()
+    .refine((files) => files && files.length > 0, 'Please upload at least one resume file.')
+    .refine((files) => files.length <= MAX_FILES, `You can upload a maximum of ${MAX_FILES} files.`)
+    .refine(
+        (files) => Array.from(files).every((file) => file.size <= MAX_FILE_SIZE),
+        `Each file size should not exceed 5MB.`
+    )
+    .refine(
+        (files) => Array.from(files).every((file) => ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type)),
+        "Please upload PDF or DOCX files."
+    )
 });
 
-const fileToString = (file: File): Promise<string> => {
+const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
         resolve(reader.result as string);
       };
       reader.onerror = reject;
-      reader.readAsText(file);
+      reader.readAsDataURL(file);
     });
 };
 
@@ -73,10 +81,12 @@ export function CandidateMatcherPage() {
     setCandidateMatches(null);
 
     try {
-        const resumeDatabase = await fileToString(values.resumeFile);
+        const resumeFiles = Array.from(values.resumeFiles);
+        const resumeDataUris = await Promise.all(resumeFiles.map(file => fileToDataUri(file)));
+
         const result = await candidateMatcherAction({
             jobDescription: values.jobDescription,
-            resumeDatabase
+            resumeDataUris: resumeDataUris
         });
         setCandidateMatches(result.candidateMatches.sort((a,b) => b.matchScore - a.matchScore));
     } catch (error) {
@@ -109,7 +119,7 @@ export function CandidateMatcherPage() {
             <Users className="text-primary"/> AI Candidate Matcher
           </CardTitle>
           <CardDescription>
-            For recruiters and hiring managers. Paste a job description and upload a single TXT file containing multiple resumes to find the best-fit candidates.
+            For recruiters and hiring managers. Paste a job description and upload multiple candidate resumes (PDF or DOCX) to find the best-fit candidates.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -136,24 +146,25 @@ export function CandidateMatcherPage() {
                 />
                  <FormField
                   control={form.control}
-                  name="resumeFile"
+                  name="resumeFiles"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Candidate Resumes File</FormLabel>
+                      <FormLabel>Candidate Resumes</FormLabel>
                        <FormControl>
                         <div className="relative">
                             <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
                                 type="file"
-                                className="pl-10"
-                                accept=".txt"
-                                onChange={(e) => field.onChange(e.target.files?.[0])}
+                                className="pl-10 h-auto"
+                                accept=".pdf,.docx"
+                                multiple
+                                onChange={(e) => field.onChange(e.target.files)}
                                 disabled={!canUseFeature || isLoading}
                             />
                         </div>
                       </FormControl>
                       <FormDescription>
-                        Upload a single .txt file with resumes separated by "~~~" on a new line.
+                        Upload up to {MAX_FILES} resumes in PDF or DOCX format.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -203,7 +214,7 @@ export function CandidateMatcherPage() {
                     )}
                     {candidateMatches && candidateMatches.map((match) => (
                         <TableRow key={match.resumeId}>
-                            <TableCell className="font-medium">{match.resumeId}</TableCell>
+                            <TableCell className="font-medium">{match.resumeId.replace('Resume', 'Resume ')}</TableCell>
                             <TableCell>
                                 <Badge variant={match.matchScore > 75 ? 'default' : match.matchScore > 50 ? 'secondary' : 'outline'}>
                                     {match.matchScore.toFixed(0)} / 100
