@@ -6,7 +6,7 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 
-type Plan = 'free' | 'pro' | 'recruiter';
+type Plan = 'free' | 'pro' | 'recruiter' | 'pending';
 
 interface UserProfile {
     displayName?: string | null;
@@ -18,6 +18,7 @@ interface UserData {
     credits: number;
     planUpdatedAt?: any;
     paymentProofURL?: string | null;
+    requestedPlan?: 'pro' | 'recruiter';
 }
 
 interface AuthContextType {
@@ -28,8 +29,8 @@ interface AuthContextType {
   credits: number;
   userData: UserData | null;
   useCredit: () => Promise<void>;
-  upgradeToPro: () => Promise<void>;
-  upgradeToRecruiter: () => Promise<void>;
+  requestProUpgrade: () => Promise<void>;
+  requestRecruiterUpgrade: () => Promise<void>;
   logout: () => Promise<void>;
   login: (email:string, password:string) => Promise<any>;
   signup: (email:string, password:string) => Promise<any>;
@@ -138,21 +139,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return signOut(auth);
   };
   
-  const upgradeToPro = async () => {
+  const requestProUpgrade = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
-    const newPlanData = { plan: 'pro' as Plan, planUpdatedAt: new Date() };
+    const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'pro' as const, planUpdatedAt: new Date() };
     await updateDoc(userRef, newPlanData);
-    setPlan('pro');
+    setPlan('pending');
     setUserData(prev => prev ? {...prev, ...newPlanData} : newPlanData as UserData);
   }
 
-  const upgradeToRecruiter = async () => {
+  const requestRecruiterUpgrade = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
-    const newPlanData = { plan: 'recruiter' as Plan, planUpdatedAt: new Date() };
+    const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'recruiter' as const, planUpdatedAt: new Date() };
     await updateDoc(userRef, newPlanData);
-    setPlan('recruiter');
+    setPlan('pending');
     setUserData(prev => prev ? {...prev, ...newPlanData} : newPlanData as UserData);
   }
 
@@ -188,8 +189,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     credits,
     userData,
     useCredit,
-    upgradeToPro,
-    upgradeToRecruiter,
+    requestProUpgrade,
+    requestRecruiterUpgrade,
     logout,
     login,
     signup,

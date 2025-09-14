@@ -23,18 +23,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Crown, User, Shield, ExternalLink } from 'lucide-react';
+import { MoreHorizontal, Trash2, Crown, User, Shield, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import Link from 'next/link';
 
-type Plan = 'free' | 'pro' | 'recruiter';
+type Plan = 'free' | 'pro' | 'recruiter' | 'pending';
 
 interface UserData {
   id: string;
   email: string;
   plan: Plan;
+  requestedPlan?: 'pro' | 'recruiter';
   createdAt?: { seconds: number };
   planUpdatedAt?: { seconds: number };
   paymentProofURL?: string;
@@ -62,10 +63,19 @@ export function UserManagementPage() {
     fetchUsers();
   }, []);
 
-  const handlePlanChange = async (userId: string, newPlan: Plan) => {
+  const handlePlanChange = async (userId: string, newPlan: Plan, requestedPlan: UserData['requestedPlan'] = undefined) => {
     const userRef = doc(db, 'users', userId);
     try {
-      await updateDoc(userRef, { plan: newPlan, planUpdatedAt: newPlan !== 'free' ? new Date() : null });
+      const updateData: any = { 
+        plan: newPlan, 
+        planUpdatedAt: newPlan !== 'free' ? new Date() : null,
+      };
+
+      if(requestedPlan) {
+        updateData.requestedPlan = requestedPlan;
+      }
+
+      await updateDoc(userRef, updateData);
       toast({
         title: 'Plan Updated',
         description: `User's plan has been changed to ${newPlan}.`,
@@ -84,14 +94,11 @@ export function UserManagementPage() {
     const userRef = doc(db, 'users', userId);
     try {
       await deleteDoc(userRef);
-      // Note: This only deletes the user record in Firestore.
-      // For a full implementation, you would also delete the user from Firebase Auth.
-      // This requires a server-side environment (e.g., Cloud Function).
       toast({
         title: 'User Deleted',
         description: 'User has been removed from Firestore.',
       });
-      fetchUsers(); // Refresh users list
+      fetchUsers(); 
     } catch (error) {
       toast({
         title: 'Error',
@@ -107,6 +114,8 @@ export function UserManagementPage() {
         return 'secondary';
       case 'recruiter':
         return 'default';
+      case 'pending':
+          return 'destructive';
       default:
         return 'outline';
     }
@@ -173,7 +182,9 @@ export function UserManagementPage() {
                        {isUserAdmin ? (
                         <Badge>Admin</Badge>
                        ) : (
-                        <Badge variant={getPlanBadgeVariant(user.plan)}>{user.plan}</Badge>
+                        <Badge variant={getPlanBadgeVariant(user.plan)}>
+                          {user.plan === 'pending' ? `Pending (${user.requestedPlan})` : user.plan}
+                        </Badge>
                        )}
                     </TableCell>
                     <TableCell>
@@ -203,16 +214,29 @@ export function UserManagementPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              {user.plan === 'pending' && user.requestedPlan && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => handlePlanChange(user.id, user.requestedPlan as Plan)}>
+                                    <CheckCircle className="mr-2 h-4 w-4 text-green-500"/>
+                                    Approve Payment
+                                  </DropdownMenuItem>
+                                   <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')}>
+                                    <XCircle className="mr-2 h-4 w-4 text-red-500"/>
+                                    Reject Payment
+                                  </DropdownMenuItem>
+                                </>
+                              )}
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')}>
                                 <User className="mr-2 h-4 w-4" />
                                 Set to Free
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pro')}>
+                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pending', 'pro')}>
                                 <Crown className="mr-2 h-4 w-4" />
                                 Set to Pro
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'recruiter')}>
+                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pending', 'recruiter')}>
                                 <User className="mr-2 h-4 w-4" />
                                 Set to Recruiter
                               </DropdownMenuItem>

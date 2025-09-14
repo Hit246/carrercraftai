@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
-import { Crown, User, Handshake, Loader2, Upload, ExternalLink, ShieldCheck } from 'lucide-react';
+import { Crown, User, Handshake, Loader2, Upload, ExternalLink, ShieldCheck, Hourglass } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { uploadFile } from '@/lib/firebase';
 import Link from 'next/link';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const formSchema = z.object({
     displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }).optional(),
@@ -104,7 +105,7 @@ export function ProfilePage() {
             await updatePaymentProof(proofUrl);
             toast({
                 title: 'Payment Proof Uploaded',
-                description: 'Your payment proof has been submitted for review.',
+                description: 'Your payment proof has been submitted for review. An admin will verify it shortly.',
             });
             paymentForm.reset();
         } catch (error) {
@@ -126,6 +127,8 @@ export function ProfilePage() {
                 return <Badge className="bg-amber-400/20 text-amber-500 border-amber-400/30"><Crown className="mr-2 h-4 w-4"/> Pro</Badge>;
             case 'recruiter':
                 return <Badge className="bg-blue-400/20 text-blue-500 border-blue-400/30"><Handshake className="mr-2 h-4 w-4"/> Recruiter</Badge>;
+            case 'pending':
+                return <Badge className="bg-yellow-400/20 text-yellow-500 border-yellow-400/30"><Hourglass className="mr-2 h-4 w-4"/> Pending Approval</Badge>;
             default:
                 return <Badge variant="secondary"><User className="mr-2 h-4 w-4"/> Free</Badge>;
         }
@@ -160,6 +163,15 @@ export function ProfilePage() {
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
+             {plan === 'pending' && (
+                <Alert variant="pro" className="border-yellow-400/50 text-yellow-600 dark:text-yellow-500 [&>svg]:text-yellow-500">
+                    <Hourglass/>
+                    <AlertTitle>Your Upgrade is Pending</AlertTitle>
+                    <AlertDescription>
+                        An administrator will review your payment soon. To speed up the process, please upload your proof of payment below if you haven't already.
+                    </AlertDescription>
+                </Alert>
+            )}
              <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <Card>
@@ -231,16 +243,16 @@ export function ProfilePage() {
                             <Label>Current Plan</Label>
                             <div className="mt-1">{getPlanBadge()}</div>
                         </div>
-                        {plan !== 'recruiter' && (
+                        {plan !== 'recruiter' && plan !== 'pending' && (
                             <Button variant="outline" size="sm" onClick={() => router.push('/pricing')}>
                                 Upgrade Plan
                             </Button>
                         )}
                     </div>
                     
-                    { (plan === 'pro' || plan === 'recruiter') && (
+                    { (plan === 'pro' || plan === 'recruiter' || plan === 'pending') && (
                         <div className="space-y-4">
-                            {userData?.planUpdatedAt && (
+                            {userData?.planUpdatedAt && (plan !== 'pending' && plan !== 'free') && (
                                 <div className="space-y-1">
                                     <Label>Last Upgrade Date</Label>
                                     <p className="text-sm text-muted-foreground">
