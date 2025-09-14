@@ -4,44 +4,44 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function isAdmin() {
-      // Admins are identified by a specific list of emails.
       return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
 
-    function isOwner(userId) {
-      // Checks if the requesting user is the owner of the document.
-      return request.auth.uid == userId;
+    // A user is a member of a team if their user document has a matching teamId.
+    function isTeamMember(teamId) {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
     }
 
+    // A user is the owner of a team if they are the owner listed on the team document.
+    function isTeamOwner(teamId) {
+      return get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+    }
+
+    // Users can read/write their own document. Admins have full access.
     match /users/{userId} {
-      // A user can read/write their own document.
-      // An admin can read/write any user document.
-      // Any authenticated user can create a user document (on signup).
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read, write: if request.auth.uid == userId || isAdmin();
       allow create: if request.auth != null;
     }
 
+    // Resumes are private to the user.
     match /resumes/{userId} {
-      // A user can only read and write their own resume.
-      allow read, write: if isOwner(userId);
+      allow read, write: if request.auth.uid == userId;
     }
     
+    // Team documents can be read by members and written by the owner.
     match /teams/{teamId} {
-      // A user can read a team document if their own user profile contains the teamId.
-      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-      // Only the team owner can update the team document itself (e.g., future fields).
-      allow write: if request.auth != null && resource.data.owner == request.auth.uid;
-      
+      allow read: if isTeamMember(teamId);
+      allow write: if isTeamOwner(teamId);
+
+      // Team members can be read by other team members. Only the owner can manage them.
       match /members/{memberId} {
-        // Any member of a team can read the list of members.
-        allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-        // Only the team owner can add/remove members.
-        allow create, delete: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+        allow read: if isTeamMember(teamId);
+        allow create, delete: if isTeamOwner(teamId);
       }
     }
     
+    // Settings can only be managed by admins.
     match /settings/{docId} {
-      // Only admins can read or write to the global settings.
       allow read, write: if isAdmin();
     }
   }
