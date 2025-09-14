@@ -49,8 +49,7 @@ export function TeamPage() {
     // Effect to find or create the team for a recruiter
     useEffect(() => {
         const findOrCreateTeam = async () => {
-            if (!user || plan !== 'recruiter') {
-                setIsLoading(false);
+            if (authLoading || !user || plan !== 'recruiter' || !userData) {
                 return;
             }
 
@@ -71,14 +70,11 @@ export function TeamPage() {
             } catch (error) {
                 console.error("Failed to find or create team:", error);
                 toast({ title: "Error", description: "Could not initialize your team. Please refresh and try again.", variant: "destructive"});
+                setIsLoading(false);
             }
         };
 
-        if (!authLoading && user) {
-          findOrCreateTeam();
-        } else if (!authLoading && !user) {
-          setIsLoading(false);
-        }
+        findOrCreateTeam();
 
     }, [user, plan, userData, authLoading, toast]);
   
