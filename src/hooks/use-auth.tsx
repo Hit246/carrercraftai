@@ -19,6 +19,7 @@ interface UserData {
     planUpdatedAt?: any;
     paymentProofURL?: string | null;
     requestedPlan?: 'pro' | 'recruiter';
+    teamId?: string;
 }
 
 interface AuthContextType {
@@ -58,44 +59,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       if (user) {
+        const userRef = doc(db, 'users', user.uid);
         const userIsAdmin = user.email && ADMIN_EMAILS.includes(user.email);
         setIsAdmin(userIsAdmin);
 
-        const userRef = doc(db, 'users', user.uid);
-        let userDoc = await getDoc(userRef);
-
         if (userIsAdmin) {
-          // If user is admin, ensure their DB record reflects recruiter status
-          if (!userDoc.exists() || userDoc.data().plan !== 'recruiter') {
-            const adminData = {
-              email: user.email,
-              plan: 'recruiter' as Plan,
-              credits: Infinity,
-              createdAt: userDoc.exists() ? userDoc.data().createdAt : new Date(),
-              planUpdatedAt: new Date(),
-            };
-            await setDoc(userRef, adminData, { merge: true });
-            userDoc = await getDoc(userRef); // Re-fetch doc after update
-          }
-        }
-        
-        if (userDoc.exists()) {
-          const data = userDoc.data() as UserData;
-          setUserData(data);
-          setPlan(data.plan || 'free');
-          setCredits(data.credits ?? (data.plan === 'free' ? FREE_CREDITS : Infinity));
+            // Immediately set admin's local state to recruiter
+            setPlan('recruiter');
+            setCredits(Infinity);
+            setIsAdmin(true);
+            
+            // Then, ensure the database reflects this state.
+            const userDoc = await getDoc(userRef);
+            if (!userDoc.exists() || userDoc.data().plan !== 'recruiter') {
+                const adminData = {
+                    email: user.email,
+                    plan: 'recruiter' as Plan,
+                    credits: Infinity,
+                    createdAt: userDoc.exists() ? userDoc.data().createdAt : new Date(),
+                };
+                await setDoc(userRef, adminData, { merge: true });
+                const updatedDoc = await getDoc(userRef);
+                setUserData(updatedDoc.data() as UserData);
+            } else {
+                setUserData(userDoc.data() as UserData);
+            }
         } else {
-          // This case handles user creation for non-admins, now mostly in signup.
-          // It can serve as a fallback if a user exists in Auth but not Firestore.
-           await setDoc(userRef, { 
-            email: user.email, 
-            plan: 'free', 
-            credits: FREE_CREDITS,
-            createdAt: new Date(),
-          });
-          setPlan('free');
-          setCredits(FREE_CREDITS);
-          setUserData({ plan: 'free', credits: FREE_CREDITS});
+            // Handle regular users
+            const userDoc = await getDoc(userRef);
+            if (userDoc.exists()) {
+                const data = userDoc.data() as UserData;
+                setUserData(data);
+                setPlan(data.plan || 'free');
+                setCredits(data.credits ?? (data.plan === 'free' ? FREE_CREDITS : Infinity));
+            } else {
+                // This case handles user creation for non-admins, now mostly in signup.
+                // It can serve as a fallback if a user exists in Auth but not Firestore.
+                await setDoc(userRef, { 
+                    email: user.email, 
+                    plan: 'free', 
+                    credits: FREE_CREDITS,
+                    createdAt: new Date(),
+                });
+                setPlan('free');
+                setCredits(FREE_CREDITS);
+                setUserData({ plan: 'free', credits: FREE_CREDITS});
+            }
         }
       } else {
         // User is signed out, reset state
