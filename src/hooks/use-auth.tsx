@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
 
 
 type Plan = 'free' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
@@ -83,14 +83,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setPlan(data.plan || 'free');
           setCredits(data.credits ?? FREE_CREDITS);
         } else {
-          // New user, create their doc
+          // This case handles user creation logic, which is now mostly in signup.
+          // It can serve as a fallback if a user exists in Auth but not Firestore.
            await setDoc(userRef, { 
             email: user.email, 
             plan: 'free', 
             credits: FREE_CREDITS,
             createdAt: new Date(),
-            planUpdatedAt: null,
-            paymentProofURL: null,
           });
           setPlan('free');
           setCredits(FREE_CREDITS);
@@ -113,25 +112,76 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
-  const signup = async (email:string, password:string) => {
+  const signup = async (email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    const initialUserData = {
-        email: user.email,
-        plan: 'free' as Plan,
-        credits: FREE_CREDITS,
-        teamId: null,
+    const newUser = userCredential.user;
+
+    // Check if the user's email exists in any team's members subcollection
+    const teamsRef = collection(db, 'teams');
+    const teamsSnapshot = await getDocs(teamsRef);
+    let teamId: string | null = null;
+    let memberDocId: string | null = null;
+    let teamOwnerId: string | null = null;
+
+    for (const teamDoc of teamsSnapshot.docs) {
+        const membersRef = collection(db, `teams/${teamDoc.id}/members`);
+        const q = query(membersRef, where("email", "==", email));
+        const membersSnapshot = await getDocs(q);
+
+        if (!membersSnapshot.empty) {
+            teamId = teamDoc.id;
+            memberDocId = membersSnapshot.docs[0].id;
+            teamOwnerId = teamDoc.data().owner;
+            break;
+        }
+    }
+
+    const initialUserData: any = {
+        email: newUser.email,
         createdAt: new Date(),
         planUpdatedAt: null,
         paymentProofURL: null,
     };
-    // Set initial doc for new user
-    await setDoc(doc(db, "users", user.uid), initialUserData);
-    setPlan('free');
-    setCredits(FREE_CREDITS);
+
+    if (teamId && memberDocId && teamOwnerId) {
+        // User was invited and is joining a team
+        const teamOwnerDoc = await getDoc(doc(db, 'users', teamOwnerId));
+        const ownerPlan = teamOwnerDoc.data()?.plan;
+
+        initialUserData.plan = ownerPlan;
+        initialUserData.credits = Infinity; // Team members get Pro features
+        initialUserData.teamId = teamId;
+
+        // Use a batch write to update user and team member doc atomically
+        const batch = writeBatch(db);
+        const userRef = doc(db, 'users', newUser.uid);
+        batch.set(userRef, initialUserData);
+
+        const memberRef = doc(db, `teams/${teamId}/members`, memberDocId);
+        batch.update(memberRef, { 
+            uid: newUser.uid,
+            name: newUser.displayName || newUser.email, // Set name on joining
+         });
+
+        await batch.commit();
+
+        setPlan(ownerPlan);
+        setCredits(Infinity);
+    } else {
+        // Regular signup, not part of a team
+        initialUserData.plan = 'free' as Plan;
+        initialUserData.credits = FREE_CREDITS;
+        initialUserData.teamId = null;
+
+        await setDoc(doc(db, "users", newUser.uid), initialUserData);
+        setPlan('free');
+        setCredits(FREE_CREDITS);
+    }
+    
     setUserData(initialUserData);
     return userCredential;
-  }
+}
+
 
   const logout = () => {
     setPlan('free');

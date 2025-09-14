@@ -16,7 +16,7 @@ import { Badge } from './ui/badge';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, onSnapshot, doc, deleteDoc, getDoc, setDoc, query, where } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, doc, deleteDoc, getDoc, setDoc, query, where, getDocs } from 'firebase/firestore';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -27,6 +27,7 @@ interface TeamMember {
   name?: string;
   email: string;
   role: 'Admin' | 'Member';
+  uid?: string; // Will be present if the user has signed up
 }
 
 export function TeamPage() {
@@ -61,12 +62,15 @@ export function TeamPage() {
   }, []);
   
   useEffect(() => {
-    if (user && plan === 'recruiter') {
-      getOrCreateTeam(user.uid);
-    } else if(plan !== 'recruiter' && plan !== 'free') {
-        router.push('/pricing');
+    if (user) {
+        if (plan === 'recruiter') {
+            getOrCreateTeam(user.uid);
+        } else if (plan !== 'free' && plan !== 'pending' && plan !== 'cancellation_requested') {
+            // Pro users shouldn't be here
+        }
     }
-  }, [user, plan, router, getOrCreateTeam]);
+  }, [user, plan, getOrCreateTeam]);
+
 
   useEffect(() => {
     if (!teamId) return;
@@ -99,7 +103,6 @@ export function TeamPage() {
   async function onInvite(values: z.infer<typeof formSchema>) {
     if (!teamId || !user) return;
 
-    // Check if user is already in the team
     const isAlreadyMember = teamMembers.some(member => member.email === values.email);
     if(isAlreadyMember) {
         toast({
@@ -123,6 +126,7 @@ export function TeamPage() {
         });
         form.reset();
     } catch (error) {
+        console.error("Error inviting member:", error);
         toast({
             title: "Error inviting member",
             description: "There was a problem inviting the new member. Please try again.",
@@ -181,7 +185,7 @@ export function TeamPage() {
                                             </Avatar>
                                             <div>
                                                 <p className="font-medium">{member.name || member.email}</p>
-                                                {!member.name && <p className="text-sm text-muted-foreground">Invited</p>}
+                                                {!member.uid && <p className="text-sm text-muted-foreground">Invited</p>}
                                             </div>
                                         </div>
                                     </TableCell>
