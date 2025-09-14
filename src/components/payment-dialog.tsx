@@ -16,6 +16,14 @@ const planDetails = {
     recruiter: { name: "Recruiter Plan", amount: 49 },
 }
 
+// Admin Configuration:
+// To update the payment details, modify the values below.
+// 1. Upload your QR code image to a service and paste the public URL in `qrCodeImageUrl`.
+// 2. Update the `upiId` with your UPI identifier.
+const qrCodeImageUrl = "https://placehold.co/200x200/eee/31343C.png?text=Your+QR+Code";
+const upiId = "your-upi-id@bank";
+
+
 export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialogProps) {
     if (!plan) return null;
 
@@ -34,7 +42,7 @@ export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialo
                     <div className="flex flex-col items-center space-y-2">
                         <Label>Scan QR Code to Pay</Label>
                         <Image
-                            src="https://placehold.co/200x200.png?text=Scan+Me"
+                            src={qrCodeImageUrl}
                             alt="Payment QR Code"
                             width={200}
                             height={200}
@@ -44,7 +52,7 @@ export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialo
                     </div>
                      <div className="space-y-1.5">
                         <Label htmlFor="upi-id">Or Pay using UPI ID</Label>
-                        <Input id="upi-id" readOnly value="careercraft@upi" />
+                        <Input id="upi-id" readOnly value={upiId} />
                     </div>
                     <div className="text-center text-sm text-muted-foreground pt-2">
                         After payment, please take a screenshot and upload it on your profile page to get your upgrade approved.
