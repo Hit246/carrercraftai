@@ -137,3 +137,73 @@ This section describes the relationships between the main collections in a text-
 
 4.  **Settings (Singleton)**
     *   The `settings` collection is not directly related to any other collection. It contains singleton documents (like `payment`) for storing global application configuration that is managed by an admin.
+
+---
+
+## Data Flow Diagram (DFD) Explanation
+
+This section provides a text-based description of the primary data flows within the CareerCraft AI application.
+
+### Process 1: User Registration & Authentication
+
+-   **External Entity:** User, Admin
+-   **Processes:**
+    1.  **User Signup:** A new user provides `email` and `password`. The system creates an account in **Firebase Auth** and a corresponding document in the `users` collection with `plan: 'free'` and `credits: 3`.
+    2.  **User Login:** A user provides `email` and `password`. The system verifies credentials against **Firebase Auth**. Upon success, it fetches user data from the `users` collection to determine their plan and permissions.
+-   **Data Stores:**
+    -   **`Firebase Auth`**: Stores and manages user credentials.
+    -   **`users` Collection**: Stores application-specific user data like plan, credits, etc.
+-   **Data Flows:**
+    -   `User Credentials` -> `Login/Signup UI` -> `Firebase Auth`
+    -   `User Profile Data` -> `users` Collection -> `Application UI`
+
+### Process 2: Resume Management
+
+-   **External Entity:** User
+-   **Processes:**
+    1.  **Create/Update Resume:** The user interacts with the **Resume Builder UI**. Changes to fields like `name`, `experience`, `skills`, etc., are collected.
+    2.  **Save Resume:** On saving, the system upserts the entire resume object into the `resumes` collection, using the user's UID as the document ID.
+    3.  **Load Resume:** When the user visits the builder, the system fetches the document from the `resumes` collection corresponding to their UID.
+-   **Data Store:**
+    -   **`resumes` Collection**: Stores the structured content of each user's resume.
+-   **Data Flows:**
+    -   `Resume Form Data` -> `Resume Builder UI` -> `resumes` Collection
+    -   `Resume Document` -> `resumes` Collection -> `Resume Builder UI` & `Live Preview`
+
+### Process 3: AI Feature Usage (e.g., Resume Analyzer)
+
+-   **External Entity:** User
+-   **Processes:**
+    1.  **Submit for Analysis:** The user uploads a resume file (`.pdf`, `.docx`) via the **Resume Analyzer UI**.
+    2.  **Credit Check (for 'free' plan):** The system checks if the user's `credits` in the `users` document is greater than 0.
+    3.  **Call AI Flow:** The system sends the resume file to the `analyzeResume` Genkit flow.
+    4.  **Decrement Credit:** If the user is on the 'free' plan, the system updates the `users` document to decrement the `credits` count.
+    5.  **Display Results:** The AI-generated `strengths`, `weaknesses`, and `suggestions` are returned and displayed on the UI.
+-   **Data Stores:**
+    -   **`users` Collection**: Read for credit check, written to for credit decrement.
+-   **Data Flows:**
+    -   `Resume File` -> `AI Feature UI` -> `Genkit AI Flow`
+    -   `Credits Count` -> `users` Collection -> `System Logic`
+    -   `AI Analysis JSON` -> `Genkit AI Flow` -> `AI Feature UI`
+
+### Process 4: Subscription Upgrade (User & Admin Interaction)
+
+-   **External Entities:** User, Admin
+-   **Processes:**
+    1.  **Request Upgrade:** The user selects a 'Pro' or 'Recruiter' plan from the **Pricing Page**. The system shows a **Payment Dialog**.
+    2.  **Fetch Payment Details:** The dialog fetches `upiId` and `qrCodeImageUrl` from the `settings` collection.
+    3.  **Confirm Payment:** The user clicks "I have paid." The system updates the user's document in the `users` collection to `plan: 'pending'` and sets the `requestedPlan`.
+    4.  **Upload Proof:** The user is redirected to the **Profile Page**, where they upload a payment proof image. This image is saved to **Firebase Storage**, and the URL is stored in the `paymentProofURL` field in their `users` document.
+    5.  **Admin Review:** The **Admin Panel** queries the `users` collection for all users with `plan: 'pending'`. The admin reviews the `paymentProofURL`.
+    6.  **Approve/Reject:** The admin approves or rejects the request. The system updates the user's document in the `users` collection to the `requestedPlan` (e.g., 'pro') or back to 'free'.
+-   **Data Stores:**
+    -   **`users` Collection**: Manages the user's state through the upgrade process (`free` -> `pending` -> `pro`).
+    -   **`settings` Collection**: Provides payment details to the user.
+    -   **`Firebase Storage`**: Stores the payment proof images.
+-   **Data Flows:**
+    -   `Payment Details` -> `settings` Collection -> `Payment Dialog`
+    -   `Upgrade Request` -> `Pricing Page` -> `users` Collection
+    -   `Payment Proof Image` -> `Profile Page` -> `Firebase Storage`
+    -   `Payment Proof URL` -> `Firebase Storage` -> `users` Collection
+    -   `Pending Requests` -> `users` Collection -> `Admin Panel`
+    -   `Approval/Rejection` -> `Admin Panel` -> `users` Collection
