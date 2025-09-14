@@ -244,7 +244,7 @@ export function ProfilePage() {
                                 <div className="space-y-1">
                                     <Label>Last Upgrade Date</Label>
                                     <p className="text-sm text-muted-foreground">
-                                        {new Date(userData.planUpdatedAt).toLocaleDateString()}
+                                        {new Date(userData.planUpdatedAt.seconds * 1000).toLocaleDateString()}
                                     </p>
                                 </div>
                             )}
