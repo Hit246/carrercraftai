@@ -26,6 +26,7 @@ import {
   ArrowLeft,
   History,
   FileX,
+  CheckCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -57,6 +58,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
   const getPageTitle = () => {
     if (isActive('/admin/dashboard')) return 'Admin Dashboard';
     if (isActive('/admin/users')) return 'User Management';
+    if (isActive('/admin/upgrades')) return 'Upgrade Requests';
     if (isActive('/admin/payments')) return 'Payment History';
     if (isActive('/admin/cancellations')) return 'Cancellation Requests';
     return 'Admin Panel';
@@ -91,6 +93,14 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 <Link href="/admin/users">
                   <Users />
                   <span>Users</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive('/admin/upgrades')}>
+                <Link href="/admin/upgrades">
+                  <CheckCircle />
+                  <span>Upgrades</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
