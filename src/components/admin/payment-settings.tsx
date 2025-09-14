@@ -9,11 +9,12 @@ import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import Image from 'next/image';
+import { Label } from '../ui/label';
 
 const formSchema = z.object({
   upiId: z.string().min(3, { message: 'Please enter a valid UPI ID.' }),
