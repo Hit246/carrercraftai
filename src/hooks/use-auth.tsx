@@ -16,7 +16,7 @@ interface UserProfile {
 interface UserData {
     plan: Plan;
     credits: number;
-    planUpdatedAt?: Date | null;
+    planUpdatedAt?: any;
     paymentProofURL?: string | null;
 }
 
@@ -141,7 +141,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const upgradeToPro = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
-    const newPlanData = { plan: 'pro', planUpdatedAt: new Date() };
+    const newPlanData = { plan: 'pro' as Plan, planUpdatedAt: new Date() };
     await updateDoc(userRef, newPlanData);
     setPlan('pro');
     setUserData(prev => prev ? {...prev, ...newPlanData} : newPlanData as UserData);
@@ -150,7 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const upgradeToRecruiter = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
-    const newPlanData = { plan: 'recruiter', planUpdatedAt: new Date() };
+    const newPlanData = { plan: 'recruiter' as Plan, planUpdatedAt: new Date() };
     await updateDoc(userRef, newPlanData);
     setPlan('recruiter');
     setUserData(prev => prev ? {...prev, ...newPlanData} : newPlanData as UserData);
@@ -177,7 +177,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user) throw new Error("Not authenticated");
     const userRef = doc(db, 'users', user.uid);
     await updateDoc(userRef, { paymentProofURL: url });
-    setUserData(prev => prev ? {...prev, paymentProofURL: url } : { paymentProofURL: url } as UserData);
+    setUserData(prev => prev ? {...prev, paymentProofURL: url } : { ...({} as UserData), paymentProofURL: url });
   }
 
   const value = {
