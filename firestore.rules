@@ -2,39 +2,46 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     function isAdmin() {
+      // Admins are identified by a specific list of emails.
       return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
 
     function isOwner(userId) {
+      // Checks if the requesting user is the owner of the document.
       return request.auth.uid == userId;
     }
 
-    function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-    }
-
     match /users/{userId} {
+      // A user can read/write their own document.
+      // An admin can read/write any user document.
+      // Any authenticated user can create a user document (on signup).
       allow read, write: if isOwner(userId) || isAdmin();
       allow create: if request.auth != null;
     }
 
     match /resumes/{userId} {
+      // A user can only read and write their own resume.
       allow read, write: if isOwner(userId);
     }
     
     match /teams/{teamId} {
-      allow read: if request.auth != null && getUserData().teamId == teamId;
+      // A user can read a team document if their own user profile contains the teamId.
+      allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+      // Only the team owner can update the team document itself (e.g., future fields).
       allow write: if request.auth != null && resource.data.owner == request.auth.uid;
       
       match /members/{memberId} {
-        allow read: if request.auth != null && getUserData().teamId == teamId;
+        // Any member of a team can read the list of members.
+        allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+        // Only the team owner can add/remove members.
         allow create, delete: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       }
     }
     
     match /settings/{docId} {
+      // Only admins can read or write to the global settings.
       allow read, write: if isAdmin();
     }
   }
