@@ -45,7 +45,7 @@ export default function CancellationPage() {
               </p>
               <ul className="list-disc pl-5 space-y-2">
                 <li>
-                  <strong>Full Refunds:</strong> A full refund can be requested within 48 hours of your initial subscription purchase, provided that you have not used any of the "Pro" or "Recruiter" specific AI features (e.g., Resume Analyzer, Job Matcher, Candidate Matcher).
+                  <strong>Full Refunds:</strong> A full refund can be requested on the same day as your initial subscription purchase, provided that you have not used any of the "Pro" or "Recruiter" specific AI features (e.g., Resume Analyzer, Job Matcher, Candidate Matcher).
                 </li>
                 <li>
                   <strong>Partial Refunds:</strong> We do not offer partial refunds for subscriptions canceled mid-cycle. You will continue to have access to the features until your subscription period ends.
