@@ -97,7 +97,7 @@ export function ProfilePage() {
         }
     }
 
-    const onPaymentSubmit = async (values: z.infer<typeof paymentFormSchema>>) => {
+    const onPaymentSubmit = async (values: z.infer<typeof paymentFormSchema>) => {
         if (!user) return;
         setIsUploadingProof(true);
         try {
