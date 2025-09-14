@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
-import { Crown, User, Handshake, Loader2, Upload, ExternalLink, ShieldCheck, Hourglass } from 'lucide-react';
+import { Crown, User, Handshake, Loader2, Upload, ExternalLink, ShieldCheck, Hourglass, Ban } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -30,7 +30,7 @@ const paymentFormSchema = z.object({
 })
 
 export function ProfilePage() {
-    const { user, plan, loading, userData, logout, updateUserProfile, updatePaymentProof } = useAuth();
+    const { user, plan, loading, userData, logout, updateUserProfile, updatePaymentProof, requestCancellation } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
@@ -97,7 +97,7 @@ export function ProfilePage() {
         }
     }
 
-    const onPaymentSubmit = async (values: z.infer<typeof paymentFormSchema>) => {
+    const onPaymentSubmit = async (values: z.infer<typeof paymentFormSchema>>) => {
         if (!user) return;
         setIsUploadingProof(true);
         try {
@@ -120,6 +120,23 @@ export function ProfilePage() {
         }
     }
 
+    const handleCancellation = async () => {
+        if(!user) return;
+        try {
+            await requestCancellation();
+            toast({
+                title: 'Cancellation Requested',
+                description: 'Your request has been submitted. An admin will process it shortly.',
+            });
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Failed to submit cancellation request.',
+                variant: 'destructive',
+            });
+        }
+    }
+
 
     const getPlanBadge = () => {
         switch (plan) {
@@ -129,6 +146,8 @@ export function ProfilePage() {
                 return <Badge className="bg-blue-400/20 text-blue-500 border-blue-400/30"><Handshake className="mr-2 h-4 w-4"/> Recruiter</Badge>;
             case 'pending':
                 return <Badge className="bg-yellow-400/20 text-yellow-500 border-yellow-400/30"><Hourglass className="mr-2 h-4 w-4"/> Pending Approval</Badge>;
+             case 'cancellation_requested':
+                return <Badge variant="destructive"><Ban className="mr-2 h-4 w-4"/> Cancellation Requested</Badge>;
             default:
                 return <Badge variant="secondary"><User className="mr-2 h-4 w-4"/> Free</Badge>;
         }
@@ -243,7 +262,7 @@ export function ProfilePage() {
                             <Label>Current Plan</Label>
                             <div className="mt-1">{getPlanBadge()}</div>
                         </div>
-                        {plan !== 'recruiter' && plan !== 'pending' && (
+                         {plan !== 'recruiter' && plan !== 'pending' && plan !== 'cancellation_requested' && (
                             <Button variant="outline" size="sm" onClick={() => router.push('/pricing')}>
                                 Upgrade Plan
                             </Button>
@@ -305,6 +324,14 @@ export function ProfilePage() {
                     )}
 
                 </CardContent>
+                {(plan === 'pro' || plan === 'recruiter') && (
+                     <CardFooter className="flex justify-end border-t pt-4">
+                        <Button variant="destructive" onClick={handleCancellation} disabled={plan === 'cancellation_requested'}>
+                            <Ban className="mr-2 h-4 w-4" />
+                            {plan === 'cancellation_requested' ? 'Cancellation Requested' : 'Request Cancellation'}
+                        </Button>
+                    </CardFooter>
+                )}
             </Card>
         </div>
     );
