@@ -26,7 +26,7 @@ import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Ban } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 
 type Plan = 'free' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
@@ -47,12 +47,22 @@ export function CancellationRequests() {
 
   const fetchUsers = async () => {
     setIsLoading(true);
-    const usersCollectionRef = collection(db, 'users');
-    const q = query(usersCollectionRef, where('plan', '==', 'cancellation_requested'), orderBy('planUpdatedAt', 'desc'));
-    const usersSnapshot = await getDocs(q);
-    const usersList = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as UserData));
-    setUsers(usersList);
-    setIsLoading(false);
+    try {
+      const usersCollectionRef = collection(db, 'users');
+      const q = query(usersCollectionRef, where('plan', '==', 'cancellation_requested'), orderBy('planUpdatedAt', 'desc'));
+      const usersSnapshot = await getDocs(q);
+      const usersList = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as UserData));
+      setUsers(usersList);
+    } catch(e) {
+      console.error(e);
+       toast({
+        title: 'Error',
+        description: 'Failed to fetch cancellation requests. You may need to create a Firestore index.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -137,42 +147,42 @@ export function CancellationRequests() {
                     </TableCell>
                     <TableCell className="text-right">
                       <AlertDialog>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                               <DropdownMenuSeparator />
-                                <AlertDialogTrigger asChild>
-                                  <DropdownMenuItem>
-                                    <Ban className="mr-2 h-4 w-4 text-orange-500"/>
-                                    Process Cancellation
-                                  </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                          <AlertDialogContent>
-                              <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                  This will revert the user's plan to "Free". This action cannot be undone, but you can manually re-assign a plan later.
-                              </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleCancellation(user.id)} className="bg-destructive hover:bg-destructive/90">Confirm Cancellation</AlertDialogAction>
-                              </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem>
+                                  <Ban className="mr-2 h-4 w-4 text-orange-500"/>
+                                  Process Cancellation
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will revert the user's plan to "Free". This action cannot be undone, but you can manually re-assign a plan later.
+                            </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleCancellation(user.id)} className="bg-destructive hover:bg-destructive/90">Confirm Cancellation</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </TableCell>
                   </TableRow>
                 ))}
           </TableBody>
         </Table>
-      </Content>
+      </CardContent>
     </Card>
   );
 }
