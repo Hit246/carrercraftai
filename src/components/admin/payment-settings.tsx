@@ -100,6 +100,7 @@ export function PaymentSettings() {
         description: 'Payment settings have been updated successfully.',
       });
       setImagePreview(null); // Clear preview after save
+      form.setValue('qrCodeImageFile', undefined); // Clear file input
       form.reset(form.getValues()); // Reset to show current values
     } catch (error) {
       toast({
