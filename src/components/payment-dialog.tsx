@@ -47,7 +47,7 @@ export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialo
                             width={200}
                             height={200}
                             className="rounded-lg border"
-                            data-ai-hint="payment qr-code"
+                            data-ai-hint="payment qrcode"
                         />
                     </div>
                      <div className="space-y-1.5">
