@@ -5,36 +5,42 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, uploadFile } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Upload } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import Image from 'next/image';
 import { Label } from '../ui/label';
 
 const formSchema = z.object({
   upiId: z.string().min(3, { message: 'Please enter a valid UPI ID.' }),
-  qrCodeImageUrl: z.string().url({ message: 'Please enter a valid URL for the QR code image.' }),
+  qrCodeImageFile: z.instanceof(File).optional(),
 });
+
+type FormValues = z.infer<typeof formSchema>;
+
+interface PaymentSettingsData {
+    upiId: string;
+    qrCodeImageUrl: string;
+}
 
 export function PaymentSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [currentQrCodeUrl, setCurrentQrCodeUrl] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       upiId: '',
-      qrCodeImageUrl: '',
     },
   });
-
-  const qrCodeUrl = form.watch('qrCodeImageUrl');
 
   useEffect(() => {
     async function fetchSettings() {
@@ -43,7 +49,9 @@ export function PaymentSettings() {
         const settingsRef = doc(db, 'settings', 'payment');
         const settingsSnap = await getDoc(settingsRef);
         if (settingsSnap.exists()) {
-          form.reset(settingsSnap.data() as z.infer<typeof formSchema>);
+          const data = settingsSnap.data() as PaymentSettingsData;
+          form.reset({ upiId: data.upiId });
+          setCurrentQrCodeUrl(data.qrCodeImageUrl);
         }
       } catch (error) {
         toast({
@@ -57,16 +65,42 @@ export function PaymentSettings() {
     }
     fetchSettings();
   }, [form, toast]);
+  
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+        form.setValue('qrCodeImageFile', file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+    }
+  };
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     setIsSaving(true);
     try {
+      let qrCodeImageUrl = currentQrCodeUrl;
+
+      if (values.qrCodeImageFile) {
+        // Upload new QR code image and get its URL
+        qrCodeImageUrl = await uploadFile(values.qrCodeImageFile, 'settings/qr-code.png');
+        setCurrentQrCodeUrl(qrCodeImageUrl); // Update state to show new image immediately
+      }
+
       const settingsRef = doc(db, 'settings', 'payment');
-      await setDoc(settingsRef, values, { merge: true });
+      await setDoc(settingsRef, { 
+        upiId: values.upiId,
+        qrCodeImageUrl
+       }, { merge: true });
+
       toast({
         title: 'Settings Saved',
         description: 'Payment settings have been updated successfully.',
       });
+      setImagePreview(null); // Clear preview after save
+      form.reset(form.getValues()); // Reset to show current values
     } catch (error) {
       toast({
         title: 'Error Saving Settings',
@@ -131,35 +165,46 @@ export function PaymentSettings() {
             />
             <FormField
               control={form.control}
-              name="qrCodeImageUrl"
-              render={({ field }) => (
+              name="qrCodeImageFile"
+              render={() => (
                 <FormItem>
-                  <FormLabel>QR Code Image URL</FormLabel>
+                  <FormLabel>QR Code Image</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/qr-code.png" {...field} />
+                    <div className="relative">
+                        <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input
+                            type="file"
+                            className="pl-10"
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={handleFileChange}
+                        />
+                    </div>
                   </FormControl>
                    <FormDescription>
-                    The public URL of the QR code image.
+                    Upload a new QR code image to replace the current one.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {qrCodeUrl && (
-                <div className='space-y-2'>
-                    <Label>QR Code Preview</Label>
-                    <div className='p-4 border rounded-md bg-muted flex items-center justify-center'>
-                         <Image
-                            src={qrCodeUrl}
-                            alt="QR Code Preview"
-                            width={150}
-                            height={150}
-                            className="rounded-lg"
-                            onError={(e) => e.currentTarget.style.display = 'none'}
-                        />
-                    </div>
+            
+            <div className='space-y-2'>
+                <Label>QR Code Preview</Label>
+                <div className='p-4 border rounded-md bg-muted flex items-center justify-center'>
+                     <Image
+                        src={imagePreview || currentQrCodeUrl || 'https://placehold.co/200x200.png?text=No+QR+Code'}
+                        alt="QR Code Preview"
+                        width={150}
+                        height={150}
+                        className="rounded-lg"
+                        onError={(e) => {
+                            e.currentTarget.src = 'https://placehold.co/200x200.png?text=Error';
+                            e.currentTarget.alt = 'Error loading image';
+                        }}
+                    />
                 </div>
-            )}
+            </div>
+            
             <div className="flex justify-end">
               <Button type="submit" disabled={isSaving}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
