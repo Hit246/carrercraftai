@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect } from 'react';
@@ -77,6 +78,7 @@ function AppLayoutContent({
     if (isActive('/support')) return 'Support';
     if (isActive('/pricing')) return 'Upgrade to Pro';
     if (isActive('/profile')) return 'Profile Settings';
+    if (isActive('/order-status')) return 'Order Status';
     return 'CareerCraft AI';
   }
 
@@ -91,6 +93,9 @@ function AppLayoutContent({
     }
     if (plan === 'pro') {
         return <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>
+    }
+    if (plan === 'pending') {
+      return <Badge variant="secondary" className="ml-auto bg-yellow-400/20 text-yellow-500 border-yellow-400/30">Pending</Badge>
     }
     return (
         <Button variant="ghost" size="sm" className="ml-auto" asChild>
@@ -190,7 +195,7 @@ function AppLayoutContent({
         <SidebarFooter className="p-4 mt-auto border-t">
           <div className="flex items-center gap-3">
              <Avatar className="h-9 w-9">
-              <AvatarImage src={user.photoURL || "https://placehold.co/100x100.png"} alt={user.displayName || user.email || "user"} data-ai-hint="profile picture" />
+              <AvatarImage src={user.photoURL || `https://placehold.co/100x100.png?text=${user.email?.[0].toUpperCase()}`} alt={user.displayName || user.email || "user"} data-ai-hint="profile picture" />
               <AvatarFallback>{user.displayName?.[0] || user.email?.[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col truncate">

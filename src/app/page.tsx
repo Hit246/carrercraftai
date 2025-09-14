@@ -172,6 +172,9 @@ function HomePageContent() {
       <footer className="py-8 bg-card border-t">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground text-sm">
           <p>&copy; {new Date().getFullYear()} CareerCraft AI. All rights reserved.</p>
+          <p className="mt-1">
+            <Link href="/cancellation" className="underline hover:text-foreground">Cancellation & Refund Policy</Link>
+          </p>
         </div>
       </footer>
     </div>

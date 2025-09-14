@@ -8,7 +8,7 @@ import { Check, Crown, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export function PricingPage() {
-  const { user, plan, upgradeToPro, upgradeToRecruiter } = useAuth();
+  const { user, plan, requestProUpgrade, requestRecruiterUpgrade } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -17,12 +17,16 @@ export function PricingPage() {
         router.push('/login');
         return;
     }
-    await upgradeToPro();
-    toast({
-        title: "Upgrade to Pro Successful!",
-        description: "You now have access to all Pro features.",
-    });
-    router.push('/dashboard');
+    try {
+      await requestProUpgrade();
+      toast({
+          title: "Upgrade Request Submitted!",
+          description: "Your request for the Pro plan is pending. Please upload your payment proof on your profile page.",
+      });
+      router.push('/order-status');
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to submit upgrade request.", variant: "destructive" });
+    }
   }
 
   const handleUpgradeRecruiter = async () => {
@@ -30,12 +34,16 @@ export function PricingPage() {
         router.push('/login');
         return;
     }
-    await upgradeToRecruiter();
-    toast({
-        title: "Upgrade to Recruiter Successful!",
-        description: "You now have access to all Recruiter features.",
-    });
-    router.push('/candidate-matcher');
+     try {
+      await requestRecruiterUpgrade();
+      toast({
+          title: "Upgrade Request Submitted!",
+          description: "Your request for the Recruiter plan is pending. Please upload your payment proof on your profile page.",
+      });
+      router.push('/order-status');
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to submit upgrade request.", variant: "destructive" });
+    }
   }
 
   return (
@@ -98,8 +106,8 @@ export function PricingPage() {
                     Your Current Plan
                 </Button>
             ) : (
-                <Button className="w-full" onClick={handleUpgradePro} disabled={plan === 'recruiter'}>
-                    {plan === 'recruiter' ? 'Included in Recruiter' : 'Upgrade to Pro'}
+                <Button className="w-full" onClick={handleUpgradePro} disabled={plan === 'recruiter' || plan === 'pending'}>
+                    {plan === 'recruiter' ? 'Included in Recruiter' : (plan === 'pending' ? 'Request Pending' : 'Upgrade to Pro')}
                 </Button>
             )}
           </CardFooter>
@@ -125,8 +133,8 @@ export function PricingPage() {
                     Your Current Plan
                 </Button>
             ) : (
-                <Button className="w-full" variant="secondary" onClick={handleUpgradeRecruiter}>
-                    Upgrade to Recruiter
+                <Button className="w-full" variant="secondary" onClick={handleUpgradeRecruiter} disabled={plan === 'pending'}>
+                     {plan === 'pending' ? 'Request Pending' : 'Upgrade to Recruiter'}
                 </Button>
             )}
           </CardFooter>
