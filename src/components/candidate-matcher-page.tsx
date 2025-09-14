@@ -152,7 +152,7 @@ export function CandidateMatcherPage() {
                         </div>
                       </FormControl>
                       <FormDescription>
-                        Upload a single .txt file with resumes separated by ~~~ on a new line.
+                        Upload a single .txt file with resumes separated by "~~~" on a new line.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
