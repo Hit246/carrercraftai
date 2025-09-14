@@ -1,5 +1,6 @@
 'use server';
 
+import { doc, getDoc } from 'firebase/firestore';
 import {
   analyzeResume,
   AnalyzeResumeInput,
@@ -16,10 +17,11 @@ import {
   CandidateMatcherOutput,
 } from '@/ai/flows/candidate-matcher';
 import {
-    generateCoverLetter,
-    GenerateCoverLetterInput,
-    GenerateCoverLetterOutput,
+  generateCoverLetter,
+  GenerateCoverLetterInput,
+  GenerateCoverLetterOutput,
 } from '@/ai/flows/cover-letter-generator';
+import { db } from './firebase';
 
 export async function analyzeResumeAction(
   input: AnalyzeResumeInput
@@ -47,4 +49,13 @@ export async function generateCoverLetterAction(
 ): Promise<GenerateCoverLetterOutput> {
   // In a real app, you would check the user's subscription tier here.
   return await generateCoverLetter(input);
+}
+
+export async function getPaymentSettings() {
+    const settingsRef = doc(db, 'settings', 'payment');
+    const settingsSnap = await getDoc(settingsRef);
+    if (settingsSnap.exists()) {
+        return settingsSnap.data();
+    }
+    return { upiId: 'your-upi-id@bank', qrCodeImageUrl: 'https://placehold.co/200x200.png' };
 }
