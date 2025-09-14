@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
-import { Users2, UserPlus, Trash2, Crown } from 'lucide-react';
+import { Users2, UserPlus, Trash2, Crown, Loader2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Badge } from './ui/badge';
@@ -65,9 +65,8 @@ export function TeamPage() {
   useEffect(() => {
     if (user) {
         if (plan === 'recruiter') {
+            setIsLoading(true);
             getOrCreateTeam(user.uid);
-        } else if (plan !== 'free' && plan !== 'pending' && plan !== 'cancellation_requested') {
-            // Pro users shouldn't be here
         }
     }
   }, [user, plan, getOrCreateTeam]);
@@ -80,6 +79,7 @@ export function TeamPage() {
     const membersRef = collection(db, `teams/${teamId}/members`);
 
     const unsubscribe = onSnapshot(query(membersRef), async (snapshot) => {
+        setIsLoading(true); // Set loading true at the start of snapshot handling
         const members = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TeamMember));
         
         const teamSnap = await getDoc(teamRef);
@@ -104,13 +104,13 @@ export function TeamPage() {
             setTeamMembers(members);
         }
 
-        setIsLoading(false);
+        setIsLoading(false); // Set loading false after all data is processed
     });
 
     return () => unsubscribe();
 }, [teamId]);
 
-  if (plan !== 'recruiter') {
+  if (plan !== 'recruiter' && !isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
          <Alert variant="pro" className="max-w-lg">
@@ -126,7 +126,7 @@ export function TeamPage() {
   }
 
   async function onInvite(values: z.infer<typeof formSchema>) {
-    if (!teamId || !user || !teamOwner || user.uid !== teamOwner.uid) {
+    if (isLoading || !teamId || !user || !teamOwner || user.uid !== teamOwner.uid) {
         toast({
             title: "Permission Denied",
             description: "Only the team owner can invite new members.",
@@ -205,7 +205,12 @@ export function TeamPage() {
                             <TableBody>
                                 {isLoading ? (
                                     <TableRow>
-                                        <TableCell colSpan={3} className="text-center h-24">Loading team members...</TableCell>
+                                        <TableCell colSpan={3} className="text-center h-24">
+                                            <div className="flex items-center justify-center">
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Loading team members...
+                                            </div>
+                                        </TableCell>
                                     </TableRow>
                                 ) : teamMembers.map((member) => (
                                 <TableRow key={member.id}>
@@ -227,7 +232,7 @@ export function TeamPage() {
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        {member.email !== user?.email && (
+                                        {member.role !== 'Admin' && (
                                             <Button variant="ghost" size="icon" onClick={() => onRemove(member.id)}>
                                                 <Trash2 className="h-4 w-4 text-destructive" />
                                             </Button>
@@ -256,13 +261,13 @@ export function TeamPage() {
                                     <FormItem>
                                     <FormLabel>Email Address</FormLabel>
                                     <FormControl>
-                                        <Input type="email" placeholder="new.member@example.com" {...field} />
+                                        <Input type="email" placeholder="new.member@example.com" {...field} disabled={isLoading} />
                                     </FormControl>
                                     <FormMessage />
                                     </FormItem>
                                 )}
                                 />
-                                <Button type="submit" className="w-full">
+                                <Button type="submit" className="w-full" disabled={isLoading}>
                                     Send Invitation
                                 </Button>
                             </form>
