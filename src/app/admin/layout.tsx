@@ -1,36 +1,35 @@
-
 'use client';
 
-import { useEffect, ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  SidebarProvider,
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-  SidebarTrigger,
-  SidebarInset,
-} from '@/components/ui/sidebar';
-import {
+  FileX,
+  History,
   LayoutGrid,
-  Users,
-  Settings,
-  LogOut,
   Loader2,
+  LogOut,
+  Users,
   Shield,
   ArrowLeft,
-  History,
-  FileX,
   CheckCircle,
+  Settings,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import Image from 'next/image';
 
@@ -61,6 +60,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
     if (isActive('/admin/upgrades')) return 'Upgrade Requests';
     if (isActive('/admin/payments')) return 'Payment History';
     if (isActive('/admin/cancellations')) return 'Cancellation Requests';
+    if (isActive('/admin/settings')) return 'Payment Settings';
     return 'Admin Panel';
   };
 
@@ -74,14 +74,25 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
       <Sidebar>
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-2">
-            <Image src="/logo.jpg" alt="CareerCraft AI" width={28} height={28} className="rounded-full object-cover" />
-            <span className="text-lg font-semibold font-headline">Admin Panel</span>
+            <Image
+              src="/logo.jpg"
+              alt="CareerCraft AI"
+              width={28}
+              height={28}
+              className="rounded-full object-cover"
+            />
+            <span className="text-lg font-semibold font-headline">
+              Admin Panel
+            </span>
           </div>
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/admin/dashboard')}>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/admin/dashboard')}
+              >
                 <Link href="/admin/dashboard">
                   <LayoutGrid />
                   <span>Dashboard</span>
@@ -97,7 +108,10 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/admin/upgrades')}>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/admin/upgrades')}
+              >
                 <Link href="/admin/upgrades">
                   <CheckCircle />
                   <span>Upgrades</span>
@@ -105,22 +119,39 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/admin/payments')}>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/admin/payments')}
+              >
                 <Link href="/admin/payments">
                   <History />
                   <span>Payments</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/admin/cancellations')}>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/admin/cancellations')}
+              >
                 <Link href="/admin/cancellations">
                   <FileX />
                   <span>Cancellations</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-             <SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/admin/settings')}
+              >
+                <Link href="/admin/settings">
+                  <Settings />
+                  <span>Settings</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
               <SidebarMenuButton asChild>
                 <Link href="/dashboard">
                   <ArrowLeft />
@@ -134,10 +165,14 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
               <AvatarImage src="https://placehold.co/100x100.png" alt="@user" />
-              <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
+              <AvatarFallback>
+                {user.email?.[0].toUpperCase()}
+              </AvatarFallback>
             </Avatar>
             <div className="flex flex-col truncate">
-              <span className="text-sm font-medium truncate">{user.email}</span>
+              <span className="text-sm font-medium truncate">
+                {user.email}
+              </span>
               <button
                 onClick={handleLogout}
                 className="text-xs text-muted-foreground hover:text-foreground text-left flex items-center gap-1"
@@ -154,12 +189,11 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sm:px-6">
           <SidebarTrigger className="md:hidden" />
           <div className="flex-1">
-            <h2 className="text-lg font-semibold font-headline">{getPageTitle()}</h2>
+            <h2 className="text-lg font-semibold font-headline">
+              {getPageTitle()}
+            </h2>
           </div>
           <ThemeSwitcher />
-          <Button variant="outline" size="icon">
-            <Settings className="h-5 w-5" />
-          </Button>
         </header>
         <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto bg-muted/40">
           {children}
