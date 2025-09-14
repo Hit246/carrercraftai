@@ -35,10 +35,10 @@ export function PricingPage() {
         await requestRecruiterUpgrade();
       }
       toast({
-          title: "Upgrade Request Submitted!",
-          description: "Your request is pending. Please upload your payment proof on your profile page.",
+          title: "Request Submitted!",
+          description: "Your upgrade is pending. Please upload your payment proof below to get approved.",
       });
-      router.push('/order-status');
+      router.push('/profile');
     } catch (error) {
       toast({ title: "Error", description: "Failed to submit upgrade request.", variant: "destructive" });
     } finally {
