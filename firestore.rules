@@ -4,45 +4,57 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function isAdmin() {
+      // Admins are identified by their email.
       return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
 
-    // A user is a member of a team if their user document has a matching teamId.
+    function isOwner(userId) {
+      // Checks if the requesting user is the owner of a document.
+      return request.auth.uid == userId;
+    }
+    
     function isTeamMember(teamId) {
+      // Checks if the user's document contains the specified teamId.
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
     }
 
-    // A user is the owner of a team if they are the owner listed on the team document.
     function isTeamOwner(teamId) {
+      // Checks if the user is the owner of the specified team.
       return get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
     }
 
-    // Users can read/write their own document. Admins have full access.
+    match /{document=**} {
+      // Admins have universal read/write access to all documents.
+      allow read, write: if isAdmin();
+    }
+
     match /users/{userId} {
-      allow read, write: if request.auth.uid == userId || isAdmin();
+      // A user can read/write their own document. Non-admins cannot list all users.
+      allow read, write: if isOwner(userId);
       allow create: if request.auth != null;
     }
 
-    // Resumes are private to the user.
     match /resumes/{userId} {
-      allow read, write: if request.auth.uid == userId;
+      // A user can read/write their own resume.
+      allow read, write: if isOwner(userId);
     }
     
-    // Team documents can be read by members and written by the owner.
     match /teams/{teamId} {
+      // Team data can be read by team members and written by the owner.
       allow read: if isTeamMember(teamId);
       allow write: if isTeamOwner(teamId);
 
-      // Team members can be read by other team members. Only the owner can manage them.
       match /members/{memberId} {
+        // Members can be read by anyone on the team.
+        // Members can only be created or deleted by the team owner.
         allow read: if isTeamMember(teamId);
         allow create, delete: if isTeamOwner(teamId);
       }
     }
     
-    // Settings can only be managed by admins.
     match /settings/{docId} {
-      allow read, write: if isAdmin();
+      // Settings are read-only for authenticated users.
+      allow read: if request.auth != null;
     }
   }
 }
