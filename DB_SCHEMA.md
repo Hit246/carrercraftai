@@ -112,3 +112,28 @@ This collection is used for global application settings that can be configured b
 | ---------------- | -------- | -------------------------------------------------- |
 | `upiId`          | `string` | The UPI ID to be displayed for payments.           |
 | `qrCodeImageUrl` | `string` | The public URL of the QR code image for payments.  |
+
+---
+
+## Entity Relationships (ER Diagram)
+
+This section describes the relationships between the main collections in a text-based format.
+
+1.  **Users ⟷ Resumes (One-to-One)**
+    *   A `user` has exactly one `resume`.
+    *   **Relationship:** The `users` collection and the `resumes` collection are linked by their document ID. Both use the `user.uid` from Firebase Authentication as the document key.
+
+2.  **Users ⟷ Teams (One-to-Many)**
+    *   A `user` with a `recruiter` plan can be the `owner` of one `team`.
+    *   A `team` can have multiple `members` (who are also `users`).
+    *   **Relationship:**
+        *   The `teams` document contains an `owner` field which stores the `user.uid` of the creator.
+        *   The `users` document contains a `teamId` field, which links a user to the `team` document they are a member of.
+
+3.  **Teams ⟷ Members (One-to-Many, as a Subcollection)**
+    *   A `team` document contains a `members` subcollection.
+    *   Each document in the `members` subcollection represents an invited user.
+    *   **Relationship:** This is a direct parent-child relationship in Firestore, where `members` documents are nested under a specific `team`.
+
+4.  **Settings (Singleton)**
+    *   The `settings` collection is not directly related to any other collection. It contains singleton documents (like `payment`) for storing global application configuration that is managed by an admin.
