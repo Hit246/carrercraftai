@@ -23,13 +23,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Crown, User, Shield, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
+import { MoreHorizontal, Trash2, Crown, User, Shield, ExternalLink, CheckCircle, XCircle, Ban } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import Link from 'next/link';
 
-type Plan = 'free' | 'pro' | 'recruiter' | 'pending';
+type Plan = 'free' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
 interface UserData {
   id: string;
@@ -71,9 +71,12 @@ export function UserManagementPage() {
         planUpdatedAt: newPlan !== 'free' ? new Date() : null,
       };
 
-      if(requestedPlan) {
+      if (newPlan === 'free') {
+        updateData.requestedPlan = null;
+      } else if (requestedPlan) {
         updateData.requestedPlan = requestedPlan;
       }
+
 
       await updateDoc(userRef, updateData);
       toast({
@@ -115,11 +118,24 @@ export function UserManagementPage() {
       case 'recruiter':
         return 'default';
       case 'pending':
+      case 'cancellation_requested':
           return 'destructive';
       default:
         return 'outline';
     }
   };
+  
+  const getPlanDisplayName = (user: UserData) => {
+    switch (user.plan) {
+      case 'pending':
+        return `Pending (${user.requestedPlan})`;
+      case 'cancellation_requested':
+        return `Cancellation Requested`;
+      default:
+        return user.plan;
+    }
+  }
+
 
   return (
     <Card>
@@ -183,7 +199,7 @@ export function UserManagementPage() {
                         <Badge>Admin</Badge>
                        ) : (
                         <Badge variant={getPlanBadgeVariant(user.plan)}>
-                          {user.plan === 'pending' ? `Pending (${user.requestedPlan})` : user.plan}
+                          {getPlanDisplayName(user)}
                         </Badge>
                        )}
                     </TableCell>
@@ -214,6 +230,7 @@ export function UserManagementPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              
                               {user.plan === 'pending' && user.requestedPlan && (
                                 <>
                                   <DropdownMenuSeparator />
@@ -227,16 +244,27 @@ export function UserManagementPage() {
                                   </DropdownMenuItem>
                                 </>
                               )}
+
+                              {user.plan === 'cancellation_requested' && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')}>
+                                    <Ban className="mr-2 h-4 w-4 text-orange-500"/>
+                                    Process Cancellation
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')}>
                                 <User className="mr-2 h-4 w-4" />
                                 Set to Free
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pending', 'pro')}>
+                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pro')}>
                                 <Crown className="mr-2 h-4 w-4" />
                                 Set to Pro
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pending', 'recruiter')}>
+                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'recruiter')}>
                                 <User className="mr-2 h-4 w-4" />
                                 Set to Recruiter
                               </DropdownMenuItem>

@@ -6,7 +6,7 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 
-type Plan = 'free' | 'pro' | 'recruiter' | 'pending';
+type Plan = 'free' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
 interface UserProfile {
     displayName?: string | null;
@@ -31,6 +31,7 @@ interface AuthContextType {
   useCredit: () => Promise<void>;
   requestProUpgrade: () => Promise<void>;
   requestRecruiterUpgrade: () => Promise<void>;
+  requestCancellation: () => Promise<void>;
   logout: () => Promise<void>;
   login: (email:string, password:string) => Promise<any>;
   signup: (email:string, password:string) => Promise<any>;
@@ -157,6 +158,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUserData(prev => prev ? {...prev, ...newPlanData} : newPlanData as UserData);
   }
 
+  const requestCancellation = async () => {
+    if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
+    const userRef = doc(db, 'users', user.uid);
+    const newPlanData = { plan: 'cancellation_requested' as Plan };
+    await updateDoc(userRef, newPlanData);
+    setPlan('cancellation_requested');
+    setUserData(prev => prev ? {...prev, ...newPlanData} : newPlanData as UserData);
+  }
+
   const useCredit = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     if (plan === 'free' && credits > 0) {
@@ -191,6 +201,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     useCredit,
     requestProUpgrade,
     requestRecruiterUpgrade,
+    requestCancellation,
     logout,
     login,
     signup,
