@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -62,45 +63,59 @@ export function SupportRequestsPage() {
         <CardDescription>Review and manage all user-submitted support requests.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className='w-[250px]'>User</TableHead>
-              <TableHead>Subject</TableHead>
-              <TableHead className="w-[120px]">Category</TableHead>
-              <TableHead className="w-[150px] text-right">Submitted</TableHead>
-            </TableRow>
-          </TableHeader>
-        </Table>
-        {isLoading ? (
-          <div className="space-y-2 p-4">
-            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
-          </div>
-        ) : requests.length === 0 ? (
-          <div className="text-center p-10 text-muted-foreground">
-            No support requests found.
-          </div>
-        ) : (
-            <Accordion type="single" collapsible className="w-full">
-            {requests.map((request) => (
-                <AccordionItem value={request.id} key={request.id} className='border-b'>
-                    <AccordionTrigger className='p-4 hover:no-underline hover:bg-muted/50'>
-                        <div className='grid grid-cols-4 w-full text-sm text-left items-center'>
-                            <div className='col-span-1 font-medium truncate pr-4'>{request.userEmail}</div>
-                            <div className='col-span-1 text-muted-foreground truncate pr-4'>{request.subject}</div>
-                            <div className='col-span-1 text-muted-foreground'> <Badge variant="secondary">{request.category}</Badge></div>
-                            <div className='col-span-1 text-muted-foreground text-right pr-4'>
-                                {formatDistanceToNow(new Date(request.createdAt.seconds * 1000), { addSuffix: true })}
-                            </div>
-                        </div>
-                    </AccordionTrigger>
-                    <AccordionContent className='p-4 bg-muted/20'>
-                        <p className='text-muted-foreground'>{request.message}</p>
-                    </AccordionContent>
-                </AccordionItem>
-            ))}
-          </Accordion>
-        )}
+         <div className="border rounded-md">
+            <Table>
+            <TableHeader>
+                <TableRow>
+                <TableHead className='w-[250px]'>User</TableHead>
+                <TableHead>Subject</TableHead>
+                <TableHead className="w-[120px]">Category</TableHead>
+                <TableHead className="w-[150px] text-right">Submitted</TableHead>
+                </TableRow>
+            </TableHeader>
+             <TableBody>
+                {isLoading ? (
+                    [...Array(5)].map((_, i) => (
+                        <TableRow key={i}>
+                            <TableCell colSpan={4}><Skeleton className="h-8 w-full" /></TableCell>
+                        </TableRow>
+                    ))
+                ) : requests.length === 0 ? (
+                <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                    No support requests found.
+                    </TableCell>
+                </TableRow>
+                ) : (
+                    <Accordion type="single" collapsible className="w-full">
+                        {requests.map((request) => (
+                            <AccordionItem value={request.id} key={request.id}>
+                                <TableRow className="w-full cursor-pointer hover:bg-muted/50">
+                                    <AccordionTrigger asChild>
+                                        <>
+                                            <TableCell className='font-medium truncate pr-4'>{request.userEmail}</TableCell>
+                                            <TableCell className='text-muted-foreground truncate pr-4'>{request.subject}</TableCell>
+                                            <TableCell className='text-muted-foreground'> <Badge variant="secondary">{request.category}</Badge></TableCell>
+                                            <TableCell className='text-muted-foreground text-right pr-4'>
+                                                {formatDistanceToNow(new Date(request.createdAt.seconds * 1000), { addSuffix: true })}
+                                            </TableCell>
+                                        </>
+                                    </AccordionTrigger>
+                                </TableRow>
+                                <AccordionContent asChild>
+                                   <tr className='bg-muted/40'>
+                                        <td colSpan={4} className='p-4'>
+                                             <p className='text-muted-foreground'>{request.message}</p>
+                                        </td>
+                                   </tr>
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                )}
+            </TableBody>
+            </Table>
+         </div>
       </CardContent>
     </Card>
   );
