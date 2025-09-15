@@ -97,14 +97,17 @@ export function PaymentSettings() {
 
       // Update state immediately to reflect changes
       setCurrentQrCodeUrl(qrCodeImageUrl);
-      form.setValue('upiId', values.upiId);
+      form.reset({
+        upiId: values.upiId,
+        qrCodeImageFile: undefined,
+      });
 
       toast({
         title: 'Settings Saved',
         description: 'Payment settings have been updated successfully.',
       });
       setImagePreview(null); // Clear preview after save
-      form.setValue('qrCodeImageFile', undefined); // Clear file input
+
     } catch (error) {
       console.error(error);
       toast({
@@ -171,7 +174,7 @@ export function PaymentSettings() {
             <FormField
               control={form.control}
               name="qrCodeImageFile"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>QR Code Image</FormLabel>
                   <FormControl>
