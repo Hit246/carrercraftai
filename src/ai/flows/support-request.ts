@@ -1,26 +1,18 @@
 'use server';
 
 /**
- * @fileOverview A flow for submitting a support request.
+ * @fileOverview A flow for submitting a user's support request to Firestore.
  *
  * - submitSupportRequestAction - Saves a user's support request to Firestore.
- * - SupportRequestInput - The input type for the submitSupportRequest function.
  */
 
 import { ai } from '@/ai/genkit';
 import { db } from '@/lib/firebase';
 import { addDoc, collection } from 'firebase/firestore';
 import { z } from 'genkit';
+import type { SupportRequestInput } from '@/lib/actions';
+import { SupportRequestInputSchema } from '@/lib/actions';
 
-export const SupportRequestInputSchema = z.object({
-  subject: z.string().min(5),
-  message: z.string().min(20),
-  category: z.enum(['billing', 'technical', 'feedback', 'other']),
-  userEmail: z.string().email(),
-  userId: z.string(),
-});
-
-export type SupportRequestInput = z.infer<typeof SupportRequestInputSchema>;
 
 const submitSupportRequestFlow = ai.defineFlow(
   {
