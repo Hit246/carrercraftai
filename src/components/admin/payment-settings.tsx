@@ -91,7 +91,7 @@ export function PaymentSettings() {
       const settingsRef = doc(db, 'settings', 'payment');
       const newSettings = { 
         upiId: values.upiId,
-        qrCodeImageUrl
+        qrCodeImageUrl: qrCodeImageUrl || ''
       };
       await setDoc(settingsRef, newSettings, { merge: true });
 
