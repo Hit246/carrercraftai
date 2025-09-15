@@ -7,6 +7,7 @@ import {
   FileX,
   History,
   LayoutGrid,
+  LifeBuoy,
   Loader2,
   LogOut,
   Users,
@@ -61,6 +62,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
     if (isActive('/admin/payments')) return 'Payment History';
     if (isActive('/admin/cancellations')) return 'Cancellation Requests';
     if (isActive('/admin/settings')) return 'Payment Settings';
+    if (isActive('/admin/support')) return 'Support Tickets';
     return 'Admin Panel';
   };
 
@@ -115,6 +117,17 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 <Link href="/admin/upgrades">
                   <CheckCircle />
                   <span>Upgrades</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/admin/support')}
+              >
+                <Link href="/admin/support">
+                  <LifeBuoy />
+                  <span>Support</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
