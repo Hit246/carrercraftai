@@ -25,16 +25,11 @@ const formSchema = z.object({
     photoFile: z.instanceof(File).optional(),
 });
 
-const paymentFormSchema = z.object({
-    proofFile: z.instanceof(File).refine(file => file.size > 0, "Please upload a file."),
-})
-
 export function ProfilePage() {
-    const { user, plan, loading, userData, logout, updateUserProfile, updatePaymentProof, requestCancellation } = useAuth();
+    const { user, plan, loading, userData, logout, updateUserProfile, requestCancellation } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
-    const [isUploadingProof, setIsUploadingProof] = useState(false);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -42,10 +37,6 @@ export function ProfilePage() {
         values: {
             displayName: user?.displayName || '',
         }
-    });
-
-    const paymentForm = useForm<z.infer<typeof paymentFormSchema>>({
-        resolver: zodResolver(paymentFormSchema)
     });
 
     const handleLogout = async () => {
@@ -97,28 +88,6 @@ export function ProfilePage() {
         }
     }
 
-    const onPaymentSubmit = async (values: z.infer<typeof paymentFormSchema>) => {
-        if (!user) return;
-        setIsUploadingProof(true);
-        try {
-            const proofUrl = await uploadFile(values.proofFile, `payment_proofs/${user.uid}/${values.proofFile.name}`);
-            await updatePaymentProof(proofUrl);
-            toast({
-                title: 'Payment Proof Uploaded',
-                description: 'Your payment proof has been submitted for review. An admin will verify it shortly.',
-            });
-            paymentForm.reset();
-        } catch (error) {
-            console.error("Failed to upload proof", error);
-            toast({
-                title: 'Upload Failed',
-                description: 'There was an error uploading your payment proof. Please try again.',
-                variant: 'destructive',
-            });
-        } finally {
-            setIsUploadingProof(false);
-        }
-    }
 
     const handleCancellation = async () => {
         if(!user) return;
@@ -187,7 +156,7 @@ export function ProfilePage() {
                     <Hourglass/>
                     <AlertTitle>Your Upgrade is Pending</AlertTitle>
                     <AlertDescription>
-                        An administrator will review your payment soon. To speed up the process, please upload your proof of payment below if you haven't already.
+                        An administrator will review your payment soon. Your request is being processed.
                     </AlertDescription>
                 </Alert>
             )}
@@ -285,7 +254,7 @@ export function ProfilePage() {
                                 {userData?.paymentProofURL ? (
                                     <div className="flex items-center gap-2 text-sm text-green-600">
                                         <ShieldCheck className="h-5 w-5" />
-                                        <span>Proof submitted.</span>
+                                        <span>Proof submitted for review.</span>
                                         <Button variant="link" size="sm" asChild className="p-0 h-auto">
                                             <Link href={userData.paymentProofURL} target="_blank" rel="noopener noreferrer">
                                                 View Proof <ExternalLink className="ml-1 h-3 w-3" />
@@ -293,31 +262,9 @@ export function ProfilePage() {
                                         </Button>
                                     </div>
                                 ) : (
-                                    <Form {...paymentForm}>
-                                        <form onSubmit={paymentForm.handleSubmit(onPaymentSubmit)} className="flex items-center gap-4">
-                                            <FormField
-                                                control={paymentForm.control}
-                                                name="proofFile"
-                                                render={({ field }) => (
-                                                <FormItem className="flex-1">
-                                                     <FormControl>
-                                                        <Input
-                                                            type="file"
-                                                            accept="image/*,.pdf"
-                                                            onChange={(e) => field.onChange(e.target.files?.[0])}
-                                                            disabled={isUploadingProof}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                                )}
-                                            />
-                                            <Button type="submit" disabled={isUploadingProof}>
-                                                {isUploadingProof ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                                                Upload
-                                            </Button>
-                                        </form>
-                                    </Form>
+                                    <p className="text-sm text-muted-foreground">
+                                        No payment proof was required or submitted for this plan.
+                                    </p>
                                 )}
                             </div>
                         </div>

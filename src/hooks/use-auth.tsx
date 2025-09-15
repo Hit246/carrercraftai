@@ -30,8 +30,8 @@ interface AuthContextType {
   credits: number;
   userData: UserData | null;
   useCredit: () => Promise<void>;
-  requestProUpgrade: () => Promise<void>;
-  requestRecruiterUpgrade: () => Promise<void>;
+  requestProUpgrade: (paymentProofURL: string) => Promise<void>;
+  requestRecruiterUpgrade: (paymentProofURL: string) => Promise<void>;
   requestCancellation: () => Promise<void>;
   logout: () => Promise<void>;
   login: (email:string, password:string) => Promise<any>;
@@ -57,55 +57,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoading(true);
       setUser(user);
       if (user) {
         const userRef = doc(db, 'users', user.uid);
         const userIsAdmin = user.email && ADMIN_EMAILS.includes(user.email);
         setIsAdmin(userIsAdmin);
+        
+        let userDoc = await getDoc(userRef);
 
         if (userIsAdmin) {
-            // Immediately set admin's local state to recruiter
             setPlan('recruiter');
             setCredits(Infinity);
-            setIsAdmin(true);
-            
-            // Then, ensure the database reflects this state.
-            const userDoc = await getDoc(userRef);
             if (!userDoc.exists() || userDoc.data().plan !== 'recruiter') {
-                const adminData = {
+                await setDoc(userRef, {
                     email: user.email,
-                    plan: 'recruiter' as Plan,
+                    plan: 'recruiter',
                     credits: Infinity,
                     createdAt: userDoc.exists() ? userDoc.data().createdAt : new Date(),
-                };
-                await setDoc(userRef, adminData, { merge: true });
-                const updatedDoc = await getDoc(userRef);
-                setUserData(updatedDoc.data() as UserData);
-            } else {
-                setUserData(userDoc.data() as UserData);
+                }, { merge: true });
+                userDoc = await getDoc(userRef); // Re-fetch doc after update
             }
         } else {
-            // Handle regular users
-            const userDoc = await getDoc(userRef);
-            if (userDoc.exists()) {
-                const data = userDoc.data() as UserData;
-                setUserData(data);
-                setPlan(data.plan || 'free');
-                setCredits(data.credits ?? (data.plan === 'free' ? FREE_CREDITS : Infinity));
-            } else {
-                // This case handles user creation for non-admins, now mostly in signup.
-                // It can serve as a fallback if a user exists in Auth but not Firestore.
-                await setDoc(userRef, { 
+            if (!userDoc.exists()) {
+                 await setDoc(userRef, { 
                     email: user.email, 
                     plan: 'free', 
                     credits: FREE_CREDITS,
                     createdAt: new Date(),
                 });
-                setPlan('free');
-                setCredits(FREE_CREDITS);
-                setUserData({ plan: 'free', credits: FREE_CREDITS});
+                userDoc = await getDoc(userRef); // Re-fetch doc after creation
             }
         }
+        
+        const data = userDoc.data() as UserData;
+        setUserData(data);
+        setPlan(data.plan || 'free');
+        setCredits(data.credits ?? (data.plan === 'free' ? FREE_CREDITS : Infinity));
+
       } else {
         // User is signed out, reset state
         setIsAdmin(false);
@@ -201,19 +190,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return signOut(auth);
   };
   
-  const requestProUpgrade = async () => {
+  const requestProUpgrade = async (paymentProofURL: string) => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
-    const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'pro' as const, planUpdatedAt: new Date() };
+    const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'pro' as const, planUpdatedAt: new Date(), paymentProofURL };
     await updateDoc(userRef, newPlanData);
     setPlan('pending');
     setUserData(prev => prev ? {...prev, ...newPlanData} : newPlanData as UserData);
   }
 
-  const requestRecruiterUpgrade = async () => {
+  const requestRecruiterUpgrade = async (paymentProofURL: string) => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
-    const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'recruiter' as const, planUpdatedAt: new Date() };
+    const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'recruiter' as const, planUpdatedAt: new Date(), paymentProofURL };
     await updateDoc(userRef, newPlanData);
     setPlan('pending');
     setUserData(prev => prev ? {...prev, ...newPlanData} : newPlanData as UserData);
@@ -222,7 +211,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const requestCancellation = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
-    const newPlanData = { plan: 'cancellation_requested' as Plan };
+    const newPlanData = { plan: 'cancellation_requested' as Plan, planUpdatedAt: new Date() };
     await updateDoc(userRef, newPlanData);
     setPlan('cancellation_requested');
     setUserData(prev => prev ? {...prev, ...newPlanData} : newPlanData as UserData);

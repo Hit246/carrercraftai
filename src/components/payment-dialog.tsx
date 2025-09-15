@@ -8,11 +8,19 @@ import { Input } from "./ui/input";
 import { getPaymentSettings } from "@/lib/actions";
 import { useEffect, useState } from "react";
 import { Skeleton } from "./ui/skeleton";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { uploadFile } from "@/lib/firebase";
+import { Loader2, Upload } from "lucide-react";
 
 interface PaymentDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: () => void;
+    onConfirm: (paymentProofURL: string) => void;
     plan: 'pro' | 'recruiter' | null;
 }
 
@@ -26,71 +34,135 @@ const planDetails = {
     recruiter: { name: "Recruiter Plan", amount: 49 },
 }
 
+const formSchema = z.object({
+    proofFile: z.instanceof(File).refine(file => file.size > 0, "Please upload proof of payment."),
+});
+
 export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialogProps) {
     const [settings, setSettings] = useState<PaymentSettings | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+    const [isConfirming, setIsConfirming] = useState(false);
+    const { toast } = useToast();
+    const { user } = useAuth();
+    
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+    });
+
 
     useEffect(() => {
         if (isOpen) {
-            setIsLoading(true);
+            setIsLoadingSettings(true);
             getPaymentSettings().then(data => {
                 setSettings(data as PaymentSettings);
-                setIsLoading(false);
+                setIsLoadingSettings(false);
+            }).catch(() => {
+                 toast({
+                    title: 'Error',
+                    description: 'Could not load payment details. Please try again.',
+                    variant: 'destructive',
+                });
+                setIsLoadingSettings(false);
             });
         }
-    }, [isOpen]);
+    }, [isOpen, toast]);
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        if (!user) {
+            toast({ title: 'Not Authenticated', description: 'You must be logged in.', variant: 'destructive'});
+            return;
+        }
+        
+        setIsConfirming(true);
+        try {
+            const proofUrl = await uploadFile(values.proofFile, `payment_proofs/${user.uid}/${values.proofFile.name}`);
+            onConfirm(proofUrl);
+            form.reset();
+        } catch(e) {
+             toast({
+                title: 'Upload Failed',
+                description: 'Could not upload your payment proof. Please try again.',
+                variant: 'destructive',
+            });
+        } finally {
+            setIsConfirming(false);
+        }
+    }
+
 
     if (!plan) return null;
 
     const details = planDetails[plan];
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={(open) => { if (!isConfirming) onClose()}}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Complete Your Payment</DialogTitle>
+                    <DialogTitle>Complete Your Upgrade</DialogTitle>
                     <DialogDescription>
-                        To upgrade to the {details.name}, please complete the payment of ${details.amount}.
+                        To upgrade to the {details.name}, pay ${details.amount} and upload the payment screenshot below.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                    {isLoading || !settings ? (
-                        <div className="flex flex-col items-center space-y-4">
-                            <Skeleton className="h-4 w-32" />
-                            <Skeleton className="h-48 w-48 rounded-lg" />
-                            <Skeleton className="h-10 w-full" />
-                        </div>
-                    ) : (
-                        <>
-                            <div className="flex flex-col items-center space-y-2">
-                                <Label>Scan QR Code to Pay</Label>
-                                <Image
-                                    src={settings.qrCodeImageUrl}
-                                    alt="Payment QR Code"
-                                    width={200}
-                                    height={200}
-                                    className="rounded-lg border"
-                                    data-ai-hint="payment qrcode from admin settings"
+                 <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+                        {isLoadingSettings || !settings ? (
+                            <div className="flex flex-col items-center space-y-4">
+                                <Skeleton className="h-4 w-32" />
+                                <Skeleton className="h-48 w-48 rounded-lg" />
+                                <Skeleton className="h-10 w-full" />
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex flex-col items-center space-y-2">
+                                    <Label>1. Scan QR Code to Pay</Label>
+                                    <Image
+                                        src={settings.qrCodeImageUrl}
+                                        alt="Payment QR Code"
+                                        width={200}
+                                        height={200}
+                                        className="rounded-lg border"
+                                        data-ai-hint="payment qrcode from admin settings"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="upi-id">Or Pay using UPI ID</Label>
+                                    <Input id="upi-id" readOnly value={settings.upiId} />
+                                </div>
+                                 <FormField
+                                    control={form.control}
+                                    name="proofFile"
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>2. Upload Payment Proof</FormLabel>
+                                        <FormControl>
+                                             <div className="relative">
+                                                <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                                <Input
+                                                    type="file"
+                                                    className="pl-10"
+                                                    accept="image/*,.pdf"
+                                                    onChange={(e) => field.onChange(e.target.files?.[0])}
+                                                    disabled={isConfirming}
+                                                />
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
                                 />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label htmlFor="upi-id">Or Pay using UPI ID</Label>
-                                <Input id="upi-id" readOnly value={settings.upiId} />
-                            </div>
-                        </>
-                    )}
-                    <div className="text-center text-sm text-muted-foreground pt-2">
-                        After payment, please take a screenshot and upload it on your profile page to get your upgrade approved.
-                    </div>
-                </div>
-                <DialogFooter className="sm:justify-center">
-                    <Button type="button" variant="secondary" onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button type="button" onClick={onConfirm} disabled={isLoading}>
-                       I have paid
-                    </Button>
-                </DialogFooter>
+                            </>
+                        )}
+                        <DialogFooter className="sm:justify-center pt-4">
+                            <Button type="button" variant="secondary" onClick={onClose} disabled={isConfirming}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={isLoadingSettings || isConfirming}>
+                               {isConfirming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                               I have paid & Uploaded Proof
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     )
