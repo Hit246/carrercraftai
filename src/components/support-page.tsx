@@ -15,16 +15,23 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { LifeBuoy, Mail, User, Building, Send, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { submitSupportRequestAction, SupportRequestInputSchema } from '@/lib/actions';
+import { submitSupportRequestAction } from '@/lib/actions';
+import type { SupportRequestInput } from '@/ai/flows/support-request';
 
-const formSchema = SupportRequestInputSchema.omit({ userEmail: true, userId: true });
+const formSchema = z.object({
+  subject: z.string().min(5),
+  message: z.string().min(20),
+  category: z.enum(['billing', 'technical', 'feedback', 'other']),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export function SupportPage() {
   const { toast } = useToast();
   const { plan, user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       subject: '',
@@ -33,7 +40,7 @@ export function SupportPage() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     if (!user || !user.email) {
         toast({
             title: 'Not Authenticated',
@@ -44,11 +51,12 @@ export function SupportPage() {
     }
     setIsSubmitting(true);
     try {
-        await submitSupportRequestAction({
+        const fullInput: SupportRequestInput = {
             ...values,
             userEmail: user.email,
             userId: user.uid,
-        });
+        };
+        await submitSupportRequestAction(fullInput);
 
         toast({
         title: "Support Request Sent!",
