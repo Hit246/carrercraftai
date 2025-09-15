@@ -25,20 +25,20 @@ export function PricingPage() {
     setPlanToUpgrade(selectedPlan);
   }
 
-  const onPaymentConfirm = async () => {
+  const onPaymentConfirm = async (paymentProofURL: string) => {
     if (!planToUpgrade) return;
 
     try {
       if (planToUpgrade === 'pro') {
-        await requestProUpgrade();
+        await requestProUpgrade(paymentProofURL);
       } else {
-        await requestRecruiterUpgrade();
+        await requestRecruiterUpgrade(paymentProofURL);
       }
       toast({
           title: "Request Submitted!",
-          description: "Your upgrade is pending. Please upload your payment proof below to get approved.",
+          description: "Your upgrade request has been submitted for review. An admin will verify it shortly.",
       });
-      router.push('/profile');
+      router.push('/order-status');
     } catch (error) {
       toast({ title: "Error", description: "Failed to submit upgrade request.", variant: "destructive" });
     } finally {
