@@ -21,6 +21,7 @@ import {
   GenerateCoverLetterInput,
   GenerateCoverLetterOutput,
 } from '@/ai/flows/cover-letter-generator';
+import { submitSupportRequest, SupportRequestInput } from '@/ai/flows/support-request';
 import { db } from './firebase';
 
 export async function analyzeResumeAction(
@@ -49,6 +50,10 @@ export async function generateCoverLetterAction(
 ): Promise<GenerateCoverLetterOutput> {
   // In a real app, you would check the user's subscription tier here.
   return await generateCoverLetter(input);
+}
+
+export async function submitSupportRequestAction(input: SupportRequestInput) {
+    return await submitSupportRequest(input);
 }
 
 export async function getPaymentSettings() {

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,8 +12,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
-import { LifeBuoy, Mail, User, Building, Send } from 'lucide-react';
+import { LifeBuoy, Mail, User, Building, Send, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { submitSupportRequest } from '@/ai/flows/support-request';
 
 const formSchema = z.object({
   subject: z.string().min(5, { message: 'Subject must be at least 5 characters.' }),
@@ -22,7 +24,8 @@ const formSchema = z.object({
 
 export function SupportPage() {
   const { toast } = useToast();
-  const { plan } = useAuth();
+  const { plan, user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -34,11 +37,36 @@ export function SupportPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    toast({
-      title: "Support Request Sent!",
-      description: "Thanks for reaching out. We'll get back to you as soon as possible.",
-    });
-    form.reset();
+    if (!user) {
+        toast({
+            title: 'Not Authenticated',
+            description: 'You must be logged in to submit a support request.',
+            variant: 'destructive',
+        });
+        return;
+    }
+    setIsSubmitting(true);
+    try {
+        await submitSupportRequest({
+            ...values,
+            userEmail: user.email!,
+            userId: user.uid,
+        });
+
+        toast({
+        title: "Support Request Sent!",
+        description: "Thanks for reaching out. We'll get back to you as soon as possible.",
+        });
+        form.reset();
+    } catch (error) {
+        toast({
+            title: 'Submission Failed',
+            description: 'There was an error submitting your request. Please try again.',
+            variant: 'destructive',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   return (
@@ -130,7 +158,8 @@ export function SupportPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" size="lg" className="w-full">
+              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Send Message
               </Button>
             </form>
