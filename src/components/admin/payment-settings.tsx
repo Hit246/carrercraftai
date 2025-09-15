@@ -84,7 +84,6 @@ export function PaymentSettings() {
       let qrCodeImageUrl = currentQrCodeUrl;
 
       if (values.qrCodeImageFile) {
-        // Upload new QR code image and get its URL
         qrCodeImageUrl = await uploadFile(values.qrCodeImageFile, 'settings/qr-code.png');
       }
 
@@ -95,18 +94,18 @@ export function PaymentSettings() {
       };
       await setDoc(settingsRef, newSettings, { merge: true });
 
-      // Update state immediately to reflect changes
       setCurrentQrCodeUrl(qrCodeImageUrl);
-      form.reset({
-        upiId: values.upiId,
-        qrCodeImageFile: undefined,
-      });
-
+      
       toast({
         title: 'Settings Saved',
         description: 'Payment settings have been updated successfully.',
       });
-      setImagePreview(null); // Clear preview after save
+      
+      setImagePreview(null);
+      form.reset({
+        upiId: values.upiId,
+        qrCodeImageFile: undefined,
+      });
 
     } catch (error) {
       console.error(error);
