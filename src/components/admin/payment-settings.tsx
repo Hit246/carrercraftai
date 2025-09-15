@@ -84,7 +84,7 @@ export function PaymentSettings() {
       let qrCodeImageUrl = currentQrCodeUrl;
 
       if (values.qrCodeImageFile) {
-        qrCodeImageUrl = await uploadFile(values.qrCodeImageFile, 'settings/qr-code.png');
+        qrCodeImageUrl = await uploadFile(values.qrCodeImageFile, `settings/qr-code-${Date.now()}`);
       }
 
       const settingsRef = doc(db, 'settings', 'payment');
@@ -102,10 +102,7 @@ export function PaymentSettings() {
       });
       
       setImagePreview(null);
-      form.reset({
-        upiId: values.upiId,
-        qrCodeImageFile: undefined,
-      });
+      form.setValue('qrCodeImageFile', undefined);
 
     } catch (error) {
       console.error(error);
@@ -173,7 +170,7 @@ export function PaymentSettings() {
             <FormField
               control={form.control}
               name="qrCodeImageFile"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>QR Code Image</FormLabel>
                   <FormControl>
