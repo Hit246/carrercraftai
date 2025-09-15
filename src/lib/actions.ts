@@ -21,7 +21,7 @@ import {
   GenerateCoverLetterInput,
   GenerateCoverLetterOutput,
 } from '@/ai/flows/cover-letter-generator';
-import { submitSupportRequestAction as submitSupportRequestFlow, SupportRequestInput } from '@/ai/flows/support-request';
+import { submitSupportRequestAction, SupportRequestInput } from '@/ai/flows/support-request';
 import { db } from './firebase';
 
 export async function analyzeResumeAction(
@@ -52,10 +52,6 @@ export async function generateCoverLetterAction(
   return await generateCoverLetter(input);
 }
 
-export async function submitSupportRequestAction(input: SupportRequestInput) {
-    return await submitSupportRequestFlow(input);
-}
-
 export async function getPaymentSettings() {
     const settingsRef = doc(db, 'settings', 'payment');
     const settingsSnap = await getDoc(settingsRef);
@@ -64,3 +60,7 @@ export async function getPaymentSettings() {
     }
     return { upiId: 'your-upi-id@bank', qrCodeImageUrl: 'https://placehold.co/200x200.png' };
 }
+
+// Re-export the server action for use in client components.
+export { submitSupportRequestAction };
+export type { SupportRequestInput };

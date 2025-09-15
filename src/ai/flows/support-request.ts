@@ -22,10 +22,6 @@ export const SupportRequestInputSchema = z.object({
 
 export type SupportRequestInput = z.infer<typeof SupportRequestInputSchema>;
 
-export async function submitSupportRequestAction(input: SupportRequestInput) {
-    return await submitSupportRequestFlow(input);
-}
-
 const submitSupportRequestFlow = ai.defineFlow(
   {
     name: 'submitSupportRequestFlow',
@@ -46,3 +42,7 @@ const submitSupportRequestFlow = ai.defineFlow(
     }
   }
 );
+
+export async function submitSupportRequestAction(input: SupportRequestInput) {
+    return await submitSupportRequestFlow(input);
+}
