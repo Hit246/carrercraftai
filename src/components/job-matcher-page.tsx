@@ -95,7 +95,7 @@ export function JobMatcherPage() {
 
   return (
     <div className="grid lg:grid-cols-12 gap-8">
-      <div className="lg:col-span-4 xl:col-span-3">
+      <div className="lg:col-span-4 xl:col-span-3 space-y-4">
         {plan === 'free' && (
              <Alert variant="pro" className="mb-4">
                 <Crown />
@@ -208,8 +208,8 @@ export function JobMatcherPage() {
                           </CardHeader>
                           <CardContent>
                               <p className="text-sm text-muted-foreground mb-4">{job.description}</p>
-                              <Label className="text-xs">Match Score: {Math.round(job.matchScore * 100)}%</Label>
-                              <Progress value={job.matchScore * 100} className="h-2 mt-1" />
+                              <Label className="text-xs">Match Score</Label>
+                              <Progress value={job.matchScore} className="h-2 mt-1" />
                           </CardContent>
                       </Card>
                   ))}
