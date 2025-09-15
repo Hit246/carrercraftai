@@ -48,6 +48,7 @@ export function TeamPage() {
 
   // Effect to listen for team members once teamId is available
   useEffect(() => {
+    if (authLoading) return;
     if (!userData?.teamId) {
       if (plan === 'recruiter') {
         setIsLoading(false);
@@ -99,7 +100,7 @@ export function TeamPage() {
     });
 
     return () => unsubscribe();
-  }, [userData, plan, toast]);
+  }, [userData, plan, toast, authLoading]);
 
   const handleCreateTeam = async () => {
     if (authLoading || !user || plan !== 'recruiter') {
@@ -125,7 +126,15 @@ export function TeamPage() {
   }
 
 
-  if (plan !== 'recruiter' && !authLoading) {
+  if (authLoading) {
+    return (
+        <div className="flex h-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    )
+  }
+
+  if (plan !== 'recruiter') {
     return (
       <div className="flex h-full items-center justify-center">
          <Alert variant="pro" className="max-w-lg">
@@ -140,7 +149,7 @@ export function TeamPage() {
     );
   }
   
-  if (!userData?.teamId && plan === 'recruiter') {
+  if (!userData?.teamId) {
      return (
         <div className="flex h-full items-center justify-center">
             <Card className="max-w-lg text-center">

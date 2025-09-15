@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, onSnapshot, collectionGroup } from 'firebase/firestore';
 
 
 type Plan = 'free' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
@@ -77,7 +77,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!user) {
-        setLoading(false);
+        if (!loading) {
+            setLoading(false);
+        }
         return;
     }
 
@@ -85,20 +87,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
         let currentData;
         if (!userDoc.exists()) {
-            if (isAdmin) {
-                 await setDoc(userRef, { email: user.email, plan: 'recruiter', credits: Infinity, createdAt: new Date() }, { merge: true });
-            } else {
-                await setDoc(userRef, { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date() });
-            }
+             // This case is primarily handled by the signup function now
+             // but as a fallback, we create a free user record.
+             await setDoc(userRef, { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date() });
+             currentData = (await getDoc(userRef)).data() as UserData;
         } else {
             currentData = userDoc.data() as UserData;
-             if (isAdmin && currentData.plan !== 'recruiter') {
-                await updateDoc(userRef, { plan: 'recruiter' });
-                currentData.plan = 'recruiter';
-            }
         }
         
-        currentData = (await getDoc(userRef)).data() as UserData;
         setUserData(currentData);
         setPlan(currentData.plan || 'free');
         setCredits(currentData.credits ?? (currentData.plan === 'free' ? FREE_CREDITS : Infinity));
@@ -106,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-}, [user, isAdmin]);
+}, [user, loading]);
 
 
   const login = (email:string, password:string) => {
@@ -117,56 +113,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const newUser = userCredential.user;
 
-    const teamsRef = collection(db, 'teams');
-    const teamsSnapshot = await getDocs(teamsRef);
-    let teamId: string | null = null;
-    let memberDocId: string | null = null;
-    let teamOwnerId: string | null = null;
-
-    for (const teamDoc of teamsSnapshot.docs) {
-        const membersRef = collection(db, `teams/${teamDoc.id}/members`);
-        const q = query(membersRef, where("email", "==", email));
-        const membersSnapshot = await getDocs(q);
-
-        if (!membersSnapshot.empty) {
-            teamId = teamDoc.id;
-            memberDocId = membersSnapshot.docs[0].id;
-            teamOwnerId = teamDoc.data().owner;
-            break;
-        }
-    }
-
     const initialUserData: any = {
         email: newUser.email,
         createdAt: new Date(),
         planUpdatedAt: null,
         paymentProofURL: null,
     };
+    
+    // Check if there is an invitation for this email
+    const membersQuery = query(collectionGroup(db, 'members'), where('email', '==', email));
+    const membersSnapshot = await getDocs(membersQuery);
 
-    if (teamId && memberDocId && teamOwnerId) {
-        const teamOwnerDoc = await getDoc(doc(db, 'users', teamOwnerId));
-        const ownerPlan = teamOwnerDoc.data()?.plan;
+    if (!membersSnapshot.empty) {
+        const invitationDoc = membersSnapshot.docs[0];
+        const teamId = invitationDoc.ref.parent.parent?.id;
 
-        initialUserData.plan = ownerPlan;
-        initialUserData.credits = Infinity;
-        initialUserData.teamId = teamId;
+        if (teamId) {
+            const teamDoc = await getDoc(doc(db, 'teams', teamId));
+            const ownerId = teamDoc.data()?.owner;
+            const ownerDoc = await getDoc(doc(db, 'users', ownerId));
+            const ownerPlan = ownerDoc.data()?.plan;
+            
+            initialUserData.plan = ownerPlan || 'recruiter'; // Default to recruiter if owner plan not found
+            initialUserData.credits = Infinity;
+            initialUserData.teamId = teamId;
 
-        const batch = writeBatch(db);
-        const userRef = doc(db, 'users', newUser.uid);
-        batch.set(userRef, initialUserData);
+            const batch = writeBatch(db);
+            const userRef = doc(db, 'users', newUser.uid);
+            batch.set(userRef, initialUserData);
+            
+            // Update the member doc with the new user's UID
+            batch.update(invitationDoc.ref, { 
+                uid: newUser.uid,
+                name: newUser.displayName || newUser.email
+            });
 
-        const memberRef = doc(db, `teams/${teamId}/members`, memberDocId);
-        batch.update(memberRef, { 
-            uid: newUser.uid,
-            name: newUser.displayName || newUser.email,
-         });
-
-        await batch.commit();
+            await batch.commit();
+        }
     } else {
+        // Standard signup for a user not invited to a team
         initialUserData.plan = 'free' as Plan;
         initialUserData.credits = FREE_CREDITS;
         initialUserData.teamId = null;
-
         await setDoc(doc(db, "users", newUser.uid), initialUserData);
     }
     
