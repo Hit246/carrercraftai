@@ -62,10 +62,10 @@ export async function getPaymentSettings() {
     return { upiId: 'your-upi-id@bank', qrCodeImageUrl: 'https://placehold.co/200x200.png' };
 }
 
-export { type SupportRequestInput, SupportRequestInputSchema };
-
 export async function submitSupportRequestAction(
     input: SupportRequestInput
   ) {
     return await submitSupportRequest(input);
 }
+
+export { type SupportRequestInput };
