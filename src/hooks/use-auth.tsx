@@ -58,17 +58,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
-      setUser(user);
       if (user) {
         const userRef = doc(db, 'users', user.uid);
         const userIsAdmin = user.email && ADMIN_EMAILS.includes(user.email);
-        setIsAdmin(userIsAdmin);
         
         let userDoc = await getDoc(userRef);
 
         if (userIsAdmin) {
+            setIsAdmin(true);
             setPlan('recruiter');
             setCredits(Infinity);
+            // Ensure admin user doc in firestore is updated to recruiter
             if (!userDoc.exists() || userDoc.data().plan !== 'recruiter') {
                 await setDoc(userRef, {
                     email: user.email,
@@ -76,9 +76,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     credits: Infinity,
                     createdAt: userDoc.exists() ? userDoc.data().createdAt : new Date(),
                 }, { merge: true });
-                userDoc = await getDoc(userRef); // Re-fetch doc after update
+                userDoc = await getDoc(userRef);
             }
         } else {
+             setIsAdmin(false);
             if (!userDoc.exists()) {
                  await setDoc(userRef, { 
                     email: user.email, 
@@ -86,17 +87,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     credits: FREE_CREDITS,
                     createdAt: new Date(),
                 });
-                userDoc = await getDoc(userRef); // Re-fetch doc after creation
+                userDoc = await getDoc(userRef);
             }
         }
         
         const data = userDoc.data() as UserData;
         setUserData(data);
+        setUser(auth.currentUser);
         setPlan(data.plan || 'free');
         setCredits(data.credits ?? (data.plan === 'free' ? FREE_CREDITS : Infinity));
 
       } else {
         // User is signed out, reset state
+        setUser(null);
         setIsAdmin(false);
         setPlan('free');
         setCredits(0);
@@ -230,8 +233,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateUserProfile = async (profile: UserProfile) => {
     if (!user) throw new Error("Not authenticated");
     await updateProfile(user, profile);
-    // Create a new user object to force re-render in components
-    setUser({ ...user, ...profile });
+    // Create a new user object to force re-render in components that use it
+    setUser(auth.currentUser);
   }
 
   const updatePaymentProof = async (url: string) => {

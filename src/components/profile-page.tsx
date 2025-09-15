@@ -65,11 +65,13 @@ export function ProfilePage() {
             if (values.photoFile) {
                  photoURL = await uploadFile(values.photoFile, `avatars/${user.uid}`);
             }
-
-            await updateUserProfile({
-                displayName: values.displayName,
+            
+            const profileData = {
+                displayName: values.displayName || user.displayName,
                 photoURL: photoURL,
-            });
+            }
+
+            await updateUserProfile(profileData);
 
             toast({
                 title: 'Profile Updated',
