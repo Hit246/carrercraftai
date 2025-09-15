@@ -1,9 +1,10 @@
+
 'use server';
 
 /**
  * @fileOverview A flow for submitting a user's support request to Firestore.
  *
- * - submitSupportRequestAction - Saves a user's support request to Firestore.
+ * - submitSupportRequest - Saves a user's support request to Firestore.
  */
 
 import { ai } from '@/ai/genkit';
