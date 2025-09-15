@@ -21,7 +21,7 @@ import {
   GenerateCoverLetterInput,
   GenerateCoverLetterOutput,
 } from '@/ai/flows/cover-letter-generator';
-import { submitSupportRequest, SupportRequestInput } from '@/ai/flows/support-request';
+import { submitSupportRequestAction as submitSupportRequestFlow, SupportRequestInput } from '@/ai/flows/support-request';
 import { db } from './firebase';
 
 export async function analyzeResumeAction(
@@ -53,7 +53,7 @@ export async function generateCoverLetterAction(
 }
 
 export async function submitSupportRequestAction(input: SupportRequestInput) {
-    return await submitSupportRequest(input);
+    return await submitSupportRequestFlow(input);
 }
 
 export async function getPaymentSettings() {
