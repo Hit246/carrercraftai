@@ -39,6 +39,13 @@ export function TeamPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingTeam, setIsCreatingTeam] = useState(false);
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
+
   // Effect to listen for team members once teamId is available
   useEffect(() => {
     if (!userData?.teamId) {
