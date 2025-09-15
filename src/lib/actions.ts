@@ -22,7 +22,7 @@ import {
   GenerateCoverLetterInput,
   GenerateCoverLetterOutput,
 } from '@/ai/flows/cover-letter-generator';
-import { submitSupportRequest, SupportRequestInput, SupportRequestInputSchema } from '@/ai/flows/support-request';
+import { submitSupportRequest, SupportRequestInput } from '@/ai/flows/support-request';
 import { db } from './firebase';
 
 export async function analyzeResumeAction(

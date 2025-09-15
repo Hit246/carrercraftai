@@ -47,4 +47,3 @@ const submitSupportRequestFlow = ai.defineFlow(
 export async function submitSupportRequest(input: SupportRequestInput) {
     return await submitSupportRequestFlow(input);
 }
-
