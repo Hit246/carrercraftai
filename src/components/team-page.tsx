@@ -236,7 +236,7 @@ export function TeamPage() {
   return (
     <div className="space-y-8">
         <div className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-2">
+            <div className="md:col-span-3 lg:col-span-2">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Users2/> Team Members</CardTitle>
@@ -247,7 +247,7 @@ export function TeamPage() {
                             <TableHeader>
                                 <TableRow>
                                 <TableHead>Member</TableHead>
-                                <TableHead>Role</TableHead>
+                                <TableHead className="hidden sm:table-cell">Role</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -271,11 +271,16 @@ export function TeamPage() {
                                             </Avatar>
                                             <div>
                                                 <p className="font-medium">{member.name || member.email}</p>
+                                                <div className="sm:hidden">
+                                                    <Badge variant={member.role === 'Admin' ? 'default' : 'secondary'}>
+                                                        {member.role}
+                                                    </Badge>
+                                                </div>
                                                 {!member.uid && <p className="text-sm text-muted-foreground">Invited</p>}
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="hidden sm:table-cell">
                                         <Badge variant={member.role === 'Admin' ? 'default' : 'secondary'}>
                                             {member.role}
                                         </Badge>
@@ -294,7 +299,7 @@ export function TeamPage() {
                     </CardContent>
                 </Card>
             </div>
-            <div>
+            <div className="md:col-span-3 lg:col-span-1">
                  <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><UserPlus /> Invite New Member</CardTitle>

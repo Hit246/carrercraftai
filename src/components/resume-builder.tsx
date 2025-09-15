@@ -285,7 +285,7 @@ export const ResumeBuilder = () => {
             </div>
 
             <div className="flex flex-col gap-4">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
                     <h3 className="font-headline text-lg">Live Preview</h3>
                     <div className="flex gap-2">
                          <Button onClick={handleSave} disabled={isSaving}>
@@ -303,9 +303,9 @@ export const ResumeBuilder = () => {
                     <CardContent className="p-0 h-full overflow-y-auto">
                         <div ref={resumePreviewRef} className="p-6 sm:p-8 font-body text-sm bg-white text-gray-800 shadow-lg h-full">
                             <div className="text-center border-b-2 border-gray-200 pb-4 mb-6">
-                                <h2 className="text-4xl font-bold font-headline text-gray-900">{resumeData.name}</h2>
-                                <p className="text-lg text-primary font-semibold mt-1">{resumeData.title}</p>
-                                <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-gray-600 mt-3">
+                                <h2 className="text-2xl md:text-4xl font-bold font-headline text-gray-900">{resumeData.name}</h2>
+                                <p className="text-base md:text-lg text-primary font-semibold mt-1">{resumeData.title}</p>
+                                <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-gray-600 mt-3">
                                     <span>{resumeData.phone}</span>
                                     <span>{resumeData.email}</span>
                                     <span>{resumeData.linkedin}</span>
@@ -319,12 +319,12 @@ export const ResumeBuilder = () => {
                                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Experience</h3>
                                 {resumeData.experience.map(exp => (
                                     <div key={exp.id} className="mb-4">
-                                        <div className="flex justify-between items-baseline">
+                                        <div className="flex flex-col sm:flex-row justify-between sm:items-baseline">
                                             <h4 className="text-base font-semibold text-gray-800">{exp.title}</h4>
                                             <p className="text-xs font-medium text-gray-600">{exp.dates}</p>
                                         </div>
                                         <p className="text-sm font-medium text-gray-700">{exp.company}</p>
-                                        <ul className="mt-2 list-disc list-inside text-gray-700 space-y-1">
+                                        <ul className="mt-2 list-disc list-inside text-gray-700 space-y-1 text-xs sm:text-sm">
                                             {exp.description.split('\n').map((line, i) => line.trim() && <li key={i}>{line.replace(/^-/, '').trim()}</li>)}
                                         </ul>
                                     </div>
@@ -334,7 +334,7 @@ export const ResumeBuilder = () => {
                                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Education</h3>
                                 {resumeData.education.map(edu => (
                                     <div key={edu.id} className="mb-2">
-                                        <div className="flex justify-between">
+                                        <div className="flex flex-col sm:flex-row justify-between sm:items-baseline">
                                             <h4 className="text-base font-semibold text-gray-800">{edu.school}</h4>
                                             <p className="text-xs font-medium text-gray-600">{edu.dates}</p>
                                         </div>
