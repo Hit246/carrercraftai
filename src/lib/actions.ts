@@ -1,6 +1,7 @@
 'use server';
 
 import { doc, getDoc } from 'firebase/firestore';
+import { z } from 'zod';
 import {
   analyzeResume,
   AnalyzeResumeInput,
@@ -21,7 +22,7 @@ import {
   GenerateCoverLetterInput,
   GenerateCoverLetterOutput,
 } from '@/ai/flows/cover-letter-generator';
-import { submitSupportRequestAction, SupportRequestInput } from '@/ai/flows/support-request';
+import { submitSupportRequestAction } from '@/ai/flows/support-request';
 import { db } from './firebase';
 
 export async function analyzeResumeAction(
@@ -61,6 +62,17 @@ export async function getPaymentSettings() {
     return { upiId: 'your-upi-id@bank', qrCodeImageUrl: 'https://placehold.co/200x200.png' };
 }
 
+
+// Schema for Support Request
+export const SupportRequestInputSchema = z.object({
+  subject: z.string().min(5),
+  message: z.string().min(20),
+  category: z.enum(['billing', 'technical', 'feedback', 'other']),
+  userEmail: z.string().email(),
+  userId: z.string(),
+});
+
+export type SupportRequestInput = z.infer<typeof SupportRequestInputSchema>;
+
 // Re-export the server action for use in client components.
 export { submitSupportRequestAction };
-export type { SupportRequestInput };
