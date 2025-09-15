@@ -5,15 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Download, Bot, Save } from 'lucide-react';
+import { PlusCircle, Trash2, Download, Bot, Save, Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from './ui/skeleton';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { useRouter } from 'next/navigation';
 
 interface Experience {
     id: number;
@@ -59,10 +59,12 @@ const initialResumeData: ResumeData = {
 
 export const ResumeBuilder = () => {
     const { toast } = useToast();
-    const { user, loading: authLoading } = useAuth();
+    const router = useRouter();
+    const { user, loading: authLoading, plan, credits, useCredit } = useAuth();
     const [resumeData, setResumeData] = React.useState<ResumeData | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
+    const [isAnalyzing, setIsAnalyzing] = React.useState(false);
     const resumePreviewRef = React.useRef<HTMLDivElement>(null);
 
 
@@ -75,7 +77,9 @@ export const ResumeBuilder = () => {
                 if (resumeSnap.exists()) {
                     setResumeData(resumeSnap.data() as ResumeData);
                 } else {
-                    setResumeData(initialResumeData);
+                    // Pre-fill with user email if available and it's a new resume
+                    const newResumeData = { ...initialResumeData, email: user.email || 'your-email@example.com' };
+                    setResumeData(newResumeData);
                 }
                 setIsLoading(false);
             }
@@ -100,74 +104,82 @@ export const ResumeBuilder = () => {
             experience: prev.experience.filter(exp => exp.id !== id)
         });
     };
+    
+    const canUseFeature = plan !== 'free' || credits > 0;
 
-    const handleExport = () => {
+    const generatePdfFromDom = async () => {
         const input = resumePreviewRef.current;
-        if (!input) {
-            toast({
-                title: "Error",
-                description: "Could not find the resume to export.",
-                variant: "destructive"
-            });
-            return;
-        }
-    
-        toast({
-            title: "Generating PDF...",
-            description: "Please wait while your resume is being exported.",
-        });
-    
-        // A4 page dimensions in pt: 595.28 x 841.89
+        if (!input) return null;
+        
+        const canvas = await html2canvas(input, { scale: 2, useCORS: true, logging: false });
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+        
         const a4Width = 595.28;
         const a4Height = 841.89;
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const canvasRatio = canvasWidth / canvasHeight;
+        const a4Ratio = a4Width / a4Height;
     
-        html2canvas(input, {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-        }).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'pt',
-                format: 'a4'
-            });
+        let finalWidth, finalHeight;
+        if (canvasRatio > a4Ratio) {
+            finalWidth = a4Width;
+            finalHeight = a4Width / canvasRatio;
+        } else {
+            finalHeight = a4Height;
+            finalWidth = a4Height * canvasRatio;
+        }
     
-            const canvasWidth = canvas.width;
-            const canvasHeight = canvas.height;
-            const canvasRatio = canvasWidth / canvasHeight;
-            const a4Ratio = a4Width / a4Height;
+        const x = (a4Width - finalWidth) / 2;
+        const y = (a4Height - finalHeight) / 2;
     
-            let finalWidth, finalHeight;
-    
-            // Scale the image to fit within the A4 page, maintaining aspect ratio
-            if (canvasRatio > a4Ratio) {
-                finalWidth = a4Width;
-                finalHeight = a4Width / canvasRatio;
-            } else {
-                finalHeight = a4Height;
-                finalWidth = a4Height * canvasRatio;
-            }
-    
-            // Center the image on the page
-            const x = (a4Width - finalWidth) / 2;
-            const y = (a4Height - finalHeight) / 2;
-    
-            pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, finalWidth, finalHeight);
+        return pdf;
+    }
+
+    const handleExport = async () => {
+        toast({ title: "Generating PDF...", description: "Please wait." });
+        const pdf = await generatePdfFromDom();
+        if (pdf) {
             pdf.save(`${resumeData?.name || 'resume'}.pdf`);
-            
+            toast({ title: "Download Complete!", description: "Your resume has been downloaded." });
+        } else {
+            toast({ title: "Export Failed", variant: "destructive" });
+        }
+    }
+    
+    const handleAnalyze = async () => {
+        if(!canUseFeature) {
             toast({
-                title: "Download Complete!",
-                description: "Your resume has been downloaded as a PDF.",
-            });
-        }).catch(err => {
-            toast({
-                title: "Export Failed",
-                description: "Something went wrong while generating the PDF.",
-                variant: "destructive"
-            });
-            console.error(err);
-        });
+              title: "Upgrade to Pro",
+              description: "You've used all your free credits. Please upgrade to continue.",
+              variant: "destructive",
+            })
+            router.push('/pricing');
+            return;
+        }
+
+        setIsAnalyzing(true);
+        toast({ title: "Analyzing Resume...", description: "Generating a snapshot and sending it to the AI." });
+
+        try {
+            if (plan === 'free') {
+                await useCredit();
+            }
+            const pdf = await generatePdfFromDom();
+            if (pdf) {
+                const dataUri = pdf.output('datauristring');
+                // Store in session storage to pass to the next page
+                sessionStorage.setItem('resumeDataUriForAnalysis', dataUri);
+                router.push('/resume-analyzer');
+            } else {
+                 throw new Error("Failed to generate PDF for analysis.");
+            }
+        } catch (error) {
+            console.error(error);
+            toast({ title: "Analysis Failed", description: "Could not prepare your resume for analysis.", variant: "destructive" });
+            setIsAnalyzing(false);
+        }
     }
 
     const handleSave = async () => {
@@ -291,8 +303,9 @@ export const ResumeBuilder = () => {
                          <Button onClick={handleSave} disabled={isSaving}>
                            <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
                         </Button>
-                        <Button variant="secondary" asChild>
-                           <Link href="/resume-analyzer"><Bot className="mr-2 h-4 w-4" /> AI Analyze</Link>
+                         <Button variant="secondary" onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
+                           {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Bot className="mr-2 h-4 w-4" />}
+                           {isAnalyzing ? "Analyzing..." : "AI Analyze"}
                         </Button>
                         <Button onClick={handleExport}>
                            <Download className="mr-2 h-4 w-4" /> Export
@@ -357,3 +370,5 @@ export const ResumeBuilder = () => {
         </div>
     );
 };
+
+    

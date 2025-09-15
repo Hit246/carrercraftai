@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -39,6 +39,7 @@ const fileToDataUri = (file: File): Promise<string> => {
 export function ResumeAnalyzerPage() {
   const [analysisResult, setAnalysisResult] = useState<AnalyzeResumeOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialAnalysis, setIsInitialAnalysis] = useState(true);
   const { toast } = useToast();
   const { plan, credits, useCredit } = useAuth();
   const router = useRouter();
@@ -48,6 +49,37 @@ export function ResumeAnalyzerPage() {
   });
 
   const canUseFeature = plan !== 'free' || credits > 0;
+  
+  const performAnalysis = async (resumeDataUri: string) => {
+    setIsLoading(true);
+    setAnalysisResult(null);
+
+    try {
+        const result = await analyzeResumeAction({ resumeDataUri });
+        setAnalysisResult(result);
+    } catch (error) {
+        console.error(error);
+        toast({
+          title: "Analysis Failed",
+          description: "Something went wrong while analyzing your resume. Please try again.",
+          variant: "destructive",
+        })
+    } finally {
+        setIsLoading(false);
+        setIsInitialAnalysis(false);
+    }
+  }
+
+  useEffect(() => {
+    const dataUri = sessionStorage.getItem('resumeDataUriForAnalysis');
+    if (dataUri) {
+        performAnalysis(dataUri);
+        // Clean up session storage after use
+        sessionStorage.removeItem('resumeDataUriForAnalysis');
+    } else {
+      setIsInitialAnalysis(false);
+    }
+  }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!canUseFeature) {
@@ -60,26 +92,21 @@ export function ResumeAnalyzerPage() {
         return;
     }
     
-    setIsLoading(true);
-    setAnalysisResult(null);
-
-    try {
-        if (plan === 'free') {
-            await useCredit();
-        }
-        const resumeDataUri = await fileToDataUri(values.resumeFile);
-        const result = await analyzeResumeAction({ resumeDataUri });
-        setAnalysisResult(result);
-    } catch (error) {
-        console.error(error);
-        toast({
-          title: "Analysis Failed",
-          description: "Something went wrong while analyzing your resume. Please try again.",
-          variant: "destructive",
-        })
-    } finally {
-        setIsLoading(false);
+    if (plan === 'free') {
+        await useCredit();
     }
+    const resumeDataUri = await fileToDataUri(values.resumeFile);
+    performAnalysis(resumeDataUri);
+  }
+
+  if (isInitialAnalysis) {
+      return (
+          <div className="flex flex-col items-center justify-center h-full text-center">
+              <Loader2 className="h-12 w-12 animate-spin text-primary mb-4"/>
+              <h2 className="text-xl font-semibold">Analyzing Your Resume...</h2>
+              <p className="text-muted-foreground">The AI is reviewing your document. Please wait a moment.</p>
+          </div>
+      )
   }
 
   return (
@@ -111,7 +138,7 @@ export function ResumeAnalyzerPage() {
                 name="resumeFile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Resume File</FormLabel>
+                    <FormLabel>Upload a different resume</FormLabel>
                     <FormControl>
                         <div className="relative">
                             <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -132,13 +159,21 @@ export function ResumeAnalyzerPage() {
                 {isLoading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</>
                 ) : (
-                  'Analyze My Resume'
+                  'Analyze Resume'
                 )}
               </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
+    
+    {isLoading && (
+         <div className="flex flex-col items-center justify-center text-center pt-10">
+              <Loader2 className="h-12 w-12 animate-spin text-primary mb-4"/>
+              <h2 className="text-xl font-semibold">Analyzing Your Resume...</h2>
+              <p className="text-muted-foreground">The AI is reviewing your document. Please wait a moment.</p>
+          </div>
+    )}
 
     {analysisResult && (
         <div className="mt-8 space-y-6 max-w-4xl mx-auto">
@@ -183,3 +218,5 @@ export function ResumeAnalyzerPage() {
     </div>
   );
 }
+
+    
