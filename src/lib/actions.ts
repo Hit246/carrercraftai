@@ -22,7 +22,7 @@ import {
   GenerateCoverLetterInput,
   GenerateCoverLetterOutput,
 } from '@/ai/flows/cover-letter-generator';
-import { submitSupportRequestAction } from '@/ai/flows/support-request';
+import { submitSupportRequest } from '@/ai/flows/support-request';
 import { db } from './firebase';
 
 export async function analyzeResumeAction(
@@ -74,5 +74,8 @@ export const SupportRequestInputSchema = z.object({
 
 export type SupportRequestInput = z.infer<typeof SupportRequestInputSchema>;
 
-// Re-export the server action for use in client components.
-export { submitSupportRequestAction };
+export async function submitSupportRequestAction(
+    input: SupportRequestInput
+  ) {
+    return await submitSupportRequest(input);
+}

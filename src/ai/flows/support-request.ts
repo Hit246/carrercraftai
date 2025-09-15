@@ -10,8 +10,7 @@ import { ai } from '@/ai/genkit';
 import { db } from '@/lib/firebase';
 import { addDoc, collection } from 'firebase/firestore';
 import { z } from 'genkit';
-import type { SupportRequestInput } from '@/lib/actions';
-import { SupportRequestInputSchema } from '@/lib/actions';
+import { SupportRequestInputSchema, type SupportRequestInput } from '@/lib/actions';
 
 
 const submitSupportRequestFlow = ai.defineFlow(
@@ -35,6 +34,6 @@ const submitSupportRequestFlow = ai.defineFlow(
   }
 );
 
-export async function submitSupportRequestAction(input: SupportRequestInput) {
+export async function submitSupportRequest(input: SupportRequestInput) {
     return await submitSupportRequestFlow(input);
 }
