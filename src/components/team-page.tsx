@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,14 +9,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
-import { Users2, UserPlus, Trash2, Crown, Loader2 } from 'lucide-react';
+import { Users2, UserPlus, Trash2, Crown, Loader2, Building } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Badge } from './ui/badge';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, onSnapshot, doc, deleteDoc, getDoc, setDoc, query, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, doc, deleteDoc, getDoc, setDoc, query, writeBatch, updateDoc } from 'firebase/firestore';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -27,7 +27,7 @@ interface TeamMember {
   name?: string;
   email: string;
   role: 'Admin' | 'Member';
-  uid?: string; // Will be present if the user has signed up
+  uid?: string;
 }
 
 export function TeamPage() {
@@ -35,94 +35,87 @@ export function TeamPage() {
   const { plan, user, userData, loading: authLoading } = useAuth();
   const router = useRouter();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [teamId, setTeamId] = useState<string | null>(null);
   const [teamOwner, setTeamOwner] = useState<TeamMember | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-    },
-  });
-  
-    // Effect to find or create the team for a recruiter
-    useEffect(() => {
-        const findOrCreateTeam = async () => {
-            if (authLoading || !user || plan !== 'recruiter' || !userData) {
+  // Effect to listen for team members once teamId is available
+  useEffect(() => {
+    if (!userData?.teamId) {
+      if (plan === 'recruiter') {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    setIsLoading(true);
+    const teamId = userData.teamId;
+    const teamRef = doc(db, 'teams', teamId);
+    const membersRef = collection(db, `teams/${teamId}/members`);
+    
+    const unsubscribe = onSnapshot(query(membersRef), async (snapshot) => {
+        const members = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TeamMember));
+        
+        try {
+            const teamSnap = await getDoc(teamRef);
+            if (!teamSnap.exists()) {
+                setIsLoading(false);
                 return;
             }
+            const ownerId = teamSnap.data()?.owner;
 
-            try {
-                let currentTeamId = userData?.teamId;
-
-                if (!currentTeamId) {
-                    const teamRef = await addDoc(collection(db, 'teams'), {
-                        owner: user.uid,
-                        createdAt: new Date(),
-                    });
-                    currentTeamId = teamRef.id;
-                    const userRef = doc(db, 'users', user.uid);
-                    await setDoc(userRef, { teamId: currentTeamId }, { merge: true });
+            if (ownerId) {
+                const ownerUserSnap = await getDoc(doc(db, 'users', ownerId));
+                if (ownerUserSnap.exists()) {
+                    const ownerData = ownerUserSnap.data();
+                    const owner: TeamMember = {
+                        id: ownerUserSnap.id,
+                        uid: ownerUserSnap.id,
+                        email: ownerData.email,
+                        role: 'Admin',
+                        name: ownerData.displayName || ownerData.email,
+                    };
+                    setTeamOwner(owner);
+                    const allMembers = [owner, ...members.filter(m => m.email !== owner.email)];
+                    setTeamMembers(allMembers);
                 }
-                setTeamId(currentTeamId);
-
-            } catch (error) {
-                console.error("Failed to find or create team:", error);
-                toast({ title: "Error", description: "Could not initialize your team. Please refresh and try again.", variant: "destructive"});
-                setIsLoading(false);
+            } else {
+                setTeamMembers(members);
+                setTeamOwner(null);
             }
-        };
+        } catch (error) {
+            console.error("Error fetching team details:", error);
+            toast({ title: "Error", description: "Could not load team details.", variant: "destructive"});
+        } finally {
+            setIsLoading(false);
+        }
+    });
 
-        findOrCreateTeam();
+    return () => unsubscribe();
+  }, [userData, plan, toast]);
 
-    }, [user, plan, userData, authLoading, toast]);
-  
-    // Effect to listen for team members once teamId is set
-    useEffect(() => {
-        if (!teamId) return;
-  
-        setIsLoading(true);
-        const teamRef = doc(db, 'teams', teamId);
-        const membersRef = collection(db, `teams/${teamId}/members`);
-    
-        const unsubscribe = onSnapshot(query(membersRef), async (snapshot) => {
-            const members = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TeamMember));
-            
-            try {
-                const teamSnap = await getDoc(teamRef);
-                const ownerId = teamSnap.data()?.owner;
-    
-                if (ownerId) {
-                    const ownerUserSnap = await getDoc(doc(db, 'users', ownerId));
-                    if (ownerUserSnap.exists()) {
-                        const ownerData = ownerUserSnap.data();
-                        const owner: TeamMember = {
-                            id: ownerUserSnap.id,
-                            uid: ownerUserSnap.id,
-                            email: ownerData.email,
-                            role: 'Admin',
-                            name: ownerData.displayName || ownerData.email,
-                        };
-                        setTeamOwner(owner);
-                        // Combine owner and members, ensuring no duplicates
-                        const allMembers = [owner, ...members.filter(m => m.email !== owner.email)];
-                        setTeamMembers(allMembers);
-                    }
-                } else {
-                    setTeamMembers(members);
-                    setTeamOwner(null);
-                }
-            } catch (error) {
-                console.error("Error fetching team details:", error);
-                toast({ title: "Error", description: "Could not load team details.", variant: "destructive"});
-            } finally {
-                setIsLoading(false);
-            }
+  const handleCreateTeam = async () => {
+    if (authLoading || !user || plan !== 'recruiter') {
+        return;
+    }
+    setIsCreatingTeam(true);
+    try {
+        const teamRef = await addDoc(collection(db, 'teams'), {
+            owner: user.uid,
+            createdAt: new Date(),
         });
-  
-      return () => unsubscribe();
-    }, [teamId, toast]);
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, { teamId: teamRef.id });
+        
+        toast({ title: "Team Created!", description: "You can now start inviting members."});
+        // The userData update will trigger the useEffect to fetch members
+    } catch (error) {
+        console.error("Failed to create team:", error);
+        toast({ title: "Error", description: "Could not create your team. Please refresh and try again.", variant: "destructive"});
+    } finally {
+        setIsCreatingTeam(false);
+    }
+  }
 
 
   if (plan !== 'recruiter' && !authLoading) {
@@ -139,9 +132,33 @@ export function TeamPage() {
       </div>
     );
   }
+  
+  if (!userData?.teamId && plan === 'recruiter') {
+     return (
+        <div className="flex h-full items-center justify-center">
+            <Card className="max-w-lg text-center">
+                <CardHeader>
+                    <CardTitle className="text-2xl font-headline flex items-center justify-center gap-2">
+                        <Building className="text-primary"/>
+                        Create Your Team
+                    </CardTitle>
+                    <CardDescription>
+                        To start managing members, you first need to create your team.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button onClick={handleCreateTeam} disabled={isCreatingTeam}>
+                        {isCreatingTeam && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Create Team
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
+     )
+  }
 
   async function onInvite(values: z.infer<typeof formSchema>) {
-    if (!teamId || !user || !teamOwner || user.uid !== teamOwner.uid) {
+    if (!userData?.teamId || !user || !teamOwner || user.uid !== teamOwner.uid) {
         toast({
             title: "Permission Denied",
             description: "Only the team owner can invite new members.",
@@ -161,15 +178,12 @@ export function TeamPage() {
     }
 
     try {
-        const batch = writeBatch(db);
-        const newMemberRef = doc(collection(db, `teams/${teamId}/members`));
-        batch.set(newMemberRef, {
+        const newMemberRef = doc(collection(db, `teams/${userData.teamId}/members`));
+        await setDoc(newMemberRef, {
             email: values.email,
             role: 'Member',
             addedBy: user.email,
         });
-
-        await batch.commit();
 
         toast({
         title: "Invitation Sent!",
@@ -187,9 +201,9 @@ export function TeamPage() {
   }
 
   async function onRemove(id: string) {
-    if (!teamId) return;
+    if (!userData?.teamId) return;
     try {
-        await deleteDoc(doc(db, `teams/${teamId}/members`, id));
+        await deleteDoc(doc(db, `teams/${userData.teamId}/members`, id));
         toast({
             title: "Member Removed",
             description: "The team member has been removed successfully.",
