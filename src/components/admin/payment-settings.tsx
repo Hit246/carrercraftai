@@ -50,7 +50,7 @@ export function PaymentSettings() {
         const settingsSnap = await getDoc(settingsRef);
         if (settingsSnap.exists()) {
           const data = settingsSnap.data() as PaymentSettingsData;
-          form.reset({ upiId: data.upiId });
+          form.setValue('upiId', data.upiId);
           setCurrentQrCodeUrl(data.qrCodeImageUrl);
         }
       } catch (error) {
@@ -86,14 +86,18 @@ export function PaymentSettings() {
       if (values.qrCodeImageFile) {
         // Upload new QR code image and get its URL
         qrCodeImageUrl = await uploadFile(values.qrCodeImageFile, 'settings/qr-code.png');
-        setCurrentQrCodeUrl(qrCodeImageUrl); // Update state to show new image immediately
       }
 
       const settingsRef = doc(db, 'settings', 'payment');
-      await setDoc(settingsRef, { 
+      const newSettings = { 
         upiId: values.upiId,
         qrCodeImageUrl
-       }, { merge: true });
+      };
+      await setDoc(settingsRef, newSettings, { merge: true });
+
+      // Update state immediately to reflect changes
+      setCurrentQrCodeUrl(qrCodeImageUrl);
+      form.setValue('upiId', values.upiId);
 
       toast({
         title: 'Settings Saved',
@@ -101,8 +105,8 @@ export function PaymentSettings() {
       });
       setImagePreview(null); // Clear preview after save
       form.setValue('qrCodeImageFile', undefined); // Clear file input
-      form.reset(form.getValues()); // Reset to show current values
     } catch (error) {
+      console.error(error);
       toast({
         title: 'Error Saving Settings',
         description: 'There was a problem saving the payment settings. Please try again.',
