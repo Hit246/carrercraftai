@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { LifeBuoy, Mail, User, Building, Send, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { submitSupportRequest } from '@/ai/flows/support-request';
+import { submitSupportRequestAction } from '@/lib/actions';
 
 const formSchema = z.object({
   subject: z.string().min(5, { message: 'Subject must be at least 5 characters.' }),
@@ -47,7 +47,7 @@ export function SupportPage() {
     }
     setIsSubmitting(true);
     try {
-        await submitSupportRequest({
+        await submitSupportRequestAction({
             ...values,
             userEmail: user.email!,
             userId: user.uid,

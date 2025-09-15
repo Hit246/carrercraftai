@@ -3,7 +3,7 @@
 /**
  * @fileOverview A flow for submitting a support request.
  *
- * - submitSupportRequest - Saves a user's support request to Firestore.
+ * - submitSupportRequestAction - Saves a user's support request to Firestore.
  * - SupportRequestInput - The input type for the submitSupportRequest function.
  */
 
@@ -22,9 +22,13 @@ export const SupportRequestInputSchema = z.object({
 
 export type SupportRequestInput = z.infer<typeof SupportRequestInputSchema>;
 
-export const submitSupportRequest = ai.defineFlow(
+export async function submitSupportRequestAction(input: SupportRequestInput) {
+    return await submitSupportRequestFlow(input);
+}
+
+const submitSupportRequestFlow = ai.defineFlow(
   {
-    name: 'submitSupportRequest',
+    name: 'submitSupportRequestFlow',
     inputSchema: SupportRequestInputSchema,
     outputSchema: z.object({ success: z.boolean() }),
   },
