@@ -11,16 +11,7 @@ import { ai } from '@/ai/genkit';
 import { db } from '@/lib/firebase';
 import { addDoc, collection } from 'firebase/firestore';
 import { z } from 'genkit';
-
-// Schema for Support Request
-export const SupportRequestInputSchema = z.object({
-    subject: z.string().min(5),
-    message: z.string().min(20),
-    category: z.enum(['billing', 'technical', 'feedback', 'other']),
-    userEmail: z.string().email(),
-    userId: z.string(),
-});
-export type SupportRequestInput = z.infer<typeof SupportRequestInputSchema>;
+import { SupportRequestInputSchema, type SupportRequestInput } from '@/lib/actions';
 
 
 const submitSupportRequestFlow = ai.defineFlow(

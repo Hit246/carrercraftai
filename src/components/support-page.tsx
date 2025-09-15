@@ -15,13 +15,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { LifeBuoy, Mail, User, Building, Send, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { submitSupportRequestAction } from '@/lib/actions';
+import { submitSupportRequestAction, SupportRequestInputSchema } from '@/lib/actions';
 
-const formSchema = z.object({
-  subject: z.string().min(5, { message: 'Subject must be at least 5 characters.' }),
-  message: z.string().min(20, { message: 'Message must be at least 20 characters.' }),
-  category: z.enum(['billing', 'technical', 'feedback', 'other']),
-});
+const formSchema = SupportRequestInputSchema.omit({ userEmail: true, userId: true });
 
 export function SupportPage() {
   const { toast } = useToast();
@@ -38,7 +34,7 @@ export function SupportPage() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user) {
+    if (!user || !user.email) {
         toast({
             title: 'Not Authenticated',
             description: 'You must be logged in to submit a support request.',
@@ -50,7 +46,7 @@ export function SupportPage() {
     try {
         await submitSupportRequestAction({
             ...values,
-            userEmail: user.email!,
+            userEmail: user.email,
             userId: user.uid,
         });
 
