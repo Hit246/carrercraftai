@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -10,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Sparkles, CheckCircle, XCircle, Lightbulb, Upload, Crown } from 'lucide-react';
+import { Loader2, Sparkles, CheckCircle, XCircle, Lightbulb, Upload, Crown, GraduationCap, ExternalLink } from 'lucide-react';
 import type { AnalyzeResumeOutput } from '@/ai/flows/resume-analyzer';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
@@ -22,7 +23,8 @@ const formSchema = z.object({
   ).refine(
     (file) => ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type),
     "Please upload a PDF or DOCX file."
-  )
+  ),
+  desiredRole: z.string().optional(),
 });
 
 const fileToDataUri = (file: File): Promise<string> => {
@@ -46,16 +48,19 @@ export function ResumeAnalyzerPage() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      desiredRole: '',
+    }
   });
 
   const canUseFeature = plan !== 'free' || credits > 0;
   
-  const performAnalysis = async (resumeDataUri: string) => {
+  const performAnalysis = async (resumeDataUri: string, desiredRole?: string) => {
     setIsLoading(true);
     setAnalysisResult(null);
 
     try {
-        const result = await analyzeResumeAction({ resumeDataUri });
+        const result = await analyzeResumeAction({ resumeDataUri, desiredRole });
         setAnalysisResult(result);
     } catch (error) {
         console.error(error);
@@ -96,7 +101,7 @@ export function ResumeAnalyzerPage() {
         await useCredit();
     }
     const resumeDataUri = await fileToDataUri(values.resumeFile);
-    performAnalysis(resumeDataUri);
+    performAnalysis(resumeDataUri, values.desiredRole);
   }
 
   if (isInitialAnalysis) {
@@ -127,34 +132,49 @@ export function ResumeAnalyzerPage() {
             <Sparkles className="text-primary"/> AI Resume Analyzer
           </CardTitle>
           <CardDescription>
-            Upload your resume (PDF or DOCX) to get AI-powered feedback.
+            Upload your resume (PDF or DOCX) to get AI-powered feedback. For a more targeted analysis, provide your desired job role.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="resumeFile"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Upload a different resume</FormLabel>
-                    <FormControl>
-                        <div className="relative">
-                            <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input
-                                type="file"
-                                className="pl-10"
-                                accept=".pdf,.docx"
-                                onChange={(e) => field.onChange(e.target.files?.[0])}
-                                disabled={isLoading}
-                            />
-                        </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+               <div className="grid md:grid-cols-2 gap-6">
+                <FormField
+                    control={form.control}
+                    name="resumeFile"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Upload Resume</FormLabel>
+                        <FormControl>
+                            <div className="relative">
+                                <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Input
+                                    type="file"
+                                    className="pl-10"
+                                    accept=".pdf,.docx"
+                                    onChange={(e) => field.onChange(e.target.files?.[0])}
+                                    disabled={isLoading}
+                                />
+                            </div>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="desiredRole"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Desired Role (Optional)</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g., Senior Product Manager" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+               </div>
               <Button type="submit" disabled={isLoading || !canUseFeature} size="lg" className="w-full">
                 {isLoading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing...</>
@@ -212,6 +232,31 @@ export function ResumeAnalyzerPage() {
                         </ul>
                     </CardContent>
                 </Card>
+                {analysisResult.skillGapAnalysis && analysisResult.skillGapAnalysis.missingSkills.length > 0 && (
+                    <Card>
+                         <CardHeader className="flex flex-row items-center gap-3 space-y-0">
+                            <GraduationCap className="w-6 h-6 text-blue-500" />
+                            <CardTitle>Skill Gap Analysis & Learning</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="space-y-4">
+                                {analysisResult.skillGapAnalysis.missingSkills.map((gap, index) => (
+                                    <li key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 rounded-md border bg-muted/50">
+                                        <div className='flex-1'>
+                                            <p className="font-semibold">{gap.skill}</p>
+                                            <p className="text-sm text-muted-foreground">Suggested resource: {gap.resourceName}</p>
+                                        </div>
+                                        <Button asChild size="sm" variant="link" className="mt-2 sm:mt-0">
+                                            <Link href={gap.resourceUrl} target="_blank" rel="noopener noreferrer">
+                                                View Course <ExternalLink className="ml-2 h-4 w-4"/>
+                                            </Link>
+                                        </Button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
         </div>
     )}
