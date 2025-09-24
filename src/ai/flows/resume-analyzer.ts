@@ -29,7 +29,6 @@ const AnalyzeResumeOutputSchema = z.object({
     missingSkills: z.array(z.object({
         skill: z.string().describe('A specific skill that is missing for the desired role.'),
         resourceName: z.string().describe('The name of a plausible online course or resource to learn the skill.'),
-        resourceUrl: z.string().url().describe('A fictional but plausible URL to the learning resource (e.g., on Coursera, Udemy). Include a fictional affiliate tag like "?aff=careercraft".'),
     })).describe('A list of missing skills and learning resources, if a desired role was provided. If no role is provided, this should be an empty array.'),
   }).optional().describe('An analysis of missing skills for a desired role.'),
 });
@@ -56,9 +55,8 @@ Provide your feedback using the following strict structure, with each section co
 {{#if desiredRole}}
 - **Skill Gap Analysis**: The user is interested in a "{{desiredRole}}" role.
   1. Identify the top 3-5 most critical skills for a "{{desiredRole}}" that are missing from the resume.
-  2. For each missing skill, suggest a plausible online course (e.g., from Coursera, Udemy, or a specialized platform) that would help the user learn it.
-  3. Provide a fictional but realistic URL for each course. Append "?aff=careercraft" to each URL.
-  4. Format this as a list of objects under the 'skillGapAnalysis.missingSkills' key. If no skills are missing, return an empty array.
+  2. For each missing skill, suggest a plausible online course title (e.g., "Advanced Python for Data Science" or "Certified Scrum Master").
+  3. Format this as a list of objects under the 'skillGapAnalysis.missingSkills' key. If no skills are missing, return an empty array. Do not generate a URL.
 {{/if}}
 `,
 });

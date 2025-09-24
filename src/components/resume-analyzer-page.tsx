@@ -240,19 +240,21 @@ export function ResumeAnalyzerPage() {
                         </CardHeader>
                         <CardContent>
                             <ul className="space-y-4">
-                                {analysisResult.skillGapAnalysis.missingSkills.map((gap, index) => (
+                                {analysisResult.skillGapAnalysis.missingSkills.map((gap, index) => {
+                                    const searchUrl = `https://www.coursera.org/search?query=${encodeURIComponent(gap.skill)}`;
+                                    return (
                                     <li key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 rounded-md border bg-muted/50">
                                         <div className='flex-1'>
                                             <p className="font-semibold">{gap.skill}</p>
                                             <p className="text-sm text-muted-foreground">Suggested resource: {gap.resourceName}</p>
                                         </div>
                                         <Button asChild size="sm" variant="link" className="mt-2 sm:mt-0">
-                                            <Link href={gap.resourceUrl} target="_blank" rel="noopener noreferrer">
-                                                View Course <ExternalLink className="ml-2 h-4 w-4"/>
+                                            <Link href={searchUrl} target="_blank" rel="noopener noreferrer">
+                                                Find Courses <ExternalLink className="ml-2 h-4 w-4"/>
                                             </Link>
                                         </Button>
                                     </li>
-                                ))}
+                                )})}
                             </ul>
                         </CardContent>
                     </Card>
@@ -263,5 +265,3 @@ export function ResumeAnalyzerPage() {
     </div>
   );
 }
-
-    
