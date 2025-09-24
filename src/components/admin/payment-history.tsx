@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, Shield } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 type Plan = 'free' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
@@ -34,26 +35,36 @@ interface UserData {
 export function PaymentHistory() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   const fetchUsers = async () => {
     setIsLoading(true);
-    const usersCollectionRef = collection(db, 'users');
-    const q = query(
-        usersCollectionRef, 
-        where('plan', 'in', ['pro', 'recruiter']),
-        orderBy('planUpdatedAt', 'desc')
-    );
-    const usersSnapshot = await getDocs(q);
-    const usersList = usersSnapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() } as UserData));
-      
-    setUsers(usersList);
-    setIsLoading(false);
+    try {
+        const usersCollectionRef = collection(db, 'users');
+        const q = query(
+            usersCollectionRef, 
+            where('plan', 'in', ['pro', 'recruiter']),
+            orderBy('planUpdatedAt', 'desc')
+        );
+        const usersSnapshot = await getDocs(q);
+        const usersList = usersSnapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() } as UserData));
+        setUsers(usersList);
+    } catch(e) {
+        console.error(e);
+        toast({
+            title: 'Error Fetching History',
+            description: 'Could not load payment history. You may need to create a Firestore index.',
+            variant: 'destructive',
+        });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [toast]);
 
   const getPlanBadgeVariant = (plan: Plan) => {
     switch (plan) {

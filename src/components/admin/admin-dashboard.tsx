@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { formatDistanceToNow } from 'date-fns';
 import { Skeleton } from "../ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserData {
     id: string;
@@ -50,6 +51,7 @@ export function AdminDashboard() {
     const [planDistribution, setPlanDistribution] = useState<PlanCount | null>(null);
     const [recentUsers, setRecentUsers] = useState<UserData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { toast } = useToast();
     
     useEffect(() => {
         const fetchData = async () => {
@@ -59,21 +61,18 @@ export function AdminDashboard() {
                 const usersSnapshot = await getDocs(usersCollectionRef);
                 const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserData));
 
-                // Set total user count
                 setUserCount(usersList.length);
 
-                // Calculate plan distribution
                 const plans: PlanCount = { free: 0, pro: 0, recruiter: 0 };
                 usersList.forEach(user => {
-                    if (user.plan) {
+                    if (user.plan && (user.plan === 'free' || user.plan === 'pro' || user.plan === 'recruiter')) {
                         plans[user.plan]++;
                     } else {
-                        plans['free']++; // Default to free if no plan is set
+                        plans['free']++;
                     }
                 });
                 setPlanDistribution(plans);
 
-                // Get recent users
                 const recentUsersQuery = query(usersCollectionRef, orderBy('createdAt', 'desc'), limit(5));
                 const recentUsersSnapshot = await getDocs(recentUsersQuery);
                 const recentUsersList = recentUsersSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()} as UserData));
@@ -81,13 +80,18 @@ export function AdminDashboard() {
 
             } catch (error) {
                 console.error("Error fetching admin data:", error);
+                toast({
+                    title: 'Error Fetching Data',
+                    description: 'Could not load dashboard data. You may need to create a Firestore index.',
+                    variant: 'destructive',
+                });
             } finally {
                 setIsLoading(false);
             }
         };
 
         fetchData();
-    }, []);
+    }, [toast]);
 
     const chartData = planDistribution ? [
         { name: 'Free', count: planDistribution.free, fill: 'var(--color-free)' },

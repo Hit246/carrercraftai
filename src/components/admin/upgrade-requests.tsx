@@ -48,17 +48,27 @@ export function UpgradeRequestsPage() {
 
   const fetchUsers = async () => {
     setIsLoading(true);
-    const usersCollectionRef = collection(db, 'users');
-    const q = query(usersCollectionRef, where('plan', '==', 'pending'), orderBy('planUpdatedAt', 'desc'));
-    const usersSnapshot = await getDocs(q);
-    const usersList = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as UserData));
-    setUsers(usersList);
-    setIsLoading(false);
+    try {
+        const usersCollectionRef = collection(db, 'users');
+        const q = query(usersCollectionRef, where('plan', '==', 'pending'), orderBy('planUpdatedAt', 'desc'));
+        const usersSnapshot = await getDocs(q);
+        const usersList = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as UserData));
+        setUsers(usersList);
+    } catch(e) {
+        console.error(e);
+        toast({
+            title: 'Error Fetching Requests',
+            description: 'Could not load upgrade requests. You may need to create a Firestore index.',
+            variant: 'destructive',
+        });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [toast]);
 
   const handlePlanChange = async (userId: string, newPlan: Plan) => {
     const userRef = doc(db, 'users', userId);
