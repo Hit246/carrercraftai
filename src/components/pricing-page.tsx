@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
-import { Check, Crown, Users } from "lucide-react"
+import { Check, Crown, Users, Target } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { PaymentDialog } from "./payment-dialog"
@@ -77,6 +77,7 @@ export function PricingPage() {
               <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Professional Templates</li>
               <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> 3 AI Credits</li>
               <li className="flex items-center gap-2 text-muted-foreground"><Crown className="h-5 w-5" /> Unlimited AI Features</li>
+              <li className="flex items-center gap-2 text-muted-foreground"><Target className="h-5 w-5" /> ATS Optimizer</li>
                <li className="flex items-center gap-2 text-muted-foreground"><Users className="h-5 w-5" /> AI Candidate Matcher</li>
             </ul>
           </CardContent>
@@ -101,6 +102,7 @@ export function PricingPage() {
              <ul className="space-y-2 text-left">
               <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Everything in Free, plus:</li>
               <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> Unlimited AI Resume Analyzer</li>
+              <li className="flex items-center gap-2 font-semibold"><Target className="h-5 w-5 text-amber-500" /> Unlimited ATS Optimizer</li>
               <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> Unlimited AI Job Matcher</li>
               <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> Unlimited AI Cover Letter Generator</li>
               <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Priority Support</li>
