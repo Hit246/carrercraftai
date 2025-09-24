@@ -29,6 +29,7 @@ import {
   Users2,
   Home,
   Shield,
+  Target,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -73,6 +74,7 @@ function AppLayoutContent({
   const getPageTitle = () => {
     if (isActive('/dashboard')) return 'Home';
     if (isActive('/resume-analyzer')) return 'Resume Analyzer';
+    if (isActive('/ats-optimizer')) return 'ATS Optimizer';
     if (isActive('/job-matcher')) return 'Job Matcher';
     if (isActive('/cover-letter-generator')) return 'Cover Letter Generator';
     if (isActive('/candidate-matcher')) return 'Candidate Matcher';
@@ -133,6 +135,15 @@ function AppLayoutContent({
                     <Link href="/resume-analyzer">
                     <Sparkles />
                     <span>Resume Analyzer</span>
+                    {(plan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    </Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive('/ats-optimizer')}>
+                    <Link href="/ats-optimizer">
+                    <Target />
+                    <span>ATS Optimizer</span>
                     {(plan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                     </Link>
                 </SidebarMenuButton>
