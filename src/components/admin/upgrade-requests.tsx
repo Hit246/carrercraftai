@@ -68,7 +68,7 @@ export function UpgradeRequestsPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, [toast]);
+  }, []);
 
   const handlePlanChange = async (userId: string, newPlan: Plan) => {
     const userRef = doc(db, 'users', userId);

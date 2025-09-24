@@ -67,7 +67,7 @@ export function CancellationRequests() {
 
   useEffect(() => {
     fetchUsers();
-  }, [toast]);
+  }, []);
 
   const handleCancellation = async (userId: string) => {
     const userRef = doc(db, 'users', userId);

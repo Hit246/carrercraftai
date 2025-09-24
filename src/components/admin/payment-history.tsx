@@ -64,7 +64,7 @@ export function PaymentHistory() {
 
   useEffect(() => {
     fetchUsers();
-  }, [toast]);
+  }, []);
 
   const getPlanBadgeVariant = (plan: Plan) => {
     switch (plan) {
