@@ -23,9 +23,8 @@ import {
   GenerateCoverLetterOutput,
 } from '@/ai/flows/cover-letter-generator';
 import { atsOptimizer, AtsOptimizerInput, AtsOptimizerOutput } from '@/ai/flows/ats-optimizer';
-import { submitSupportRequest } from '@/ai/flows/support-request';
+import { submitSupportRequest, SupportRequestInput } from '@/ai/flows/support-request';
 import { db } from './firebase';
-import { z } from 'zod';
 
 export async function analyzeResumeAction(
   input: AnalyzeResumeInput
@@ -70,17 +69,9 @@ export async function getPaymentSettings() {
     return { upiId: 'your-upi-id@bank', qrCodeImageUrl: 'https://placehold.co/200x200.png' };
 }
 
-export const SupportRequestInputSchema = z.object({
-    subject: z.string().min(5),
-    message: z.string().min(20),
-    category: z.enum(['billing', 'technical', 'feedback', 'other']),
-    userEmail: z.string().email(),
-    userId: z.string(),
-});
-export type SupportRequestInput = z.infer<typeof SupportRequestInputSchema>;
-
 export async function submitSupportRequestAction(
     input: SupportRequestInput
   ) {
     return await submitSupportRequest(input);
 }
+export type { SupportRequestInput };

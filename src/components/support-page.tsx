@@ -15,7 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { LifeBuoy, Mail, User, Building, Send, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { submitSupportRequestAction, SupportRequestInput } from '@/lib/actions';
+import { submitSupportRequestAction } from '@/lib/actions';
+import type { SupportRequestInput } from '@/lib/actions';
 
 const formSchema = z.object({
   subject: z.string().min(5),
