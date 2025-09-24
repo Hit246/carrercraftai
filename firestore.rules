@@ -1,43 +1,46 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users can manage their own data.
+    // Helper function to check if a user is the owner of a document
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Users can only read/write their own document
     match /users/{userId} {
-      // A user can create their own user document upon signup.
-      // They can read, update, and delete their own document.
-      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+      allow read, update, delete: if isOwner(userId);
       allow create: if request.auth != null;
 
-      // A user can perform all actions on their own resume versions subcollection.
-      // The `read` permission covers both `get` (single doc) and `list` (queries).
-      // The `write` permission covers `create`, `update`, and `delete`.
+      // Users can manage their own resume versions
       match /resumeVersions/{versionId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read, write: if isOwner(userId);
       }
     }
 
-    // Teams can only be read or written to by their owner.
+    // Teams can be read by anyone, but only created by authenticated users
     match /teams/{teamId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.owner;
-      
-      // Team members can be managed by the team owner.
+      allow read;
+      allow create: if request.auth != null;
+
+      // Team members can be managed by the team owner
       match /members/{memberId} {
-         allow read, write: if request.auth != null && request.auth.uid == get(/databases/$(database)/documents/teams/$(teamId)).data.owner;
+        allow read;
+        allow write, delete: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       }
     }
 
-    // Admins can read/write global settings. All authenticated users can read them.
-    match /settings/payment {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+    // Public settings are readable by anyone, but only writable by admins (not enforced by rules, but by backend logic)
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if false; // Managed via Admin SDK
     }
 
-    // Authenticated users can create support requests.
-    // Admins can read all support requests.
+    // Users can create support requests for themselves
     match /supportRequests/{requestId} {
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      allow read: if request.auth != null && request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read, write: if false; // Only accessible via Admin SDK
     }
   }
 }
