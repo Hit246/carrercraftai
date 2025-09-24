@@ -12,7 +12,6 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from './ui/skeleton';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -141,34 +140,149 @@ export const ResumeBuilder = () => {
     
     const canUseFeature = plan !== 'free' || credits > 0;
 
-    const generatePdfFromDom = async () => {
-        const input = resumePreviewRef.current;
-        if (!input) return null;
-    
-        const canvas = await html2canvas(input, {
-            scale: 2,
-            useCORS: true,
-            logging: false,
+    const generatePdfFromData = async () => {
+        if (!resumeData) return null;
+
+        const doc = new jsPDF({
+            orientation: 'p',
+            unit: 'pt',
+            format: 'a4'
         });
         
-        // A4 page dimensions in points: 595.28 x 841.89
-        const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'pt',
-            format: 'a4',
+        const pageW = doc.internal.pageSize.getWidth();
+        const margin = 40;
+        let y = margin;
+
+        const primaryColor = '#6d28d9'; // A purple color similar to the theme
+        const textColor = '#374151';
+        const lightTextColor = '#6b7280';
+        
+        doc.setFont('helvetica', 'normal');
+
+        // --- HEADER ---
+        doc.setFontSize(28).setFont('helvetica', 'bold');
+        doc.setTextColor(textColor);
+        doc.text(resumeData.name, pageW / 2, y, { align: 'center' });
+        y += 30;
+
+        doc.setFontSize(14).setFont('helvetica', 'normal');
+        doc.setTextColor(primaryColor);
+        doc.text(resumeData.title, pageW / 2, y, { align: 'center' });
+        y += 20;
+
+        doc.setFontSize(9);
+        doc.setTextColor(lightTextColor);
+        const contactInfo = [resumeData.phone, resumeData.email, resumeData.linkedin].filter(Boolean).join(' | ');
+        doc.text(contactInfo, pageW / 2, y, { align: 'center' });
+        y += 15;
+
+        // --- BORDER ---
+        doc.setDrawColor(229, 231, 235); // gray-200
+        doc.setLineWidth(1.5);
+        doc.line(margin, y, pageW - margin, y);
+        y += 25;
+
+
+        const addSection = (title: string) => {
+            if (y > doc.internal.pageSize.getHeight() - margin) {
+                doc.addPage();
+                y = margin;
+            }
+            doc.setFontSize(11).setFont('helvetica', 'bold');
+            doc.setTextColor(primaryColor);
+            doc.text(title.toUpperCase(), margin, y);
+            y += 8;
+            doc.line(margin, y, pageW - margin, y);
+            y += 15;
+        };
+
+        const addWrappedText = (text: string, x: number, startY: number, options: { maxWidth: number, fontSize: number, style: 'normal' | 'bold' }) => {
+            doc.setFontSize(options.fontSize).setFont('helvetica', options.style);
+            const lines = doc.splitTextToSize(text, options.maxWidth);
+            doc.text(lines, x, startY);
+            return startY + (lines.length * options.fontSize * 1.15); // Adjust line height
+        };
+
+        // --- SUMMARY ---
+        addSection('Summary');
+        doc.setTextColor(textColor);
+        y = addWrappedText(resumeData.summary, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal' });
+        y += 15;
+
+
+        // --- EXPERIENCE ---
+        addSection('Experience');
+        resumeData.experience.forEach(exp => {
+            doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
+            doc.text(exp.title, margin, y);
+            
+            doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
+            doc.text(exp.dates, pageW - margin, y, { align: 'right'});
+            y += 14;
+
+            doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
+            doc.text(exp.company, margin, y);
+            y += 14;
+            
+            doc.setFontSize(10).setTextColor(lightTextColor);
+            const bulletPoints = exp.description.split('\n').map(line => line.replace(/^-/, '').trim());
+            bulletPoints.forEach(point => {
+                if(point) {
+                    y = addWrappedText(`- ${point}`, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
+                }
+            });
+            y += 15;
         });
-    
-        const a4Width = 595.28;
-        const imgWidth = a4Width;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-        return pdf;
+
+        // --- PROJECTS ---
+        if(resumeData.projects && resumeData.projects.length > 0) {
+            addSection('Projects');
+            resumeData.projects.forEach(proj => {
+                doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
+                doc.text(proj.name, margin, y);
+                if (proj.url) {
+                    doc.setTextColor(primaryColor);
+                    doc.textWithLink(' (link)', margin + doc.getTextWidth(proj.name), y, { url: proj.url });
+                    doc.setTextColor(textColor);
+                }
+                y += 14;
+                y = addWrappedText(proj.description, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
+                
+                doc.setFontSize(9).setFont('helvetica', 'bold').setTextColor(textColor);
+                doc.text('Technologies: ', margin, y);
+                doc.setFont('helvetica', 'normal').setTextColor(lightTextColor);
+                doc.text(proj.technologies, margin + doc.getTextWidth('Technologies: '), y);
+                y += 20;
+            });
+        }
+
+        // --- EDUCATION ---
+        addSection('Education');
+        resumeData.education.forEach(edu => {
+             doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
+            doc.text(edu.school, margin, y);
+            
+            doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
+            doc.text(edu.dates, pageW - margin, y, { align: 'right'});
+            y += 14;
+
+            doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
+            doc.text(edu.degree, margin, y);
+            y += 15;
+        });
+        
+        // --- SKILLS ---
+        addSection('Skills');
+        doc.setFontSize(10).setTextColor(textColor);
+        y = addWrappedText(resumeData.skills, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
+        
+        return doc;
     };
+
 
     const handleExport = async () => {
         toast({ title: "Generating PDF...", description: "Please wait." });
-        const pdf = await generatePdfFromDom();
+        const pdf = await generatePdfFromData();
         if (pdf) {
             pdf.save(`${resumeData?.name || 'resume'}.pdf`);
             toast({ title: "Download Complete!", description: "Your resume has been downloaded." });
@@ -195,7 +309,7 @@ export const ResumeBuilder = () => {
             if (plan === 'free') {
                 await useCredit();
             }
-            const pdf = await generatePdfFromDom();
+            const pdf = await generatePdfFromData();
             if (pdf) {
                 const dataUri = pdf.output('datauristring');
                 // Store in session storage to pass to the next page
