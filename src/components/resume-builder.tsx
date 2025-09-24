@@ -152,6 +152,7 @@ export const ResumeBuilder = () => {
         const pageW = doc.internal.pageSize.getWidth();
         const margin = 40;
         let y = margin;
+        const lineSpacing = 1.25;
 
         const primaryColor = '#6d28d9'; // A purple color similar to the theme
         const textColor = '#374151';
@@ -200,7 +201,7 @@ export const ResumeBuilder = () => {
             doc.setFontSize(options.fontSize).setFont('helvetica', options.style);
             const lines = doc.splitTextToSize(text, options.maxWidth);
             doc.text(lines, x, startY);
-            return startY + (lines.length * options.fontSize * 1.15); // Adjust line height
+            return startY + (lines.length * options.fontSize * lineSpacing);
         };
 
         // --- SUMMARY ---
@@ -218,11 +219,11 @@ export const ResumeBuilder = () => {
             
             doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
             doc.text(exp.dates, pageW - margin, y, { align: 'right'});
-            y += 14;
+            y += 14 * lineSpacing;
 
             doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
             doc.text(exp.company, margin, y);
-            y += 14;
+            y += 14 * lineSpacing;
             
             doc.setFontSize(10).setTextColor(lightTextColor);
             const bulletPoints = exp.description.split('\n').map(line => line.replace(/^-/, '').trim());
@@ -245,14 +246,14 @@ export const ResumeBuilder = () => {
                     doc.textWithLink(' (link)', margin + doc.getTextWidth(proj.name), y, { url: proj.url });
                     doc.setTextColor(textColor);
                 }
-                y += 14;
+                y += 14 * lineSpacing;
                 y = addWrappedText(proj.description, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
                 
                 doc.setFontSize(9).setFont('helvetica', 'bold').setTextColor(textColor);
                 doc.text('Technologies: ', margin, y);
                 doc.setFont('helvetica', 'normal').setTextColor(lightTextColor);
                 doc.text(proj.technologies, margin + doc.getTextWidth('Technologies: '), y);
-                y += 20;
+                y += 20 * lineSpacing;
             });
         }
 
@@ -264,7 +265,7 @@ export const ResumeBuilder = () => {
             
             doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
             doc.text(edu.dates, pageW - margin, y, { align: 'right'});
-            y += 14;
+            y += 14 * lineSpacing;
 
             doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
             doc.text(edu.degree, margin, y);
