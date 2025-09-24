@@ -144,32 +144,27 @@ export const ResumeBuilder = () => {
     const generatePdfFromDom = async () => {
         const input = resumePreviewRef.current;
         if (!input) return null;
+    
+        const canvas = await html2canvas(input, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+        });
         
-        const canvas = await html2canvas(input, { scale: 2, useCORS: true, logging: false });
-        const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
-        
+        // A4 page dimensions in points: 595.28 x 841.89
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'pt',
+            format: 'a4',
+        });
+    
         const a4Width = 595.28;
-        const a4Height = 841.89;
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const canvasRatio = canvasWidth / canvasHeight;
-        const a4Ratio = a4Width / a4Height;
+        const imgWidth = a4Width;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
     
-        let finalWidth, finalHeight;
-        if (canvasRatio > a4Ratio) {
-            finalWidth = a4Width;
-            finalHeight = a4Width / canvasRatio;
-        } else {
-            finalHeight = a4Height;
-            finalWidth = a4Height * canvasRatio;
-        }
-    
-        const x = (a4Width - finalWidth) / 2;
-        const y = (a4Height - finalHeight) / 2;
-    
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, finalWidth, finalHeight);
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
         return pdf;
-    }
+    };
 
     const handleExport = async () => {
         toast({ title: "Generating PDF...", description: "Please wait." });
