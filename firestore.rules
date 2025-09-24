@@ -3,44 +3,60 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if a user is the owner of a document
+    // Helper function to check if a user is an admin.
+    function isAdmin() {
+      return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+    }
+
+    // Helper function to check if the user is the owner of the document.
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
-
-    // Users can only read/write their own document
+    
+    // Rules for the 'users' collection.
     match /users/{userId} {
-      allow read, update, delete: if isOwner(userId);
+      // Admins can read/write any user document.
+      // Regular users can only read/write their own document.
+      allow read, write: if isOwner(userId) || isAdmin();
+      // Any authenticated user can create a user document on signup.
       allow create: if request.auth != null;
 
-      // Users can manage their own resume versions
+      // Rules for the 'resumeVersions' subcollection.
       match /resumeVersions/{versionId} {
-        allow read, write: if isOwner(userId);
+        // Users can manage their own resume versions. Admins have access too.
+        allow read, write: if isOwner(userId) || isAdmin();
       }
     }
 
-    // Teams can be read by anyone, but only created by authenticated users
+    // Rules for the 'teams' collection.
     match /teams/{teamId} {
-      allow read;
-      allow create: if request.auth != null;
+      // Allow read/write access for admins.
+      // Team creation is handled by backend logic, but reading is open for team members.
+      allow read, write: if isAdmin();
 
-      // Team members can be managed by the team owner
+      // Rules for the 'members' subcollection.
       match /members/{memberId} {
-        allow read;
-        allow write, delete: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+        // Admins have full access.
+        allow read, write: if isAdmin();
       }
     }
 
-    // Public settings are readable by anyone, but only writable by admins (not enforced by rules, but by backend logic)
+    // Rules for the 'settings' collection (e.g., payment info).
     match /settings/{settingId} {
-      allow read: if true;
-      allow write: if false; // Managed via Admin SDK
+      // Readable by any authenticated user (to show payment details).
+      allow read: if request.auth != null;
+      // Only writable by admins (handled via backend/Admin SDK).
+      allow write: if isAdmin();
     }
 
-    // Users can create support requests for themselves
+    // Rules for the 'supportRequests' collection.
     match /supportRequests/{requestId} {
+      // Users can create support requests for themselves.
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read, write: if false; // Only accessible via Admin SDK
+      // Only admins can read/update support requests.
+      allow read, update: if isAdmin();
+      // Nobody can delete support requests through client-side code.
+      allow delete: if false;
     }
   }
 }

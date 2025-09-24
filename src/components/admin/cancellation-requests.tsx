@@ -56,8 +56,8 @@ export function CancellationRequests() {
     } catch(e) {
       console.error(e);
        toast({
-        title: 'Error',
-        description: 'Failed to fetch cancellation requests. You may need to create a Firestore index.',
+        title: 'Error Fetching Requests',
+        description: 'Could not load cancellation requests. You may need to create a Firestore index.',
         variant: 'destructive',
       });
     } finally {
@@ -67,7 +67,7 @@ export function CancellationRequests() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [toast]);
 
   const handleCancellation = async (userId: string) => {
     const userRef = doc(db, 'users', userId);
