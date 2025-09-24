@@ -46,6 +46,7 @@ This collection stores the complete resume data for each user, which is edited i
 | `skills`    | `string`             | A comma-separated list of skills.                                         |
 | `experience`| `Array<Map>`         | An array of objects, where each object represents a work experience entry.|
 | `education` | `Array<Map>`         | An array of objects, where each object represents an education entry.     |
+| `projects`  | `Array<Map>`         | An array of objects, where each object represents a project showcase entry. |
 
 #### `experience` Object Structure:
 
@@ -65,6 +66,16 @@ This collection stores the complete resume data for each user, which is edited i
 | `school` | `string` | The name of the school or university.                 |
 | `degree` | `string` | The degree obtained (e.g., "B.S. in Computer Science"). |
 | `dates`  | `string` | The dates of attendance (e.g., "2016 - 2020").        |
+
+#### `projects` Object Structure:
+
+| Field         | Type     | Description                                              |
+| ------------- | -------- | -------------------------------------------------------- |
+| `id`          | `number` | A unique timestamp-based ID for the entry.               |
+| `name`        | `string` | The name of the project.                                 |
+| `description` | `string` | A brief description of the project.                      |
+| `url`         | `string` | A URL to the project (e.g., GitHub, live demo).          |
+| `technologies`| `string` | Comma-separated list of technologies used in the project.|
 
 ---
 
