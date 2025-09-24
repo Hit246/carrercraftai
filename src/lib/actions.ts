@@ -23,7 +23,9 @@ import {
   GenerateCoverLetterOutput,
 } from '@/ai/flows/cover-letter-generator';
 import { atsOptimizer, AtsOptimizerInput, AtsOptimizerOutput } from '@/ai/flows/ats-optimizer';
-import { submitSupportRequest, SupportRequestInput } from '@/ai/flows/support-request';
+import { submitSupportRequest } from '@/ai/flows/support-request';
+import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeVersionNameOutput } from '@/ai/flows/resume-version-namer';
+import type { SupportRequestInput } from '@/ai/flows/support-request';
 import { db } from './firebase';
 
 export async function analyzeResumeAction(
@@ -74,4 +76,11 @@ export async function submitSupportRequestAction(
   ) {
     return await submitSupportRequest(input);
 }
+
+export async function suggestResumeVersionNameAction(
+    input: SuggestResumeVersionNameInput
+    ): Promise<SuggestResumeVersionNameOutput> {
+    return await suggestResumeVersionName(input);
+}
+
 export type { SupportRequestInput };
