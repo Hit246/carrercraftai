@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Download, Bot, Save, Loader2 } from 'lucide-react';
+import { PlusCircle, Trash2, Download, Bot, Save, Loader2, Link as LinkIcon } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -14,6 +14,7 @@ import { Skeleton } from './ui/skeleton';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface Experience {
     id: number;
@@ -30,6 +31,14 @@ interface Education {
     dates: string;
 }
 
+interface Project {
+    id: number;
+    name: string;
+    description: string;
+    url: string;
+    technologies: string;
+}
+
 interface ResumeData {
     name: string;
     title: string;
@@ -40,6 +49,7 @@ interface ResumeData {
     experience: Experience[];
     education: Education[];
     skills: string;
+    projects: Project[];
 }
 
 const initialResumeData: ResumeData = {
@@ -54,7 +64,10 @@ const initialResumeData: ResumeData = {
         { id: 2, title: 'Junior Developer', company: 'Innovate LLC', dates: '2018 - 2020', description: '- Contributed to the frontend development of a major e-commerce website using React and Redux.\n- Implemented responsive UI components that improved user experience on mobile devices.\n- Fixed bugs and improved application performance.' }
     ],
     education: [{ id: 1, school: 'University of Technology', degree: 'B.S. in Computer Science', dates: '2014 - 2018' }],
-    skills: 'React, Node.js, TypeScript, Next.js, PostgreSQL, Docker, AWS, GraphQL, REST APIs'
+    skills: 'React, Node.js, TypeScript, Next.js, PostgreSQL, Docker, AWS, GraphQL, REST APIs',
+    projects: [
+        { id: 1, name: 'E-commerce Platform', description: 'A full-stack e-commerce website with features like product search, shopping cart, and a secure checkout process.', url: 'https://github.com/johndoe/e-commerce', technologies: 'React, Node.js, Express, MongoDB' }
+    ]
 }
 
 export const ResumeBuilder = () => {
@@ -75,7 +88,12 @@ export const ResumeBuilder = () => {
                 const resumeRef = doc(db, 'resumes', user.uid);
                 const resumeSnap = await getDoc(resumeRef);
                 if (resumeSnap.exists()) {
-                    setResumeData(resumeSnap.data() as ResumeData);
+                    const data = resumeSnap.data() as ResumeData;
+                    // Ensure projects array exists
+                    if (!data.projects) {
+                        data.projects = [];
+                    }
+                    setResumeData(data);
                 } else {
                     // Pre-fill with user email if available and it's a new resume
                     const newResumeData = { ...initialResumeData, email: user.email || 'your-email@example.com' };
@@ -102,6 +120,22 @@ export const ResumeBuilder = () => {
         setResumeData(prev => prev && {
             ...prev,
             experience: prev.experience.filter(exp => exp.id !== id)
+        });
+    };
+
+    const handleAddProject = () => {
+        if (!resumeData) return;
+        setResumeData(prev => prev && {
+            ...prev,
+            projects: [...(prev.projects || []), { id: Date.now(), name: '', description: '', url: '', technologies: '' }]
+        });
+    };
+
+    const handleRemoveProject = (id: number) => {
+        if (!resumeData) return;
+        setResumeData(prev => prev && {
+            ...prev,
+            projects: prev.projects.filter(proj => proj.id !== id)
         });
     };
     
@@ -209,13 +243,18 @@ export const ResumeBuilder = () => {
         setResumeData(prev => prev && ({ ...prev, [id]: value }));
     };
 
-    const handleNestedChange = (section: 'experience' | 'education', id: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleNestedChange = (section: 'experience' | 'education' | 'projects', id: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setResumeData(prev => prev && ({
-            ...prev,
-            [section]: prev[section].map(item => item.id === id ? { ...item, [name]: value } : item)
-        }));
+        setResumeData(prev => {
+            if (!prev) return null;
+            const sectionData = prev[section as keyof ResumeData] as any[];
+            return {
+                ...prev,
+                [section]: sectionData.map(item => item.id === id ? { ...item, [name]: value } : item)
+            };
+        });
     };
+    
 
     if (isLoading || authLoading) {
         return (
@@ -272,6 +311,24 @@ export const ResumeBuilder = () => {
                                 <Input name="company" placeholder="Company" value={exp.company} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
                                 <Input name="dates" placeholder="Dates (e.g., Jan 2020 - Present)" value={exp.dates} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
                                 <Textarea name="description" placeholder="Description (use bullet points starting with -)" value={exp.description} onChange={(e) => handleNestedChange('experience', exp.id, e)} rows={4}/>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                        <CardTitle>Projects</CardTitle>
+                        <Button variant="ghost" size="sm" onClick={handleAddProject}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {(resumeData.projects || []).map((proj) => (
+                            <div key={proj.id} className="p-4 border rounded-lg relative space-y-2">
+                                <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleRemoveProject(proj.id)}><Trash2 className="h-4 w-4" /></Button>
+                                <Input name="name" placeholder="Project Name" value={proj.name} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
+                                <Input name="url" placeholder="Project URL" value={proj.url} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
+                                <Textarea name="description" placeholder="Project description..." value={proj.description} onChange={(e) => handleNestedChange('projects', proj.id, e)} rows={3} />
+                                <Input name="technologies" placeholder="Technologies Used (comma-separated)" value={proj.technologies} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
                             </div>
                         ))}
                     </CardContent>
@@ -344,6 +401,21 @@ export const ResumeBuilder = () => {
                                 ))}
                             </div>
                              <div className="mb-6">
+                                <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Projects</h3>
+                                {resumeData.projects && resumeData.projects.map(proj => (
+                                    <div key={proj.id} className="mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <h4 className="text-base font-semibold text-gray-800">{proj.name}</h4>
+                                            {proj.url && <Link href={proj.url} target="_blank" rel="noopener noreferrer"><LinkIcon className="h-3 w-3 text-primary hover:underline"/></Link>}
+                                        </div>
+                                        <p className="text-xs text-gray-700">{proj.description}</p>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            <span className="font-semibold">Technologies:</span> {proj.technologies}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                             <div className="mb-6">
                                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Education</h3>
                                 {resumeData.education.map(edu => (
                                     <div key={edu.id} className="mb-2">
@@ -370,5 +442,3 @@ export const ResumeBuilder = () => {
         </div>
     );
 };
-
-    
