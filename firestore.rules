@@ -1,50 +1,47 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isAdmin(email) {
-      return email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
-    }
-
-    // Admins have full access
-    match /{document=**} {
-      allow read, write: if isAdmin(request.auth.token.email);
-    }
-    
-    // Users can read/update their own document.
-    // New users can create their own document.
+    // Users can read and update their own user document.
+    // They can create their own user document on signup.
     match /users/{userId} {
       allow read, update: if request.auth.uid == userId;
       allow create: if request.auth.uid != null;
+
+      // Users can manage their own resume versions.
+      match /resumeVersions/{versionId} {
+        allow get, list, create, update, delete: if request.auth.uid == userId;
+      }
     }
 
-    // Users can read/write their own resume.
-    match /resumes/{userId} {
-      allow read, write: if request.auth.uid == userId;
+    // Team management rules for 'recruiter' plan users.
+    match /teams/{teamId} {
+      // Team owner can read, update, and delete the team.
+      allow get, update, delete: if request.auth.uid == resource.data.owner;
+      // Any authenticated user with a 'recruiter' plan can create a team.
+      allow create: if request.auth.uid != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.plan == 'recruiter';
+
+      // Rules for team members subcollection.
+      match /members/{memberId} {
+        // Team owner can add, view, and remove members.
+        allow get, list, create, delete: if request.auth.uid == get(/databases/$(database)/documents/teams/$(teamId)).data.owner;
+      }
     }
     
-    // Any authenticated user can create a team.
-    // The team owner can read and update their team document.
-    match /teams/{teamId} {
-      allow create: if request.auth.uid != null;
-      allow read, update: if request.auth.uid == get(/databases/$(database)/documents/teams/$(teamId)).data.owner;
-    }
-
-    // Team owners can manage their team members.
-    // Team members can read the list of members.
-    match /teams/{teamId}/members/{memberId} {
-        allow read: if request.auth.uid == get(/databases/$(database)/documents/teams/$(teamId)).data.owner 
-                    || exists(/databases/$(database)/documents/users/$(request.auth.uid))
-                       && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-
-        allow create, delete: if request.auth.uid == get(/databases/$(database)/documents/teams/$(teamId)).data.owner;
-    }
-
-    // All users can read the global payment settings.
+    // Global settings for payments.
     match /settings/payment {
-      allow read: if request.auth.uid != null;
+      // Allow any authenticated user to read payment settings.
+      allow get: if request.auth.uid != null;
+      // Disallow public writes. Only admin SDK should write to this.
+      allow write: if false; 
+    }
+
+    // Support requests can be created by any authenticated user.
+    match /supportRequests/{requestId} {
+        allow create: if request.auth.uid != null && request.resource.data.userId == request.auth.uid;
+        // Only admin should be able to read/update/delete support requests.
+        allow read, update, delete: if false;
     }
   }
 }
