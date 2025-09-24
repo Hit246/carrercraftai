@@ -5,15 +5,20 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Download, Bot, Save, Loader2, Link as LinkIcon } from 'lucide-react';
+import { PlusCircle, Trash2, Download, Bot, Save, Loader2, Link as LinkIcon, History, ChevronsUpDown } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, addDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from './ui/skeleton';
 import jsPDF from 'jspdf';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { suggestResumeVersionNameAction } from '@/lib/actions';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from './ui/command';
+import { Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Experience {
     id: number;
@@ -51,6 +56,13 @@ interface ResumeData {
     projects: Project[];
 }
 
+interface ResumeVersion {
+    id: string;
+    versionName: string;
+    updatedAt: any;
+    resumeData: ResumeData;
+}
+
 const initialResumeData: ResumeData = {
     name: 'John Doe',
     title: 'Software Engineer',
@@ -78,32 +90,50 @@ export const ResumeBuilder = () => {
     const [isSaving, setIsSaving] = React.useState(false);
     const [isAnalyzing, setIsAnalyzing] = React.useState(false);
     const resumePreviewRef = React.useRef<HTMLDivElement>(null);
+    const [versions, setVersions] = React.useState<ResumeVersion[]>([]);
+    const [currentVersion, setCurrentVersion] = React.useState<ResumeVersion | null>(null);
+    const [versionManagerOpen, setVersionManagerOpen] = React.useState(false);
 
 
     React.useEffect(() => {
-        const loadResumeData = async () => {
-            if (user) {
-                setIsLoading(true);
-                const resumeRef = doc(db, 'resumes', user.uid);
-                const resumeSnap = await getDoc(resumeRef);
-                if (resumeSnap.exists()) {
-                    const data = resumeSnap.data() as ResumeData;
-                    // Ensure projects array exists
-                    if (!data.projects) {
-                        data.projects = [];
-                    }
-                    setResumeData(data);
-                } else {
-                    // Pre-fill with user email if available and it's a new resume
-                    const newResumeData = { ...initialResumeData, email: user.email || 'your-email@example.com' };
-                    setResumeData(newResumeData);
+        if (authLoading || !user) return;
+
+        setIsLoading(true);
+        const versionsQuery = query(collection(db, `users/${user.uid}/resumeVersions`), orderBy('updatedAt', 'desc'));
+
+        const unsubscribe = onSnapshot(versionsQuery, async (snapshot) => {
+            if (snapshot.empty) {
+                // Create the first version if none exist
+                const firstVersionName = "Initial Resume";
+                const firstVersionData = {
+                    versionName: firstVersionName,
+                    updatedAt: serverTimestamp(),
+                    resumeData: { ...initialResumeData, email: user.email || '' }
+                };
+                const newVersionRef = await addDoc(collection(db, `users/${user.uid}/resumeVersions`), firstVersionData);
+                
+                const newVersion: ResumeVersion = { id: newVersionRef.id, ...firstVersionData };
+                setVersions([newVersion]);
+                setCurrentVersion(newVersion);
+                setResumeData(newVersion.resumeData);
+            } else {
+                const fetchedVersions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ResumeVersion));
+                setVersions(fetchedVersions);
+
+                if (!currentVersion || !fetchedVersions.some(v => v.id === currentVersion.id)) {
+                    const latestVersion = fetchedVersions[0];
+                    setCurrentVersion(latestVersion);
+                    setResumeData(latestVersion.resumeData);
                 }
-                setIsLoading(false);
             }
-        };
-        if (!authLoading) {
-            loadResumeData();
-        }
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching resume versions: ", error);
+            toast({ title: "Error", description: "Could not load resume versions.", variant: "destructive" });
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe();
     }, [user, authLoading]);
 
     const handleAddExperience = () => {
@@ -354,14 +384,14 @@ export const ResumeBuilder = () => {
     }
 
     const handleSave = async () => {
-        if (!user || !resumeData) return;
+        if (!user || !resumeData || !currentVersion) return;
         setIsSaving(true);
         try {
-            const resumeRef = doc(db, 'resumes', user.uid);
-            await setDoc(resumeRef, resumeData);
+            const versionRef = doc(db, `users/${user.uid}/resumeVersions`, currentVersion.id);
+            await setDoc(versionRef, { resumeData, updatedAt: serverTimestamp() }, { merge: true });
             toast({
                 title: "Resume Saved!",
-                description: "Your resume has been successfully saved to the database.",
+                description: `Version "${currentVersion.versionName}" has been updated.`,
             });
         } catch (error) {
             console.error("Error saving resume: ", error);
@@ -374,6 +404,46 @@ export const ResumeBuilder = () => {
             setIsSaving(false);
         }
     }
+    
+    const handleSaveAsNew = async () => {
+        if (!user || !resumeData) return;
+        setIsSaving(true);
+        try {
+            // Suggest a name via AI
+            const { versionName } = await suggestResumeVersionNameAction({ resumeData });
+
+            const newVersionData = {
+                versionName: versionName || `Version ${versions.length + 1}`,
+                updatedAt: serverTimestamp(),
+                resumeData,
+            };
+            const newVersionRef = await addDoc(collection(db, `users/${user.uid}/resumeVersions`), newVersionData);
+
+            toast({
+                title: "New Version Saved!",
+                description: `Saved as "${newVersionData.versionName}".`,
+            });
+
+            // Set this new version as the current one
+            const newVersion = { id: newVersionRef.id, ...newVersionData };
+            setCurrentVersion(newVersion);
+
+        } catch (error) {
+            console.error("Error saving new version: ", error);
+            toast({ title: "Error", description: "Could not save new version.", variant: "destructive" });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+    
+    const handleVersionSelect = (versionId: string) => {
+        const selectedVersion = versions.find(v => v.id === versionId);
+        if (selectedVersion) {
+            setCurrentVersion(selectedVersion);
+            setResumeData(selectedVersion.resumeData);
+            setVersionManagerOpen(false);
+        }
+    };
     
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target;
@@ -491,12 +561,55 @@ export const ResumeBuilder = () => {
             </div>
 
             <div className="flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
-                    <h3 className="font-headline text-lg">Live Preview</h3>
+                <Card className="flex flex-col sm:flex-row justify-between items-center gap-2 p-3">
+                    <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={versionManagerOpen}
+                            className="w-[250px] justify-between"
+                            >
+                            <History className="mr-2 h-4 w-4" />
+                            {currentVersion
+                                ? currentVersion.versionName
+                                : "Select version..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[250px] p-0">
+                            <Command>
+                            <CommandInput placeholder="Search versions..." />
+                            <CommandEmpty>No versions found.</CommandEmpty>
+                            <CommandGroup>
+                                {versions.map((version) => (
+                                <CommandItem
+                                    key={version.id}
+                                    value={version.id}
+                                    onSelect={(currentValue) => {
+                                        handleVersionSelect(currentValue)
+                                    }}
+                                >
+                                    <Check
+                                    className={cn(
+                                        "mr-2 h-4 w-4",
+                                        currentVersion?.id === version.id ? "opacity-100" : "opacity-0"
+                                    )}
+                                    />
+                                    {version.versionName}
+                                </CommandItem>
+                                ))}
+                            </CommandGroup>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
                     <div className="flex gap-2">
                          <Button onClick={handleSave} disabled={isSaving}>
                            <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
-                        </Button>
+                         </Button>
+                         <Button onClick={handleSaveAsNew} disabled={isSaving}>
+                            <PlusCircle className="mr-2 h-4 w-4" /> Save as New
+                         </Button>
                          <Button variant="secondary" onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
                            {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Bot className="mr-2 h-4 w-4" />}
                            {isAnalyzing ? "Analyzing..." : "AI Analyze"}
@@ -505,7 +618,7 @@ export const ResumeBuilder = () => {
                            <Download className="mr-2 h-4 w-4" /> Export
                         </Button>
                     </div>
-                </div>
+                </Card>
                 <Card className="flex-1">
                     <CardContent className="p-0 h-full overflow-y-auto">
                         <div ref={resumePreviewRef} className="p-6 sm:p-8 font-body text-sm bg-white text-gray-800 shadow-lg h-full">
