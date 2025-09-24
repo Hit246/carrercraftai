@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { FileText, Briefcase, Users, Sparkles, Check, Crown } from 'lucide-react';
+import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider } from '@/hooks/use-auth';
 import { HomeHeader } from '@/components/home-header';
@@ -45,16 +45,16 @@ function HomePageContent() {
                 From creation to application, our intelligent tools support you at every step.
               </p>
             </div>
-            <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader>
                     <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                         <FileText className="w-6 h-6"/>
                     </div>
-                  <CardTitle>Resume Builder</CardTitle>
+                  <CardTitle>Intuitive Resume Builder</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Create professional resumes with our intuitive builder and customizable templates, designed to impress any recruiter.</p>
+                  <p className="text-muted-foreground">Create professional, version-controlled resumes with our intuitive builder and live preview, designed to impress any recruiter.</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-none bg-transparent">
@@ -71,12 +71,34 @@ function HomePageContent() {
               <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader>
                     <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <Target className="w-6 h-6"/>
+                    </div>
+                  <CardTitle>ATS Optimizer</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">Compare your resume against a job description to identify missing keywords and get a match score to beat the bots.</p>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-none bg-transparent">
+                <CardHeader>
+                    <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                         <Briefcase className="w-6 h-6"/>
                     </div>
                   <CardTitle>Smart Job Matching</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">Discover job opportunities that perfectly align with your unique skills, experience, and career aspirations.</p>
+                </CardContent>
+              </Card>
+               <Card className="border-0 shadow-none bg-transparent">
+                <CardHeader>
+                    <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <FileText className="w-6 h-6"/>
+                    </div>
+                  <CardTitle>Cover Letter Generator</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">Instantly generate a personalized cover letter for any job description, based on the contents of your resume.</p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-none bg-transparent">
@@ -136,6 +158,8 @@ function HomePageContent() {
                     <ul className="space-y-2 text-left">
                     <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Everything in Free, plus:</li>
                     <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> Unlimited AI Features</li>
+                     <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> AI-Powered ATS Optimizer</li>
+                     <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> AI Cover Letter Generator</li>
                     <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Priority Support</li>
                     </ul>
                 </CardContent>
