@@ -68,7 +68,7 @@ export async function getPaymentSettings() {
     if (settingsSnap.exists()) {
         return settingsSnap.data();
     }
-    return { upiId: 'your-upi-id@bank', qrCodeImageUrl: 'https://placehold.co/200x200.png' };
+    return { upiId: 'chauhanhitarth6@oksbi', qrCodeImageUrl: 'https://i.imgur.com/2O0s4Jm.png' };
 }
 
 export async function submitSupportRequestAction(
