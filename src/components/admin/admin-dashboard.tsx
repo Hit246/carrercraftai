@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, orderBy, query, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, UserPlus, Crown, Handshake } from "lucide-react";
+import { Users, UserPlus, Crown, Handshake, Trophy } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
@@ -17,12 +17,13 @@ import { useToast } from "@/hooks/use-toast";
 interface UserData {
     id: string;
     email: string;
-    plan: 'free' | 'pro' | 'recruiter';
+    plan: 'free' | 'essentials' | 'pro' | 'recruiter';
     createdAt?: { seconds: number, nanoseconds: number };
 }
 
 interface PlanCount {
     free: number;
+    essentials: number;
     pro: number;
     recruiter: number;
 }
@@ -34,6 +35,10 @@ const chartConfig = {
     free: {
         label: "Free",
         color: "hsl(var(--chart-1))",
+    },
+    essentials: {
+        label: "Essentials",
+        color: "hsl(var(--chart-4))",
     },
     pro: {
         label: "Pro",
@@ -63,9 +68,9 @@ export function AdminDashboard() {
 
                 setUserCount(usersList.length);
 
-                const plans: PlanCount = { free: 0, pro: 0, recruiter: 0 };
+                const plans: PlanCount = { free: 0, essentials: 0, pro: 0, recruiter: 0 };
                 usersList.forEach(user => {
-                    if (user.plan && (user.plan === 'free' || user.plan === 'pro' || user.plan === 'recruiter')) {
+                    if (user.plan && (user.plan === 'free' || user.plan === 'essentials' || user.plan === 'pro' || user.plan === 'recruiter')) {
                         plans[user.plan]++;
                     } else {
                         plans['free']++;
@@ -95,13 +100,14 @@ export function AdminDashboard() {
 
     const chartData = planDistribution ? [
         { name: 'Free', count: planDistribution.free, fill: 'var(--color-free)' },
+        { name: 'Essentials', count: planDistribution.essentials, fill: 'var(--color-essentials)' },
         { name: 'Pro', count: planDistribution.pro, fill: 'var(--color-pro)' },
         { name: 'Recruiter', count: planDistribution.recruiter, fill: 'var(--color-recruiter)' },
     ] : [];
 
     return (
         <div className="space-y-8">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -109,6 +115,15 @@ export function AdminDashboard() {
                     </CardHeader>
                     <CardContent>
                         {isLoading ? <Skeleton className="h-8 w-1/4 mt-1" /> : <div className="text-2xl font-bold">{userCount}</div>}
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Essentials Users</CardTitle>
+                        <Trophy className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        {isLoading ? <Skeleton className="h-8 w-1/4 mt-1" /> : <div className="text-2xl font-bold">{planDistribution?.essentials}</div>}
                     </CardContent>
                 </Card>
                 <Card>
@@ -151,7 +166,6 @@ export function AdminDashboard() {
                                         tickLine={false}
                                         tickMargin={10}
                                         axisLine={false}
-                                        tickFormatter={(value) => value.slice(0, 3)}
                                     />
                                     <YAxis />
                                     <ChartTooltip
