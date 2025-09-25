@@ -19,7 +19,7 @@ export function PricingPage() {
   const router = useRouter();
   const [planToUpgrade, setPlanToUpgrade] = useState<PlanToUpgrade>(null);
 
-  const handleUpgrade = async (selectedPlan: PlanToUpgrade) => {
+  const handleUpgrade = (selectedPlan: PlanToUpgrade) => {
     if (!user) {
         router.push('/login');
         return;
