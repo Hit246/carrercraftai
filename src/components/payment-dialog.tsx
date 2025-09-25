@@ -17,11 +17,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { uploadFile } from "@/lib/firebase";
 import { Loader2, Upload } from "lucide-react";
 
+type PlanToUpgrade = 'essentials' | 'pro' | 'recruiter' | null;
+
 interface PaymentDialogProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: (paymentProofURL: string) => void;
-    plan: 'pro' | 'recruiter' | null;
+    plan: PlanToUpgrade;
 }
 
 interface PaymentSettings {
@@ -30,8 +32,9 @@ interface PaymentSettings {
 }
 
 const planDetails = {
-    pro: { name: "Pro Plan", amount: 10 },
-    recruiter: { name: "Recruiter Plan", amount: 49 },
+    essentials: { name: "Essentials Plan", amount: 199 },
+    pro: { name: "Pro Plan", amount: 399 },
+    recruiter: { name: "Recruiter Plan", amount: 999 },
 }
 
 const formSchema = z.object({
@@ -100,7 +103,7 @@ export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialo
                 <DialogHeader>
                     <DialogTitle>Complete Your Upgrade</DialogTitle>
                     <DialogDescription>
-                        To upgrade to the {details.name}, pay ${details.amount} and upload the payment screenshot below.
+                        To upgrade to the {details.name}, pay ₹{details.amount} and upload the payment screenshot below.
                     </DialogDescription>
                 </DialogHeader>
                  <Form {...form}>
@@ -167,3 +170,5 @@ export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialo
         </Dialog>
     )
 }
+
+    

@@ -14,12 +14,12 @@ import { Badge } from "./ui/badge"
 type PlanToUpgrade = 'essentials' | 'pro' | 'recruiter' | null;
 
 export function PricingPage() {
-  const { user, plan, requestProUpgrade, requestRecruiterUpgrade } = useAuth();
+  const { user, plan, requestProUpgrade, requestRecruiterUpgrade, requestEssentialsUpgrade } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
-  const [planToUpgrade, setPlanToUpgrade] = useState<any>(null); // Simplified for new structure
+  const [planToUpgrade, setPlanToUpgrade] = useState<PlanToUpgrade>(null);
 
-  const handleUpgrade = async (selectedPlan: 'pro' | 'recruiter') => { // Keeping this simple for now
+  const handleUpgrade = async (selectedPlan: PlanToUpgrade) => {
     if (!user) {
         router.push('/login');
         return;
@@ -33,8 +33,10 @@ export function PricingPage() {
     try {
       if (planToUpgrade === 'pro') {
         await requestProUpgrade(paymentProofURL);
-      } else {
+      } else if (planToUpgrade === 'recruiter') {
         await requestRecruiterUpgrade(paymentProofURL);
+      } else if (planToUpgrade === 'essentials') {
+        await requestEssentialsUpgrade(paymentProofURL);
       }
       toast({
           title: "Request Submitted!",
@@ -111,8 +113,8 @@ export function PricingPage() {
                   <Key className="w-4 h-4"/>
                   <span>Great for people applying regularly.</span>
                 </div>
-                <Button className="w-full mt-2" onClick={() => handleUpgrade('pro')} disabled={plan === 'pro' || plan === 'recruiter' || plan === 'pending'}>
-                  Upgrade
+                <Button className="w-full mt-2" onClick={() => handleUpgrade('essentials')} disabled={plan === 'essentials' || plan === 'pro' || plan === 'recruiter' || plan === 'pending'}>
+                  {plan === 'essentials' ? 'Your Current Plan' : 'Upgrade'}
                 </Button>
             </CardFooter>
           </Card>
@@ -130,7 +132,7 @@ export function PricingPage() {
                   <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Advanced ATS optimization</li>
                   <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Skill gap analysis</li>
                   <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Resume performance analytics</li>
-                  <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited resumes & portfolio</li>
+                  <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited resumes</li>
                   <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Priority support</li>
                 </ul>
             </CardContent>
@@ -182,3 +184,5 @@ export function PricingPage() {
     </>
   )
 }
+
+    

@@ -6,7 +6,7 @@ import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, onSnapshot, collectionGroup } from 'firebase/firestore';
 
 
-type Plan = 'free' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
+type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
 interface UserProfile {
     displayName?: string | null;
@@ -18,7 +18,7 @@ interface UserData {
     credits: number;
     planUpdatedAt?: any;
     paymentProofURL?: string | null;
-    requestedPlan?: 'pro' | 'recruiter';
+    requestedPlan?: 'essentials' | 'pro' | 'recruiter';
     teamId?: string;
 }
 
@@ -30,6 +30,7 @@ interface AuthContextType {
   credits: number;
   userData: UserData | null;
   useCredit: () => Promise<void>;
+  requestEssentialsUpgrade: (paymentProofURL: string) => Promise<void>;
   requestProUpgrade: (paymentProofURL: string) => Promise<void>;
   requestRecruiterUpgrade: (paymentProofURL: string) => Promise<void>;
   requestCancellation: () => Promise<void>;
@@ -42,7 +43,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const FREE_CREDITS = 3;
+const FREE_CREDITS = 5;
+const ESSENTIALS_CREDITS = 50;
 const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
 
 
@@ -96,8 +98,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         
         setUserData(currentData);
-        setPlan(currentData.plan || 'free');
-        setCredits(currentData.credits ?? (currentData.plan === 'free' ? FREE_CREDITS : Infinity));
+        const userPlan = currentData.plan || 'free';
+        setPlan(userPlan);
+
+        if (userPlan === 'pro' || userPlan === 'recruiter') {
+            setCredits(Infinity);
+        } else if (userPlan === 'essentials') {
+            setCredits(currentData.credits ?? ESSENTIALS_CREDITS);
+        } else {
+            setCredits(currentData.credits ?? FREE_CREDITS);
+        }
         setLoading(false);
     });
 
@@ -169,6 +179,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return signOut(auth);
   };
   
+  const requestEssentialsUpgrade = async (paymentProofURL: string) => {
+    if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
+    const userRef = doc(db, 'users', user.uid);
+    const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'essentials' as const, planUpdatedAt: new Date(), paymentProofURL };
+    await updateDoc(userRef, newPlanData);
+  }
+
   const requestProUpgrade = async (paymentProofURL: string) => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
@@ -192,7 +209,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const useCredit = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
-    if (plan === 'free' && credits > 0) {
+    if ((plan === 'free' || plan === 'essentials') && credits > 0) {
         const newCredits = credits - 1;
         const userRef = doc(db, 'users', user.uid);
         await updateDoc(userRef, { credits: newCredits });
@@ -219,6 +236,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     credits,
     userData,
     useCredit,
+    requestEssentialsUpgrade,
     requestProUpgrade,
     requestRecruiterUpgrade,
     requestCancellation,
@@ -239,3 +257,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+    
