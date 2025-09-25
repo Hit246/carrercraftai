@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Download, Bot, Save, Loader2, Link as LinkIcon, History, ChevronsUpDown } from 'lucide-react';
+import { PlusCircle, Trash2, Download, Bot, Save, Loader2, Link as LinkIcon, History, ChevronsUpDown, Crown } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { doc, getDoc, setDoc, collection, addDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
@@ -19,6 +19,17 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from './ui/command';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface Experience {
     id: number;
@@ -93,6 +104,13 @@ export const ResumeBuilder = () => {
     const [versions, setVersions] = React.useState<ResumeVersion[]>([]);
     const [currentVersion, setCurrentVersion] = React.useState<ResumeVersion | null>(null);
     const [versionManagerOpen, setVersionManagerOpen] = React.useState(false);
+    const [draftLimit, setDraftLimit] = React.useState(2);
+
+    React.useEffect(() => {
+        if (plan === 'essentials') setDraftLimit(10);
+        else if (plan === 'pro' || plan === 'recruiter') setDraftLimit(Infinity);
+        else setDraftLimit(2);
+    }, [plan]);
 
 
     React.useEffect(() => {
@@ -134,7 +152,7 @@ export const ResumeBuilder = () => {
         });
 
         return () => unsubscribe();
-    }, [user, authLoading]);
+    }, [user, authLoading, toast, currentVersion]);
 
     const handleAddExperience = () => {
         if (!resumeData) return;
@@ -364,7 +382,7 @@ export const ResumeBuilder = () => {
         toast({ title: "Analyzing Resume...", description: "Generating a snapshot and sending it to the AI." });
 
         try {
-            if (plan === 'free') {
+            if (plan === 'free' || plan === 'essentials') {
                 await useCredit();
             }
             const pdf = await generatePdfFromData();
@@ -406,7 +424,7 @@ export const ResumeBuilder = () => {
     }
     
     const handleSaveAsNew = async () => {
-        if (!user || !resumeData) return;
+        if (!user || !resumeData || versions.length >= draftLimit) return;
         setIsSaving(true);
         try {
             // Suggest a name via AI
@@ -607,9 +625,28 @@ export const ResumeBuilder = () => {
                          <Button onClick={handleSave} disabled={isSaving}>
                            <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
                          </Button>
-                         <Button onClick={handleSaveAsNew} disabled={isSaving}>
-                            <PlusCircle className="mr-2 h-4 w-4" /> Save as New
-                         </Button>
+                         <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                 <Button disabled={isSaving || versions.length >= draftLimit}>
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Save as New
+                                 </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Draft Limit Reached</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        You have reached the maximum number of resume drafts ({draftLimit}) for the {plan} plan. Please upgrade your plan to save more versions.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => router.push('/pricing')}>
+                                        <Crown className="mr-2 h-4 w-4" />
+                                        Upgrade Plan
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                         </AlertDialog>
                          <Button variant="secondary" onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
                            {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Bot className="mr-2 h-4 w-4" />}
                            {isAnalyzing ? "Analyzing..." : "AI Analyze"}
@@ -692,3 +729,5 @@ export const ResumeBuilder = () => {
         </div>
     );
 };
+
+    
