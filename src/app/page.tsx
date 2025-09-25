@@ -1,7 +1,8 @@
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target } from 'lucide-react';
+import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider } from '@/hooks/use-auth';
 import { HomeHeader } from '@/components/home-header';
@@ -126,68 +127,108 @@ function HomePageContent() {
                 </p>
             </div>
 
-            <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl w-full mx-auto">
-                <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline">Free</CardTitle>
-                    <CardDescription>For getting started and building a foundational resume.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <p className="text-4xl font-bold font-headline">$0<span className="text-lg font-normal text-muted-foreground">/month</span></p>
-                    <ul className="space-y-2 text-left">
-                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Intuitive Resume Builder</li>
-                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Professional Templates</li>
-                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> 3 AI Credits</li>
-                    </ul>
-                </CardContent>
-                <CardFooter>
-                    <Button asChild variant="outline" className="w-full">
-                        <Link href="/signup">Get Started</Link>
-                    </Button>
-                </CardFooter>
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl w-full mx-auto">
+                <Card className="flex flex-col">
+                  <CardHeader>
+                      <CardTitle className="font-headline flex items-center gap-2"><Star className="text-yellow-500" /> Free</CardTitle>
+                      <CardDescription>For students & freshers exploring jobs.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 flex-1">
+                      <p className="text-4xl font-bold font-headline">₹0<span className="text-lg font-normal text-muted-foreground">/month</span></p>
+                      <ul className="space-y-2 text-left text-sm">
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 5 AI credits per month</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Basic templates</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 2 resume drafts</li>
+                      </ul>
+                  </CardContent>
+                  <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Key className="w-4 h-4"/>
+                        <span>Good for beginners.</span>
+                      </div>
+                      <Button asChild variant="outline" className="w-full mt-2">
+                          <Link href="/signup">Get Started</Link>
+                      </Button>
+                  </CardFooter>
                 </Card>
 
-                <Card className="border-primary border-2 relative overflow-hidden">
+                <Card className="flex flex-col">
+                  <CardHeader>
+                      <CardTitle className="font-headline flex items-center gap-2"><Trophy className="text-gray-400" /> Essentials</CardTitle>
+                      <CardDescription>For active job seekers.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 flex-1">
+                      <p className="text-4xl font-bold font-headline">₹199<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                      <ul className="space-y-2 text-left text-sm">
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 50 AI credits</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> ATS keyword suggestions</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Cover letter generator</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Portfolio showcase</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 10 resumes</li>
+                      </ul>
+                  </CardContent>
+                  <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Key className="w-4 h-4"/>
+                        <span>Great for people applying regularly.</span>
+                      </div>
+                      <Button asChild className="w-full mt-2">
+                         <Link href="/signup">Choose Essentials</Link>
+                      </Button>
+                  </CardFooter>
+                </Card>
+
+                <Card className="border-primary border-2 relative flex flex-col">
                      <Badge className="absolute top-4 right-4" variant="secondary">Most Popular</Badge>
-                <CardHeader>
-                    <CardTitle className="font-headline">Pro</CardTitle>
-                    <CardDescription>For professionals who want to stand out and land their dream job.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <p className="text-4xl font-bold font-headline">$10<span className="text-lg font-normal text-muted-foreground">/month</span></p>
-                    <ul className="space-y-2 text-left">
-                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Everything in Free, plus:</li>
-                    <li className="flex items-center gap-2 font-semibold"><Crown className="h-5 w-5 text-amber-500" /> Unlimited AI Features</li>
-                     <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> AI-Powered ATS Optimizer</li>
-                     <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> AI Cover Letter Generator</li>
-                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Priority Support</li>
-                    </ul>
-                </CardContent>
-                <CardFooter>
-                    <Button asChild className="w-full">
-                       <Link href="/signup">Choose Pro</Link>
-                    </Button>
-                </CardFooter>
+                  <CardHeader>
+                      <CardTitle className="font-headline flex items-center gap-2"><Crown className="text-amber-500" /> Pro</CardTitle>
+                      <CardDescription>For professionals aiming for top jobs.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 flex-1">
+                      <p className="text-4xl font-bold font-headline">₹399<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                      <ul className="space-y-2 text-left text-sm">
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited AI generation</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Advanced ATS optimization</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Skill gap analysis</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Resume performance analytics</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited resumes & portfolio</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Priority support</li>
+                      </ul>
+                  </CardContent>
+                  <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Key className="w-4 h-4"/>
+                        <span>Perfect for experienced professionals.</span>
+                      </div>
+                      <Button asChild className="w-full mt-2">
+                         <Link href="/signup">Choose Pro</Link>
+                      </Button>
+                  </CardFooter>
                 </Card>
 
-                <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline">Recruiter</CardTitle>
-                    <CardDescription>For hiring managers and recruitment agencies.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <p className="text-4xl font-bold font-headline">$49<span className="text-lg font-normal text-muted-foreground">/month</span></p>
-                    <ul className="space-y-2 text-left">
-                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Everything in Pro, plus:</li>
-                    <li className="flex items-center gap-2 font-semibold"><Users className="h-5 w-5 text-blue-500" /> AI Candidate Matcher</li>
-                    <li className="flex items-center gap-2"><Check className="h-5 w-5 text-primary" /> Team Management Tools</li>
-                    </ul>
-                </CardContent>
-                <CardFooter>
-                    <Button asChild variant="secondary" className="w-full">
-                       <Link href="/signup">Contact Sales</Link>
-                    </Button>
-                </CardFooter>
+                <Card className="flex flex-col">
+                  <CardHeader>
+                      <CardTitle className="font-headline flex items-center gap-2"><Diamond className="text-blue-500" /> Recruiter</CardTitle>
+                      <CardDescription>For recruiters & HR teams.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 flex-1">
+                      <p className="text-4xl font-bold font-headline">₹999<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                      <ul className="space-y-2 text-left text-sm">
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI candidate ranking</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 25 job postings / month</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Team collaboration</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter analytics dashboard</li>
+                      </ul>
+                  </CardContent>
+                  <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Key className="w-4 h-4"/>
+                        <span>Best for freelance recruiters.</span>
+                      </div>
+                      <Button asChild variant="secondary" className="w-full mt-2">
+                         <Link href="/signup">Contact Sales</Link>
+                      </Button>
+                  </CardFooter>
                 </Card>
             </div>
           </div>
