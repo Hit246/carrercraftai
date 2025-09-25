@@ -21,7 +21,7 @@ import { Skeleton } from '../ui/skeleton';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 
-type Plan = 'free' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
+type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
 interface UserData {
   id: string;
@@ -43,7 +43,7 @@ export function PaymentHistory() {
         const usersCollectionRef = collection(db, 'users');
         const q = query(
             usersCollectionRef, 
-            where('plan', 'in', ['pro', 'recruiter']),
+            where('plan', 'in', ['essentials', 'pro', 'recruiter']),
             orderBy('planUpdatedAt', 'desc')
         );
         const usersSnapshot = await getDocs(q);
@@ -69,6 +69,8 @@ export function PaymentHistory() {
   const getPlanBadgeVariant = (plan: Plan) => {
     switch (plan) {
       case 'pro':
+        return 'secondary';
+      case 'essentials':
         return 'secondary';
       case 'recruiter':
         return 'default';

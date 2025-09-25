@@ -23,18 +23,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Crown, User, Shield, CheckCircle, XCircle, Ban } from 'lucide-react';
+import { MoreHorizontal, Trash2, Crown, User, Shield, CheckCircle, XCircle, Ban, Trophy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 
-type Plan = 'free' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
+type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
 interface UserData {
   id: string;
   email: string;
   plan: Plan;
-  requestedPlan?: 'pro' | 'recruiter';
+  requestedPlan?: 'essentials' | 'pro' | 'recruiter';
   createdAt?: { seconds: number };
 }
 
@@ -107,6 +107,8 @@ export function UserManagementPage() {
 
   const getPlanBadgeVariant = (plan: Plan) => {
     switch (plan) {
+      case 'essentials':
+        return 'secondary';
       case 'pro':
         return 'secondary';
       case 'recruiter':
@@ -205,6 +207,10 @@ export function UserManagementPage() {
                               <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')}>
                                 <User className="mr-2 h-4 w-4" />
                                 Set to Free
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'essentials')}>
+                                <Trophy className="mr-2 h-4 w-4" />
+                                Set to Essentials
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pro')}>
                                 <Crown className="mr-2 h-4 w-4" />
