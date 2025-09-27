@@ -7,5 +7,5 @@ export const ai = genkit({
       apiVersion: 'v1',
     }),
   ],
-  model: 'gemini-pro',
+  model: 'googleai/gemini-pro',
 });
