@@ -31,8 +31,7 @@ import { db } from './firebase';
 export async function analyzeResumeAction(
   input: AnalyzeResumeInput
 ): Promise<AnalyzeResumeOutput> {
-  // In a real app, you would check the user's subscription tier here before proceeding.
-  return await analyzeResume(input);
+  return analyzeResume(input);
 }
 
 export async function jobMatcherAction(
