@@ -141,12 +141,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const teamId = invitationDoc.ref.parent.parent?.id;
 
         if (teamId) {
-            const teamDoc = await getDoc(doc(db, 'teams', teamId));
-            const ownerId = teamDoc.data()?.owner;
-            const ownerDoc = await getDoc(doc(db, 'users', ownerId));
-            const ownerPlan = ownerDoc.data()?.plan;
-            
-            initialUserData.plan = ownerPlan || 'recruiter'; // Default to recruiter if owner plan not found
+            // A user invited to a team should always get the 'recruiter' plan benefits.
+            initialUserData.plan = 'recruiter' as Plan;
             initialUserData.credits = Infinity;
             initialUserData.teamId = teamId;
 
@@ -259,5 +255,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-    
