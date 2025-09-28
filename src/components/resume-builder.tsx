@@ -570,7 +570,7 @@ export const ResumeBuilder = () => {
                                 <Input name="degree" placeholder="Degree (e.g., B.S. in Computer Science)" value={edu.degree} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
                                 <div className="grid grid-cols-2 gap-4">
                                     <Input name="dates" placeholder="Dates (e.g., 2014 - 2018)" value={edu.dates} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
-                                    <Input name="cgpa" placeholder="CGPA (e.g., 8.8/10)" value={edu.cgpa} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                                    <Input name="cgpa" placeholder="CGPA (e.g., 8.8/10)" value={edu.cgpa || ''} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
                                 </div>
                             </div>
                         ))}
@@ -734,5 +734,3 @@ export const ResumeBuilder = () => {
         </div>
     );
 };
-
-    
