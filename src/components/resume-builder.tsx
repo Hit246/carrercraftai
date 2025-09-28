@@ -729,5 +729,3 @@ export const ResumeBuilder = () => {
         </div>
     );
 };
-
-    
