@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
@@ -86,6 +87,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
     }
 
+    if (isAdmin) {
+        setPlan('recruiter');
+        setCredits(Infinity);
+        setUserData({
+            plan: 'recruiter',
+            credits: Infinity,
+        });
+        setLoading(false);
+        return;
+    }
+
     const userRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
         let currentData;
@@ -113,7 +125,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-}, [user, loading]);
+}, [user, loading, isAdmin]);
 
 
   const login = (email:string, password:string) => {
