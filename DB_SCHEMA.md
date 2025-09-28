@@ -77,6 +77,7 @@ The `resumeData` map contains the full content of a specific resume version.
 | `school` | `string` | The name of the school or university.                 |
 | `degree` | `string` | The degree obtained (e.g., "B.S. in Computer Science"). |
 | `dates`  | `string` | The dates of attendance (e.g., "2016 - 2020").        |
+| `cgpa`   | `string` | The Cumulative Grade Point Average (e.g., "8.5/10").  |
 
 ##### `projects` Object Structure:
 

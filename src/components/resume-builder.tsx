@@ -44,6 +44,7 @@ interface Education {
     school: string;
     degree: string;
     dates: string;
+    cgpa?: string;
 }
 
 interface Project {
@@ -85,7 +86,7 @@ const initialResumeData: ResumeData = {
         { id: 1, title: 'Senior Developer', company: 'Tech Corp', dates: '2020 - Present', description: '- Led the development of a new microservices-based platform, improving system scalability by 40%.\n- Collaborated with cross-functional teams to define, design, and ship new features.\n- Mentored junior developers and conducted code reviews to maintain code quality.' },
         { id: 2, title: 'Junior Developer', company: 'Innovate LLC', dates: '2018 - 2020', description: '- Contributed to the frontend development of a major e-commerce website using React and Redux.\n- Implemented responsive UI components that improved user experience on mobile devices.\n- Fixed bugs and improved application performance.' }
     ],
-    education: [{ id: 1, school: 'University of Technology', degree: 'B.S. in Computer Science', dates: '2014 - 2018' }],
+    education: [{ id: 1, school: 'University of Technology', degree: 'B.S. in Computer Science', dates: '2014 - 2018', cgpa: '8.8/10' }],
     skills: 'React, Node.js, TypeScript, Next.js, PostgreSQL, Docker, AWS, GraphQL, REST APIs',
     projects: [
         { id: 1, name: 'E-commerce Platform', description: 'A full-stack e-commerce website with features like product search, shopping cart, and a secure checkout process.', url: 'https://github.com/johndoe/e-commerce', technologies: 'React, Node.js, Express, MongoDB' }
@@ -343,7 +344,8 @@ export const ResumeBuilder = () => {
             y += 14 * lineSpacing;
 
             doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
-            doc.text(edu.degree, margin, y);
+            const degreeAndCgpa = edu.cgpa ? `${edu.degree} (CGPA: ${edu.cgpa})` : edu.degree;
+            doc.text(degreeAndCgpa, margin, y);
             y += 15;
         });
         
@@ -566,7 +568,10 @@ export const ResumeBuilder = () => {
                             <div key={edu.id} className="p-4 border rounded-lg relative space-y-2">
                                 <Input name="school" placeholder="School or University" value={edu.school} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
                                 <Input name="degree" placeholder="Degree (e.g., B.S. in Computer Science)" value={edu.degree} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
-                                <Input name="dates" placeholder="Dates (e.g., 2014 - 2018)" value={edu.dates} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input name="dates" placeholder="Dates (e.g., 2014 - 2018)" value={edu.dates} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                                    <Input name="cgpa" placeholder="CGPA (e.g., 8.8/10)" value={edu.cgpa} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                                </div>
                             </div>
                         ))}
                     </CardContent>
@@ -710,7 +715,7 @@ export const ResumeBuilder = () => {
                                             <h4 className="text-base font-semibold text-gray-800">{edu.school}</h4>
                                             <p className="text-xs font-medium text-gray-600">{edu.dates}</p>
                                         </div>
-                                        <p className="text-sm text-gray-700">{edu.degree}</p>
+                                        <p className="text-sm text-gray-700">{edu.degree} {edu.cgpa && `(CGPA: ${edu.cgpa})`}</p>
                                     </div>
                                 ))}
                             </div>
@@ -729,3 +734,5 @@ export const ResumeBuilder = () => {
         </div>
     );
 };
+
+    
