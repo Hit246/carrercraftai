@@ -11,13 +11,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Upload, Crown, Target, Zap, TrendingUp } from 'lucide-react';
+import { Loader2, Upload, Crown, Target, Zap, TrendingUp, HelpCircle } from 'lucide-react';
 import type { AtsOptimizerOutput } from '@/ai/flows/ats-optimizer';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 const formSchema = z.object({
     resumeFile: z.instanceof(File).refine(
@@ -183,7 +184,20 @@ export function AtsOptimizerPage() {
              <h3 className="text-xl font-headline text-center">Optimization Results</h3>
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-3"><TrendingUp /> Match Score</CardTitle>
+                    <CardTitle className="flex items-center gap-3">
+                        <TrendingUp /> 
+                        Match Score
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p className="max-w-xs">This score represents how well your resume matches the job description based on keywords and skills identified by the AI. A higher score means better alignment.</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </CardTitle>
                 </CardHeader>
                 <CardContent className="text-center">
                     <div className="relative w-32 h-32 mx-auto">
