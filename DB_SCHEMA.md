@@ -13,16 +13,18 @@ This collection stores information about individual users, their subscription st
 
 #### Document Fields:
 
-| Field             | Type      | Description                                                                                               | Example                               |
-| ----------------- | --------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `email`           | `string`  | The user's email address.                                                                                 | `"user@example.com"`                  |
-| `plan`            | `string`  | The user's current subscription plan. Can be `free`, `essentials`, `pro`, `recruiter`, `pending`, `cancellation_requested`. | `"pro"`                               |
-| `credits`         | `number`  | The number of AI credits available. Free: 5, Essentials: 50, Pro/Recruiter: Unlimited.                       | `50`                                  |
-| `createdAt`       | `Timestamp` | The date and time when the user account was created.                                                      | `October 26, 2023 at 10:00:00 AM UTC+0` |
-| `planUpdatedAt`   | `Timestamp` | The date and time when the user's plan was last updated (e.g., when an upgrade was approved).             | `November 1, 2023 at 12:30:00 PM UTC+0` |
-| `requestedPlan`   | `string`  | The plan the user requested if their status is `pending`. Can be `essentials`, `pro` or `recruiter`.        | `"pro"`                               |
-| `paymentProofURL` | `string`  | The URL of the uploaded payment proof screenshot in Firebase Storage.                                     | `"https://firebasestorage.googleapis.com/..."` |
-| `teamId`          | `string`  | The ID of the team the user belongs to (primarily for `recruiter` plan users). Points to a doc in `teams`.  | `"T1a2b3c4d5"`                        |
+| Field                    | Type      | Description                                                                                               | Example                               |
+| ------------------------ | --------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `email`                  | `string`  | The user's email address.                                                                                 | `"user@example.com"`                  |
+| `plan`                   | `string`  | The user's current subscription plan. Can be `free`, `essentials`, `pro`, `recruiter`, `pending`, `cancellation_requested`. | `"pro"`                               |
+| `credits`                | `number`  | The number of AI credits available. Free: 5, Essentials: 50, Pro/Recruiter: Unlimited.                       | `50`                                  |
+| `createdAt`              | `Timestamp` | The date and time when the user account was created.                                                      | `October 26, 2023 at 10:00:00 AM UTC+0` |
+| `planUpdatedAt`          | `Timestamp` | The date and time when the user's plan was last updated (e.g., when an upgrade was approved).             | `November 1, 2023 at 12:30:00 PM UTC+0` |
+| `requestedPlan`          | `string`  | The plan the user requested if their status is `pending`. Can be `essentials`, `pro` or `recruiter`.        | `"pro"`                               |
+| `paymentProofURL`        | `string`  | The URL of the uploaded payment proof screenshot in Firebase Storage.                                     | `"https://firebasestorage.googleapis.com/..."` |
+| `teamId`                 | `string`  | The ID of the team the user belongs to (primarily for `recruiter` plan users). Points to a doc in `teams`.  | `"T1a2b3c4d5"`                        |
+| `hasCompletedOnboarding` | `boolean` | Set to `true` after the user has completed the initial guided tour. Defaults to `false`.                  | `true`                                |
+
 
 #### Subcollection: `resumeVersions`
 
@@ -217,7 +219,7 @@ This section provides a text-based description of the primary data flows within 
 
 -   **External Entity:** User, Admin
 -   **Processes:**
-    1.  **User Signup:** A new user provides `email` and `password`. The system creates an account in **Firebase Auth** and a corresponding document in the `users` collection with `plan: 'free'` and `credits: 5`.
+    1.  **User Signup:** A new user provides `email` and `password`. The system creates an account in **Firebase Auth** and a corresponding document in the `users` collection with `plan: 'free'`, `credits: 5`, and `hasCompletedOnboarding: false`.
     2.  **User Login:** A user provides `email` and `password`. The system verifies credentials against **Firebase Auth**. Upon success, it fetches user data from the `users` collection to determine their plan and permissions.
 -   **Data Stores:**
     -   **`Firebase Auth`**: Stores and manages user credentials.
