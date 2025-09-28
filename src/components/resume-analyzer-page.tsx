@@ -60,6 +60,9 @@ export function ResumeAnalyzerPage() {
     setAnalysisResult(null);
 
     try {
+        if (plan === 'free' || plan === 'essentials') {
+            await useCredit();
+        }
         const result = await analyzeResumeAction({ resumeDataUri, desiredRole });
         setAnalysisResult(result);
     } catch (error) {
@@ -97,9 +100,6 @@ export function ResumeAnalyzerPage() {
         return;
     }
     
-    if (plan === 'free') {
-        await useCredit();
-    }
     const resumeDataUri = await fileToDataUri(values.resumeFile);
     performAnalysis(resumeDataUri, values.desiredRole);
   }
