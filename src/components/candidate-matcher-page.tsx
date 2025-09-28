@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { candidateMatcherAction, summarizeCandidateAction } from '@/lib/actions';
+import { candidateMatcherAndSaveAction, summarizeCandidateAction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,6 +32,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const formSchema = z.object({
   jobDescription: z.string().min(50, { message: 'Please provide a detailed job description.' }),
+  jobTitle: z.string().min(3, { message: 'Please provide a job title.' }),
   resumeFiles: z.custom<FileList>()
     .refine((files) => files && files.length > 0, 'Please upload at least one resume file.')
     .refine((files) => files.length <= MAX_FILES, `You can upload a maximum of ${MAX_FILES} files.`)
@@ -65,26 +66,28 @@ export function CandidateMatcherPage() {
   const [summary, setSummary] = useState<string | null>(null);
   const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { plan } = useAuth();
+  const { plan, userData } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       jobDescription: '',
+      jobTitle: '',
     },
   });
 
   const canUseFeature = plan === 'recruiter';
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!canUseFeature) {
+    if (!canUseFeature || !userData?.teamId) {
         toast({
-            title: "Upgrade to Recruiter Plan",
-            description: "This feature is only available on the Recruiter plan.",
+            title: "Feature Unavailable",
+            description: "This feature is only for Recruiter plans with an active team.",
             variant: "destructive",
         });
-        router.push('/pricing');
+        if (!userData?.teamId) router.push('/team/members');
+        else router.push('/pricing');
         return;
     }
 
@@ -95,14 +98,17 @@ export function CandidateMatcherPage() {
         const resumeFiles = Array.from(values.resumeFiles);
         const resumeDataUris = await Promise.all(resumeFiles.map(file => fileToDataUri(file)));
 
-        const result = await candidateMatcherAction({
+        const result = await candidateMatcherAndSaveAction({
             jobDescription: values.jobDescription,
-            resumeDataUris: resumeDataUris
+            resumeDataUris: resumeDataUris,
+            teamId: userData.teamId,
+            files: resumeFiles,
+            jobTitle: values.jobTitle
         });
 
         const matchesWithUris: Match[] = result.candidateMatches
             .map((match, index) => {
-                const originalIndex = parseInt(match.resumeId.split(' ')[1]) -1;
+                const originalIndex = parseInt(match.resumeId.split(' ')[1]);
                 return {
                     ...match,
                     resumeDataUri: resumeDataUris[originalIndex]
@@ -174,31 +180,50 @@ export function CandidateMatcherPage() {
             <Users className="text-primary"/> AI Candidate Matcher
           </CardTitle>
           <CardDescription>
-            For recruiters and hiring managers. Paste a job description and upload multiple candidate resumes (PDF or DOCX) to find the best-fit candidates.
+            Find the best-fit candidates for a role. Matched candidates will be automatically saved to your Candidate Management dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="jobDescription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Job Description</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Paste the job description here..."
-                          className="h-64 resize-y"
-                          {...field}
-                          disabled={!canUseFeature || isLoading}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                 <div className="space-y-6">
+                    <FormField
+                    control={form.control}
+                    name="jobTitle"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Job Title</FormLabel>
+                        <FormControl>
+                            <Input
+                            placeholder="e.g., Senior Frontend Developer"
+                            {...field}
+                            disabled={!canUseFeature || isLoading}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="jobDescription"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Job Description</FormLabel>
+                        <FormControl>
+                            <Textarea
+                            placeholder="Paste the job description here..."
+                            className="h-64 resize-y"
+                            {...field}
+                            disabled={!canUseFeature || isLoading}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                 </div>
                  <FormField
                   control={form.control}
                   name="resumeFiles"
@@ -228,7 +253,7 @@ export function CandidateMatcherPage() {
               </div>
               <Button type="submit" disabled={isLoading || !canUseFeature} size="lg" className="w-full">
                 {isLoading ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finding Candidates...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finding & Saving Candidates...</>
                 ) : (
                   'Find Best Matches'
                 )}
@@ -271,7 +296,7 @@ export function CandidateMatcherPage() {
                     )}
                     {candidateMatches && candidateMatches.map((match) => (
                         <TableRow key={match.resumeId}>
-                            <TableCell className="font-medium">{match.resumeId.replace('Resume', 'Resume ')}</TableCell>
+                            <TableCell className="font-medium">{`Resume ${parseInt(match.resumeId.split(' ')[1]) + 1}`}</TableCell>
                             <TableCell>
                                 <Badge variant={match.matchScore > 75 ? 'default' : match.matchScore > 50 ? 'secondary' : 'outline'}>
                                     {match.matchScore.toFixed(0)} / 100
@@ -298,3 +323,5 @@ export function CandidateMatcherPage() {
     </div>
   );
 }
+
+    

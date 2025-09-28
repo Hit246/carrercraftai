@@ -1,7 +1,7 @@
 
 'use server';
 
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
 import {
   analyzeResume,
   AnalyzeResumeInput,
@@ -27,7 +27,7 @@ import { submitSupportRequest } from '@/ai/flows/support-request';
 import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeVersionNameOutput } from '@/ai/flows/resume-version-namer';
 import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput } from '@/ai/flows/candidate-summarizer';
 import type { SupportRequestInput } from '@/ai/flows/support-request';
-import { db } from './firebase';
+import { db, uploadFile } from './firebase';
 
 export async function analyzeResumeAction(
   input: AnalyzeResumeInput
@@ -42,12 +42,63 @@ export async function jobMatcherAction(
   return await jobMatcher(input);
 }
 
-export async function candidateMatcherAction(
-  input: CandidateMatcherInput
-): Promise<CandidateMatcherOutput> {
-  // In a real app, you would check the company's subscription tier here.
-  return await candidateMatcher(input);
+// Interface representing the input for saving candidates to Firestore
+interface SaveCandidatesInput {
+    teamId: string;
+    jobTitle: string;
+    candidates: Array<{
+        resumeId: string;
+        matchScore: number;
+        justification: string;
+        resumeFile: File;
+        extractedName: string;
+        extractedSkills: string[];
+    }>;
 }
+
+
+export async function candidateMatcherAndSaveAction(
+    input: CandidateMatcherInput & { teamId: string, files: File[], jobTitle: string }
+  ): Promise<CandidateMatcherOutput> {
+    
+    // 1. Get AI matching results
+    const matchResult = await candidateMatcher({
+        jobDescription: input.jobDescription,
+        resumeDataUris: input.resumeDataUris
+    });
+
+    if (!matchResult.candidateMatches || matchResult.candidateMatches.length === 0) {
+        return matchResult;
+    }
+
+    // 2. Save candidates to Firestore
+    const candidatesCollectionRef = firestoreCollection(db, `teams/${input.teamId}/candidates`);
+
+    for (const match of matchResult.candidateMatches) {
+        const originalIndex = parseInt(match.resumeId.split(' ')[1]);
+        const resumeFile = input.files[originalIndex];
+        
+        if (resumeFile) {
+            // Upload resume to storage
+            const resumeURL = await uploadFile(resumeFile, `teams/${input.teamId}/resumes/${Date.now()}-${resumeFile.name}`);
+
+            // Add candidate document to Firestore
+            await addDoc(candidatesCollectionRef, {
+                name: resumeFile.name, // Using filename as name for now
+                matchScore: match.matchScore,
+                skills: [], // We can enhance the AI flow to extract skills later
+                status: 'New',
+                resumeURL: resumeURL,
+                addedAt: serverTimestamp(),
+                jobTitle: input.jobTitle,
+                justification: match.justification
+            });
+        }
+    }
+    
+    return matchResult;
+}
+
 
 export async function generateCoverLetterAction(
   input: GenerateCoverLetterInput
@@ -91,3 +142,5 @@ export async function summarizeCandidateAction(
 
 
 export type { SupportRequestInput };
+
+    

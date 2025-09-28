@@ -14,6 +14,8 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard,
@@ -31,6 +33,7 @@ import {
   Shield,
   Target,
   NotebookPen,
+  Contact,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -38,6 +41,8 @@ import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import Image from 'next/image';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 
 function AppLayoutContent({
     children,
@@ -80,7 +85,8 @@ function AppLayoutContent({
     if (isActive('/cover-letter-generator')) return 'Cover Letter Generator';
     if (isActive('/candidate-matcher')) return 'Candidate Matcher';
     if (isActive('/candidate-summarizer')) return 'Candidate Summarizer';
-    if (isActive('/team')) return 'Team Management';
+    if (isActive('/team/members')) return 'Team Members';
+    if (isActive('/team/candidates')) return 'Candidate Management';
     if (isActive('/support')) return 'Support';
     if (isActive('/pricing')) return 'Upgrade to Pro';
     if (isActive('/profile')) return 'Profile Settings';
@@ -186,15 +192,23 @@ function AppLayoutContent({
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
-             {plan === 'recruiter' && (
-                <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/team')}>
-                        <Link href="/team">
-                        <Users2 />
-                        <span>Team Management</span>
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
+            {plan === 'recruiter' && (
+                <Collapsible asChild>
+                    <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                            <SidebarMenuButton>
+                                <Users2 />
+                                <span>Team Management</span>
+                            </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent asChild>
+                            <SidebarMenuSub>
+                                <SidebarMenuSubItem><SidebarMenuSubButton asChild isActive={isActive('/team/members')}><Link href="/team/members"><Users />Members</Link></SidebarMenuSubButton></SidebarMenuSubItem>
+                                <SidebarMenuSubItem><SidebarMenuSubButton asChild isActive={isActive('/team/candidates')}><Link href="/team/candidates"><Contact />Candidates</Link></SidebarMenuSubButton></SidebarMenuSubItem>
+                            </SidebarMenuSub>
+                        </CollapsibleContent>
+                    </SidebarMenuItem>
+                </Collapsible>
             )}
              <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive('/support')}>
@@ -267,3 +281,4 @@ export default function AppLayout({
           </AuthProvider>
       )
   }
+    
