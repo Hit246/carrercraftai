@@ -126,6 +126,9 @@ function AppLayoutContent({
     if (plan === 'pro') {
         return <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>
     }
+    if (plan === 'essentials') {
+      return <Badge variant="secondary" className="ml-auto bg-gray-400/20 text-gray-500 border-gray-400/30">Essentials</Badge>
+    }
     if (plan === 'pending') {
       return <Badge variant="secondary" className="ml-auto bg-yellow-400/20 text-yellow-500 border-yellow-400/30">Pending</Badge>
     }
@@ -307,5 +310,3 @@ export default function AppLayout({
           </AuthProvider>
       )
   }
-
-    
