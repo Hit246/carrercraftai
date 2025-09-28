@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -44,7 +44,9 @@ import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import Image from 'next/image';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-
+import { OnboardingTour } from '@/components/onboarding-tour';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 function AppLayoutContent({
     children,
@@ -53,13 +55,20 @@ function AppLayoutContent({
   }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logout, plan, isAdmin } = useAuth();
+  const { user, loading, logout, plan, isAdmin, userData } = useAuth();
+  const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
+  
+  useEffect(() => {
+    if (userData && userData.hasCompletedOnboarding === false) {
+      setShowTour(true);
+    }
+  }, [userData]);
 
 
   if (loading) {
@@ -73,6 +82,15 @@ function AppLayoutContent({
   if (!user) {
     return null;
   }
+
+  const handleTourComplete = async () => {
+    if(user) {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, { hasCompletedOnboarding: true });
+    }
+    setShowTour(false);
+  }
+
 
   const isActive = (path: string) => {
     if (path === '/dashboard') return pathname === path;
@@ -122,6 +140,11 @@ function AppLayoutContent({
   }
 
   return (
+    <>
+    <OnboardingTour
+        isOpen={showTour}
+        onClose={handleTourComplete}
+      />
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader className="p-4">
@@ -269,6 +292,7 @@ function AppLayoutContent({
         </main>
       </SidebarInset>
     </SidebarProvider>
+    </>
   );
 }
 
@@ -283,6 +307,5 @@ export default function AppLayout({
           </AuthProvider>
       )
   }
-    
 
     

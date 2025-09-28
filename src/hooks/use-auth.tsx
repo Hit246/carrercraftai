@@ -20,6 +20,7 @@ interface UserData {
     paymentProofURL?: string | null;
     requestedPlan?: 'essentials' | 'pro' | 'recruiter';
     teamId?: string;
+    hasCompletedOnboarding?: boolean;
 }
 
 interface AuthContextType {
@@ -91,7 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!userDoc.exists()) {
              // This case is primarily handled by the signup function now
              // but as a fallback, we create a free user record.
-             await setDoc(userRef, { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date() });
+             await setDoc(userRef, { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date(), hasCompletedOnboarding: false });
              currentData = (await getDoc(userRef)).data() as UserData;
         } else {
             currentData = userDoc.data() as UserData;
@@ -128,6 +129,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         createdAt: new Date(),
         planUpdatedAt: null,
         paymentProofURL: null,
+        hasCompletedOnboarding: false,
     };
     
     // Check if there is an invitation for this email
