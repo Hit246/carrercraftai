@@ -25,6 +25,7 @@ import {
 import { atsOptimizer, AtsOptimizerInput, AtsOptimizerOutput } from '@/ai/flows/ats-optimizer';
 import { submitSupportRequest } from '@/ai/flows/support-request';
 import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeVersionNameOutput } from '@/ai/flows/resume-version-namer';
+import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput } from '@/ai/flows/candidate-summarizer';
 import type { SupportRequestInput } from '@/ai/flows/support-request';
 import { db } from './firebase';
 
@@ -81,5 +82,12 @@ export async function suggestResumeVersionNameAction(
     ): Promise<SuggestResumeVersionNameOutput> {
     return await suggestResumeVersionName(input);
 }
+
+export async function summarizeCandidateAction(
+  input: SummarizeCandidateInput
+): Promise<SummarizeCandidateOutput> {
+  return await summarizeCandidate(input);
+}
+
 
 export type { SupportRequestInput };

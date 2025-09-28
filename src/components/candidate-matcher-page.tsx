@@ -1,18 +1,17 @@
-
 'use client';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { candidateMatcherAction } from '@/lib/actions';
+import { candidateMatcherAction, summarizeCandidateAction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Users, FileSearch, Upload, Crown } from 'lucide-react';
+import { Loader2, Users, FileSearch, Upload, Crown, TextIcon, NotebookPen } from 'lucide-react';
 import type { CandidateMatcherOutput } from '@/ai/flows/candidate-matcher';
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +19,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 const MAX_FILES = 10;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -39,6 +45,8 @@ const formSchema = z.object({
     )
 });
 
+type Match = CandidateMatcherOutput['candidateMatches'][0] & { resumeDataUri: string };
+
 const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -51,8 +59,11 @@ const fileToDataUri = (file: File): Promise<string> => {
 };
 
 export function CandidateMatcherPage() {
-  const [candidateMatches, setCandidateMatches] = useState<CandidateMatcherOutput['candidateMatches'] | null>(null);
+  const [candidateMatches, setCandidateMatches] = useState<Match[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(false);
   const { toast } = useToast();
   const { plan } = useAuth();
   const router = useRouter();
@@ -88,7 +99,16 @@ export function CandidateMatcherPage() {
             jobDescription: values.jobDescription,
             resumeDataUris: resumeDataUris
         });
-        setCandidateMatches(result.candidateMatches.sort((a,b) => b.matchScore - a.matchScore));
+
+        const matchesWithUris: Match[] = result.candidateMatches
+            .map((match, index) => ({
+                ...match,
+                resumeDataUri: resumeDataUris[index]
+            }))
+            .sort((a,b) => b.matchScore - a.matchScore);
+
+        setCandidateMatches(matchesWithUris);
+
     } catch (error) {
         console.error(error);
         toast({
@@ -101,8 +121,40 @@ export function CandidateMatcherPage() {
     }
   }
 
+  const handleSummarize = async (resumeDataUri: string) => {
+    setIsSummarizing(true);
+    setSummary(null);
+    setIsSummaryDialogOpen(true);
+    try {
+        const result = await summarizeCandidateAction({ resumeDataUri });
+        setSummary(result.summary);
+    } catch (error) {
+        console.error(error);
+        setSummary("Failed to generate summary. Please try again.");
+    } finally {
+        setIsSummarizing(false);
+    }
+  }
+
   return (
     <div className="space-y-8">
+      <Dialog open={isSummaryDialogOpen} onOpenChange={setIsSummaryDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><NotebookPen/> AI Candidate Summary</DialogTitle>
+            <DialogDescription>A quick overview of the candidate's profile.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {isSummarizing ? (
+                 <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin"/> Generating summary...
+                 </div>
+            ) : (
+                <p className="text-sm text-muted-foreground">{summary}</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
       {!canUseFeature && (
         <Alert variant="pro">
             <Crown />
@@ -192,6 +244,7 @@ export function CandidateMatcherPage() {
                         <TableHead className="w-[150px]">Resume ID</TableHead>
                         <TableHead className="w-[150px]">Match Score</TableHead>
                         <TableHead>Justification</TableHead>
+                        <TableHead className="text-right w-[120px]">Summary</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -201,12 +254,13 @@ export function CandidateMatcherPage() {
                                 <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                                 <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                                 <TableCell><Skeleton className="h-5 w-5/6" /></TableCell>
+                                <TableCell><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                             </TableRow>
                         ))
                     )}
                     {!isLoading && (!candidateMatches || candidateMatches.length === 0) && (
                         <TableRow>
-                            <TableCell colSpan={3} className="h-24 text-center">
+                            <TableCell colSpan={4} className="h-24 text-center">
                                 <FileSearch className="mx-auto h-8 w-8 text-muted-foreground mb-2"/>
                                {canUseFeature ? "No candidates found yet. Results will appear here." : "Upgrade to the Recruiter plan to find candidates."}
                             </TableCell>
@@ -221,6 +275,17 @@ export function CandidateMatcherPage() {
                                 </Badge>
                             </TableCell>
                             <TableCell className="text-sm text-muted-foreground">{match.justification}</TableCell>
+                            <TableCell className="text-right">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleSummarize(match.resumeDataUri)}
+                                    disabled={isSummarizing}
+                                >
+                                    <TextIcon className="mr-2 h-4 w-4" />
+                                    Summarize
+                                </Button>
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
