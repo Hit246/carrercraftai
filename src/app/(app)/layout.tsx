@@ -30,6 +30,7 @@ import {
   Home,
   Shield,
   Target,
+  NotebookPen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -78,6 +79,7 @@ function AppLayoutContent({
     if (isActive('/job-matcher')) return 'Job Matcher';
     if (isActive('/cover-letter-generator')) return 'Cover Letter Generator';
     if (isActive('/candidate-matcher')) return 'Candidate Matcher';
+    if (isActive('/candidate-summarizer')) return 'Candidate Summarizer';
     if (isActive('/team')) return 'Team Management';
     if (isActive('/support')) return 'Support';
     if (isActive('/pricing')) return 'Upgrade to Pro';
@@ -171,6 +173,15 @@ function AppLayoutContent({
                     <Link href="/candidate-matcher">
                     <Users />
                     <span>Candidate Matcher</span>
+                    {plan !== 'recruiter' && <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>}
+                    </Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive('/candidate-summarizer')}>
+                    <Link href="/candidate-summarizer">
+                    <NotebookPen />
+                    <span>Candidate Summarizer</span>
                     {plan !== 'recruiter' && <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>}
                     </Link>
                 </SidebarMenuButton>

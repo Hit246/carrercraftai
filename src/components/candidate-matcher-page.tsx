@@ -101,10 +101,13 @@ export function CandidateMatcherPage() {
         });
 
         const matchesWithUris: Match[] = result.candidateMatches
-            .map((match, index) => ({
-                ...match,
-                resumeDataUri: resumeDataUris[index]
-            }))
+            .map((match, index) => {
+                const originalIndex = parseInt(match.resumeId.split(' ')[1]) -1;
+                return {
+                    ...match,
+                    resumeDataUri: resumeDataUris[originalIndex]
+                }
+            })
             .sort((a,b) => b.matchScore - a.matchScore);
 
         setCandidateMatches(matchesWithUris);
