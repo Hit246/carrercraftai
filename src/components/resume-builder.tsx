@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface Experience {
     id: number;
@@ -370,6 +371,9 @@ export const ResumeBuilder = () => {
     }
     
     const handleAnalyze = async () => {
+        // This function is being kept for potential future use but is disabled.
+        if (true) return; // Keep this disabled
+
         if(!canUseFeature) {
             toast({
               title: "Upgrade to Pro",
@@ -652,10 +656,21 @@ export const ResumeBuilder = () => {
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                          </AlertDialog>
-                         <Button variant="secondary" onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
-                           {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Bot className="mr-2 h-4 w-4" />}
-                           {isAnalyzing ? "Analyzing..." : "AI Analyze"}
-                        </Button>
+                         <TooltipProvider>
+                           <Tooltip>
+                            <TooltipTrigger asChild>
+                                <span tabIndex={0}>
+                                    <Button variant="secondary" disabled={true}>
+                                        <Bot className="mr-2 h-4 w-4" />
+                                        AI Analyze
+                                    </Button>
+                                </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Please take a screenshot of your resume and use the main Resume Analyzer tool.</p>
+                            </TooltipContent>
+                           </Tooltip>
+                        </TooltipProvider>
                         <Button onClick={handleExport}>
                            <Download className="mr-2 h-4 w-4" /> Export
                         </Button>
