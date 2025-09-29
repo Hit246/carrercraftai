@@ -20,8 +20,8 @@ const formSchema = z.object({
     resumeFile: z.instanceof(File).refine(
         (file) => file.size > 0, 'Please upload your resume.'
       ).refine(
-        (file) => ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type),
-        "Please upload a PDF or DOCX file."
+        (file) => file.type.startsWith('image/'),
+        "Please upload a valid image file (PNG, JPG, etc.)."
       ),
 });
 
@@ -98,7 +98,7 @@ export function CandidateSummarizerPage() {
             <NotebookPen className="text-primary"/> AI Candidate Summarizer
           </CardTitle>
           <CardDescription>
-            Upload a candidate's resume (PDF or DOCX) to generate a quick, 3-sentence summary.
+            Upload a candidate's resume image to generate a quick, 3-sentence summary.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -109,14 +109,14 @@ export function CandidateSummarizerPage() {
                 name="resumeFile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Candidate's Resume</FormLabel>
+                    <FormLabel>Candidate's Resume Image</FormLabel>
                      <FormControl>
                       <div className="relative">
                           <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                           <Input
                               type="file"
                               className="pl-10 h-auto"
-                              accept=".pdf,.docx"
+                              accept="image/*"
                               onChange={(e) => field.onChange(e.target.files?.[0])}
                               disabled={!canUseFeature || isLoading}
                           />

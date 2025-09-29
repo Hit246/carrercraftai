@@ -24,8 +24,8 @@ const formSchema = z.object({
     resumeFile: z.instanceof(File).refine(
         (file) => file.size > 0, 'Please upload your resume.'
       ).refine(
-        (file) => ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type),
-        "Please upload a PDF or DOCX file."
+        (file) => file.type.startsWith('image/'),
+        "Please upload a valid image file (PNG, JPG, etc.)."
       ),
     jobDescription: z.string().min(50, { message: 'Please provide a detailed job description.' }),
 });
@@ -130,7 +130,7 @@ export function AtsOptimizerPage() {
                                     <Input
                                         type="file"
                                         className="pl-10"
-                                        accept=".pdf,.docx"
+                                        accept="image/*"
                                         onChange={(e) => field.onChange(e.target.files?.[0])}
                                         disabled={isLoading}
                                     />

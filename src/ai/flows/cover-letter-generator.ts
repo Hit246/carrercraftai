@@ -15,7 +15,7 @@ const GenerateCoverLetterInputSchema = z.object({
   resumeDataUri: z
   .string()
   .describe(
-    'A resume as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:<mimetype>;base64,<encoded_data>.'
+    'An image of a resume as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:image/<mimetype>;base64,<encoded_data>.'
   ),
   jobDescription: z.string().describe('The job description for which to generate the cover letter.'),
   userName: z.string().describe('The name of the user applying for the job.'),
@@ -44,7 +44,7 @@ You will be provided with the applicant's resume, the job description, and the a
 **Job Description**:
 {{{jobDescription}}}
 
-**Applicant's Resume**:
+**Applicant's Resume Image**:
 {{media url=resumeDataUri}}
 
 **Instructions**:
