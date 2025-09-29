@@ -41,8 +41,8 @@ const formSchema = z.object({
         `Each file size should not exceed 5MB.`
     )
     .refine(
-        (files) => Array.from(files).every((file) => ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"].includes(file.type)),
-        "Please upload PDF or DOCX files."
+        (files) => Array.from(files).every((file) => file.type.startsWith('image/')),
+        "Please upload image files only."
     )
 });
 
@@ -236,7 +236,7 @@ export function CandidateMatcherPage() {
                             <Input
                                 type="file"
                                 className="pl-10 h-auto"
-                                accept=".pdf,.docx"
+                                accept="image/*"
                                 multiple
                                 onChange={(e) => field.onChange(e.target.files)}
                                 disabled={!canUseFeature || isLoading}
@@ -244,7 +244,7 @@ export function CandidateMatcherPage() {
                         </div>
                       </FormControl>
                       <FormDescription>
-                        Upload up to {MAX_FILES} resumes in PDF or DOCX format.
+                        Upload up to {MAX_FILES} resume images.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -323,5 +323,3 @@ export function CandidateMatcherPage() {
     </div>
   );
 }
-
-    

@@ -15,7 +15,7 @@ const AtsOptimizerInputSchema = z.object({
   resumeDataUri: z
     .string()
     .describe(
-      'A resume as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:<mimetype>;base64,<encoded_data>.'
+      'An image of a resume as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:image/<mimetype>;base64,<encoded_data>.'
     ),
   jobDescription: z.string().describe('The job description to compare the resume against.'),
 });
@@ -42,7 +42,7 @@ const prompt = ai.definePrompt({
 **Job Description**:
 {{{jobDescription}}}
 
-**Resume**:
+**Resume Image**:
 {{media url=resumeDataUri}}
 
 **Instructions**:
