@@ -15,7 +15,7 @@ const AnalyzeResumeInputSchema = z.object({
   resumeDataUri: z
     .string()
     .describe(
-      'A resume as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:<mimetype>;base64,<encoded_data>.'
+      'An image of a resume as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:image/<mimetype>;base64,<encoded_data>.'
     ),
   desiredRole: z.string().optional().describe('The user\'s desired job role, if provided.'),
 });
@@ -42,7 +42,7 @@ const prompt = ai.definePrompt({
   name: 'analyzeResumePrompt',
   input: {schema: AnalyzeResumeInputSchema},
   output: {schema: AnalyzeResumeOutputSchema},
-  prompt: `You are a world-class career coach and expert resume critic. Your task is to provide a detailed, constructive, and highly specific analysis of the provided resume.
+  prompt: `You are a world-class career coach and expert resume critic. Your task is to provide a detailed, constructive, and highly specific analysis of the provided resume image.
 
 Analyze the following resume for clarity, impact, and keyword optimization:
 {{media url=resumeDataUri}}
