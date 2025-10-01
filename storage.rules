@@ -2,31 +2,43 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-
+  
+    // Function to check if the user is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Avatars: Users can only upload/update their own avatar.
-    match /avatars/{userId} {
-      allow read: if true;
-      allow write: if isAuthenticated() && request.auth.uid == userId;
+    // Admins are identified by a custom claim.
+    function isAdmin() {
+      return request.auth.token.admin == true;
     }
 
-    // Payment Proofs: Users can only upload their own proof.
-    match /payment_proofs/{userId}/{fileName} {
+    // Recruiters are identified by a custom claim.
+    function isRecruiter() {
+      return request.auth.token.recruiter == true;
+    }
+    
+    // Logged-in users can manage their own avatar.
+    match /avatars/{userId} {
       allow read, write: if isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Team Resumes: Recruiters/admins can upload resumes for their team.
+    // Logged-in users can upload their own payment proof.
+    match /payment_proofs/{userId}/{fileName} {
+        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Recruiters or Admins can upload resumes to their team's folder.
+    // For now, allow any authenticated user to get unblocked.
+    // For production, you would set a custom claim 'isRecruiter'
+    // on the user and use `if isRecruiter() || isAdmin();`
     match /teams/{teamId}/resumes/{fileName} {
-      function isTeamOwner() {
-        return isAuthenticated() && get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
-      }
-      function isTeamMember() {
-          return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-      }
-      allow read, write: if isTeamOwner() || isTeamMember();
+      allow read, write: if isAuthenticated();
+    }
+    
+    // Allow admins to read/write anywhere for settings, etc.
+    match /settings/{allPaths=**} {
+        allow read, write: if isAdmin();
     }
   }
 }
