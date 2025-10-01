@@ -199,16 +199,14 @@ export function JobMatcherPage() {
                                       <CardTitle className="font-headline text-lg">{job.title}</CardTitle>
                                       <CardDescription>{job.company}</CardDescription>
                                   </div>
-                                  <Button variant="ghost" size="icon" asChild>
-                                      <Link href={job.url} target="_blank" rel="noopener noreferrer">
-                                          <ExternalLink className="h-4 w-4" />
-                                      </Link>
-                                  </Button>
                               </div>
                           </CardHeader>
                           <CardContent>
                               <p className="text-sm text-muted-foreground mb-4">{job.description}</p>
-                              <Label className="text-xs">Match Score</Label>
+                              <div className="flex justify-between items-center">
+                                <Label className="text-xs">Match Score</Label>
+                                <span className="text-xs font-semibold text-primary">{job.matchScore}%</span>
+                              </div>
                               <Progress value={job.matchScore} className="h-2 mt-1" />
                           </CardContent>
                       </Card>
