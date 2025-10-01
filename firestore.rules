@@ -44,14 +44,19 @@ service cloud.firestore {
       match /members/{memberId} {
         allow read, write: if isAdmin() || get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       }
+
+      // Candidates Subcollection
+      match /candidates/{candidateId} {
+         allow read, write: if isAdmin() || isMember();
+      }
     }
 
     // Settings Collection
     match /settings/{settingId} {
       // Settings can be read by anyone (for payment details)
-      // but only written to by an admin (or any authenticated user for now).
+      // but only written to by an admin.
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     // Support Requests Collection
