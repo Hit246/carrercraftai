@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Crown, User, Shield, Trophy, AlertTriangle } from 'lucide-react';
+import { MoreHorizontal, Trash2, Crown, User, Shield, Trophy, AlertTriangle, Handshake } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
@@ -261,7 +261,7 @@ export function UserManagementPage() {
                                     Set to Pro
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'recruiter')}>
-                                    <User className="mr-2 h-4 w-4" />
+                                    <Handshake className="mr-2 h-4 w-4" />
                                     Set to Recruiter
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />

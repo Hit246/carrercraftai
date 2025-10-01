@@ -35,9 +35,7 @@ const prompt = ai.definePrompt({
   name: 'generateCoverLetterPrompt',
   input: {schema: GenerateCoverLetterInputSchema},
   output: {schema: GenerateCoverLetterOutputSchema},
-  prompt: `You are a professional career coach and expert cover letter writer. Your task is to generate a compelling and personalized cover letter for a job application. The tone should be professional, confident, and enthusiastic.
-
-You will be provided with the applicant's resume, the job description, and the applicant's name.
+  prompt: `You are an expert career coach and a master at writing compelling cover letters. Your task is to generate a professional and highly personalized cover letter that makes the applicant stand out.
 
 **Applicant's Name**: {{{userName}}}
 
@@ -48,10 +46,14 @@ You will be provided with the applicant's resume, the job description, and the a
 {{media url=resumeDataUri}}
 
 **Instructions**:
-1.  **Structure**: The cover letter must have a clear introduction, body, and conclusion.
-2.  **Personalization**: Directly address the requirements in the job description. In the body paragraphs, highlight 2-3 key skills or experiences from the resume that are most relevant to the job.
-3.  **Tone**: Maintain a professional and confident tone.
-4.  **Formatting**: Address the letter to the "Hiring Manager". Sign off with the applicant's name, "{{{userName}}}". The output must be a single string in Markdown format.
+1.  **Opening Paragraph**: Start with an engaging opening that grabs the reader's attention. Mention the specific job title and where it was seen.
+2.  **Body Paragraphs (2-3 paragraphs)**: This is the most critical part. Do not just list skills. Instead, create a narrative. Select 2-3 key experiences or projects from the resume and connect them directly to the most important requirements in the job description. For each, explain *how* the applicant's past achievements will translate to success in the new role. Use quantifiable results from the resume where possible (e.g., "increased efficiency by 30%").
+3.  **Closing Paragraph**: Reiterate enthusiasm for the role and the company. Briefly mention how the applicant's values align with the company's mission if possible. Include a strong call to action, expressing eagerness for an interview.
+4.  **Tone**: The tone must be professional, confident, and genuinely enthusiastic. Avoid overly formal or generic language.
+5.  **Formatting**: 
+    - Address the letter to "Dear Hiring Manager,".
+    - Sign off with "Sincerely," followed by the applicant's name, "{{{userName}}}".
+    - The final output must be a single string in Markdown format, with proper paragraph breaks.
 `,
 });
 
