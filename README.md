@@ -32,7 +32,7 @@ An AI-powered platform designed to empower job seekers and recruiters. Build stu
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **UI Components:** [shadcn/ui](https://ui.shadcn.com/)
 - **AI Integration:** [Firebase Genkit](https://firebase.google.com/docs/genkit) with Google AI (Gemini)
-- **Backend & Database:** [Firebase](https://firebase.google.com/) (Authentication & Firestore)
+- **Backend & Database:** [Firebase](https://firebase.google.com/) (Authentication, Firestore & Storage)
 - **Forms:** [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/) for validation
 - **Icons:** [Lucide React](https://lucide.dev/)
 - **Deployment:** Ready for [Firebase App Hosting](https://firebase.google.com/docs/app-hosting)
@@ -45,6 +45,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 - [Node.js](https://nodejs.org/) (v18 or later recommended)
 - [pnpm](https://pnpm.io/) (or npm/yarn)
+- [Firebase CLI](https://firebase.google.com/docs/cli)
 
 ### 1. Clone the Repository
 
@@ -68,6 +69,7 @@ This project requires a connection to a Firebase project to function.
 3.  **Enable Services:**
     -   Enable **Authentication** with the "Email/Password" sign-in method.
     -   Enable **Firestore Database**.
+    -   Enable **Firebase Storage**.
 4.  **Set up Environment File:**
     -   Create a `.env` file in the root of the project.
     -   Copy the contents of `.env.example` into `.env`.
@@ -101,15 +103,15 @@ The application uses two concurrent development servers: one for the Next.js fro
 
 Open [http://localhost:9002](http://localhost:9002) with your browser to see the result. The Genkit server will run on a different port and will be proxied by the Next.js server.
 
-## ⚙️ Firestore Security Rules
+## ⚙️ Firebase Security Rules
 
-For the application to interact with Firestore securely, you must deploy the provided security rules.
+For the application to interact with Firestore and Storage securely, you must deploy the provided security rules.
 
-1.  Open the `firestore.rules` file in the project root.
-2.  Copy its contents.
-3.  In the Firebase Console, navigate to **Firestore Database > Rules**.
-4.  Paste the content into the editor, replacing any existing rules.
-5.  Click **Publish**.
+1.  Log in to the Firebase CLI: `firebase login`
+2.  Select your project: `firebase use your-project-id`
+3.  Deploy the rules: `firebase deploy --only firestore,storage`
+
+The CLI will use the `firestore.rules` and `storage.rules` files in the project root.
 
 ## ✍️ Author
 
