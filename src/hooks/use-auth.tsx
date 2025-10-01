@@ -68,9 +68,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsAdmin(userIsAdmin);
 
         if (userIsAdmin) {
+            const userRef = doc(db, 'users', currentUser.uid);
+            const userDoc = await getDoc(userRef);
+            const adminData = {
+                email: currentUser.email,
+                plan: 'recruiter' as Plan,
+                credits: Infinity,
+            };
+            if (!userDoc.exists()) {
+                await setDoc(userRef, { ...adminData, createdAt: new Date() });
+            } else {
+                await updateDoc(userRef, adminData);
+            }
             setPlan('recruiter');
             setCredits(Infinity);
-            setUserData({ plan: 'recruiter', credits: Infinity });
+            setUserData((await getDoc(userRef)).data() as UserData);
             setLoading(false);
         }
 
