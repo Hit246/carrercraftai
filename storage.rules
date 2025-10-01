@@ -2,34 +2,26 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-
+  
+    // Helper function to check if a user is authenticated.
     function isAuthenticated() {
       return request.auth != null;
     }
-
-    function isOwner(userId) {
-        return isAuthenticated() && request.auth.uid == userId;
+    
+    // Admins can read/write anything.
+    match /{allPaths=**} {
+      allow read, write: if request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
 
-    // Avatars: Users can only upload their own avatar.
-    match /avatars/{userId} {
-      allow write: if isOwner(userId);
+    // Any authenticated user can upload files.
+    // This is permissive for development but should be locked down further
+    // in production using custom claims or more specific path checks.
+    match /{allPaths=**} {
+      allow write: if isAuthenticated();
     }
     
-    // Payment Proofs: Users can only upload their own payment proof.
-    match /payment_proofs/{userId}/{fileName} {
-        allow write: if isOwner(userId);
-    }
-
-    // Resumes for Candidate Matching (Recruiter feature)
-    match /teams/{teamId}/resumes/{fileName} {
-        // This rule is permissive for now to unblock development.
-        // For production, you would verify team membership.
-        allow read, write: if isAuthenticated();
-    }
-
-    // Allow public reads on all files for simplicity of displaying them in the app.
-    // In production, you might want more granular read rules.
+    // Allow public read access to all files.
+    // This is useful for avatars, payment QR codes, etc.
     allow read: if true;
   }
 }

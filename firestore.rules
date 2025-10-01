@@ -1,85 +1,66 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
     
-    // Helper function to check if the user is authenticated.
+    // Helper function to check if a user is authenticated.
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Helper function to check if a user is an admin by email.
+    // Helper function to check if a user is an admin
     function isAdmin() {
-      return isAuthenticated() && request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+      return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
 
-    // Helper function to check if the requesting user is the owner of the document.
+    // Helper function to check if a user is the owner of a document
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+      return request.auth.uid == userId;
     }
 
-    // Users Collection
+    // Allow admins to read/write anything
+    match /{path=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Users can read/update their own document.
     match /users/{userId} {
-      // A user can read and write to their own document. Admins can read/write any.
-      allow read, write: if isOwner(userId) || isAdmin();
-      // Allow user creation on signup.
+      allow read, update: if isOwner(userId);
       allow create: if isAuthenticated();
-
-      // Resume Versions Subcollection
-      match /resumeVersions/{versionId} {
-        // A user can manage their own resume versions. Admins have full access.
-        allow read, write: if isOwner(userId) || isAdmin();
-      }
+    }
+    
+    // Users can manage their own resume versions.
+    match /users/{userId}/resumeVersions/{versionId} {
+      allow read, write: if isOwner(userId);
     }
 
-    // Teams Collection
+    // Allow authenticated users to read team and member info.
+    // Only team owners can create/edit team info.
     match /teams/{teamId} {
+      allow read, create: if isAuthenticated();
+      allow write: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       
-      function isTeamOwner() {
-        return isAuthenticated() && resource.data.owner == request.auth.uid;
-      }
-
-      function isTeamMember() {
-        return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-      }
-      
-      // The team owner or an admin can write to the team document.
-      allow write: if isTeamOwner() || isAdmin();
-
-      // Any member of the team, the owner, or an admin can read the team document.
-      allow read: if isTeamMember() || isTeamOwner() || isAdmin();
-      
-      // Any authenticated user can create a team (the `useAuth` hook restricts this to recruiters).
-      allow create: if isAuthenticated();
-
-      // Team Members Subcollection
       match /members/{memberId} {
-        // Only the team owner or an admin can add/remove members.
-        allow read, write, delete: if isTeamOwner() || isAdmin();
-      }
-      
-      // Candidates Subcollection
-      match /candidates/{candidateId} {
-          // Any team member or the owner can manage candidates.
-          allow read, write: if isTeamMember() || isTeamOwner() || isAdmin();
+          allow read: if isAuthenticated();
+          allow write: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       }
     }
-
-    // Settings Collection
+    
+    // Settings are public (for payment details).
     match /settings/{settingId} {
-      // Payment settings are public for reading.
       allow read: if true;
-      // Only admins can change settings.
       allow write: if isAdmin();
     }
     
-    // Support Requests Collection
+    // Users can create their own support requests.
     match /supportRequests/{requestId} {
-        // Users can create their own support requests.
-        allow create: if isOwner(request.resource.data.userId);
-        // Only admins can read/write/delete support requests.
-        allow read, write, delete: if isAdmin();
+      allow create: if isOwner(request.resource.data.userId);
+      allow read, update: if isAdmin();
     }
   }
 }
