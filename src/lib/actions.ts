@@ -66,35 +66,6 @@ export async function candidateMatcherAndSaveAction(
         jobDescription: input.jobDescription,
         resumeDataUris: input.resumeDataUris
     });
-
-    if (!matchResult.candidateMatches || matchResult.candidateMatches.length === 0) {
-        return matchResult;
-    }
-
-    // 2. Save candidates to Firestore
-    const candidatesCollectionRef = firestoreCollection(db, `teams/${input.teamId}/candidates`);
-
-    for (const match of matchResult.candidateMatches) {
-        const originalIndex = parseInt(match.resumeId.split(' ')[1]);
-        const resumeFile = input.files[originalIndex];
-        
-        if (resumeFile) {
-            // Upload resume to storage
-            const resumeURL = await uploadFile(resumeFile, `teams/${input.teamId}/resumes/${Date.now()}-${resumeFile.name}`);
-
-            // Add candidate document to Firestore
-            await addDoc(candidatesCollectionRef, {
-                name: resumeFile.name, // Using filename as name for now
-                matchScore: match.matchScore,
-                skills: [], // We can enhance the AI flow to extract skills later
-                status: 'New',
-                resumeURL: resumeURL,
-                addedAt: serverTimestamp(),
-                jobTitle: input.jobTitle,
-                justification: match.justification
-            });
-        }
-    }
     
     return matchResult;
 }

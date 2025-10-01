@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -80,14 +81,13 @@ export function CandidateMatcherPage() {
   const canUseFeature = plan === 'recruiter';
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!canUseFeature || !userData?.teamId) {
+    if (!canUseFeature) {
         toast({
             title: "Feature Unavailable",
-            description: "This feature is only for Recruiter plans with an active team.",
+            description: "This feature is only for Recruiter plans.",
             variant: "destructive",
         });
-        if (!userData?.teamId) router.push('/team/members');
-        else router.push('/pricing');
+        router.push('/pricing');
         return;
     }
 
@@ -101,7 +101,7 @@ export function CandidateMatcherPage() {
         const result = await candidateMatcherAndSaveAction({
             jobDescription: values.jobDescription,
             resumeDataUris: resumeDataUris,
-            teamId: userData.teamId,
+            teamId: userData?.teamId || '',
             files: resumeFiles,
             jobTitle: values.jobTitle
         });
@@ -117,6 +117,10 @@ export function CandidateMatcherPage() {
             .sort((a,b) => b.matchScore - a.matchScore);
 
         setCandidateMatches(matchesWithUris);
+        toast({
+          title: "Analysis Complete",
+          description: "Top candidates have been identified. Note: candidates are not saved automatically.",
+        })
 
     } catch (error) {
         console.error(error);
@@ -180,7 +184,7 @@ export function CandidateMatcherPage() {
             <Users className="text-primary"/> AI Candidate Matcher
           </CardTitle>
           <CardDescription>
-            Find the best-fit candidates for a role. Matched candidates will be automatically saved to your Candidate Management dashboard.
+            Find the best-fit candidates for a role. The results will be displayed below without saving them.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -253,7 +257,7 @@ export function CandidateMatcherPage() {
               </div>
               <Button type="submit" disabled={isLoading || !canUseFeature} size="lg" className="w-full">
                 {isLoading ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finding & Saving Candidates...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Finding Candidates...</>
                 ) : (
                   'Find Best Matches'
                 )}
