@@ -2,43 +2,29 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-  
-    // Function to check if the user is authenticated
+
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Admins are identified by a custom claim.
-    function isAdmin() {
-      return request.auth.token.admin == true;
-    }
-
-    // Recruiters are identified by a custom claim.
-    function isRecruiter() {
-      return request.auth.token.recruiter == true;
-    }
-    
-    // Logged-in users can manage their own avatar.
+    // Allow users to read/write their own avatars
     match /avatars/{userId} {
-      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+      allow read: if true; // Avatars are public
     }
 
-    // Logged-in users can upload their own payment proof.
+    // Allow users to write their own payment proofs
     match /payment_proofs/{userId}/{fileName} {
-        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+      // Admins should be able to read these, checked via custom claims or functions in a real app
+      allow read: if isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Recruiters or Admins can upload resumes to their team's folder.
-    // For now, allow any authenticated user to get unblocked.
-    // For production, you would set a custom claim 'isRecruiter'
-    // on the user and use `if isRecruiter() || isAdmin();`
+    // Allow authenticated users to write to the resumes folder for their team
     match /teams/{teamId}/resumes/{fileName} {
-      allow read, write: if isAuthenticated();
-    }
-    
-    // Allow admins to read/write anywhere for settings, etc.
-    match /settings/{allPaths=**} {
-        allow read, write: if isAdmin();
+        // This is a simplified rule. In a production app, you'd check
+        // if the user is a member/owner of the teamId.
+        allow read, write: if isAuthenticated();
     }
   }
 }
