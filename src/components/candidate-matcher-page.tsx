@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { candidateMatcherAndSaveAction, summarizeCandidateAction } from '@/lib/actions';
+import { candidateMatcherAction, summarizeCandidateAction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -47,7 +46,7 @@ const formSchema = z.object({
     )
 });
 
-type Match = CandidateMatcherOutput['candidateMatches'][0] & { resumeDataUri: string };
+type Match = CandidateMatcherOutput['candidateMatches'][0] & { resumeDataUri: string, fileName: string };
 
 const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -98,20 +97,18 @@ export function CandidateMatcherPage() {
         const resumeFiles = Array.from(values.resumeFiles);
         const resumeDataUris = await Promise.all(resumeFiles.map(file => fileToDataUri(file)));
 
-        const result = await candidateMatcherAndSaveAction({
+        const result = await candidateMatcherAction({
             jobDescription: values.jobDescription,
             resumeDataUris: resumeDataUris,
-            teamId: userData?.teamId || '',
-            files: resumeFiles,
-            jobTitle: values.jobTitle
         });
 
         const matchesWithUris: Match[] = result.candidateMatches
-            .map((match, index) => {
+            .map((match) => {
                 const originalIndex = parseInt(match.resumeId.split(' ')[1]);
                 return {
                     ...match,
-                    resumeDataUri: resumeDataUris[originalIndex]
+                    resumeDataUri: resumeDataUris[originalIndex],
+                    fileName: resumeFiles[originalIndex].name
                 }
             })
             .sort((a,b) => b.matchScore - a.matchScore);
@@ -119,7 +116,7 @@ export function CandidateMatcherPage() {
         setCandidateMatches(matchesWithUris);
         toast({
           title: "Analysis Complete",
-          description: "Top candidates have been identified. Note: candidates are not saved automatically.",
+          description: "Top candidates have been identified.",
         })
 
     } catch (error) {
@@ -273,7 +270,7 @@ export function CandidateMatcherPage() {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[150px]">Resume ID</TableHead>
+                        <TableHead className="w-[200px]">Resume</TableHead>
                         <TableHead className="w-[150px]">Match Score</TableHead>
                         <TableHead>Justification</TableHead>
                         <TableHead className="text-right w-[120px]">Summary</TableHead>
@@ -283,7 +280,7 @@ export function CandidateMatcherPage() {
                     {isLoading && (
                          [...Array(3)].map((_, i) => (
                             <TableRow key={i}>
-                                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                                <TableCell><Skeleton className="h-5 w-36" /></TableCell>
                                 <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                                 <TableCell><Skeleton className="h-5 w-5/6" /></TableCell>
                                 <TableCell><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
@@ -300,7 +297,7 @@ export function CandidateMatcherPage() {
                     )}
                     {candidateMatches && candidateMatches.map((match) => (
                         <TableRow key={match.resumeId}>
-                            <TableCell className="font-medium">{`Resume ${parseInt(match.resumeId.split(' ')[1]) + 1}`}</TableCell>
+                            <TableCell className="font-medium truncate">{match.fileName}</TableCell>
                             <TableCell>
                                 <Badge variant={match.matchScore > 75 ? 'default' : match.matchScore > 50 ? 'secondary' : 'outline'}>
                                     {match.matchScore.toFixed(0)} / 100

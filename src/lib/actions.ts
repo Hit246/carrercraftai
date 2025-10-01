@@ -1,4 +1,3 @@
-
 'use server';
 
 import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
@@ -42,23 +41,9 @@ export async function jobMatcherAction(
   return await jobMatcher(input);
 }
 
-// Interface representing the input for saving candidates to Firestore
-interface SaveCandidatesInput {
-    teamId: string;
-    jobTitle: string;
-    candidates: Array<{
-        resumeId: string;
-        matchScore: number;
-        justification: string;
-        resumeFile: File;
-        extractedName: string;
-        extractedSkills: string[];
-    }>;
-}
 
-
-export async function candidateMatcherAndSaveAction(
-    input: CandidateMatcherInput & { teamId: string, files: File[], jobTitle: string }
+export async function candidateMatcherAction(
+    input: CandidateMatcherInput
   ): Promise<CandidateMatcherOutput> {
     
     // 1. Get AI matching results
@@ -113,5 +98,3 @@ export async function summarizeCandidateAction(
 
 
 export type { SupportRequestInput };
-
-    
