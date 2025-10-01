@@ -66,6 +66,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentUser);
         const userIsAdmin = currentUser.email && ADMIN_EMAILS.includes(currentUser.email);
         setIsAdmin(userIsAdmin);
+
+        if (userIsAdmin) {
+            setPlan('recruiter');
+            setCredits(Infinity);
+            setUserData({ plan: 'recruiter', credits: Infinity });
+            setLoading(false);
+        }
+
       } else {
         setUser(null);
         setIsAdmin(false);
@@ -80,21 +88,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || isAdmin) {
         if (!loading) {
             setLoading(false);
         }
-        return;
-    }
-
-    if (isAdmin) {
-        setPlan('recruiter');
-        setCredits(Infinity);
-        setUserData({
-            plan: 'recruiter',
-            credits: Infinity,
-        });
-        setLoading(false);
         return;
     }
 
