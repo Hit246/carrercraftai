@@ -3,32 +3,40 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Avatars: Allow any authenticated user to write their own avatar
-    // and allow anyone to read avatars.
+    // Helper function to check if a user is an admin
+    function isAdmin() {
+      return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+    }
+
+    // Allow users to upload their own avatar
     match /avatars/{userId} {
-      allow read;
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+     match /avatars/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow users to upload payment proofs
+    match /payment_proofs/{userId}/{fileName} {
+      allow read: if true; // Admins will need to read this
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Payment Proofs: Allow users to upload their own payment proof.
-    match /payment_proofs/{userId}/{fileName} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Team Resumes: Allow members of a team to upload resumes.
-    // This requires checking the user's teamId from Firestore.
-    function isTeamMember(teamId) {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-    }
-
+    // Allow recruiters to upload resumes for their team
     match /teams/{teamId}/resumes/{fileName} {
-      allow read, write: if request.auth != null && isTeamMember(teamId);
+      function isTeamMember() {
+        return get(/databases/(default)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+      }
+      allow read, write: if (request.auth != null && isTeamMember()) || isAdmin();
     }
     
-    // Settings: Allow admins to write QR codes.
+    // Allow admins to upload QR codes
     match /settings/{fileName} {
-        allow read;
-        allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.plan == 'recruiter';
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }
