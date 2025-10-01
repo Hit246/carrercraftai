@@ -1,0 +1,34 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Avatars: Allow any authenticated user to write their own avatar
+    // and allow anyone to read avatars.
+    match /avatars/{userId} {
+      allow read;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Payment Proofs: Allow users to upload their own payment proof.
+    match /payment_proofs/{userId}/{fileName} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Team Resumes: Allow members of a team to upload resumes.
+    // This requires checking the user's teamId from Firestore.
+    function isTeamMember(teamId) {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+    }
+
+    match /teams/{teamId}/resumes/{fileName} {
+      allow read, write: if request.auth != null && isTeamMember(teamId);
+    }
+    
+    // Settings: Allow admins to write QR codes.
+    match /settings/{fileName} {
+        allow read;
+        allow write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.plan == 'recruiter';
+    }
+  }
+}
