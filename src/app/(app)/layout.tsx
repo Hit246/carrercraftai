@@ -106,7 +106,6 @@ function AppLayoutContent({
     if (isActive('/candidate-matcher')) return 'Candidate Matcher';
     if (isActive('/candidate-summarizer')) return 'Candidate Summarizer';
     if (isActive('/team/members')) return 'Team Members';
-    if (isActive('/team/candidates')) return 'Candidate Management';
     if (isActive('/support')) return 'Support';
     if (isActive('/pricing')) return 'Upgrade to Pro';
     if (isActive('/profile')) return 'Profile Settings';
@@ -221,22 +220,14 @@ function AppLayoutContent({
                 </SidebarMenuButton>
             </SidebarMenuItem>
             {plan === 'recruiter' && (
-                <Collapsible asChild>
-                    <SidebarMenuItem>
-                        <CollapsibleTrigger asChild>
-                            <SidebarMenuButton>
-                                <Users2 />
-                                <span>Team Management</span>
-                            </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent asChild>
-                            <SidebarMenuSub>
-                                <SidebarMenuSubItem><SidebarMenuSubButton asChild isActive={isActive('/team/members')}><Link href="/team/members"><Users />Members</Link></SidebarMenuSubButton></SidebarMenuSubItem>
-                                <SidebarMenuSubItem><SidebarMenuSubButton asChild isActive={isActive('/team/candidates')}><Link href="/team/candidates"><Contact />Candidates</Link></SidebarMenuSubButton></SidebarMenuSubItem>
-                            </SidebarMenuSub>
-                        </CollapsibleContent>
-                    </SidebarMenuItem>
-                </Collapsible>
+                <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive('/team/members')}>
+                        <Link href="/team/members">
+                            <Users2 />
+                            <span>Team Management</span>
+                        </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
             )}
              <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive('/support')}>
