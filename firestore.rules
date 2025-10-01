@@ -3,14 +3,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if a user has the 'admin' custom claim.
+    // Helper function to check if a user is an admin
     function isAdmin() {
-      return request.auth.token.admin == true;
-    }
-    
-    // Helper function to check if a user is a recruiter.
-    function isRecruiter() {
-        return request.auth.token.recruiter == true;
+      // In a production app, use custom claims: request.auth.token.isAdmin == true
+      return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
 
     // Helper function to check if a user is the owner of a document
@@ -18,55 +14,51 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
 
-    // Users Collection
+    // Users can only be created if the document ID matches the authenticated user's ID.
     match /users/{userId} {
-      // Admins can read/write any user document.
-      // Regular users can only read/write their own document.
-      allow read, write: if isOwner(userId) || isAdmin();
-
-      // Any authenticated user can create their own user document during signup.
-      allow create: if request.auth != null;
-
+      allow read, update: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      
       // Resume Versions Subcollection
       match /resumeVersions/{versionId} {
-        // A user can read/write their own resume versions. Admins can read any.
         allow read, write: if isOwner(userId) || isAdmin();
       }
     }
 
     // Teams Collection
     match /teams/{teamId} {
-      function isMember() {
-        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+      function isTeamOwner() {
+        return request.auth.uid == get(/databases/$(database)/documents/teams/$(teamId)).data.owner;
       }
-      // Only admins or recruiters can read/write team data.
-      allow read, write: if isAdmin() || isRecruiter();
-      allow create: if isRecruiter();
+      
+      function isTeamMember() {
+         return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+      }
+
+      allow read: if isAdmin() || isTeamOwner() || isTeamMember();
+      allow write: if isAdmin() || isTeamOwner();
+      allow create: if request.auth != null;
 
       // Members Subcollection
       match /members/{memberId} {
-        allow read, write: if isAdmin() || isRecruiter();
+        allow read, write: if isAdmin() || isTeamOwner();
       }
-      
+
       // Candidates Subcollection
       match /candidates/{candidateId} {
-          allow read, write: if isAdmin() || isRecruiter();
+          allow read, write: if isAdmin() || isTeamOwner() || isTeamMember();
       }
     }
 
     // Settings Collection
     match /settings/{settingId} {
-      // Settings can be read by any authenticated user (for payment details)
-      // but only written to by an admin.
       allow read: if request.auth != null;
       allow write: if isAdmin();
     }
 
     // Support Requests Collection
     match /supportRequests/{requestId} {
-      // Users can create their own support requests.
       allow create: if isOwner(request.resource.data.userId);
-      // Admins can read/write all support requests.
       allow read, write: if isAdmin();
     }
   }
