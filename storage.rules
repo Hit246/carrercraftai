@@ -3,31 +3,33 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Helper function to check if a user is authenticated
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Avatars: Users can read/write their own avatar
+    function isOwner(userId) {
+        return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Avatars: Users can only upload their own avatar.
     match /avatars/{userId} {
-      allow write: if isAuthenticated() && request.auth.uid == userId;
-      allow read: if true; // Avatars are often public
+      allow write: if isOwner(userId);
     }
-
-    // Payment Proofs: Users can read/write their own proofs
+    
+    // Payment Proofs: Users can only upload their own payment proof.
     match /payment_proofs/{userId}/{fileName} {
-      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+        allow write: if isOwner(userId);
     }
 
-    // Candidate Resumes: Allow any authenticated user to upload for now to fix permissions.
-    // In production, this should be locked down further, likely with custom claims.
+    // Resumes for Candidate Matching (Recruiter feature)
     match /teams/{teamId}/resumes/{fileName} {
-      allow read, write: if isAuthenticated();
+        // This rule is permissive for now to unblock development.
+        // For production, you would verify team membership.
+        allow read, write: if isAuthenticated();
     }
 
-    // Default deny
-    match /{allPaths=**} {
-      allow read, write: if false;
-    }
+    // Allow public reads on all files for simplicity of displaying them in the app.
+    // In production, you might want more granular read rules.
+    allow read: if true;
   }
 }
