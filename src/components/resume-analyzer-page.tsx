@@ -19,10 +19,10 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const formSchema = z.object({
   resumeFile: z.instanceof(File).refine(
-    (file) => file.size > 0, 'Please upload an image of your resume.'
+    (file) => file.size > 0, 'Please upload a PDF of your resume.'
   ).refine(
-    (file) => file.type.startsWith('image/'),
-    "Please upload a valid image file (PNG, JPG, etc.)."
+    (file) => file.type === 'application/pdf',
+    "Please upload a valid PDF file."
   ),
   desiredRole: z.string().optional(),
 });
@@ -55,7 +55,7 @@ export function ResumeAnalyzerPage() {
 
   const canUseFeature = plan !== 'free' || credits > 0;
   
-  const performAnalysis = async (resumeDataUri: string, desiredRole?: string) => {
+  const performAnalysis = useCallback(async (resumeDataUri: string, desiredRole?: string) => {
     setIsLoading(true);
     setAnalysisResult(null);
 
@@ -76,7 +76,7 @@ export function ResumeAnalyzerPage() {
         setIsLoading(false);
         setIsInitialAnalysis(false);
     }
-  }
+  }, [plan, useCredit, toast]);
 
   useEffect(() => {
     const dataUri = sessionStorage.getItem('resumeDataUriForAnalysis');
@@ -87,7 +87,7 @@ export function ResumeAnalyzerPage() {
     } else {
       setIsInitialAnalysis(false);
     }
-  }, []);
+  }, [performAnalysis]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!canUseFeature) {
@@ -132,7 +132,7 @@ export function ResumeAnalyzerPage() {
             <Sparkles className="text-primary"/> AI Resume Analyzer
           </CardTitle>
           <CardDescription>
-            Upload an image of your resume to get AI-powered feedback. For a more targeted analysis, provide your desired job role.
+            Upload a PDF of your resume to get AI-powered feedback. For a more targeted analysis, provide your desired job role.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -144,14 +144,14 @@ export function ResumeAnalyzerPage() {
                     name="resumeFile"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Upload Resume Image</FormLabel>
+                        <FormLabel>Upload Resume (PDF)</FormLabel>
                         <FormControl>
                             <div className="relative">
                                 <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                 <Input
                                     type="file"
                                     className="pl-10"
-                                    accept="image/*"
+                                    accept="application/pdf"
                                     onChange={(e) => field.onChange(e.target.files?.[0])}
                                     disabled={isLoading}
                                 />

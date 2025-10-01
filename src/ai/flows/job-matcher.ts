@@ -15,7 +15,7 @@ const JobMatcherInputSchema = z.object({
   resumeDataUri: z
   .string()
   .describe(
-    'An image of a resume as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:image/<mimetype>;base64,<encoded_data>.'
+    'A PDF of a resume as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:application/pdf;base64,<encoded_data>.'
   ),
   desiredJobTitle: z.string().optional().describe('The user\'s desired job title, if any.'),
 });
@@ -44,7 +44,7 @@ const prompt = ai.definePrompt({
   output: {schema: JobMatcherOutputSchema},
   prompt: `You are an AI career placement expert. Your task is to analyze the given resume and generate a list of 5 relevant, plausible, but fictional job opportunities.
 
-Analyze this resume image:
+Analyze this resume PDF:
 {{media url=resumeDataUri}}
 
 Desired Job Title (if provided):

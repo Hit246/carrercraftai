@@ -15,7 +15,7 @@ const SummarizeCandidateInputSchema = z.object({
   resumeDataUri: z
     .string()
     .describe(
-      'An image of a resume as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:image/<mimetype>;base64,<encoded_data>.'
+      'A PDF of a resume as a data URI that must include a MIME type and use Base64 encoding. Expected format: data:application/pdf;base64,<encoded_data>.'
     ),
 });
 export type SummarizeCandidateInput = z.infer<typeof SummarizeCandidateInputSchema>;
@@ -33,9 +33,9 @@ const prompt = ai.definePrompt({
   name: 'summarizeCandidatePrompt',
   input: {schema: SummarizeCandidateInputSchema},
   output: {schema: SummarizeCandidateOutputSchema},
-  prompt: `You are an expert recruiter with a talent for summarizing candidate profiles quickly. Analyze the following resume image.
+  prompt: `You are an expert recruiter with a talent for summarizing candidate profiles quickly. Analyze the following resume PDF.
 
-**Resume Image**:
+**Resume PDF**:
 {{media url=resumeDataUri}}
 
 **Instructions**:
