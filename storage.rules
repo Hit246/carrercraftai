@@ -2,42 +2,31 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    
+
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    function isTeamMember(teamId) {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-    }
-
-    function isTeamOwner(teamId) {
-      return get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
-    }
-
-    // Avatars: Allow users to read/write their own avatar
-    match /avatars/{userId}/{allPaths=**} {
-      allow read;
+    // Avatars: Users can only upload/update their own avatar.
+    match /avatars/{userId} {
+      allow read: if true;
       allow write: if isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Payment Proofs: Allow users to write their own proofs
+    // Payment Proofs: Users can only upload their own proof.
     match /payment_proofs/{userId}/{fileName} {
-        allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Candidate Resumes for Recruiters
+    // Team Resumes: Recruiters/admins can upload resumes for their team.
     match /teams/{teamId}/resumes/{fileName} {
-        allow read, write: if isAuthenticated() && (isTeamMember(teamId) || isTeamOwner(teamId));
-    }
-
-     // QR Codes for admins
-    match /settings/{allPaths=**} {
-      allow read;
-      function isAdmin() {
-          return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+      function isTeamOwner() {
+        return isAuthenticated() && get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       }
-      allow write: if isAdmin();
+      function isTeamMember() {
+          return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+      }
+      allow read, write: if isTeamOwner() || isTeamMember();
     }
   }
 }
