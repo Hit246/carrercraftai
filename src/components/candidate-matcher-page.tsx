@@ -41,8 +41,8 @@ const formSchema = z.object({
         `Each file size should not exceed 5MB.`
     )
     .refine(
-        (files) => Array.from(files).every((file) => file.type.startsWith('image/')),
-        "Please upload image files only."
+        (files) => Array.from(files).every((file) => file.type === 'application/pdf'),
+        "Please upload PDF files only."
     )
 });
 
@@ -229,14 +229,14 @@ export function CandidateMatcherPage() {
                   name="resumeFiles"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Candidate Resumes</FormLabel>
+                      <FormLabel>Candidate Resumes (PDFs)</FormLabel>
                        <FormControl>
                         <div className="relative">
                             <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
                                 type="file"
                                 className="pl-10 h-auto"
-                                accept="image/*"
+                                accept="application/pdf"
                                 multiple
                                 onChange={(e) => field.onChange(e.target.files)}
                                 disabled={!canUseFeature || isLoading}
@@ -244,7 +244,7 @@ export function CandidateMatcherPage() {
                         </div>
                       </FormControl>
                       <FormDescription>
-                        Upload up to {MAX_FILES} resume images.
+                        Upload up to {MAX_FILES} resume PDFs.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

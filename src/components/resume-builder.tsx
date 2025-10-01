@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -190,7 +190,7 @@ export const ResumeBuilder = () => {
     
     const canUseFeature = plan !== 'free' || credits > 0;
 
-    const generatePdfFromData = async () => {
+    const generatePdfFromData = useCallback(async () => {
         if (!resumeData) return null;
 
         const doc = new jsPDF({
@@ -356,7 +356,7 @@ export const ResumeBuilder = () => {
         y = addWrappedText(resumeData.skills, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
         
         return doc;
-    };
+    }, [resumeData]);
 
 
     const handleExport = async () => {
@@ -371,9 +371,6 @@ export const ResumeBuilder = () => {
     }
     
     const handleAnalyze = async () => {
-        // This function is being kept for potential future use but is disabled.
-        if (true) return; // Keep this disabled
-
         if(!canUseFeature) {
             toast({
               title: "Upgrade to Pro",
@@ -656,21 +653,10 @@ export const ResumeBuilder = () => {
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                          </AlertDialog>
-                         <TooltipProvider>
-                           <Tooltip>
-                            <TooltipTrigger asChild>
-                                <span tabIndex={0}>
-                                    <Button variant="secondary" disabled={true}>
-                                        <Bot className="mr-2 h-4 w-4" />
-                                        AI Analyze
-                                    </Button>
-                                </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Please take a screenshot of your resume and use the main Resume Analyzer tool.</p>
-                            </TooltipContent>
-                           </Tooltip>
-                        </TooltipProvider>
+                        <Button variant="secondary" onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
+                            {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Bot className="mr-2 h-4 w-4" />}
+                            AI Analyze
+                        </Button>
                         <Button onClick={handleExport}>
                            <Download className="mr-2 h-4 w-4" /> Export
                         </Button>

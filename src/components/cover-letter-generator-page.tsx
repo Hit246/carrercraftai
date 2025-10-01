@@ -21,8 +21,8 @@ const formSchema = z.object({
     resumeFile: z.instanceof(File).refine(
         (file) => file.size > 0, 'Please upload your resume.'
       ).refine(
-        (file) => file.type.startsWith('image/'),
-        "Please upload a valid image file (PNG, JPG, etc.)."
+        (file) => file.type === 'application/pdf',
+        "Please upload a valid PDF file."
       ),
     jobDescription: z.string().min(50, { message: 'Please provide a detailed job description.' }),
 });
@@ -120,14 +120,14 @@ export function CoverLetterGeneratorPage() {
                   name="resumeFile"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Your Resume</FormLabel>
+                      <FormLabel>Your Resume (PDF)</FormLabel>
                       <FormControl>
                         <div className="relative">
                             <Upload className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <Input
                                 type="file"
                                 className="pl-10"
-                                accept="image/*"
+                                accept="application/pdf"
                                 onChange={(e) => field.onChange(e.target.files?.[0])}
                                 disabled={isLoading}
                             />

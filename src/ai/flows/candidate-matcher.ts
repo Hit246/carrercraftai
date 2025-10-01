@@ -14,7 +14,7 @@ import {z} from 'genkit';
 const CandidateMatcherInputSchema = z.object({
   jobDescription: z.string().describe('The description of the job.'),
   resumeDataUris: z.array(z.string()).describe(
-    "A list of resume images, each provided as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:image/<mimetype>;base64,<encoded_data>'."
+    "A list of resume PDFs, each provided as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:application/pdf;base64,<encoded_data>'."
   ),
 });
 export type CandidateMatcherInput = z.infer<typeof CandidateMatcherInputSchema>;
@@ -40,7 +40,7 @@ const prompt = ai.definePrompt({
   output: {schema: CandidateMatcherOutputSchema},
   prompt: `You are an expert recruiter specializing in matching candidates to job descriptions.
 
-You will be provided with a job description and a database of resume images. Your task is to identify the top candidates whose skills and experience best align with the job requirements.
+You will be provided with a job description and a database of resume PDFs. Your task is to identify the top candidates whose skills and experience best align with the job requirements.
 
 **Job Description**:
 {{{jobDescription}}}
