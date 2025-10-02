@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import { FirebaseErrorListener } from "@/components/FirebaseErrorListener";
 
 
 // Even though we're using a client component, we can still export metadata
@@ -43,6 +44,7 @@ export default function RootLayout({
         >
             {children}
             <Toaster />
+            <FirebaseErrorListener />
         </ThemeProvider>
       </body>
     </html>
