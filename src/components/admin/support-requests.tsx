@@ -40,7 +40,7 @@ export function SupportRequestsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRequests = async () => {
+    const fetchRequests = () => {
       setIsLoading(true);
       const requestsCollectionRef = collection(db, 'supportRequests');
       const q = query(requestsCollectionRef, orderBy('createdAt', 'desc'));
@@ -51,7 +51,6 @@ export function SupportRequestsPage() {
             setRequests(requestsList);
         })
         .catch((serverError) => {
-            console.error("Error fetching support requests:", serverError);
              const permissionError = new FirestorePermissionError({
                 path: requestsCollectionRef.path,
                 operation: 'list',
