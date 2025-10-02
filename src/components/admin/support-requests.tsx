@@ -54,7 +54,7 @@ export function SupportRequestsPage() {
              const permissionError = new FirestorePermissionError({
                 path: requestsCollectionRef.path,
                 operation: 'list',
-             });
+             }, serverError);
              errorEmitter.emit('permission-error', permissionError);
         })
         .finally(() => {
