@@ -505,7 +505,7 @@ export const ResumeBuilder = () => {
 
     return (
         <div className="grid lg:grid-cols-2 gap-8 h-full">
-            <div className="space-y-6 overflow-y-auto pr-4 pb-8">
+            <div className="space-y-6 overflow-y-auto pb-8">
                 <Card>
                     <CardHeader>
                         <CardTitle>Personal Information</CardTitle>
