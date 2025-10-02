@@ -505,7 +505,7 @@ export const ResumeBuilder = () => {
 
     return (
         <div className="grid lg:grid-cols-2 gap-8 h-full">
-            <div className="space-y-6 overflow-y-auto pr-4 -mr-4 pb-8">
+            <div className="space-y-6 overflow-y-auto pr-4 pb-8">
                 <Card>
                     <CardHeader>
                         <CardTitle>Personal Information</CardTitle>
@@ -592,7 +592,7 @@ export const ResumeBuilder = () => {
                             variant="outline"
                             role="combobox"
                             aria-expanded={versionManagerOpen}
-                            className="w-[250px] justify-between"
+                            className="w-full sm:w-[250px] justify-between"
                             >
                             <History className="mr-2 h-4 w-4" />
                             {currentVersion
@@ -627,7 +627,7 @@ export const ResumeBuilder = () => {
                             </Command>
                         </PopoverContent>
                     </Popover>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap justify-center">
                          <Button onClick={handleSave} disabled={isSaving}>
                            <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
                          </Button>
@@ -662,33 +662,33 @@ export const ResumeBuilder = () => {
                         </Button>
                     </div>
                 </Card>
-                <Card className="flex-1">
+                <Card className="flex-1 overflow-hidden">
                     <CardContent className="p-0 h-full overflow-y-auto">
-                        <div ref={resumePreviewRef} className="p-6 sm:p-8 font-body text-sm bg-white text-gray-800 shadow-lg h-full">
+                        <div ref={resumePreviewRef} className="p-4 sm:p-8 font-body text-sm bg-white text-gray-800 shadow-lg h-full">
                             <div className="text-center border-b-2 border-gray-200 pb-4 mb-6">
-                                <h2 className="text-2xl md:text-4xl font-bold font-headline text-gray-900">{resumeData.name}</h2>
-                                <p className="text-base md:text-lg text-primary font-semibold mt-1">{resumeData.title}</p>
-                                <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-x-5 gap-y-1 text-xs text-gray-600 mt-3">
-                                    <span>{resumeData.phone}</span>
-                                    <Link href={`mailto:${resumeData.email}`} className="text-primary hover:underline">{resumeData.email}</Link>
-                                    <Link href={`https://${resumeData.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{resumeData.linkedin}</Link>
+                                <h2 className="text-2xl md:text-4xl font-bold font-headline text-gray-900 break-words">{resumeData.name}</h2>
+                                <p className="text-base md:text-lg text-primary font-semibold mt-1 break-words">{resumeData.title}</p>
+                                <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-x-3 gap-y-1 text-xs text-gray-600 mt-3">
+                                    <span className="break-all">{resumeData.phone}</span>
+                                    <Link href={`mailto:${resumeData.email}`} className="text-primary hover:underline break-all">{resumeData.email}</Link>
+                                    <Link href={`https://${resumeData.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{resumeData.linkedin}</Link>
                                 </div>
                             </div>
                             <div className="mb-6">
                                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Summary</h3>
-                                <p className="text-gray-700">{resumeData.summary}</p>
+                                <p className="text-gray-700 whitespace-pre-wrap break-words">{resumeData.summary}</p>
                             </div>
                             <div className="mb-6">
                                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Experience</h3>
                                 {resumeData.experience.map(exp => (
                                     <div key={exp.id} className="mb-4">
                                         <div className="flex flex-col sm:flex-row justify-between sm:items-baseline">
-                                            <h4 className="text-base font-semibold text-gray-800">{exp.title}</h4>
-                                            <p className="text-xs font-medium text-gray-600">{exp.dates}</p>
+                                            <h4 className="text-base font-semibold text-gray-800 break-words">{exp.title}</h4>
+                                            <p className="text-xs font-medium text-gray-600 flex-shrink-0">{exp.dates}</p>
                                         </div>
-                                        <p className="text-sm font-medium text-gray-700">{exp.company}</p>
+                                        <p className="text-sm font-medium text-gray-700 break-words">{exp.company}</p>
                                         <ul className="mt-2 list-disc list-inside text-gray-700 space-y-1 text-xs sm:text-sm">
-                                            {exp.description.split('\n').map((line, i) => line.trim() && <li key={i}>{line.replace(/^-/, '').trim()}</li>)}
+                                            {exp.description.split('\n').map((line, i) => line.trim() && <li key={i} className="whitespace-pre-wrap break-words">{line.replace(/^-/, '').trim()}</li>)}
                                         </ul>
                                     </div>
                                 ))}
@@ -698,11 +698,11 @@ export const ResumeBuilder = () => {
                                 {resumeData.projects && resumeData.projects.map(proj => (
                                     <div key={proj.id} className="mb-4">
                                         <div className="flex items-center gap-2">
-                                            <h4 className="text-base font-semibold text-gray-800">{proj.name}</h4>
+                                            <h4 className="text-base font-semibold text-gray-800 break-words">{proj.name}</h4>
                                             {proj.url && <Link href={proj.url.startsWith('http') ? proj.url : `https://${proj.url}`} target="_blank" rel="noopener noreferrer"><LinkIcon className="h-3 w-3 text-primary hover:underline"/></Link>}
                                         </div>
-                                        <p className="text-xs text-gray-700">{proj.description}</p>
-                                        <p className="text-xs text-gray-500 mt-1">
+                                        <p className="text-xs text-gray-700 whitespace-pre-wrap break-words">{proj.description}</p>
+                                        <p className="text-xs text-gray-500 mt-1 break-words">
                                             <span className="font-semibold">Technologies:</span> {proj.technologies}
                                         </p>
                                     </div>
@@ -713,10 +713,10 @@ export const ResumeBuilder = () => {
                                 {resumeData.education.map(edu => (
                                     <div key={edu.id} className="mb-2">
                                         <div className="flex flex-col sm:flex-row justify-between sm:items-baseline">
-                                            <h4 className="text-base font-semibold text-gray-800">{edu.school}</h4>
-                                            <p className="text-xs font-medium text-gray-600">{edu.dates}</p>
+                                            <h4 className="text-base font-semibold text-gray-800 break-words">{edu.school}</h4>
+                                            <p className="text-xs font-medium text-gray-600 flex-shrink-0">{edu.dates}</p>
                                         </div>
-                                        <p className="text-sm text-gray-700">{edu.degree} {edu.cgpa && `(CGPA: ${edu.cgpa})`}</p>
+                                        <p className="text-sm text-gray-700 break-words">{edu.degree} {edu.cgpa && `(CGPA: ${edu.cgpa})`}</p>
                                     </div>
                                 ))}
                             </div>
