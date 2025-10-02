@@ -172,7 +172,7 @@ export function ProfilePage() {
                         <CardContent className="space-y-6">
                              <div className="flex items-center gap-4">
                                 <Avatar className="h-16 w-16">
-                                    <AvatarImage src={photoPreview || user.photoURL || `https://placehold.co/100x100.png?text=${user.email?.[0].toUpperCase()}`} />
+                                    <AvatarImage src={photoPreview || userData?.photoURL || user.photoURL || `https://placehold.co/100x100.png?text=${user.email?.[0].toUpperCase()}`} />
                                     <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                  <FormField
