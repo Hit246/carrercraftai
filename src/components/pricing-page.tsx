@@ -7,17 +7,41 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { Check, Crown, Users, Target, Star, Trophy, Diamond, Key } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { PaymentDialog } from "./payment-dialog"
 import { Badge } from "./ui/badge"
+import { getPaymentSettings } from "@/lib/actions"
 
 type PlanToUpgrade = 'essentials' | 'pro' | 'recruiter' | null;
+
+interface PaymentSettings {
+    upiId: string;
+    qrCodeImageUrl: string;
+}
+
 
 export function PricingPage() {
   const { user, plan, requestProUpgrade, requestRecruiterUpgrade, requestEssentialsUpgrade } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [planToUpgrade, setPlanToUpgrade] = useState<PlanToUpgrade>(null);
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings | null>(null);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+
+  useEffect(() => {
+    getPaymentSettings().then(data => {
+        setPaymentSettings(data as PaymentSettings);
+    }).catch(() => {
+         toast({
+            title: 'Error',
+            description: 'Could not load payment details. Please try again.',
+            variant: 'destructive',
+        });
+    }).finally(() => {
+        setIsLoadingSettings(false);
+    });
+  }, [toast]);
+
 
   const handleUpgrade = (selectedPlan: PlanToUpgrade) => {
     if (!user) {
@@ -57,6 +81,8 @@ export function PricingPage() {
       onClose={() => setPlanToUpgrade(null)}
       onConfirm={onPaymentConfirm}
       plan={planToUpgrade}
+      settings={paymentSettings}
+      isLoadingSettings={isLoadingSettings}
     />
     <div className="flex flex-col items-center text-center">
       <div className="max-w-2xl">

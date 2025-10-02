@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
@@ -5,8 +6,7 @@ import { Button } from "./ui/button";
 import Image from "next/image";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { getPaymentSettings } from "@/lib/actions";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -19,17 +19,20 @@ import { Loader2, Upload } from "lucide-react";
 
 type PlanToUpgrade = 'essentials' | 'pro' | 'recruiter' | null;
 
+interface PaymentSettings {
+    upiId: string;
+    qrCodeImageUrl: string;
+}
+
 interface PaymentDialogProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: (paymentProofURL: string) => void;
     plan: PlanToUpgrade;
+    settings: PaymentSettings | null;
+    isLoadingSettings: boolean;
 }
 
-interface PaymentSettings {
-    upiId: string;
-    qrCodeImageUrl: string;
-}
 
 const planDetails = {
     essentials: { name: "Essentials Plan", amount: 199 },
@@ -41,9 +44,7 @@ const formSchema = z.object({
     proofFile: z.instanceof(File).refine(file => file.size > 0, "Please upload proof of payment."),
 });
 
-export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialogProps) {
-    const [settings, setSettings] = useState<PaymentSettings | null>(null);
-    const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+export function PaymentDialog({ isOpen, onClose, onConfirm, plan, settings, isLoadingSettings }: PaymentDialogProps) {
     const [isConfirming, setIsConfirming] = useState(false);
     const { toast } = useToast();
     const { user } = useAuth();
@@ -51,24 +52,6 @@ export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialo
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     });
-
-
-    useEffect(() => {
-        if (isOpen) {
-            setIsLoadingSettings(true);
-            getPaymentSettings().then(data => {
-                setSettings(data as PaymentSettings);
-                setIsLoadingSettings(false);
-            }).catch(() => {
-                 toast({
-                    title: 'Error',
-                    description: 'Could not load payment details. Please try again.',
-                    variant: 'destructive',
-                });
-                setIsLoadingSettings(false);
-            });
-        }
-    }, [isOpen, toast]);
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!user) {
@@ -170,5 +153,3 @@ export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialo
         </Dialog>
     )
 }
-
-    
