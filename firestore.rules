@@ -1,51 +1,71 @@
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+  
+    // Helper Functions
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
 
-    // Helper function to check if a user is an admin
     function isAdmin() {
       return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
-
-    // Users can read/write their own user document
+    
+    // USERS collection
     match /users/{userId} {
-      allow read, update: if request.auth.uid == userId;
-      allow create: if request.auth.uid != null;
+      // Anyone can create their own user document on signup
+      allow create: if request.auth != null;
+      
+      // Users can only read their own document
+      allow read: if isOwner(userId) || isAdmin();
 
-      // Users can manage their own resume versions
+      // Users can only update their own document, but cannot change their plan
+      allow update: if isOwner(userId) && request.resource.data.plan == resource.data.plan;
+      
+      // Admins can update any user document (e.g., to change a plan)
+      allow update: if isAdmin();
+
+      // Users cannot delete their own accounts from the client
+      allow delete: if isAdmin();
+
+      // RESUME_VERSIONS subcollection
       match /resumeVersions/{versionId} {
-        allow read, write, delete: if request.auth.uid == userId;
+        allow read, write: if isOwner(userId) || isAdmin();
       }
     }
 
-    // Teams can be read by their members
+    // TEAMS collection
     match /teams/{teamId} {
-      allow get: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-
-      // Team members can be read by other members of the same team
+      // Allow read/write for admins or for users who are part of that team
+      allow read, write: if isAdmin() || (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+                                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId);
+                                       
       match /members/{memberId} {
-         allow list: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-         allow write, delete: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+         allow read, write: if isAdmin() || (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+                                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId);
       }
-      
-      // Candidates can be managed by team members
-      match /candidates/{candidateId} {
-        allow read, write, delete: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+       match /candidates/{candidateId} {
+         allow read, write: if isAdmin() || (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+                                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId);
       }
     }
     
-    // Admins can manage all support requests
-    match /supportRequests/{requestId} {
-      allow read, write, list: if isAdmin();
-      // Users can create their own support requests
-      allow create: if request.auth.uid == request.resource.data.userId;
+    // SETTINGS collection
+    match /settings/{settingId} {
+      // Only admins can change settings
+      allow write: if isAdmin();
+      // Any authenticated user can read settings (e.g., to get payment info)
+      allow read: if request.auth != null;
     }
 
-    // Settings are read-only for users, writable for admins
-    match /settings/payment {
-      allow read: if request.auth != null;
-      allow write: if isAdmin();
+    // SUPPORT_REQUESTS collection
+    match /supportRequests/{requestId} {
+      // Any authenticated user can create a support request
+      allow create: if request.auth != null;
+      // Only admins can read/update/delete support requests
+      allow read, update, delete: if isAdmin();
     }
   }
 }
