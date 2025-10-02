@@ -3,45 +3,49 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-
+    // Helper function to check if a user is an admin
     function isAdmin() {
-      // Check for the custom claim OR a specific admin email for fallback.
-      return request.auth.token.isRecruiter == true || request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+      return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
-    
-    // USER data
+
+    // Users can read/write their own user document
     match /users/{userId} {
-      allow read, write: if isOwner(userId) || isAdmin();
-      
-      // Resume versions can be read/written by the owner or an admin
+      allow read, update: if request.auth.uid == userId;
+      allow create: if request.auth.uid != null;
+
+      // Users can manage their own resume versions
       match /resumeVersions/{versionId} {
-        allow read, write: if isOwner(userId) || isAdmin();
+        allow read, write, delete: if request.auth.uid == userId;
       }
     }
 
-    // TEAMS data
+    // Teams can be read by their members
     match /teams/{teamId} {
-      allow read, write: if isAdmin();
-      
-      match /members/{memberId} {
-        allow read, write: if isAdmin();
-      }
-    }
+      allow get: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
 
-    // SETTINGS
-    match /settings/{settingId} {
-        allow read: if true; // Publicly readable
-        allow write: if isAdmin(); // Only admins can change settings
+      // Team members can be read by other members of the same team
+      match /members/{memberId} {
+         allow list: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+         allow write, delete: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+      }
+      
+      // Candidates can be managed by team members
+      match /candidates/{candidateId} {
+        allow read, write, delete: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+      }
     }
     
-    // SUPPORT REQUESTS
+    // Admins can manage all support requests
     match /supportRequests/{requestId} {
-      allow create: if request.auth != null; // Any authenticated user can create a support request
-      allow read, list, update, delete: if request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com']; // Only specific admins can manage them
+      allow read, write, list: if isAdmin();
+      // Users can create their own support requests
+      allow create: if request.auth.uid == request.resource.data.userId;
+    }
+
+    // Settings are read-only for users, writable for admins
+    match /settings/payment {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
     }
   }
 }
