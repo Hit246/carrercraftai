@@ -22,6 +22,8 @@ import {
     AccordionItem,
     AccordionTrigger,
   } from "@/components/ui/accordion"
+import { errorEmitter } from '@/lib/error-emitter';
+import { FirestorePermissionError } from '@/lib/errors';
 
 interface SupportRequest {
   id: string;
@@ -40,17 +42,25 @@ export function SupportRequestsPage() {
   useEffect(() => {
     const fetchRequests = async () => {
       setIsLoading(true);
-      try {
-        const requestsCollectionRef = collection(db, 'supportRequests');
-        const q = query(requestsCollectionRef, orderBy('createdAt', 'desc'));
-        const requestsSnapshot = await getDocs(q);
-        const requestsList = requestsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as SupportRequest));
-        setRequests(requestsList);
-      } catch (error) {
-        console.error("Error fetching support requests:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      const requestsCollectionRef = collection(db, 'supportRequests');
+      const q = query(requestsCollectionRef, orderBy('createdAt', 'desc'));
+      
+      getDocs(q)
+        .then((requestsSnapshot) => {
+            const requestsList = requestsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as SupportRequest));
+            setRequests(requestsList);
+        })
+        .catch((serverError) => {
+            console.error("Error fetching support requests:", serverError);
+             const permissionError = new FirestorePermissionError({
+                path: requestsCollectionRef.path,
+                operation: 'list',
+             }, serverError);
+             errorEmitter.emit('permission-error', permissionError);
+        })
+        .finally(() => {
+            setIsLoading(false);
+        });
     };
 
     fetchRequests();
