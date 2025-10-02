@@ -267,7 +267,7 @@ function AppLayoutContent({
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sm:px-6">
+        <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sm:px-6 shadow-md">
           <SidebarTrigger className="md:hidden"/>
           <div className="flex-1">
              <h2 className="text-lg font-semibold font-headline">
@@ -301,3 +301,5 @@ export default function AppLayout({
           </AuthProvider>
       )
   }
+
+    
