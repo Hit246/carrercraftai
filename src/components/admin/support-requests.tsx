@@ -24,6 +24,7 @@ import {
   } from "@/components/ui/accordion"
 import { errorEmitter } from '@/lib/error-emitter';
 import { FirestorePermissionError } from '@/lib/errors';
+import { useToast } from '@/hooks/use-toast';
 
 interface SupportRequest {
   id: string;
@@ -38,6 +39,7 @@ interface SupportRequest {
 export function SupportRequestsPage() {
   const [requests, setRequests] = useState<SupportRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchRequests = () => {
@@ -51,11 +53,20 @@ export function SupportRequestsPage() {
             setRequests(requestsList);
         })
         .catch((serverError) => {
+             // This is a generic error, so we assume it might be a permission issue.
+             // We create a contextual error to help with debugging.
              const permissionError = new FirestorePermissionError({
                 path: requestsCollectionRef.path,
                 operation: 'list',
              }, serverError);
              errorEmitter.emit('permission-error', permissionError);
+
+             // Also inform the user in the UI, as the listener is for dev debugging.
+             toast({
+                title: 'Error Fetching Support Requests',
+                description: 'You may not have permission to view this data. Check the console for details.',
+                variant: 'destructive',
+             });
         })
         .finally(() => {
             setIsLoading(false);
@@ -63,7 +74,7 @@ export function SupportRequestsPage() {
     };
 
     fetchRequests();
-  }, []);
+  }, [toast]);
 
   return (
     <Card>
