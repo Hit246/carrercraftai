@@ -22,6 +22,8 @@ interface UserData {
     requestedPlan?: 'essentials' | 'pro' | 'recruiter';
     teamId?: string;
     hasCompletedOnboarding?: boolean;
+    displayName?: string | null;
+    photoURL?: string | null;
 }
 
 interface AuthContextType {
@@ -248,8 +250,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         photoURL: profile.photoURL
     });
 
+    // Create a new user object with the updated info to force a state update
+    const updatedUser = Object.assign(Object.create(Object.getPrototypeOf(user)), user);
+    updatedUser.displayName = profile.displayName;
+    updatedUser.photoURL = profile.photoURL;
+
     // Refresh the local user state
-    setUser(auth.currentUser);
+    setUser(updatedUser);
   }
 
   const updatePaymentProof = async (url: string) => {
