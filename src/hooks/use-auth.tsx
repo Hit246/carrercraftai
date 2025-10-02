@@ -237,7 +237,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const updateUserProfile = async (profile: UserProfile) => {
     if (!user) throw new Error("Not authenticated");
+    
+    // Update Firebase Auth profile
     await updateProfile(user, profile);
+
+    // Also update the user's document in Firestore
+    const userRef = doc(db, 'users', user.uid);
+    await updateDoc(userRef, {
+        displayName: profile.displayName,
+        photoURL: profile.photoURL
+    });
+
+    // Refresh the local user state
     setUser(auth.currentUser);
   }
 

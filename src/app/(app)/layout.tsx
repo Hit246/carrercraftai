@@ -252,7 +252,7 @@ function AppLayoutContent({
         <SidebarFooter className="p-4 mt-auto border-t">
           <div className="flex items-center gap-3">
              <Avatar className="h-9 w-9">
-              <AvatarImage src={user.photoURL || `https://placehold.co/100x100.png?text=${user.email?.[0].toUpperCase()}`} alt={user.displayName || user.email || "user"} data-ai-hint="profile picture" />
+              <AvatarImage src={userData?.photoURL || user.photoURL || `https://placehold.co/100x100.png?text=${user.email?.[0].toUpperCase()}`} alt={user.displayName || user.email || "user"} data-ai-hint="profile picture" />
               <AvatarFallback>{user.displayName?.[0] || user.email?.[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col truncate">
