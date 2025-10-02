@@ -3,43 +3,45 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
+    // Helper functions
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
 
     function isAdmin() {
-      return request.auth.token.email_verified && request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+      // Check for the custom claim OR a specific admin email for fallback.
+      return request.auth.token.isRecruiter == true || request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
-
+    
+    // USER data
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if isOwner(userId) || isAdmin();
-    }
-
-    match /teams/{teamId} {
-      allow read, write: if isAuthenticated() && (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId || isAdmin());
-      match /members/{memberId} {
-        allow read, write: if isAuthenticated() && (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId || isAdmin());
+      allow read, write: if isOwner(userId) || isAdmin();
+      
+      // Resume versions can be read/written by the owner or an admin
+      match /resumeVersions/{versionId} {
+        allow read, write: if isOwner(userId) || isAdmin();
       }
     }
 
-    match /users/{userId}/resumeVersions/{versionId} {
-      allow read, write: if isOwner(userId);
+    // TEAMS data
+    match /teams/{teamId} {
+      allow read, write: if isAdmin();
+      
+      match /members/{memberId} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // SETTINGS
+    match /settings/{settingId} {
+        allow read: if true; // Publicly readable
+        allow write: if isAdmin(); // Only admins can change settings
     }
     
-    match /settings/payment {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-    }
-
+    // SUPPORT REQUESTS
     match /supportRequests/{requestId} {
-      allow read, write: if isAdmin();
-      allow create: if isAuthenticated();
+      allow create: if request.auth != null; // Any authenticated user can create a support request
+      allow read, list, update, delete: if request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com']; // Only specific admins can manage them
     }
-
   }
 }
