@@ -8,26 +8,29 @@
  */
 
 import { getFirestore, Timestamp, FieldValue } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-
-import { FirestorePermissionError, type SecurityRuleContext } from '@/lib/errors';
+import { initializeApp, getApps, cert, type App } from 'firebase-admin/app';
 import type { ReplySupportRequestInput, SupportRequestInput } from '@/lib/types';
 
-// Server-side Firebase initialization
-const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
-  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
-  : undefined;
+// Helper function to initialize Firebase Admin SDK idempotently
+function initializeFirebaseAdmin(): App {
+    if (getApps().length > 0) {
+        return getApps()[0];
+    }
+    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
+      ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
+      : undefined;
 
-if (getApps().length === 0) {
-  initializeApp({
-    credential: serviceAccount ? cert(serviceAccount) : undefined,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  });
+    return initializeApp({
+        credential: serviceAccount ? cert(serviceAccount) : undefined,
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    });
 }
-const db = getFirestore();
 
 // This is the function that will be called by the server action.
 export async function submitSupportRequest(input: SupportRequestInput) {
+    const app = initializeFirebaseAdmin();
+    const db = getFirestore(app);
+
     const batch = db.batch();
     const now = FieldValue.serverTimestamp();
   
@@ -61,9 +64,10 @@ export async function submitSupportRequest(input: SupportRequestInput) {
     }
 }
   
-
-
 export async function replyToSupportRequest(input: ReplySupportRequestInput) {
+    const app = initializeFirebaseAdmin();
+    const db = getFirestore(app);
+
     const { requestId, message, sender } = input;
     const now = FieldValue.serverTimestamp();
 
