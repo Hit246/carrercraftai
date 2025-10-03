@@ -7,19 +7,32 @@
  * - submitSupportRequest - Saves a user's support request to Firestore.
  */
 
-import { db } from '@/lib/firebase';
-import { addDoc, collection, doc, serverTimestamp, updateDoc, writeBatch } from 'firebase/firestore';
-import { errorEmitter } from '@/lib/error-emitter';
+import { getFirestore, Timestamp, FieldValue } from 'firebase-admin/firestore';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+
 import { FirestorePermissionError, type SecurityRuleContext } from '@/lib/errors';
 import type { ReplySupportRequestInput, SupportRequestInput } from '@/lib/types';
 
+// Server-side Firebase initialization
+const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
+  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
+  : undefined;
+
+if (getApps().length === 0) {
+  initializeApp({
+    credential: serviceAccount ? cert(serviceAccount) : undefined,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  });
+}
+const db = getFirestore();
+
 // This is the function that will be called by the server action.
 export async function submitSupportRequest(input: SupportRequestInput) {
-    const batch = writeBatch(db);
-    const now = serverTimestamp();
+    const batch = db.batch();
+    const now = FieldValue.serverTimestamp();
   
     // Create main request doc
-    const supportRequestRef = doc(collection(db, 'supportRequests'));
+    const supportRequestRef = db.collection('supportRequests').doc();
     batch.set(supportRequestRef, {
       userId: input.userId,
       userEmail: input.userEmail,
@@ -31,7 +44,7 @@ export async function submitSupportRequest(input: SupportRequestInput) {
     });
   
     // Create first message
-    const historyRef = doc(collection(supportRequestRef, 'history'));
+    const historyRef = supportRequestRef.collection('history').doc();
     batch.set(historyRef, {
       message: input.message,
       sender: 'user',
@@ -43,34 +56,21 @@ export async function submitSupportRequest(input: SupportRequestInput) {
       return { success: true };
     } catch (serverError: any) {
         console.error("❌ Firestore commit failed:", serverError);
-        // Create a contextual error for better debugging if this is a permission issue.
-        const permissionError = new FirestorePermissionError({
-            path: supportRequestRef.path,
-            operation: 'create',
-            requestResourceData: {
-                userId: input.userId,
-                subject: input.subject,
-                category: input.category,
-            },
-        } as SecurityRuleContext, serverError);
-        
-        errorEmitter.emit('permission-error', permissionError);
-
-        // Re-throw the original error to let the frontend know something went wrong.
-        throw serverError;
+        // We re-throw the error so the client-side catch block can handle it.
+        throw new Error("Failed to submit support request to Firestore.");
     }
-  }
+}
   
 
 
 export async function replyToSupportRequest(input: ReplySupportRequestInput) {
     const { requestId, message, sender } = input;
-    const now = serverTimestamp();
+    const now = FieldValue.serverTimestamp();
 
-    const requestRef = doc(db, 'supportRequests', requestId);
-    const historyRef = doc(collection(requestRef, 'history'));
+    const requestRef = db.collection('supportRequests').doc(requestId);
+    const historyRef = requestRef.collection('history').doc();
 
-    const batch = writeBatch(db);
+    const batch = db.batch();
 
     // Add the new message to history
     batch.set(historyRef, {
@@ -85,16 +85,11 @@ export async function replyToSupportRequest(input: ReplySupportRequestInput) {
         lastMessageAt: now,
     });
     
-    batch.commit()
-        .catch((serverError: any) => {
-            const permissionError = new FirestorePermissionError({
-                path: historyRef.path,
-                operation: 'create',
-                requestResourceData: { message, sender },
-            } as SecurityRuleContext, serverError);
-            
-            errorEmitter.emit('permission-error', permissionError);
-        });
-
-    return { success: true };
+    try {
+        await batch.commit();
+        return { success: true };
+    } catch (serverError) {
+        console.error("❌ Firestore commit failed (reply):", serverError);
+        throw new Error("Failed to reply to support request.");
+    }
 }
