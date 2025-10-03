@@ -1,71 +1,53 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-  
-    // Helper Functions
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
 
+    // Helper function to check if the user is an admin
     function isAdmin() {
       return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
-    
-    // USERS collection
+
+    // Users can only read/write their own data
     match /users/{userId} {
-      // Anyone can create their own user document on signup
-      allow create: if request.auth != null;
-      
-      // Users can only read their own document
-      allow read: if isOwner(userId) || isAdmin();
-
-      // Users can only update their own document, but cannot change their plan
-      allow update: if isOwner(userId) && request.resource.data.plan == resource.data.plan;
-      
-      // Admins can update any user document (e.g., to change a plan)
-      allow update: if isAdmin();
-
-      // Users cannot delete their own accounts from the client
-      allow delete: if isAdmin();
-
-      // RESUME_VERSIONS subcollection
-      match /resumeVersions/{versionId} {
-        allow read, write: if isOwner(userId) || isAdmin();
-      }
-    }
-
-    // TEAMS collection
-    match /teams/{teamId} {
-      // Allow read/write for admins or for users who are part of that team
-      allow read, write: if isAdmin() || (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-                                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId);
-                                       
-      match /members/{memberId} {
-         allow read, write: if isAdmin() || (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-                                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId);
-      }
-       match /candidates/{candidateId} {
-         allow read, write: if isAdmin() || (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-                                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId);
-      }
+      allow read, update, delete: if request.auth.uid == userId || isAdmin();
+      allow create: if request.auth.uid != null;
     }
     
-    // SETTINGS collection
-    match /settings/{settingId} {
-      // Only admins can change settings
-      allow write: if isAdmin();
-      // Any authenticated user can read settings (e.g., to get payment info)
-      allow read: if request.auth != null;
+    // Resume versions can only be managed by their owner
+    match /users/{userId}/resumeVersions/{versionId} {
+        allow read, write, delete: if request.auth.uid == userId || isAdmin();
     }
 
-    // SUPPORT_REQUESTS collection
+    // Settings can only be managed by an admin
+    match /settings/payment {
+      allow read: if request.auth != null; // All users can read payment settings
+      allow write: if isAdmin(); // Only admins can write
+    }
+
+    // Any authenticated user can submit a support request
     match /supportRequests/{requestId} {
-      // Any authenticated user can create a support request
       allow create: if request.auth != null;
-      // Only admins can read/update/delete support requests
-      allow read, update, delete: if isAdmin();
+      allow read, write, delete: if isAdmin(); // Only admins can manage them
+    }
+
+    // Team data can be read by team members, managed by the owner/admin
+    match /teams/{teamId} {
+        // Team document itself (owner info)
+        allow read: if isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+        allow write: if isAdmin();
+
+        // Team members subcollection
+        match /members/{memberId} {
+            allow read: if isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+            // Only the team owner can add/remove members for now
+            allow write, delete: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid || isAdmin();
+        }
+        
+        // Candidates subcollection
+        match /candidates/{candidateId} {
+             allow read, write: if isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+        }
     }
   }
 }
