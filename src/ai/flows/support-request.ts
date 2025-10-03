@@ -7,32 +7,19 @@
  * - submitSupportRequest - Saves a user's support request to Firestore.
  */
 
-import { getFirestore, Timestamp, FieldValue } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert, type App } from 'firebase-admin/app';
+import { collection, addDoc, serverTimestamp, writeBatch, doc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import type { ReplySupportRequestInput, SupportRequestInput } from '@/lib/types';
 
-// Helper function to initialize Firebase Admin SDK idempotently
-function initializeFirebaseAdmin(): App {
-    // If the app is already initialized, return it.
-    if (getApps().length > 0) {
-        return getApps()[0];
-    }
-    // Otherwise, initialize the app. The Admin SDK will automatically
-    // find the project's credentials in the environment.
-    return initializeApp();
-}
 
 // This is the function that will be called by the server action.
 export async function submitSupportRequest(input: SupportRequestInput) {
     try {
-        const app = initializeFirebaseAdmin();
-        const db = getFirestore(app);
-    
-        const batch = db.batch();
-        const now = Timestamp.now();
+        const batch = writeBatch(db);
+        const now = serverTimestamp();
       
         // Create main request doc
-        const supportRequestRef = db.collection('supportRequests').doc();
+        const supportRequestRef = doc(collection(db, 'supportRequests'));
         batch.set(supportRequestRef, {
           userId: input.userId,
           userEmail: input.userEmail,
@@ -44,7 +31,7 @@ export async function submitSupportRequest(input: SupportRequestInput) {
         });
       
         // Create first message
-        const historyRef = supportRequestRef.collection('history').doc();
+        const historyRef = doc(collection(supportRequestRef, 'history'));
         batch.set(historyRef, {
           message: input.message,
           sender: 'user',
@@ -62,16 +49,13 @@ export async function submitSupportRequest(input: SupportRequestInput) {
   
 export async function replyToSupportRequest(input: ReplySupportRequestInput) {
     try {
-        const app = initializeFirebaseAdmin();
-        const db = getFirestore(app);
-    
         const { requestId, message, sender } = input;
-        const now = Timestamp.now();
+        const now = serverTimestamp();
     
-        const requestRef = db.collection('supportRequests').doc(requestId);
-        const historyRef = requestRef.collection('history').doc();
+        const requestRef = doc(db, 'supportRequests', requestId);
+        const historyRef = doc(collection(requestRef, 'history'));
     
-        const batch = db.batch();
+        const batch = writeBatch(db);
     
         // Add the new message to history
         batch.set(historyRef, {
