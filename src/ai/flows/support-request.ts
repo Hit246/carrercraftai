@@ -11,7 +11,7 @@ import { db } from '@/lib/firebase';
 import { addDoc, collection, doc, serverTimestamp, updateDoc, writeBatch } from 'firebase/firestore';
 import { errorEmitter } from '@/lib/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/lib/errors';
-import type { ReplySupportRequestInput, SupportRequestInput } from '@/lib/actions';
+import type { ReplySupportRequestInput, SupportRequestInput } from '@/lib/types';
 
 // This is the function that will be called by the server action.
 export async function submitSupportRequest(input: SupportRequestInput) {
@@ -90,4 +90,3 @@ export async function replyToSupportRequest(input: ReplySupportRequestInput) {
 
     return { success: true };
 }
-
