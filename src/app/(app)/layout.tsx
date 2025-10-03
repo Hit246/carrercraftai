@@ -268,7 +268,7 @@ function AppLayoutContent({
       </Sidebar>
       <SidebarInset>
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sm:px-6 shadow-md">
-          <SidebarTrigger className="md:hidden"/>
+          <SidebarTrigger />
           <div className="flex-1">
              <h2 className="text-lg font-semibold font-headline">
                 {getPageTitle()}
