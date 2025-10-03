@@ -7,10 +7,11 @@
  * - submitSupportRequest - Saves a user's support request to Firestore.
  */
 
-import { ai } from '@/ai/genkit';
 import { db } from '@/lib/firebase';
 import { addDoc, collection } from 'firebase/firestore';
-import { z } from 'genkit';
+import { z } from 'zod';
+import { errorEmitter } from '@/lib/error-emitter';
+import type { FirestorePermissionError } from '@/lib/errors';
 
 // Define the schema directly in this file.
 const SupportRequestInputSchema = z.object({
@@ -23,28 +24,34 @@ const SupportRequestInputSchema = z.object({
 export type SupportRequestInput = z.infer<typeof SupportRequestInputSchema>;
 
 
-const submitSupportRequestFlow = ai.defineFlow(
-  {
-    name: 'submitSupportRequestFlow',
-    inputSchema: SupportRequestInputSchema,
-    outputSchema: z.object({ success: z.boolean() }),
-  },
-  async (input) => {
-    try {
-      await addDoc(collection(db, 'supportRequests'), {
-        ...input,
-        createdAt: new Date(),
-        status: 'open',
-      });
-      return { success: true };
-    } catch (error) {
-      console.error('Error submitting support request:', error);
-      return { success: false };
-    }
-  }
-);
-
 // This is the function that will be called by the server action.
 export async function submitSupportRequest(input: SupportRequestInput) {
-    return await submitSupportRequestFlow(input);
+    const supportRequestsRef = collection(db, 'supportRequests');
+    try {
+        await addDoc(supportRequestsRef, {
+            ...input,
+            createdAt: new Date(),
+            status: 'open',
+        });
+        return { success: true };
+    } catch (serverError: any) {
+        console.error('Error submitting support request:', serverError);
+        
+        // Create a contextual error for better debugging
+        const permissionError = {
+            name: 'FirestorePermissionError',
+            message: `FirestoreError: Missing or insufficient permissions for creating a document in 'supportRequests'.`,
+            context: {
+                path: supportRequestsRef.path,
+                operation: 'create',
+                requestResourceData: input,
+            },
+            originalError: serverError,
+        } as FirestorePermissionError;
+        
+        errorEmitter.emit('permission-error', permissionError);
+
+        // Also, re-throw the original error or a new one to indicate failure to the client
+        throw new Error("Failed to submit support request due to a server error.");
+    }
 }
