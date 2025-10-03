@@ -177,19 +177,19 @@ export function SupportPage() {
                                 render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Category</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select a category" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="billing">Billing</SelectItem>
-                                                <SelectItem value="technical">Technical Issue</SelectItem>
-                                                <SelectItem value="feedback">Feedback</SelectItem>
-                                                <SelectItem value="other">Other</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                        <SelectTrigger>
+                                        <SelectValue placeholder="Select a category" />
+                                        </SelectTrigger>
                                     </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="billing">Billing</SelectItem>
+                                        <SelectItem value="technical">Technical Issue</SelectItem>
+                                        <SelectItem value="feedback">Feedback</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                                 )}
@@ -232,5 +232,3 @@ export function SupportPage() {
     </div>
   );
 }
-
-    
