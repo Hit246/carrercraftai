@@ -221,7 +221,7 @@ export function SupportPage() {
                         <p className="font-semibold truncate">{req.subject}</p>
                         {getStatusBadge(req.status)}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">{formatDistanceToNow(new Date(req.lastMessageAt.seconds * 1000), { addSuffix: true })}</p>
+                      <div className="text-xs text-muted-foreground mt-1">{formatDistanceToNow(new Date(req.lastMessageAt.seconds * 1000), { addSuffix: true })}</div>
                     </button>
                   ))}
                 </ScrollArea>
