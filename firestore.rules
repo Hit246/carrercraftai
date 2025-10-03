@@ -2,52 +2,67 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper function to check if the user is an admin
+    
+    // Helper function to check if a user is an admin
     function isAdmin() {
       return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
 
-    // Users can only read/write their own data
+    // Helper function to check if the user is the owner of the document
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Rules for the 'users' collection
     match /users/{userId} {
-      allow read, update, delete: if request.auth.uid == userId || isAdmin();
-      allow create: if request.auth.uid != null;
-    }
-    
-    // Resume versions can only be managed by their owner
-    match /users/{userId}/resumeVersions/{versionId} {
-        allow read, write, delete: if request.auth.uid == userId || isAdmin();
-    }
-
-    // Settings can only be managed by an admin
-    match /settings/payment {
-      allow read: if request.auth != null; // All users can read payment settings
-      allow write: if isAdmin(); // Only admins can write
-    }
-
-    // Any authenticated user can submit a support request
-    match /supportRequests/{requestId} {
+      // Any authenticated user can create their own user document.
+      // Only the owner or an admin can read/update/delete their document.
+      allow read, update, delete: if isOwner(userId) || isAdmin();
       allow create: if request.auth != null;
-      allow read, write, delete: if isAdmin(); // Only admins can manage them
+
+      // Rules for the 'resumeVersions' subcollection
+      match /resumeVersions/{versionId} {
+        // Only the owner of the parent user document can manage their resume versions.
+        allow read, write, delete: if isOwner(userId);
+      }
     }
 
-    // Team data can be read by team members, managed by the owner/admin
+    // Rules for the 'teams' collection
     match /teams/{teamId} {
-        // Team document itself (owner info)
-        allow read: if isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-        allow write: if isAdmin();
+      // Any authenticated user can create a team.
+      // Only the owner can read/update/delete the team document.
+      allow read, update, delete: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+      allow create: if request.auth != null;
 
-        // Team members subcollection
-        match /members/{memberId} {
-            allow read: if isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-            // Only the team owner can add/remove members for now
-            allow write, delete: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid || isAdmin();
-        }
-        
-        // Candidates subcollection
-        match /candidates/{candidateId} {
-             allow read, write: if isAdmin() || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
-        }
+      // Rules for the 'members' subcollection
+      match /members/{memberId} {
+        // The team owner can add/remove members.
+        allow write, delete: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+        // Any team member can read the list of members.
+        allow read: if exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+                      get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+      }
+      
+      // Rules for the 'candidates' subcollection
+      match /candidates/{candidateId} {
+        // Team members can manage candidates.
+        allow read, write, delete: if exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+                                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+      }
+    }
+
+    // Rules for the 'settings' collection
+    match /settings/{settingId} {
+      // Admins can manage all settings.
+      allow read, write: if isAdmin();
+    }
+
+    // Rules for the 'supportRequests' collection
+    match /supportRequests/{requestId} {
+        // Any authenticated user can create a support request.
+        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+        // Only admins can read, update, or delete support requests.
+        allow read, update, delete: if isAdmin();
     }
   }
 }
