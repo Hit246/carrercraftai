@@ -17,42 +17,36 @@ import type { ReplySupportRequestInput, SupportRequestInput } from '@/lib/types'
 export async function submitSupportRequest(input: SupportRequestInput) {
     const batch = writeBatch(db);
     const now = serverTimestamp();
-
-    // 1. Create the main support request document
+  
+    // Create main request doc
     const supportRequestRef = doc(collection(db, 'supportRequests'));
     batch.set(supportRequestRef, {
-        userId: input.userId,
-        userEmail: input.userEmail,
-        subject: input.subject,
-        category: input.category,
-        status: 'open',
-        createdAt: now,
-        lastMessageAt: now,
+      userId: input.userId,
+      userEmail: input.userEmail,
+      subject: input.subject,
+      category: input.category,
+      status: 'open',
+      createdAt: now,
+      lastMessageAt: now,
     });
-    
-    // 2. Create the first message in the history subcollection
+  
+    // Create first message
     const historyRef = doc(collection(supportRequestRef, 'history'));
     batch.set(historyRef, {
-        message: input.message,
-        sender: 'user',
-        timestamp: now,
+      message: input.message,
+      sender: 'user',
+      timestamp: now,
     });
-    
-    batch.commit()
-    .catch((serverError: any) => {
-        // Create a contextual error for better debugging
-        const permissionError = new FirestorePermissionError({
-            path: supportRequestRef.path,
-            operation: 'create',
-            requestResourceData: input,
-        } as SecurityRuleContext, serverError);
-        
-        errorEmitter.emit('permission-error', permissionError);
-    });
-
-    // Return success immediately for optimistic UI
-    return { success: true };
-}
+  
+    try {
+      await batch.commit();   // ✅ wait and throw if fails
+      return { success: true };
+    } catch (error: any) {
+      console.error("❌ Firestore commit failed:", error);
+      throw error;  // ✅ let frontend know it failed
+    }
+  }
+  
 
 
 export async function replyToSupportRequest(input: ReplySupportRequestInput) {
