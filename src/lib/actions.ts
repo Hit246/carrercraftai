@@ -23,11 +23,28 @@ import {
   GenerateCoverLetterOutput,
 } from '@/ai/flows/cover-letter-generator';
 import { atsOptimizer, AtsOptimizerInput, AtsOptimizerOutput } from '@/ai/flows/ats-optimizer';
-import { submitSupportRequest, replyToSupportRequest, ReplySupportRequestInput } from '@/ai/flows/support-request';
+import { submitSupportRequest, replyToSupportRequest } from '@/ai/flows/support-request';
 import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeVersionNameOutput } from '@/ai/flows/resume-version-namer';
 import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput } from '@/ai/flows/candidate-summarizer';
-import type { SupportRequestInput } from '@/ai/flows/support-request';
 import { db, uploadFile } from './firebase';
+import { z } from 'zod';
+
+export const SupportRequestInputSchema = z.object({
+    subject: z.string().min(5),
+    message: z.string().min(20),
+    category: z.enum(['billing', 'technical', 'feedback', 'other']),
+    userEmail: z.string().email(),
+    userId: z.string(),
+});
+export type SupportRequestInput = z.infer<typeof SupportRequestInputSchema>;
+
+export const ReplySupportRequestInputSchema = z.object({
+  requestId: z.string(),
+  message: z.string().min(1),
+  sender: z.enum(['user', 'admin']),
+});
+export type ReplySupportRequestInput = z.infer<typeof ReplySupportRequestInputSchema>;
+
 
 export async function analyzeResumeAction(
   input: AnalyzeResumeInput
@@ -104,5 +121,3 @@ export async function summarizeCandidateAction(
   return await summarizeCandidate(input);
 }
 
-
-export type { SupportRequestInput };

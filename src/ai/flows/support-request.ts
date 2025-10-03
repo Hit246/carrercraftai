@@ -9,27 +9,9 @@
 
 import { db } from '@/lib/firebase';
 import { addDoc, collection, doc, serverTimestamp, updateDoc, writeBatch } from 'firebase/firestore';
-import { z } from 'zod';
 import { errorEmitter } from '@/lib/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/lib/errors';
-
-// Define the schema directly in this file.
-export const SupportRequestInputSchema = z.object({
-    subject: z.string().min(5),
-    message: z.string().min(20),
-    category: z.enum(['billing', 'technical', 'feedback', 'other']),
-    userEmail: z.string().email(),
-    userId: z.string(),
-});
-export type SupportRequestInput = z.infer<typeof SupportRequestInputSchema>;
-
-export const ReplySupportRequestInputSchema = z.object({
-  requestId: z.string(),
-  message: z.string().min(1),
-  sender: z.enum(['user', 'admin']),
-});
-export type ReplySupportRequestInput = z.infer<typeof ReplySupportRequestInputSchema>;
-
+import type { ReplySupportRequestInput, SupportRequestInput } from '@/lib/actions';
 
 // This is the function that will be called by the server action.
 export async function submitSupportRequest(input: SupportRequestInput) {
@@ -108,3 +90,4 @@ export async function replyToSupportRequest(input: ReplySupportRequestInput) {
 
     return { success: true };
 }
+
