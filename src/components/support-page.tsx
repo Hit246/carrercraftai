@@ -76,7 +76,7 @@ export function SupportPage() {
   }, [user]);
   
   useEffect(() => {
-    if (!selectedRequest) return;
+    if (!selectedRequest?.id) return;
     const historyRef = collection(db, 'supportRequests', selectedRequest.id, 'history');
     const q = query(historyRef, orderBy('timestamp', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -177,19 +177,19 @@ export function SupportPage() {
                                 render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Category</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
-                                        <SelectTrigger>
-                                        <SelectValue placeholder="Select a category" />
-                                        </SelectTrigger>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <SelectTrigger>
+                                            <SelectValue placeholder="Select a category" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="billing">Billing</SelectItem>
+                                                <SelectItem value="technical">Technical Issue</SelectItem>
+                                                <SelectItem value="feedback">Feedback</SelectItem>
+                                                <SelectItem value="other">Other</SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="billing">Billing</SelectItem>
-                                        <SelectItem value="technical">Technical Issue</SelectItem>
-                                        <SelectItem value="feedback">Feedback</SelectItem>
-                                        <SelectItem value="other">Other</SelectItem>
-                                    </SelectContent>
-                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                                 )}
