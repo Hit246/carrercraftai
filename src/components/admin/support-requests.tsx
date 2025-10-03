@@ -2,141 +2,240 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, doc, onSnapshot, orderBy, query, serverTimestamp, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { Skeleton } from '../ui/skeleton';
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-  } from "@/components/ui/accordion"
 import { errorEmitter } from '@/lib/error-emitter';
 import { FirestorePermissionError } from '@/lib/errors';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { Loader2, Send } from 'lucide-react';
+import { ScrollArea } from '../ui/scroll-area';
+import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Textarea } from '../ui/textarea';
+import { Button } from '../ui/button';
+import { replyToSupportRequestAction } from '@/lib/actions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+
+interface HistoryItem {
+  id: string;
+  message: string;
+  sender: 'user' | 'admin';
+  timestamp: { seconds: number; nanoseconds: number };
+}
 
 interface SupportRequest {
   id: string;
   userEmail: string;
   subject: string;
-  message: string;
   category: 'billing' | 'technical' | 'feedback' | 'other';
-  status: 'open' | 'closed';
-  createdAt: { seconds: number, nanoseconds: number };
+  status: 'open' | 'in-progress' | 'closed';
+  lastMessageAt: { seconds: number; nanoseconds: number };
+  history: HistoryItem[];
 }
 
 export function SupportRequestsPage() {
   const [requests, setRequests] = useState<SupportRequest[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<SupportRequest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const [replyMessage, setReplyMessage] = useState('');
+  const [isReplying, setIsReplying] = useState(false);
 
   useEffect(() => {
-    const fetchRequests = () => {
-      setIsLoading(true);
-      const requestsCollectionRef = collection(db, 'supportRequests');
-      const q = query(requestsCollectionRef, orderBy('createdAt', 'desc'));
-      
-      getDocs(q)
-        .then((requestsSnapshot) => {
-            const requestsList = requestsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as SupportRequest));
-            setRequests(requestsList);
-        })
-        .catch((serverError) => {
-             // This is a generic error, so we assume it might be a permission issue.
-             // We create a contextual error to help with debugging.
-             const permissionError = new FirestorePermissionError({
-                path: requestsCollectionRef.path,
-                operation: 'list',
-             }, serverError);
-             errorEmitter.emit('permission-error', permissionError);
+    const requestsCollectionRef = collection(db, 'supportRequests');
+    const q = query(requestsCollectionRef, orderBy('lastMessageAt', 'desc'));
 
-             // Also inform the user in the UI, as the listener is for dev debugging.
-             toast({
-                title: 'Error Fetching Support Requests',
-                description: 'You may not have permission to view this data. Check the console for details.',
-                variant: 'destructive',
-             });
-        })
-        .finally(() => {
-            setIsLoading(false);
-        });
-    };
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const requestsList: SupportRequest[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        history: [],
+      } as SupportRequest));
+      setRequests(requestsList);
+      setIsLoading(false);
+    }, (serverError) => {
+      const permissionError = new FirestorePermissionError({
+        path: requestsCollectionRef.path,
+        operation: 'list',
+      }, serverError);
+      errorEmitter.emit('permission-error', permissionError);
+      toast({
+        title: 'Error Fetching Support Requests',
+        description: 'You may not have permission to view this data.',
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+    });
 
-    fetchRequests();
+    return () => unsubscribe();
   }, [toast]);
 
+  useEffect(() => {
+    if (!selectedRequest) return;
+
+    const historyRef = collection(db, 'supportRequests', selectedRequest.id, 'history');
+    const q = query(historyRef, orderBy('timestamp', 'asc'));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const history = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as HistoryItem));
+      setSelectedRequest(prev => prev ? { ...prev, history } : null);
+    });
+
+    return () => unsubscribe();
+  }, [selectedRequest?.id]);
+
+  const handleReply = async () => {
+    if (!selectedRequest || !replyMessage.trim()) return;
+    setIsReplying(true);
+    await replyToSupportRequestAction({
+      requestId: selectedRequest.id,
+      message: replyMessage,
+      sender: 'admin',
+    });
+    setReplyMessage('');
+    setIsReplying(false);
+  };
+  
+  const handleStatusChange = async (requestId: string, status: SupportRequest['status']) => {
+    const requestRef = doc(db, 'supportRequests', requestId);
+    try {
+        await updateDoc(requestRef, { status });
+        toast({ title: 'Status Updated', description: `Ticket status changed to ${status}.`});
+    } catch (error) {
+        toast({ title: 'Error', description: 'Failed to update status.', variant: 'destructive'});
+    }
+  }
+
+
+  const getStatusBadge = (status: SupportRequest['status']) => {
+    switch (status) {
+      case 'open':
+        return <Badge variant="destructive">Open</Badge>;
+      case 'in-progress':
+        return <Badge className="bg-yellow-500">In Progress</Badge>;
+      case 'closed':
+        return <Badge variant="secondary">Closed</Badge>;
+    }
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Support Tickets</CardTitle>
-        <CardDescription>Review and manage all user-submitted support requests.</CardDescription>
-      </CardHeader>
-      <CardContent>
-         <div className="border rounded-md">
-            <Table>
-            <TableHeader>
-                <TableRow>
-                <TableHead className='w-[250px]'>User</TableHead>
-                <TableHead>Subject</TableHead>
-                <TableHead className="w-[120px]">Category</TableHead>
-                <TableHead className="w-[150px] text-right">Submitted</TableHead>
-                </TableRow>
-            </TableHeader>
-             <TableBody>
-                {isLoading ? (
-                    [...Array(5)].map((_, i) => (
-                        <TableRow key={i}>
-                            <TableCell colSpan={4}><Skeleton className="h-8 w-full" /></TableCell>
-                        </TableRow>
-                    ))
-                ) : requests.length === 0 ? (
-                <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
-                    No support requests found.
-                    </TableCell>
-                </TableRow>
-                ) : (
-                    <Accordion type="single" collapsible className="w-full">
-                        {requests.map((request) => (
-                            <AccordionItem value={request.id} key={request.id}>
-                                <TableRow className="w-full cursor-pointer hover:bg-muted/50">
-                                    <AccordionTrigger asChild>
-                                        <>
-                                            <TableCell className='font-medium truncate pr-4'>{request.userEmail}</TableCell>
-                                            <TableCell className='text-muted-foreground truncate pr-4'>{request.subject}</TableCell>
-                                            <TableCell className='text-muted-foreground'> <Badge variant="secondary">{request.category}</Badge></TableCell>
-                                            <TableCell className='text-muted-foreground text-right pr-4'>
-                                                {formatDistanceToNow(new Date(request.createdAt.seconds * 1000), { addSuffix: true })}
-                                            </TableCell>
-                                        </>
-                                    </AccordionTrigger>
-                                </TableRow>
-                                <AccordionContent asChild>
-                                   <tr className='bg-muted/40'>
-                                        <td colSpan={4} className='p-4'>
-                                             <p className='text-muted-foreground'>{request.message}</p>
-                                        </td>
-                                   </tr>
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[calc(100vh-10rem)]">
+      <Card className="md:col-span-1">
+        <CardHeader>
+          <CardTitle>Support Inbox</CardTitle>
+          <CardDescription>{requests.length} tickets</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <ScrollArea className="h-[calc(100vh-16rem)]">
+            {isLoading && [...Array(5)].map((_, i) => <div key={i} className="p-4"><Skeleton className="h-10 w-full"/></div>)}
+            {requests.map(req => (
+              <button
+                key={req.id}
+                onClick={() => setSelectedRequest(req)}
+                className={cn(
+                  'block w-full text-left p-4 border-b hover:bg-muted/50',
+                  selectedRequest?.id === req.id && 'bg-muted'
                 )}
-            </TableBody>
-            </Table>
-         </div>
-      </CardContent>
-    </Card>
+              >
+                <div className="flex justify-between items-start">
+                  <p className="font-semibold truncate">{req.subject}</p>
+                  {getStatusBadge(req.status)}
+                </div>
+                <p className="text-sm text-muted-foreground truncate">{req.userEmail}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formatDistanceToNow(new Date(req.lastMessageAt.seconds * 1000), { addSuffix: true })}
+                </p>
+              </button>
+            ))}
+          </ScrollArea>
+        </CardContent>
+      </Card>
+
+      <Card className="md:col-span-2 flex flex-col">
+        {selectedRequest ? (
+          <>
+            <CardHeader className="border-b">
+              <div className="flex justify-between items-center">
+                <div>
+                    <CardTitle className="truncate">{selectedRequest.subject}</CardTitle>
+                    <CardDescription>{selectedRequest.userEmail}</CardDescription>
+                </div>
+                <Select value={selectedRequest.status} onValueChange={(value) => handleStatusChange(selectedRequest.id, value as SupportRequest['status'])}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Set status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                {selectedRequest.history.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-muted-foreground"><Loader2 className="animate-spin mr-2"/>Loading history...</div>
+                ) : selectedRequest.history.map(item => (
+                  <div key={item.id} className={cn('flex items-end gap-2', item.sender === 'admin' && 'justify-end')}>
+                    {item.sender === 'user' && (
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>{selectedRequest.userEmail[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div className={cn(
+                      'max-w-xs md:max-w-md rounded-lg p-3 text-sm',
+                      item.sender === 'user' ? 'bg-muted' : 'bg-primary text-primary-foreground'
+                    )}>
+                      <p className="whitespace-pre-wrap">{item.message}</p>
+                      <p className="text-xs opacity-70 mt-2 text-right">
+                        {formatDistanceToNow(new Date(item.timestamp.seconds * 1000), { addSuffix: true })}
+                      </p>
+                    </div>
+                     {item.sender === 'admin' && (
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>A</AvatarFallback>
+                      </Avatar>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <CardContent className="pt-4 border-t">
+              <div className="relative">
+                <Textarea
+                  placeholder="Type your response here..."
+                  className="pr-16"
+                  value={replyMessage}
+                  onChange={(e) => setReplyMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleReply();
+                    }
+                  }}
+                />
+                <Button
+                  size="icon"
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={handleReply}
+                  disabled={isReplying || !replyMessage.trim()}
+                >
+                  {isReplying ? <Loader2 className="animate-spin" /> : <Send />}
+                </Button>
+              </div>
+            </CardContent>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8">
+            <p>Select a ticket from the inbox to view the conversation.</p>
+          </div>
+        )}
+      </Card>
+    </div>
   );
 }

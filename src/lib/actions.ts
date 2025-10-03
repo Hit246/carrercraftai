@@ -1,3 +1,4 @@
+
 'use server';
 
 import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
@@ -22,7 +23,7 @@ import {
   GenerateCoverLetterOutput,
 } from '@/ai/flows/cover-letter-generator';
 import { atsOptimizer, AtsOptimizerInput, AtsOptimizerOutput } from '@/ai/flows/ats-optimizer';
-import { submitSupportRequest } from '@/ai/flows/support-request';
+import { submitSupportRequest, replyToSupportRequest, ReplySupportRequestInput } from '@/ai/flows/support-request';
 import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeVersionNameOutput } from '@/ai/flows/resume-version-namer';
 import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput } from '@/ai/flows/candidate-summarizer';
 import type { SupportRequestInput } from '@/ai/flows/support-request';
@@ -83,6 +84,13 @@ export async function submitSupportRequestAction(
   ) {
     return await submitSupportRequest(input);
 }
+
+export async function replyToSupportRequestAction(
+  input: ReplySupportRequestInput
+) {
+  return await replyToSupportRequest(input);
+}
+
 
 export async function suggestResumeVersionNameAction(
     input: SuggestResumeVersionNameInput
