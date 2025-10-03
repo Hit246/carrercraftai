@@ -121,4 +121,8 @@
   .btn-gradient {
     background-image: linear-gradient(to right, hsl(var(--primary)), hsl(240, 83%, 63%));
   }
+  .sidebar-active-gradient {
+    background-image: linear-gradient(to right, hsl(var(--primary)/0.1), hsl(var(--primary)/0.01));
+    border-right: 2px solid hsl(var(--primary));
+  }
 }
