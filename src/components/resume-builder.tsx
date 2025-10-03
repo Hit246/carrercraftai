@@ -698,13 +698,16 @@ export const ResumeBuilder = () => {
                                     <Link href={`https://${resumeData.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline break-all">{resumeData.linkedin}</Link>
                                 </div>
                             </div>
+                            {resumeData.summary && (
                             <div className="mb-6">
                                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Summary</h3>
                                 <p className="text-gray-700 whitespace-pre-wrap break-words">{resumeData.summary}</p>
                             </div>
+                            )}
+                            {resumeData.experience && resumeData.experience.length > 0 && resumeData.experience.some(exp => exp.title || exp.company) && (
                             <div className="mb-6">
                                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Experience</h3>
-                                {resumeData.experience.map(exp => (
+                                {resumeData.experience.map(exp => exp.title && exp.company && (
                                     <div key={exp.id} className="mb-4">
                                         <div className="flex flex-col sm:flex-row justify-between sm:items-baseline">
                                             <h4 className="text-base font-semibold text-gray-800 break-words">{exp.title}</h4>
@@ -717,24 +720,30 @@ export const ResumeBuilder = () => {
                                     </div>
                                 ))}
                             </div>
+                            )}
+                             {resumeData.projects && resumeData.projects.length > 0 && resumeData.projects.some(p => p.name) && (
                              <div className="mb-6">
                                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Projects</h3>
-                                {resumeData.projects && resumeData.projects.map(proj => (
+                                {resumeData.projects.map(proj => proj.name && (
                                     <div key={proj.id} className="mb-4">
                                         <div className="flex items-center gap-2">
                                             <h4 className="text-base font-semibold text-gray-800 break-words">{proj.name}</h4>
                                             {proj.url && <Link href={proj.url.startsWith('http') ? proj.url : `https://${proj.url}`} target="_blank" rel="noopener noreferrer"><LinkIcon className="h-3 w-3 text-primary hover:underline"/></Link>}
                                         </div>
                                         <p className="text-xs text-gray-700 whitespace-pre-wrap break-words">{proj.description}</p>
+                                        {proj.technologies && (
                                         <p className="text-xs text-gray-500 mt-1 break-words">
-                                            <span className="font-semibold">Technologies:</span> {proj.technologies}
+                                            <span className="font-semibold text-gray-800">Technologies:</span> {proj.technologies}
                                         </p>
+                                        )}
                                     </div>
                                 ))}
                             </div>
+                            )}
+                             {resumeData.education && resumeData.education.length > 0 && resumeData.education.some(e => e.school) && (
                              <div className="mb-6">
                                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Education</h3>
-                                {resumeData.education.map(edu => (
+                                {resumeData.education.map(edu => edu.school && (
                                     <div key={edu.id} className="mb-2">
                                         <div className="flex flex-col sm:flex-row justify-between sm:items-baseline">
                                             <h4 className="text-base font-semibold text-gray-800 break-words">{edu.school}</h4>
@@ -744,6 +753,8 @@ export const ResumeBuilder = () => {
                                     </div>
                                 ))}
                             </div>
+                            )}
+                             {resumeData.skills && (
                              <div>
                                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Skills</h3>
                                 <div className="flex flex-wrap gap-2">
@@ -752,6 +763,7 @@ export const ResumeBuilder = () => {
                                     ))}
                                 </div>
                             </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
