@@ -29,7 +29,7 @@ export async function submitSupportRequest(input: SupportRequestInput) {
         const db = getFirestore(app);
     
         const batch = db.batch();
-        const now = FieldValue.serverTimestamp();
+        const now = new Date();
       
         // Create main request doc
         const supportRequestRef = db.collection('supportRequests').doc();
@@ -66,7 +66,7 @@ export async function replyToSupportRequest(input: ReplySupportRequestInput) {
         const db = getFirestore(app);
     
         const { requestId, message, sender } = input;
-        const now = FieldValue.serverTimestamp();
+        const now = new Date();
     
         const requestRef = db.collection('supportRequests').doc(requestId);
         const historyRef = requestRef.collection('history').doc();
