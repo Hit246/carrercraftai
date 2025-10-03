@@ -11,7 +11,7 @@ import { db } from '@/lib/firebase';
 import { addDoc, collection } from 'firebase/firestore';
 import { z } from 'zod';
 import { errorEmitter } from '@/lib/error-emitter';
-import type { FirestorePermissionError } from '@/lib/errors';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/lib/errors';
 
 // Define the schema directly in this file.
 const SupportRequestInputSchema = z.object({
@@ -27,27 +27,23 @@ export type SupportRequestInput = z.infer<typeof SupportRequestInputSchema>;
 // This is the function that will be called by the server action.
 export async function submitSupportRequest(input: SupportRequestInput) {
     const supportRequestsRef = collection(db, 'supportRequests');
+    const newRequestData = {
+        ...input,
+        createdAt: new Date(),
+        status: 'open',
+    };
+    
     try {
-        await addDoc(supportRequestsRef, {
-            ...input,
-            createdAt: new Date(),
-            status: 'open',
-        });
+        await addDoc(supportRequestsRef, newRequestData);
         return { success: true };
     } catch (serverError: any) {
-        console.error('Error submitting support request:', serverError);
         
         // Create a contextual error for better debugging
-        const permissionError = {
-            name: 'FirestorePermissionError',
-            message: `FirestoreError: Missing or insufficient permissions for creating a document in 'supportRequests'.`,
-            context: {
-                path: supportRequestsRef.path,
-                operation: 'create',
-                requestResourceData: input,
-            },
-            originalError: serverError,
-        } as FirestorePermissionError;
+        const permissionError = new FirestorePermissionError({
+            path: supportRequestsRef.path,
+            operation: 'create',
+            requestResourceData: newRequestData,
+        } as SecurityRuleContext, serverError);
         
         errorEmitter.emit('permission-error', permissionError);
 
@@ -55,3 +51,4 @@ export async function submitSupportRequest(input: SupportRequestInput) {
         throw new Error("Failed to submit support request due to a server error.");
     }
 }
+
