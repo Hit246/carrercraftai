@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { Send, Loader2, MessageSquare, History, ChevronLeft } from 'lucide-react';
-import { submitSupportRequestAction, replyToSupportRequestAction, type SupportRequestInput } from '@/lib/actions';
+import { submitSupportRequestAction, replyToSupportRequestAction } from '@/lib/actions';
 import { collection, onSnapshot, orderBy, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { cn } from '@/lib/utils';
@@ -23,6 +23,8 @@ import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Badge } from './ui/badge';
 import { Skeleton } from './ui/skeleton';
+import type { SupportRequestInput, ReplySupportRequestInput } from '@/lib/types';
+
 
 interface HistoryItem {
   id: string;
@@ -169,7 +171,29 @@ export function SupportPage() {
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid md:grid-cols-2 gap-6">
                             <FormField control={form.control} name="subject" render={({ field }) => ( <FormItem> <FormLabel>Subject</FormLabel> <FormControl> <Input placeholder="e.g., Issue with resume analysis" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                            <FormField control={form.control} name="category" render={({ field }) => ( <FormItem> <FormLabel>Category</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl> <SelectTrigger> <SelectValue placeholder="Select a category" /> </SelectTrigger> </FormControl> <SelectContent> <SelectItem value="billing">Billing</SelectItem> <SelectItem value="technical">Technical Issue</SelectItem> <SelectItem value="feedback">Feedback</SelectItem> <SelectItem value="other">Other</SelectItem> </SelectContent> </Select> <FormMessage /> </FormItem> )}/>
+                            <FormField
+                                control={form.control}
+                                name="category"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Category</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                        <SelectValue placeholder="Select a category" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="billing">Billing</SelectItem>
+                                        <SelectItem value="technical">Technical Issue</SelectItem>
+                                        <SelectItem value="feedback">Feedback</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
                         </div>
                         <FormField control={form.control} name="message" render={({ field }) => ( <FormItem> <FormLabel>Your Message</FormLabel> <FormControl> <Textarea placeholder="Please describe your issue or question in detail..." className="h-40 resize-y" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
                         <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
