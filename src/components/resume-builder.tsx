@@ -211,47 +211,57 @@ export const ResumeBuilder = () => {
         doc.setFont('helvetica', 'normal');
 
         // --- HEADER ---
-        doc.setFontSize(28).setFont('helvetica', 'bold');
-        doc.setTextColor(textColor);
-        doc.text(resumeData.name, pageW / 2, y, { align: 'center' });
-        y += 30;
+        if(resumeData.name) {
+            doc.setFontSize(28).setFont('helvetica', 'bold');
+            doc.setTextColor(textColor);
+            doc.text(resumeData.name, pageW / 2, y, { align: 'center' });
+            y += 30;
+        }
 
-        doc.setFontSize(14).setFont('helvetica', 'normal');
-        doc.setTextColor(primaryColor);
-        doc.text(resumeData.title, pageW / 2, y, { align: 'center' });
-        y += 20;
+        if(resumeData.title) {
+            doc.setFontSize(14).setFont('helvetica', 'normal');
+            doc.setTextColor(primaryColor);
+            doc.text(resumeData.title, pageW / 2, y, { align: 'center' });
+            y += 20;
+        }
 
         doc.setFontSize(9);
-        const contactInfo = [resumeData.phone, resumeData.email, `https://${resumeData.linkedin}`].filter(Boolean);
-        const contactInfoString = contactInfo.join(' | ');
-        const contactX = pageW / 2 - (doc.getStringUnitWidth(contactInfoString) * doc.getFontSize()) / 2;
+        const contactInfo = [
+            resumeData.phone, 
+            resumeData.email, 
+            resumeData.linkedin && `https://${resumeData.linkedin}`
+        ].filter(Boolean);
         
-        let currentX = contactX;
+        if (contactInfo.length > 0) {
+            const contactInfoString = contactInfo.join(' | ');
+            const contactX = pageW / 2 - (doc.getStringUnitWidth(contactInfoString) * doc.getFontSize()) / 2;
+            let currentX = contactX;
 
-        // Phone
-        doc.setTextColor(lightTextColor);
-        doc.text(resumeData.phone, currentX, y);
-        currentX += doc.getStringUnitWidth(resumeData.phone) * doc.getFontSize() + 5;
+            const addContactPart = (text: string, link?: string) => {
+                if (!text) return;
+                doc.setTextColor(link ? primaryColor : lightTextColor);
+                if (link) {
+                    doc.textWithLink(text, currentX, y, { url: link });
+                } else {
+                    doc.text(text, currentX, y);
+                }
+                currentX += doc.getStringUnitWidth(text) * doc.getFontSize() + 5;
+            };
 
-        // Separator
-        doc.text('|', currentX, y);
-        currentX += doc.getStringUnitWidth('|') * doc.getFontSize() + 5;
+            if (resumeData.phone) addContactPart(resumeData.phone);
 
-        // Email
-        doc.setTextColor(primaryColor);
-        doc.textWithLink(resumeData.email, currentX, y, { url: `mailto:${resumeData.email}`});
-        currentX += doc.getStringUnitWidth(resumeData.email) * doc.getFontSize() + 5;
+            if (resumeData.phone && resumeData.email) {
+                addContactPart('|');
+            }
+            if (resumeData.email) addContactPart(resumeData.email, `mailto:${resumeData.email}`);
+            
+            if ((resumeData.phone || resumeData.email) && resumeData.linkedin) {
+                addContactPart('|');
+            }
+            if (resumeData.linkedin) addContactPart(resumeData.linkedin, `https://${resumeData.linkedin}`);
 
-        // Separator
-        doc.setTextColor(lightTextColor);
-        doc.text('|', currentX, y);
-        currentX += doc.getStringUnitWidth('|') * doc.getFontSize() + 5;
-
-        // LinkedIn
-        doc.setTextColor(primaryColor);
-        doc.textWithLink(resumeData.linkedin, currentX, y, { url: `https://${resumeData.linkedin}` });
-        
-        y += 15;
+            y += 15;
+        }
 
 
         // --- BORDER ---
@@ -282,40 +292,45 @@ export const ResumeBuilder = () => {
         };
 
         // --- SUMMARY ---
-        addSection('Summary');
-        doc.setTextColor(textColor);
-        y = addWrappedText(resumeData.summary, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal' });
-        y += 15;
-
+        if (resumeData.summary) {
+            addSection('Summary');
+            doc.setTextColor(textColor);
+            y = addWrappedText(resumeData.summary, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal' });
+            y += 15;
+        }
 
         // --- EXPERIENCE ---
-        addSection('Experience');
-        resumeData.experience.forEach(exp => {
-            doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
-            doc.text(exp.title, margin, y);
-            
-            doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
-            doc.text(exp.dates, pageW - margin, y, { align: 'right'});
-            y += 14 * lineSpacing;
+        if (resumeData.experience && resumeData.experience.length > 0 && resumeData.experience.some(exp => exp.title || exp.company)) {
+            addSection('Experience');
+            resumeData.experience.forEach(exp => {
+                if (!exp.title && !exp.company) return;
+                doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
+                doc.text(exp.title, margin, y);
+                
+                doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
+                doc.text(exp.dates, pageW - margin, y, { align: 'right'});
+                y += 14 * lineSpacing;
 
-            doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
-            doc.text(exp.company, margin, y);
-            y += 14 * lineSpacing;
-            
-            doc.setFontSize(10).setTextColor(lightTextColor);
-            const bulletPoints = exp.description.split('\n').map(line => line.replace(/^-/, '').trim());
-            bulletPoints.forEach(point => {
-                if(point) {
-                    y = addWrappedText(`- ${point}`, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
-                }
+                doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
+                doc.text(exp.company, margin, y);
+                y += 14 * lineSpacing;
+                
+                doc.setFontSize(10).setTextColor(lightTextColor);
+                const bulletPoints = exp.description.split('\n').map(line => line.replace(/^-/, '').trim());
+                bulletPoints.forEach(point => {
+                    if(point) {
+                        y = addWrappedText(`- ${point}`, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
+                    }
+                });
+                y += 15;
             });
-            y += 15;
-        });
+        }
 
         // --- PROJECTS ---
-        if(resumeData.projects && resumeData.projects.length > 0) {
+        if(resumeData.projects && resumeData.projects.length > 0 && resumeData.projects.some(p => p.name)) {
             addSection('Projects');
             resumeData.projects.forEach(proj => {
+                if (!proj.name) return;
                 doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
                 doc.text(proj.name, margin, y);
                 if (proj.url) {
@@ -324,36 +339,45 @@ export const ResumeBuilder = () => {
                     doc.setTextColor(textColor);
                 }
                 y += 14 * lineSpacing;
-                y = addWrappedText(proj.description, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
+                if (proj.description) {
+                    y = addWrappedText(proj.description, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
+                }
                 
-                doc.setFontSize(9).setFont('helvetica', 'bold').setTextColor(textColor);
-                doc.text('Technologies: ', margin, y);
-                doc.setFont('helvetica', 'normal').setTextColor(lightTextColor);
-                doc.text(proj.technologies, margin + doc.getTextWidth('Technologies: '), y);
+                if (proj.technologies) {
+                    doc.setFontSize(9).setFont('helvetica', 'bold').setTextColor(textColor);
+                    doc.text('Technologies: ', margin, y);
+                    doc.setFont('helvetica', 'normal').setTextColor(lightTextColor);
+                    doc.text(proj.technologies, margin + doc.getTextWidth('Technologies: '), y);
+                }
                 y += 20 * lineSpacing;
             });
         }
 
         // --- EDUCATION ---
-        addSection('Education');
-        resumeData.education.forEach(edu => {
-             doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
-            doc.text(edu.school, margin, y);
-            
-            doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
-            doc.text(edu.dates, pageW - margin, y, { align: 'right'});
-            y += 14 * lineSpacing;
+        if (resumeData.education && resumeData.education.length > 0 && resumeData.education.some(edu => edu.school)) {
+            addSection('Education');
+            resumeData.education.forEach(edu => {
+                if (!edu.school) return;
+                doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
+                doc.text(edu.school, margin, y);
+                
+                doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
+                doc.text(edu.dates, pageW - margin, y, { align: 'right'});
+                y += 14 * lineSpacing;
 
-            doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
-            const degreeAndCgpa = edu.cgpa ? `${edu.degree} (CGPA: ${edu.cgpa})` : edu.degree;
-            doc.text(degreeAndCgpa, margin, y);
-            y += 15;
-        });
+                doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
+                const degreeAndCgpa = edu.cgpa ? `${edu.degree} (CGPA: ${edu.cgpa})` : edu.degree;
+                doc.text(degreeAndCgpa, margin, y);
+                y += 15;
+            });
+        }
         
         // --- SKILLS ---
-        addSection('Skills');
-        doc.setFontSize(10).setTextColor(textColor);
-        y = addWrappedText(resumeData.skills, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
+        if (resumeData.skills) {
+            addSection('Skills');
+            doc.setFontSize(10).setTextColor(textColor);
+            y = addWrappedText(resumeData.skills, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
+        }
         
         return doc;
     }, [resumeData]);
