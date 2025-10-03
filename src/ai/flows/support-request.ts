@@ -47,8 +47,9 @@ export async function submitSupportRequest(input: SupportRequestInput) {
         
         errorEmitter.emit('permission-error', permissionError);
 
-        // Also, re-throw the original error or a new one to indicate failure to the client
-        throw new Error("Failed to submit support request due to a server error.");
+        // This was causing the generic "Submission Failed" message.
+        // Removing it will allow the contextual error to be seen.
+        // throw new Error("Failed to submit support request due to a server error.");
+        return { success: false, error: permissionError.message };
     }
 }
-
