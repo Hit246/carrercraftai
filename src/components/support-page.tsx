@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -48,6 +49,22 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+const isCode = (text: string) => {
+    return text.includes('import ') || text.includes('function ') || text.includes('const ') || text.includes(';') || text.includes('{') || text.includes('}');
+}
+
+const MessageContent = ({ text }: { text: string }) => {
+    if (isCode(text)) {
+        return (
+            <pre className="text-xs bg-background/20 p-3 rounded-md overflow-x-auto">
+                <code>{text}</code>
+            </pre>
+        )
+    }
+    return <p className="whitespace-pre-wrap">{text}</p>;
+}
+
 
 export function SupportPage() {
   const { toast } = useToast();
@@ -139,8 +156,8 @@ export function SupportPage() {
                 <div key={item.id} className={cn('flex items-end gap-2', item.sender === 'user' && 'justify-end')}>
                   {item.sender === 'admin' && <Avatar className="h-8 w-8"><AvatarFallback>A</AvatarFallback></Avatar>}
                   <div className={cn('max-w-xs md:max-w-md rounded-lg p-3 text-sm', item.sender === 'admin' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
-                    <p className="whitespace-pre-wrap">{item.message}</p>
-                    <p className="text-xs opacity-70 mt-2 text-right">{formatDistanceToNow(new Date(item.timestamp.seconds * 1000), { addSuffix: true })}</p>
+                    <MessageContent text={item.message} />
+                    <div className="text-xs opacity-70 mt-2 text-right">{formatDistanceToNow(new Date(item.timestamp.seconds * 1000), { addSuffix: true })}</div>
                   </div>
                   {item.sender === 'user' && <Avatar className="h-8 w-8"><AvatarFallback>{user?.email?.[0].toUpperCase()}</AvatarFallback></Avatar>}
                 </div>

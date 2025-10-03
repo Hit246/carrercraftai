@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -35,6 +36,21 @@ interface SupportRequest {
   status: 'open' | 'in-progress' | 'closed';
   lastMessageAt: { seconds: number; nanoseconds: number };
   history: HistoryItem[];
+}
+
+const isCode = (text: string) => {
+    return text.includes('import ') || text.includes('function ') || text.includes('const ') || text.includes(';') || text.includes('{') || text.includes('}');
+}
+
+const MessageContent = ({ text }: { text: string }) => {
+    if (isCode(text)) {
+        return (
+            <pre className="text-xs bg-black/80 text-white p-3 rounded-md overflow-x-auto">
+                <code>{text}</code>
+            </pre>
+        )
+    }
+    return <p className="whitespace-pre-wrap">{text}</p>;
 }
 
 export function SupportRequestsPage() {
@@ -159,8 +175,8 @@ export function SupportRequestsPage() {
         {selectedRequest ? (
           <>
             <CardHeader className="border-b">
-              <div className="flex justify-between items-center">
-                <div>
+              <div className="flex justify-between items-center gap-4">
+                <div className="flex-1">
                     <CardTitle className="truncate">{selectedRequest.subject}</CardTitle>
                     <CardDescription>{selectedRequest.userEmail}</CardDescription>
                 </div>
@@ -191,10 +207,10 @@ export function SupportRequestsPage() {
                       'max-w-xs md:max-w-md rounded-lg p-3 text-sm',
                       item.sender === 'user' ? 'bg-muted' : 'bg-primary text-primary-foreground'
                     )}>
-                      <p className="whitespace-pre-wrap">{item.message}</p>
-                      <p className="text-xs opacity-70 mt-2 text-right">
+                      <MessageContent text={item.message} />
+                      <div className="text-xs opacity-70 mt-2 text-right">
                         {formatDistanceToNow(new Date(item.timestamp.seconds * 1000), { addSuffix: true })}
-                      </p>
+                      </div>
                     </div>
                      {item.sender === 'admin' && (
                       <Avatar className="h-8 w-8">
