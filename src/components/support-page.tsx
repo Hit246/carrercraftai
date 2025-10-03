@@ -175,26 +175,25 @@ export function SupportPage() {
                         control={form.control}
                         name="category"
                         render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Category</FormLabel>
-                            {/* Only the SelectTrigger goes inside FormControl */}
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a category" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="billing">Billing</SelectItem>
-                                <SelectItem value="technical">Technical Issue</SelectItem>
-                                <SelectItem value="feedback">Feedback</SelectItem>
-                                <SelectItem value="other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
+                            <FormItem>
+                                <FormLabel>Category</FormLabel>
+                                <FormControl>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a category" />
+                                            </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="billing">Billing</SelectItem>
+                                            <SelectItem value="technical">Technical Issue</SelectItem>
+                                            <SelectItem value="feedback">Feedback</SelectItem>
+                                            <SelectItem value="other">Other</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
                         )}
-                      />
+                        />
                     </div>
                     <FormField control={form.control} name="message" render={({ field }) => (<FormItem> <FormLabel>Your Message</FormLabel> <FormControl> <Textarea placeholder="Please describe your issue or question in detail..." className="h-40 resize-y" {...field} /> </FormControl> <FormMessage /> </FormItem>)} />
                     <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
