@@ -190,7 +190,7 @@ export const ResumeBuilder = () => {
     
     const canUseFeature = plan !== 'free' || credits > 0;
 
-    const generatePdfFromData = useCallback(async () => {
+     const generatePdfFromData = useCallback(async () => {
         if (!resumeData) return null;
 
         const doc = new jsPDF({
@@ -233,43 +233,17 @@ export const ResumeBuilder = () => {
         ].filter(Boolean);
         
         if (contactInfo.length > 0) {
-            const contactInfoString = contactInfo.join(' | ');
-            const contactX = pageW / 2 - (doc.getStringUnitWidth(contactInfoString) * doc.getFontSize()) / 2;
-            let currentX = contactX;
-
-            const addContactPart = (text: string, link?: string) => {
-                if (!text) return;
-                doc.setTextColor(link ? primaryColor : lightTextColor);
-                if (link) {
-                    doc.textWithLink(text, currentX, y, { url: link });
-                } else {
-                    doc.text(text, currentX, y);
-                }
-                currentX += doc.getStringUnitWidth(text) * doc.getFontSize() + 5;
-            };
-
-            if (resumeData.phone) addContactPart(resumeData.phone);
-
-            if (resumeData.phone && resumeData.email) {
-                addContactPart('|');
-            }
-            if (resumeData.email) addContactPart(resumeData.email, `mailto:${resumeData.email}`);
-            
-            if ((resumeData.phone || resumeData.email) && resumeData.linkedin) {
-                addContactPart('|');
-            }
-            if (resumeData.linkedin) addContactPart(resumeData.linkedin, `https://${resumeData.linkedin}`);
-
+            doc.setTextColor(lightTextColor);
+            const contactInfoString = contactInfo.join('  |  ');
+            doc.text(contactInfoString, pageW / 2, y, { align: 'center' });
             y += 15;
         }
-
 
         // --- BORDER ---
         doc.setDrawColor(229, 231, 235); // gray-200
         doc.setLineWidth(1.5);
         doc.line(margin, y, pageW - margin, y);
         y += 25;
-
 
         const addSection = (title: string) => {
             if (y > doc.internal.pageSize.getHeight() - margin) {
@@ -280,22 +254,23 @@ export const ResumeBuilder = () => {
             doc.setTextColor(primaryColor);
             doc.text(title.toUpperCase(), margin, y);
             y += 8;
+            doc.setDrawColor(229, 231, 235);
             doc.line(margin, y, pageW - margin, y);
             y += 15;
         };
-
-        const addWrappedText = (text: string, x: number, startY: number, options: { maxWidth: number, fontSize: number, style: 'normal' | 'bold' }) => {
-            doc.setFontSize(options.fontSize).setFont('helvetica', options.style);
+        
+        const addWrappedText = (text: string, x: number, startY: number, options: { maxWidth: number, fontSize: number, style?: 'normal' | 'bold', color?: string, lineSpacing?: number }) => {
+            doc.setFontSize(options.fontSize).setFont('helvetica', options.style || 'normal');
+            doc.setTextColor(options.color || textColor);
             const lines = doc.splitTextToSize(text, options.maxWidth);
-            doc.text(lines, x, startY);
-            return startY + (lines.length * options.fontSize * lineSpacing);
+            doc.text(lines, x, startY, {lineHeightFactor: options.lineSpacing || lineSpacing});
+            return startY + (lines.length * options.fontSize * (options.lineSpacing || lineSpacing));
         };
 
         // --- SUMMARY ---
         if (resumeData.summary) {
             addSection('Summary');
-            doc.setTextColor(textColor);
-            y = addWrappedText(resumeData.summary, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal' });
+            y = addWrappedText(resumeData.summary, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10 });
             y += 15;
         }
 
@@ -316,11 +291,9 @@ export const ResumeBuilder = () => {
                 y += 14 * lineSpacing;
                 
                 doc.setFontSize(10).setTextColor(lightTextColor);
-                const bulletPoints = exp.description.split('\n').map(line => line.replace(/^-/, '').trim());
+                const bulletPoints = exp.description.split('\n').map(line => line.replace(/^-/, '').trim()).filter(Boolean);
                 bulletPoints.forEach(point => {
-                    if(point) {
-                        y = addWrappedText(`- ${point}`, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
-                    }
+                    y = addWrappedText(`• ${point}`, margin + 10, y, { maxWidth: pageW - margin * 2 - 10, fontSize: 10 });
                 });
                 y += 15;
             });
@@ -336,20 +309,23 @@ export const ResumeBuilder = () => {
                 if (proj.url) {
                     doc.setTextColor(primaryColor);
                     doc.textWithLink('(link)', margin + doc.getTextWidth(proj.name) + 5, y, { url: proj.url.startsWith('http') ? proj.url : `https://${proj.url}` });
-                    doc.setTextColor(textColor);
                 }
                 y += 14 * lineSpacing;
-                if (proj.description) {
-                    y = addWrappedText(proj.description, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
-                }
+                
+                const bulletPoints = proj.description.split('\n').map(line => line.replace(/^-/, '').trim()).filter(Boolean);
+                bulletPoints.forEach(point => {
+                    y = addWrappedText(`• ${point}`, margin + 10, y, { maxWidth: pageW - margin * 2 - 10, fontSize: 10, color: lightTextColor });
+                });
                 
                 if (proj.technologies) {
+                    y += 5;
                     doc.setFontSize(9).setFont('helvetica', 'bold').setTextColor(textColor);
                     doc.text('Technologies: ', margin, y);
                     doc.setFont('helvetica', 'normal').setTextColor(lightTextColor);
-                    doc.text(proj.technologies, margin + doc.getTextWidth('Technologies: '), y);
+                    const technologiesText = proj.technologies.split(',').map(t => t.trim()).join(', ');
+                    doc.text(technologiesText, margin + doc.getTextWidth('Technologies: '), y);
                 }
-                y += 20 * lineSpacing;
+                y += 20;
             });
         }
 
@@ -375,8 +351,26 @@ export const ResumeBuilder = () => {
         // --- SKILLS ---
         if (resumeData.skills) {
             addSection('Skills');
-            doc.setFontSize(10).setTextColor(textColor);
-            y = addWrappedText(resumeData.skills, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10, style: 'normal'});
+            const skills = resumeData.skills.split(',').map(s => s.trim()).filter(Boolean);
+            let currentX = margin;
+            const skillPadding = 10;
+            const skillHeight = 20;
+            doc.setFontSize(9);
+
+            skills.forEach(skill => {
+                const skillWidth = doc.getTextWidth(skill) + skillPadding * 2;
+                if (currentX + skillWidth > pageW - margin) {
+                    y += skillHeight + 5;
+                    currentX = margin;
+                }
+                
+                doc.setFillColor(239, 246, 255); // A light blue color, similar to bg-primary/10
+                doc.setTextColor(primaryColor);
+                doc.roundedRect(currentX, y, skillWidth, skillHeight, 5, 5, 'F');
+                doc.text(skill, currentX + skillWidth / 2, y + skillHeight / 2, { align: 'center', baseline: 'middle' });
+                
+                currentX += skillWidth + 5;
+            });
         }
         
         return doc;
@@ -730,9 +724,11 @@ export const ResumeBuilder = () => {
                                             <h4 className="text-base font-semibold text-gray-800 break-words">{proj.name}</h4>
                                             {proj.url && <Link href={proj.url.startsWith('http') ? proj.url : `https://${proj.url}`} target="_blank" rel="noopener noreferrer"><LinkIcon className="h-3 w-3 text-primary hover:underline"/></Link>}
                                         </div>
-                                        <p className="text-xs text-gray-700 whitespace-pre-wrap break-words">{proj.description}</p>
+                                        <ul className="mt-2 list-disc list-inside text-gray-700 space-y-1 text-xs sm:text-sm">
+                                            {proj.description.split('\n').map((line, i) => line.trim() && <li key={i} className="whitespace-pre-wrap break-words">{line.replace(/^-/, '').trim()}</li>)}
+                                        </ul>
                                         {proj.technologies && (
-                                        <p className="text-xs text-gray-500 mt-1 break-words">
+                                        <p className="text-xs text-gray-500 mt-2 break-words">
                                             <span className="font-semibold text-gray-800">Technologies:</span> {proj.technologies}
                                         </p>
                                         )}
