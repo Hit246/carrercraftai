@@ -39,11 +39,25 @@ export async function submitSupportRequest(input: SupportRequestInput) {
     });
   
     try {
-      await batch.commit();   // ✅ wait and throw if fails
+      await batch.commit();
       return { success: true };
-    } catch (error: any) {
-      console.error("❌ Firestore commit failed:", error);
-      throw error;  // ✅ let frontend know it failed
+    } catch (serverError: any) {
+        console.error("❌ Firestore commit failed:", serverError);
+        // Create a contextual error for better debugging if this is a permission issue.
+        const permissionError = new FirestorePermissionError({
+            path: supportRequestRef.path,
+            operation: 'create',
+            requestResourceData: {
+                userId: input.userId,
+                subject: input.subject,
+                category: input.category,
+            },
+        } as SecurityRuleContext, serverError);
+        
+        errorEmitter.emit('permission-error', permissionError);
+
+        // Re-throw the original error to let the frontend know something went wrong.
+        throw serverError;
     }
   }
   
@@ -67,7 +81,7 @@ export async function replyToSupportRequest(input: ReplySupportRequestInput) {
 
     // Update the main request document
     batch.update(requestRef, {
-        status: 'in-progress',
+        status: sender === 'admin' ? 'in-progress' : 'open',
         lastMessageAt: now,
     });
     
