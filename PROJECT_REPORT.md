@@ -51,18 +51,48 @@ CareerCraft AI is an innovative, AI-powered platform designed to revolutionize t
 
 ### Background & Motivation
 
-In today's competitive job market, creating a standout resume and finding the right talent are significant challenges for job seekers and recruiters, respectively. Many job applicants struggle to articulate their skills effectively, while recruiters are often overwhelmed by a high volume of applications. CareerCraft AI was conceived to address these pain points by leveraging the power of generative AI to provide intelligent, accessible, and affordable career and recruitment tools.
+In today's competitive job market, creating a standout resume and finding the right talent are significant challenges for job seekers and recruiters, respectively. Many job applicants struggle to articulate their skills effectively and tailor their resumes to specific roles, often leading to their applications being overlooked by Applicant Tracking Systems (ATS). Simultaneously, recruiters are overwhelmed by a high volume of applications, making it difficult to identify the most qualified candidates efficiently. CareerCraft AI was conceived to address these pain points by leveraging the power of generative AI to provide intelligent, accessible, and affordable career and recruitment tools. The platform aims to democratize access to professional career guidance and streamline the hiring process, empowering individuals to build successful careers and enabling organizations to find top talent.
 
 ### Objectives / Goals
 
-*   **For Job Seekers:** To provide an all-in-one platform for creating, analyzing, and optimizing professional resumes and cover letters.
-*   **For Recruiters:** To offer efficient tools for matching candidates to job descriptions, thereby streamlining the hiring process.
-*   **Overall:** To create a seamless, intuitive, and data-driven ecosystem for career development and talent acquisition that is both scalable and secure.
+The primary objectives of the CareerCraft AI project are:
+
+*   **For Job Seekers:**
+    *   To provide an all-in-one platform for creating, analyzing, and optimizing professional resumes and cover letters.
+    *   To empower users with AI-driven insights to improve their application materials and increase their chances of landing an interview.
+    *   To offer tools for discovering relevant job opportunities and preparing for applications.
+
+*   **For Recruiters:**
+    *   To offer efficient, AI-powered tools for screening and matching candidates to job descriptions, significantly reducing manual effort.
+    *   To provide a simple team management interface for collaborative hiring.
+
+*   **Overall Platform Goals:**
+    *   To create a seamless, intuitive, and data-driven ecosystem for career development and talent acquisition.
+    *   To build a scalable and secure platform using a modern, serverless technology stack.
+    *   To implement a tiered subscription model that provides value to both free and premium users.
 
 ### Scope & Limitations
 
-*   **In-Scope:** The platform includes features for resume building, AI-powered analysis, job matching, cover letter generation, candidate matching for recruiters, user authentication, subscription management (via manual verification), and a support system.
-*   **Out-of-Scope:** The current version does not include a fully automated payment gateway, direct integration with live job boards (job suggestions are fictional), or real-time resume performance analytics.
+*   **In-Scope Features:**
+    *   **User Management:** Secure user registration, login (email/password), and profile management.
+    *   **Resume Builder:** An intuitive interface to create, edit, save multiple versions, and export resumes as PDFs.
+    *   **AI Tools for Job Seekers:**
+        *   **Resume Analyzer:** Analyze an uploaded resume PDF for strengths, weaknesses, and improvement suggestions.
+        *   **ATS Optimizer:** Score a resume against a job description and identify missing keywords.
+        *   **Job Matcher:** Suggest fictional jobs based on a resume's content.
+        *   **Cover Letter Generator:** Create a personalized cover letter from a resume and job description.
+    *   **AI Tools for Recruiters:**
+        *   **Candidate Matcher:** Rank multiple candidate resumes against a single job description.
+        *   **Candidate Summarizer:** Generate a concise 3-sentence summary of a resume.
+    *   **Subscription & Payments:** A tiered subscription model (Free, Essentials, Pro, Recruiter) with a manual payment verification process managed by an admin.
+    *   **Admin Panel:** A dedicated dashboard for administrators to manage users, approve plan upgrades, and handle support tickets.
+    *   **Team Management:** Functionality for a recruiter to create a team and invite members.
+
+*   **Limitations & Out-of-Scope:**
+    *   **Automated Payments:** The platform uses a manual payment verification system. A fully automated payment gateway (e.g., Stripe, Razorpay) is not included in the current scope.
+    *   **Live Job Board Integration:** The "Job Matcher" feature uses fictional job data generated by the AI. There is no integration with live job boards like Indeed or LinkedIn.
+    *   **Advanced Analytics:** The platform does not include detailed analytics on resume performance (e.g., view counts, success rates) or recruiter hiring funnels.
+    *   **Automated Testing:** While a testing strategy is defined, a comprehensive suite of automated unit, integration, and E2E tests is not implemented.
 
 ---
 
