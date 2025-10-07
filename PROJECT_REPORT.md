@@ -268,12 +268,14 @@ The ER diagram of CareerCraft AI demonstrates how `users` interact with `resumeV
 
 ### 4.4 Data Dictionary (Database Schema)
 
-The database schema is defined in Firestore with the following main collections:
-*   **`users`**: Stores user profiles, subscription plans, AI credits, and contains a `resumeVersions` subcollection.
-*   **`teams`**: For recruiter accounts, storing team ownership and containing a `members` subcollection.
-*   **`settings`**: A singleton collection for storing global app settings like payment details.
-*   **`supportRequests`**: Stores user support tickets, with a `history` subcollection for conversation threads.
-(For a detailed schema, refer to `DB_SCHEMA.md`)
+A **Data Dictionary**, also known as a metadata repository, is a structured collection of definitions and information about the data used in a system or application. It acts as a reference guide for developers, analysts, and stakeholders, ensuring everyone understands what data exists, how it is structured, and how it should be used.
+
+For CareerCraft AI, the Data Dictionary includes:
+*   **Data Object Definitions:** Descriptions of Firestore collections and their fields.
+*   **Data Types:** Specifies the format of each field (e.g., `string`, `number`, `Timestamp`).
+*   **Relationships:** Describes how collections and subcollections are connected.
+
+The detailed Data Dictionary for this project, outlining every collection, field, and data type, is maintained in the `DB_SCHEMA.md` file.
 
 ---
 
