@@ -90,7 +90,7 @@ CareerCraft AI is an innovative, AI-powered platform designed to revolutionize t
 
 ---
 
-## 2. Existing System
+## Existing System
 
 Popular job platforms like LinkedIn, Indeed, and Glassdoor dominate the market but are often overwhelming for job seekers and inefficient for recruiters. They can be cluttered with ads, generic listings, and lack personalized, actionable feedback for applicants.
 
