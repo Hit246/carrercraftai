@@ -246,7 +246,7 @@ Firebase App Hosting automatically sets up a CI/CD pipeline that connects to a G
 
 ## 7. Evaluation & Results
 
-### How well the system meets the objectives
+### Meeting Objectives
 
 The platform successfully meets its primary objectives by providing a robust set of tools for both job seekers and recruiters. The AI-powered features are functional and provide tangible value, while the Firebase backend ensures a scalable and secure foundation.
 
