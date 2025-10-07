@@ -14,9 +14,7 @@ CareerCraft AI is an innovative, AI-powered platform designed to revolutionize t
 ## Table of Contents
 
 1.  **Introduction**
-    *   Background & Motivation
-    *   Objectives / Goals
-    *   Scope & Limitations
+    *   Project Profile
 2.  **Requirement Analysis**
     *   Functional Requirements
     *   Non-functional Requirements
@@ -49,50 +47,35 @@ CareerCraft AI is an innovative, AI-powered platform designed to revolutionize t
 
 ## 1. Introduction
 
-### Background & Motivation
+### Project Profile
 
-In today's competitive job market, creating a standout resume and finding the right talent are significant challenges for job seekers and recruiters, respectively. Many job applicants struggle to articulate their skills effectively and tailor their resumes to specific roles, often leading to their applications being overlooked by Applicant Tracking Systems (ATS). Simultaneously, recruiters are overwhelmed by a high volume of applications, making it difficult to identify the most qualified candidates efficiently. CareerCraft AI was conceived to address these pain points by leveraging the power of generative AI to provide intelligent, accessible, and affordable career and recruitment tools. The platform aims to democratize access to professional career guidance and streamline the hiring process, empowering individuals to build successful careers and enabling organizations to find top talent.
+*   **1. Project Title**
+    CareerCraft AI – An AI-Powered Career Platform
 
-### Objectives / Goals
+*   **2. Objective**
+    The objective of CareerCraft AI is to deliver a modern, intelligent platform to empower job seekers and streamline the recruitment process. The system provides a suite of AI-driven tools for resume building, analysis, and job matching, alongside a dedicated feature set for recruiters to efficiently screen candidates.
 
-The primary objectives of the CareerCraft AI project are:
+    Key goals include:
+    *   Providing a seamless resume building and management experience.
+    *   Offering AI-powered analysis and optimization for resumes and cover letters.
+    *   Supporting secure user authentication and tiered subscription plans.
+    *   Delivering an intuitive and responsive user interface for both job seekers and recruiters.
+    *   Leveraging Firebase and Genkit for a scalable, serverless backend and AI integration.
 
-*   **For Job Seekers:**
-    *   To provide an all-in-one platform for creating, analyzing, and optimizing professional resumes and cover letters.
-    *   To empower users with AI-driven insights to improve their application materials and increase their chances of landing an interview.
-    *   To offer tools for discovering relevant job opportunities and preparing for applications.
+*   **3. Developed By**
+    *   CHAUHAN HITARTH
 
-*   **For Recruiters:**
-    *   To offer efficient, AI-powered tools for screening and matching candidates to job descriptions, significantly reducing manual effort.
-    *   To provide a simple team management interface for collaborative hiring.
+*   **4. Frontend Technologies**
+    *   **Next.js (React):** A component-based framework for building fast, server-rendered applications.
+    *   **Tailwind CSS:** A utility-first CSS framework for rapid and responsive UI development.
+    *   **shadcn/ui:** A collection of accessible and reusable UI components.
+    *   **TypeScript:** For static typing and improved code quality.
 
-*   **Overall Platform Goals:**
-    *   To create a seamless, intuitive, and data-driven ecosystem for career development and talent acquisition.
-    *   To build a scalable and secure platform using a modern, serverless technology stack.
-    *   To implement a tiered subscription model that provides value to both free and premium users.
+*   **5. Backend Technologies**
+    *   **Firebase:** Provides authentication, Firestore (NoSQL database), and file storage.
+    *   **Genkit (Google AI):** A framework for building production-ready AI flows with Gemini models.
+    *   **Node.js:** The underlying runtime environment for the server-side logic.
 
-### Scope & Limitations
-
-*   **In-Scope Features:**
-    *   **User Management:** Secure user registration, login (email/password), and profile management.
-    *   **Resume Builder:** An intuitive interface to create, edit, save multiple versions, and export resumes as PDFs.
-    *   **AI Tools for Job Seekers:**
-        *   **Resume Analyzer:** Analyze an uploaded resume PDF for strengths, weaknesses, and improvement suggestions.
-        *   **ATS Optimizer:** Score a resume against a job description and identify missing keywords.
-        *   **Job Matcher:** Suggest fictional jobs based on a resume's content.
-        *   **Cover Letter Generator:** Create a personalized cover letter from a resume and job description.
-    *   **AI Tools for Recruiters:**
-        *   **Candidate Matcher:** Rank multiple candidate resumes against a single job description.
-        *   **Candidate Summarizer:** Generate a concise 3-sentence summary of a resume.
-    *   **Subscription & Payments:** A tiered subscription model (Free, Essentials, Pro, Recruiter) with a manual payment verification process managed by an admin.
-    *   **Admin Panel:** A dedicated dashboard for administrators to manage users, approve plan upgrades, and handle support tickets.
-    *   **Team Management:** Functionality for a recruiter to create a team and invite members.
-
-*   **Limitations & Out-of-Scope:**
-    *   **Automated Payments:** The platform uses a manual payment verification system. A fully automated payment gateway (e.g., Stripe, Razorpay) is not included in the current scope.
-    *   **Live Job Board Integration:** The "Job Matcher" feature uses fictional job data generated by the AI. There is no integration with live job boards like Indeed or LinkedIn.
-    *   **Advanced Analytics:** The platform does not include detailed analytics on resume performance (e.g., view counts, success rates) or recruiter hiring funnels.
-    *   **Automated Testing:** While a testing strategy is defined, a comprehensive suite of automated unit, integration, and E2E tests is not implemented.
 
 ---
 
