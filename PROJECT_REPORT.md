@@ -487,13 +487,18 @@ The CareerCraft AI application is divided into three primary modules, each respo
 *   **1. User & Recruiter Module**
     This is the primary interface for job seekers and recruiters.
     *   **Dashboard (Resume Builder):** The main dashboard features a two-panel layout with an editable form on the left for all resume sections (personal info, summary, experience, etc.) and a live, real-time preview of the resume on the right.
+        ![Resume Builder Screenshot](./resume-builder.png)
     *   **AI Tools:** Each AI tool (e.g., Resume Analyzer, Job Matcher) has a dedicated page with a simple and clear input form. This typically includes file uploads for resumes and text areas for job descriptions.
+        ![Resume Analyzer Screenshot](./resume-analyzer.png)
+        ![ATS Optimizer Screenshot](./ats-optimizer.png)
     *   **Navigation:** A collapsible sidebar provides easy and intuitive access to all features, including the resume builder, AI tools, support, and profile settings.
 
 *   **2. Admin Module**
     The admin panel is designed for efficient management and oversight.
     *   **Admin Dashboard:** The main landing page for admins, featuring statistical cards (e.g., total users, plan distribution) and a chart visualizing user data.
+        ![Admin Dashboard Screenshot](./admin-dashboard.png)
     *   **Management Pages:** Pages for user management, upgrade requests, and support tickets are presented in a clean, tabular format, allowing admins to quickly view, search, and take action on items.
+        ![User Management Screenshot](./user-management.png)
     *   **Forms:** Simple forms are used for tasks like updating payment settings or replying to support tickets, ensuring a straightforward user experience for administrators.
 
 ---
