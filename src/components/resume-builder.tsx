@@ -604,93 +604,97 @@ export const ResumeBuilder = () => {
             </div>
 
             <div className="flex flex-col gap-4">
-                <Card className="flex flex-col sm:flex-row justify-between items-center gap-2 p-3">
-                    <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
-                        <PopoverTrigger asChild>
-                            <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={versionManagerOpen}
-                            className="w-full sm:w-[250px] justify-between"
-                            >
-                            <History className="mr-2 h-4 w-4" />
-                            {currentVersion
-                                ? currentVersion.versionName
-                                : "Select version..."}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[250px] p-0">
-                            <Command>
-                            <CommandInput placeholder="Search versions..." />
-                            <CommandEmpty>No versions found.</CommandEmpty>
-                            <CommandGroup>
-                                {versions.map((version) => (
-                                <CommandItem
-                                    key={version.id}
-                                    value={version.id}
-                                    onSelect={(currentValue) => {
-                                        handleVersionSelect(currentValue)
-                                    }}
+                <Card className="p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={versionManagerOpen}
+                                className="w-full sm:w-auto flex-1 min-w-[200px] justify-between"
                                 >
-                                    <Check
-                                    className={cn(
-                                        "mr-2 h-4 w-4",
-                                        currentVersion?.id === version.id ? "opacity-100" : "opacity-0"
-                                    )}
-                                    />
-                                    {version.versionName}
-                                </CommandItem>
-                                ))}
-                            </CommandGroup>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
-                    <div className="flex items-center gap-2">
-                        <Button onClick={handleSave} disabled={isSaving}>
-                            <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
-                        </Button>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="outline" disabled={isSaving || versions.length >= draftLimit}>
-                                    <PlusCircle className="mr-2 h-4 w-4" /> Save as New
+                                <History className="mr-2 h-4 w-4" />
+                                <span className="truncate">
+                                {currentVersion
+                                    ? currentVersion.versionName
+                                    : "Select version..."}
+                                </span>
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
-                            </AlertDialogTrigger>
-                            {versions.length >= draftLimit && 
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Draft Limit Reached</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            You have reached the maximum number of resume drafts ({draftLimit}) for the {plan} plan. Please upgrade your plan to save more versions.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => router.push('/pricing')}>
-                                            <Crown className="mr-2 h-4 w-4" />
-                                            Upgrade Plan
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            }
-                        </AlertDialog>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                    <MoreVertical className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
-                                    {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Bot className="mr-2 h-4 w-4" />}
-                                    AI Analyze
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleExport}>
-                                    <Download className="mr-2 h-4 w-4" /> 
-                                    Export as PDF
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[250px] p-0">
+                                <Command>
+                                <CommandInput placeholder="Search versions..." />
+                                <CommandEmpty>No versions found.</CommandEmpty>
+                                <CommandGroup>
+                                    {versions.map((version) => (
+                                    <CommandItem
+                                        key={version.id}
+                                        value={version.id}
+                                        onSelect={(currentValue) => {
+                                            handleVersionSelect(currentValue)
+                                        }}
+                                    >
+                                        <Check
+                                        className={cn(
+                                            "mr-2 h-4 w-4",
+                                            currentVersion?.id === version.id ? "opacity-100" : "opacity-0"
+                                        )}
+                                        />
+                                        {version.versionName}
+                                    </CommandItem>
+                                    ))}
+                                </CommandGroup>
+                                </Command>
+                            </PopoverContent>
+                        </Popover>
+                        <div className="flex items-center gap-2 flex-wrap justify-end">
+                            <Button onClick={handleSave} disabled={isSaving}>
+                                <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
+                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="outline" disabled={isSaving || versions.length >= draftLimit}>
+                                        <PlusCircle className="mr-2 h-4 w-4" /> Save as New
+                                    </Button>
+                                </AlertDialogTrigger>
+                                {versions.length >= draftLimit && 
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Draft Limit Reached</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                You have reached the maximum number of resume drafts ({draftLimit}) for the {plan} plan. Please upgrade your plan to save more versions.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => router.push('/pricing')}>
+                                                <Crown className="mr-2 h-4 w-4" />
+                                                Upgrade Plan
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                }
+                            </AlertDialog>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
+                                        {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Bot className="mr-2 h-4 w-4" />}
+                                        AI Analyze
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleExport}>
+                                        <Download className="mr-2 h-4 w-4" /> 
+                                        Export as PDF
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </div>
                 </Card>
                 <Card className="flex-1 overflow-hidden">
