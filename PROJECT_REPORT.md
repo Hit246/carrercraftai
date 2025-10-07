@@ -110,7 +110,23 @@ The main goal of CareerCraft AI is to combine a user-friendly design with powerf
 
 ### 2.2 Existing System
 
-(This section is intentionally left blank for now.)
+Popular platforms like LinkedIn, Indeed, and traditional resume builders dominate the job market but are often generic, ad-driven, and fail to provide deep, personalized guidance for job seekers.
+
+**Limitations of Current Platforms:**
+*   **Generic Templates and Feedback:** Offer basic templates and superficial advice, lacking personalized, AI-driven analysis.
+*   **Fragmented User Experience:** Job seekers must use separate tools for resume building, job searching, and application tracking.
+*   **Inefficient for Recruiters:** Manual screening of hundreds of resumes is time-consuming and prone to bias.
+*   **Lack of Actionable Insights:** Fail to provide users with clear, data-driven steps to improve their resume's effectiveness.
+
+**Need for a Better Alternative:**
+An intelligent, all-in-one platform that empowers both job seekers and recruiters with:
+*   An integrated resume builder with version control.
+*   AI-powered analysis for resumes, cover letters, and job matching.
+*   A streamlined, serverless architecture for a fast and reliable experience.
+*   Dedicated tools for recruiters to automate and enhance candidate screening.
+
+**Solution: CareerCraft AI**
+Designed for modern professionals, CareerCraft AI fills this gap with an intelligent, cohesive platform that simplifies career advancement and streamlines recruitment.
 
 ### 2.3 Need for New System
 
@@ -226,3 +242,4 @@ CareerCraft AI successfully demonstrates the potential of generative AI to trans
 *   Official documentation for Next.js, React, Firebase, and Genkit.
 *   Articles and best practices on UI/UX design for web applications.
 *   Resources on prompt engineering for large language models.
+
