@@ -222,9 +222,49 @@ The design methodology used in the development of the CareerCraft AI system is p
 
 ### 4.3 ER (Entity Relationship Diagram)
 
-*   **Users ⟷ Resume Versions (One-to-Many):** A `user` can have multiple `resumeVersions`. This is implemented as a subcollection in Firestore.
-*   **Users ⟷ Teams (One-to-Many):** A `user` with a 'recruiter' plan can own a `team`. A `team` can have multiple `members` (who are also `users`).
-*   **Users ⟷ Support Requests (One-to-Many):** A `user` can have multiple `supportRequests`.
+An Entity-Relationship (ER) Diagram is a visual representation that outlines how data entities relate to one another within a database system. It helps in understanding the structure of the application's backend and serves as a guide for designing the database schema.
+
+The ER diagram of CareerCraft AI demonstrates how `users` interact with `resumeVersions`, `teams`, and `supportRequests`.
+
+*   **Building Blocks of the E-R Diagram**
+
+    **Entities (Rectangles)**
+    Entities are real-world objects that store data.
+    *   `users`: Stores individual user profiles and subscription data.
+    *   `resumeVersions`: A subcollection storing different versions of a user's resume.
+    *   `teams`: For recruiter accounts, containing team data.
+    *   `members`: A subcollection storing team member information.
+    *   `supportRequests`: Stores user-submitted support tickets.
+    *   `history`: A subcollection for the conversation history of a support ticket.
+
+    **Attributes (Ovals)**
+    Attributes define the properties of each entity.
+    *   `user`: `uid`, `displayName`, `email`, `plan`, `credits`, `teamId`.
+    *   `resumeVersion`: `versionName`, `updatedAt`, `resumeData` (a map object).
+    *   `team`: `owner`, `createdAt`.
+    *   `member`: `uid`, `email`, `role`, `name`.
+    *   `supportRequest`: `userId`, `subject`, `status`, `lastMessageAt`.
+    *   `history`: `message`, `sender`, `timestamp`.
+
+*   **Relationships (Diamonds)**
+    Relationships explain how entities are connected.
+    *   A `user` → has → many `resumeVersions`.
+    *   A `user` → submits → many `supportRequests`.
+    *   A `supportRequest` → has → many `history` entries.
+    *   A `user` (recruiter) → owns → a `team`.
+    *   A `team` → has → many `members`.
+
+*   **Types of Relationships**
+
+    **One-to-Many**
+    *   One `user` can have multiple `resumeVersions`.
+    *   One `user` can submit multiple `supportRequests`.
+    *   One `team` can have many `members`.
+
+*   **Purpose of the ER Diagram**
+    *   **Data Modeling:** Defines how data is structured and related in the application.
+    *   **Communication Tool:** Acts as a shared understanding between developers, designers, and stakeholders.
+    *   **Database Design:** Lays the foundation for database schema creation and relationships in Firestore.
 
 ### 4.4 Data Dictionary (Database Schema)
 
