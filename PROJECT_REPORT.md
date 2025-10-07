@@ -547,6 +547,13 @@ A multi-layered testing strategy was employed to ensure the application's qualit
 
 ### 7.2 Bibliography
 
-*   Official documentation for Next.js, React, Firebase, and Genkit.
-*   Articles and best practices on UI/UX design for web applications.
-*   Resources on prompt engineering for large language models.
+The development of CareerCraft AI involved learning and applying modern frontend frameworks, serverless backend services, AI integration, and UI design principles. The following online documentation and resources were instrumental in successfully building and understanding the platform.
+
+*   **Online Resources**
+    *   **Google & Stack Overflow** – General web searches for syntax, error resolution, and code snippets.
+    *   **YouTube** – Tutorials for building Next.js apps, integrating Firebase, and UI component design.
+    *   **Next.js Official Docs** – Guidance on App Router, Server Components, page rendering, and API routes.
+    *   **Firebase Documentation** – Essential for understanding Firestore queries, Authentication, Storage, and Security Rules.
+    *   **Genkit for Firebase Documentation** – Reference for defining AI flows, prompts, and integrating with Google's Gemini models.
+    *   **Tailwind CSS Documentation** – Official utility-first CSS documentation used for all styling.
+    *   **shadcn/ui Documentation** – Reference for component structure, usage, and theming.
