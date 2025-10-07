@@ -519,9 +519,31 @@ This project effectively demonstrates the integration of a serverless backend (F
 
 ### 7.1 Testing
 
-*   **Unit Testing:** (Planned) Use Jest and React Testing Library to test individual UI components and utility functions.
-*   **Integration Testing:** (Planned) Test the integration between frontend components and Firebase services (e.g., data writes, auth flows).
-*   **Manual Testing:** The application was manually tested across all key user flows, including user registration, resume building, AI feature usage, and subscription requests.
+A multi-layered testing strategy was employed to ensure the application's quality, reliability, and performance. This approach combines manual checks with plans for automated testing to cover different aspects of the system.
+
+*   **Unit Testing (Planned):**
+    *   **Objective:** To test individual components and functions in isolation to ensure they work correctly. This is crucial for maintaining a stable and predictable codebase.
+    *   **Tools:** The plan is to use **Jest** and **React Testing Library**.
+    *   **Examples:**
+        *   Testing a UI component like `<Button>` to verify it renders correctly and that its `onClick` handler fires when clicked.
+        *   Testing a utility function, such as one that converts a file to a data URI, to ensure it produces the correct output for a given input.
+
+*   **Integration Testing (Planned):**
+    *   **Objective:** To verify that different parts of the application work together as expected. This is especially important for a full-stack application that relies on external services.
+    *   **Tools:** This would also leverage **Jest** and **React Testing Library**, but with a focus on component interactions and service mocking.
+    *   **Examples:**
+        *   Testing the login flow to ensure the `LoginForm` component correctly calls the `useAuth` hook, which in turn interacts with Firebase Authentication. This test would verify both successful login and error handling.
+        *   Testing the Resume Builder's "Save" functionality to ensure that changes in the UI are correctly written to the user's Firestore document.
+
+*   **Manual Testing (Executed):**
+    *   **Objective:** To test the application from an end-user's perspective, covering complete user journeys and identifying any UI/UX issues that automated tests might miss.
+    *   **Process:** Manually executed all key user flows across different browsers (Chrome, Firefox).
+    *   **Key Scenarios Tested:**
+        *   **User Authentication:** Successfully signing up, logging in, and logging out.
+        *   **Resume Builder:** Creating, editing, saving, and exporting a resume.
+        *   **AI Features:** Using the Resume Analyzer, Job Matcher, and other AI tools to ensure inputs are processed and results are displayed correctly.
+        *   **Subscription Flow:** Simulating a user requesting a plan upgrade and an admin approving it.
+        *   **Admin Panel:** Verifying that admins can view users, manage subscriptions, and update settings.
 
 ### 7.2 Bibliography
 
