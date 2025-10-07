@@ -458,10 +458,27 @@ Each support request contains a subcollection for the conversation history.
 
 ### 5.1 Process Description (Implementation)
 
-*   **Authentication:** Handled by Firebase Authentication for secure email/password login.
-*   **Database Operations:** All data is stored and retrieved from Firestore. Firestore Security Rules are implemented to ensure users can only access their own data.
-*   **AI Integration:** AI features are built as Firebase Genkit flows using Google's Gemini models. These flows are called securely from the frontend via Next.js Server Actions.
-*   **Frontend Development:** The UI is built with Next.js and React, using `shadcn/ui` for components and Tailwind CSS for styling.
+The CareerCraft AI application is divided into three primary modules, each responsible for handling distinct user roles and system functionalities:
+
+*   **1. User & Recruiter Module**
+    This module enables registered job seekers and recruiters to interact with the platform's core features, focused on career enhancement and talent acquisition.
+
+    *   **Key Functions:**
+        *   **User Registration & Login:** Users can sign up or log in using a secure email/password system powered by Firebase Authentication.
+        *   **Resume Builder:** An intuitive interface allows users to create, edit, and manage multiple versions of their resumes with a live preview.
+        *   **AI-Powered Tools:** Users can access a suite of AI tools, including the Resume Analyzer, ATS Optimizer, Job Matcher, and Cover Letter Generator, by calling Genkit flows.
+        *   **Subscription Management:** Users can view their current plan and initiate an upgrade process by submitting a payment proof, which is reviewed by an admin.
+        *   **Team Management (Recruiter Plan):** Recruiters can create a team, invite members via email, and manage their roster.
+
+*   **2. Admin Module**
+    The admin panel provides authorized administrators with oversight and control over platform operations, content, and user management.
+
+    *   **Key Functions:**
+        *   **User Management:** Admins can view a list of all registered users, edit their subscription plans manually, and delete user accounts.
+        *   **Subscription Approval:** Admins can review and approve or reject pending subscription upgrade requests submitted by users.
+        *   **Payment Settings:** Admins can configure global payment details, such as the UPI ID and QR code, which are displayed to users during upgrades.
+        *   **Support Ticket Management:** Admins can view, respond to, and manage the status of all support tickets submitted by users.
+        *   **Platform Monitoring:** Admins have access to a dashboard that provides an overview of user statistics and subscription distribution.
 
 ### 5.2 Input Design (UI/UX)
 
