@@ -23,7 +23,7 @@
 |        | 3.2 Objective                             |
 |        | 3.3 Feasibility Study                     |
 | 4.     | **Experimental or Material Method**       |
-|        | 4.1 Design Methodology (System Architecture)|
+|        | 4.1 Design Methodology                    |
 |        | 4.2 DFD (Data Flow Diagram)               |
 |        | 4.3 ER (Entity Relationship Diagram)      |
 |        | 4.4 Data Dictionary (Database Schema)     |
@@ -191,12 +191,28 @@ Key goals include:
 
 ## 4. Experimental or Material Method
 
-### 4.1 Design Methodology (System Architecture)
+### 4.1 Design Methodology
 
-CareerCraft AI is built on a modern, serverless architecture that separates the frontend, backend, and AI services.
-*   **Frontend (Client-Side):** A Next.js application using the App Router. It leverages Server Components for performance and Client Components for interactivity.
-*   **Backend (Server-Side):** Firebase serves as the primary backend, providing Authentication, Firestore (NoSQL Database), and Storage.
-*   **AI Layer (Genkit Flows):** All generative AI functionality is encapsulated in server-side TypeScript "flows" managed by Firebase Genkit.
+The design methodology used in the development of the CareerCraft AI system is primarily based on **Data Flow Diagrams (DFDs)**, which illustrate the logical flow of data through the application. These diagrams help in mapping out how data is processed, transferred, and stored within the system—independent of the physical or technical implementation.
+
+*   **Purpose of Using DFDs**
+    *   To identify system inputs, outputs, and processing components.
+    *   To visualize user interaction with the system.
+    *   To understand how data moves and transforms through different stages.
+    *   To separate logical design from the physical architecture, ensuring a clearer view of how features are structured.
+
+*   **DFD Levels Used in CareerCraft AI**
+    1.  **Level 0: Context-Level DFD**
+        *   Provides a high-level overview of the entire system.
+        *   Shows main external entities such as Users, Admins, and Recruiters interacting with the CareerCraft AI system.
+        *   Highlights the general input-output relationship of major system functions.
+    2.  **Level 1: First-Level DFD**
+        *   Breaks down major system functions into sub-processes such as:
+            *   User Authentication
+            *   Resume Management
+            *   AI Feature Usage (e.g., Resume Analyzer, Job Matcher)
+            *   Subscription Management
+        *   Helps visualize internal data flow and sub-process dependencies.
 
 ### 4.2 DFD (Data Flow Diagram)
 
