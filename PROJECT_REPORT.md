@@ -62,9 +62,12 @@ I would like to express my sincere gratitude to my project guide and mentor for 
     *   The objective of CareerCraft AI is to deliver a modern, intelligent platform that empowers job seekers with AI-driven tools for resume building and career planning, while also streamlining the recruitment process for hiring managers.
     *   Key goals include:
         *   Providing a seamless resume building and management experience.
-        *   Supporting secure authentication and tiered subscription plans.
-        *   Offering an intuitive and responsive UI for both job seekers and recruiters.
-        *   Leveraging Firebase for a scalable, serverless backend and Genkit for AI integration.
+        *   Offering AI-powered analysis and optimization for resumes and cover letters.
+        *   Supporting secure user authentication and tiered subscription plans.
+        *   Delivering an intuitive and responsive user interface for both job seekers and recruiters.
+        *   Leveraging Firebase and Genkit for a scalable, serverless backend and AI integration.
+        *   Equipping recruiters with advanced tools like AI Candidate Matcher and team management.
+        *   Providing a comprehensive admin panel for user management and subscription approval.
 
 *   **3. Developed By**
     *   CHAUHAN HITARTH
@@ -481,10 +484,17 @@ The CareerCraft AI application is divided into three primary modules, each respo
 
 ### 5.2 Input Design (UI/UX)
 
-The user interface is designed to be clean, intuitive, and responsive.
-*   **Resume Builder:** Features a two-panel layout with an editable form on the left and a live, real-time preview of the resume on the right.
-*   **AI Tools:** Each AI tool has a dedicated page with a simple form for input (e.g., file uploads, text areas) and a clearly formatted results display area.
-*   **Navigation:** A collapsible sidebar provides easy access to all features of the application, including the admin panel for authorized users.
+*   **1. User & Recruiter Module**
+    This is the primary interface for job seekers and recruiters.
+    *   **Dashboard (Resume Builder):** The main dashboard features a two-panel layout with an editable form on the left for all resume sections (personal info, summary, experience, etc.) and a live, real-time preview of the resume on the right.
+    *   **AI Tools:** Each AI tool (e.g., Resume Analyzer, Job Matcher) has a dedicated page with a simple and clear input form. This typically includes file uploads for resumes and text areas for job descriptions.
+    *   **Navigation:** A collapsible sidebar provides easy and intuitive access to all features, including the resume builder, AI tools, support, and profile settings.
+
+*   **2. Admin Module**
+    The admin panel is designed for efficient management and oversight.
+    *   **Admin Dashboard:** The main landing page for admins, featuring statistical cards (e.g., total users, plan distribution) and a chart visualizing user data.
+    *   **Management Pages:** Pages for user management, upgrade requests, and support tickets are presented in a clean, tabular format, allowing admins to quickly view, search, and take action on items.
+    *   **Forms:** Simple forms are used for tasks like updating payment settings or replying to support tickets, ensuring a straightforward user experience for administrators.
 
 ---
 
