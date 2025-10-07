@@ -55,11 +55,32 @@ I would like to express my sincere gratitude to my project guide and mentor for 
 
 ### 1.4 Project Profile
 
-*   **Project Title:** CareerCraft AI – An AI-Powered Career Platform
-*   **Objective:** To deliver a modern, intelligent platform that empowers job seekers with AI-driven tools for resume building and career planning, while also streamlining the recruitment process for hiring managers.
-*   **Developed By:** CHAUHAN HITARTH
-*   **Frontend Technologies:** Next.js (React), TypeScript, Tailwind CSS, shadcn/ui
-*   **Backend Technologies:** Firebase (Authentication, Firestore, Storage), Genkit (Google AI)
+*   **1. Project Title**
+    *   CareerCraft AI – An AI-Powered Career Platform
+
+*   **2. Objective**
+    *   The objective of CareerCraft AI is to deliver a modern, intelligent platform that empowers job seekers with AI-driven tools for resume building and career planning, while also streamlining the recruitment process for hiring managers.
+    *   Key goals include:
+        *   Providing a seamless resume building and management experience.
+        *   Supporting secure authentication and tiered subscription plans.
+        *   Offering an intuitive and responsive UI for both job seekers and recruiters.
+        *   Leveraging Firebase for a scalable, serverless backend and Genkit for AI integration.
+
+*   **3. Developed By**
+    *   CHAUHAN HITARTH
+
+*   **4. Project Guide**
+    *   (Placeholder for Project Guide Name)
+
+*   **5. Frontend Technologies**
+    *   **Next.js (React):** A modern framework for building performant, server-rendered web applications.
+    *   **TypeScript:** For strong typing and improved code quality.
+    *   **Tailwind CSS:** A utility-first CSS framework for rapid UI development.
+    *   **shadcn/ui:** A collection of beautifully designed, accessible UI components.
+
+*   **6. Backend Technologies**
+    *   **Firebase:** Provides authentication, a NoSQL Firestore database for data storage, and file storage.
+    *   **Genkit (Google AI):** Used for integrating powerful generative AI models (like Gemini) for all intelligent features.
 
 ---
 
