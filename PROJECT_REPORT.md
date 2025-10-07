@@ -88,7 +88,25 @@ I would like to express my sincere gratitude to my project guide and mentor for 
 
 ### 2.1 Overview of Project
 
-CareerCraft AI is an innovative, AI-powered platform designed to revolutionize the job application and recruitment process. For job seekers, it offers a suite of intelligent tools—including an intuitive resume builder, AI-driven resume analysis, and a cover letter generator—to help them craft compelling applications and stand out in a competitive market. For recruiters, the platform provides an AI Candidate Matcher to streamline the screening process, saving time and improving the quality of hires. Built on a modern tech stack featuring Next.js, Firebase, and Google's Gemini models via Genkit, CareerCraft AI provides a seamless, data-driven, and user-centric experience for all users.
+CareerCraft AI is an innovative, AI-powered platform designed to revolutionize the job application and recruitment process. For job seekers, it offers a suite of intelligent tools to help them craft compelling applications and stand out in a competitive market. For recruiters, the platform provides an AI Candidate Matcher to streamline the screening process, saving time and improving the quality of hires.
+
+Built with a full-stack approach, the application uses:
+*   **Next.js (React):** For a component-based, responsive frontend.
+*   **Tailwind CSS & shadcn/ui:** For clean, utility-first styling and a modern UI.
+*   **Firebase:** As a serverless backend for authentication, database (Firestore), and storage.
+*   **Genkit (Google AI):** For all AI-driven features, including resume analysis and candidate matching.
+
+Key Features Include:
+*   **Intuitive Resume Builder:** Create and manage multiple resume versions with a live preview.
+*   **AI Resume Analyzer:** Get instant feedback on strengths, weaknesses, and keyword optimization.
+*   **AI Candidate Matcher:** For recruiters to score and rank resumes against a job description.
+*   **Tiered Subscription Model:** Offering 'Free', 'Pro', and 'Recruiter' plans with varying levels of access.
+*   **Admin & User Dashboards:** Separate interfaces for user management and application functionality.
+
+The main goal of CareerCraft AI is to combine a user-friendly design with powerful AI functionality—creating a seamless, responsive experience for both job seekers and hiring managers. It serves as a practical demonstration of:
+*   Real-time, serverless backend integration.
+*   Scalable architecture using modern cloud services.
+*   The application of generative AI in a real-world use case.
 
 ### 2.2 Existing System
 
