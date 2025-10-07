@@ -5,46 +5,6 @@
 
 ---
 
-## Abstract / Executive Summary
-
-CareerCraft AI is an innovative, AI-powered platform designed to revolutionize the job application and recruitment process. For job seekers, it offers a suite of intelligent tools—including an intuitive resume builder, AI-driven resume analysis, and a cover letter generator—to help them craft compelling applications and stand out in a competitive market. For recruiters, the platform provides an AI Candidate Matcher to streamline the screening process, saving time and improving the quality of hires. Built on a modern tech stack featuring Next.js, Firebase, and Google's Gemini models via Genkit, CareerCraft AI provides a seamless, data-driven, and user-centric experience for all users. The project successfully meets its objectives of empowering job seekers and optimizing recruitment workflows through the strategic implementation of generative AI.
-
----
-
-## Table of Contents
-
-1.  **Introduction**
-    *   Project Profile
-2.  **Requirement Analysis**
-    *   Functional Requirements
-    *   Non-functional Requirements
-3.  **System Architecture & Design**
-    *   Overall Architecture
-    *   Modules / Components
-    *   Technology Stack
-4.  **Implementation**
-    *   Frontend
-    *   Backend / APIs / Integrations
-    *   AI / ML Components
-    *   Database / Data Storage
-    *   Security, Authentication, Authorization
-5.  **Testing & Quality Assurance**
-    *   Test Strategy
-    *   Bug Tracking
-6.  **Deployment & Hosting**
-    *   Hosting Platform
-    *   CI/CD Pipeline
-7.  **Evaluation & Results**
-    *   Meeting Objectives
-    *   User Feedback
-8.  **Challenges & Limitations**
-    *   Technical Challenges
-    *   Limitations
-9.  **Future Work & Extensions**
-10. **Conclusion**
-
----
-
 ## 1. Introduction
 
 ### Project Profile
@@ -76,6 +36,57 @@ CareerCraft AI is an innovative, AI-powered platform designed to revolutionize t
     *   **Genkit (Google AI):** A framework for building production-ready AI flows with Gemini models.
     *   **Node.js:** The underlying runtime environment for the server-side logic.
 
+### Overview of Project
+
+*   **Project Name:** CareerCraft AI
+*   **Technology Used:** Next.js (React), Firebase, Genkit (Google AI), Tailwind CSS, shadcn/ui, TypeScript.
+*   **Database:** Firestore (NoSQL)
+*   **Project Goal:** To create an intelligent, AI-powered platform that empowers job seekers in their career journey and streamlines the candidate screening process for recruiters.
+*   **Features:**
+    *   **For Job Seekers:** An intuitive resume builder with live preview, AI-driven resume analysis for feedback, an ATS optimizer, a smart job matcher, and an automated cover letter generator.
+    *   **For Recruiters:** An AI Candidate Matcher to rank multiple resumes against a job description and a tool to summarize candidate profiles.
+    *   **General:** Secure user authentication, tiered subscription plans with manual payment verification, team management for recruiters, and a dedicated admin panel.
+
+---
+
+## Abstract / Executive Summary
+
+CareerCraft AI is an innovative, AI-powered platform designed to revolutionize the job application and recruitment process. For job seekers, it offers a suite of intelligent tools—including an intuitive resume builder, AI-driven resume analysis, and a cover letter generator—to help them craft compelling applications and stand out in a competitive market. For recruiters, the platform provides an AI Candidate Matcher to streamline the screening process, saving time and improving the quality of hires. Built on a modern tech stack featuring Next.js, Firebase, and Google's Gemini models via Genkit, CareerCraft AI provides a seamless, data-driven, and user-centric experience for all users. The project successfully meets its objectives of empowering job seekers and optimizing recruitment workflows through the strategic implementation of generative AI.
+
+---
+
+## Table of Contents
+
+1.  **Introduction**
+    *   Project Profile
+    *   Overview of Project
+2.  **Requirement Analysis**
+    *   Functional Requirements
+    *   Non-functional Requirements
+3.  **System Architecture & Design**
+    *   Overall Architecture
+    *   Modules / Components
+    *   Technology Stack
+4.  **Implementation**
+    *   Frontend
+    *   Backend / APIs / Integrations
+    *   AI / ML Components
+    *   Database / Data Storage
+    *   Security, Authentication, Authorization
+5.  **Testing & Quality Assurance**
+    *   Test Strategy
+    *   Bug Tracking
+6.  **Deployment & Hosting**
+    *   Hosting Platform
+    *   CI/CD Pipeline
+7.  **Evaluation & Results**
+    *   Meeting Objectives
+    *   User Feedback
+8.  **Challenges & Limitations**
+    *   Technical Challenges
+    *   Limitations
+9.  **Future Work & Extensions**
+10. **Conclusion**
 
 ---
 
