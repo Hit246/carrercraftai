@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Download, Bot, Save, Loader2, Link as LinkIcon, History, ChevronsUpDown, Crown } from 'lucide-react';
+import { PlusCircle, Trash2, Download, Bot, Save, Loader2, Link as LinkIcon, History, ChevronsUpDown, Crown, MoreVertical } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { doc, getDoc, setDoc, collection, addDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
@@ -31,6 +31,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 interface Experience {
     id: number;
@@ -645,39 +646,51 @@ export const ResumeBuilder = () => {
                             </Command>
                         </PopoverContent>
                     </Popover>
-                    <div className="flex gap-2 flex-wrap justify-center">
-                         <Button onClick={handleSave} disabled={isSaving}>
-                           <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
-                         </Button>
-                         <AlertDialog>
+                    <div className="flex items-center gap-2">
+                        <Button onClick={handleSave} disabled={isSaving}>
+                            <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
+                        </Button>
+                        <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                 <Button disabled={isSaving || versions.length >= draftLimit}>
+                                <Button variant="outline" disabled={isSaving || versions.length >= draftLimit}>
                                     <PlusCircle className="mr-2 h-4 w-4" /> Save as New
-                                 </Button>
+                                </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Draft Limit Reached</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        You have reached the maximum number of resume drafts ({draftLimit}) for the {plan} plan. Please upgrade your plan to save more versions.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => router.push('/pricing')}>
-                                        <Crown className="mr-2 h-4 w-4" />
-                                        Upgrade Plan
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                         </AlertDialog>
-                        <Button variant="secondary" onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
-                            {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Bot className="mr-2 h-4 w-4" />}
-                            AI Analyze
-                        </Button>
-                        <Button onClick={handleExport}>
-                           <Download className="mr-2 h-4 w-4" /> Export
-                        </Button>
+                            {versions.length >= draftLimit && 
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Draft Limit Reached</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            You have reached the maximum number of resume drafts ({draftLimit}) for the {plan} plan. Please upgrade your plan to save more versions.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => router.push('/pricing')}>
+                                            <Crown className="mr-2 h-4 w-4" />
+                                            Upgrade Plan
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            }
+                        </AlertDialog>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
+                                    {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Bot className="mr-2 h-4 w-4" />}
+                                    AI Analyze
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleExport}>
+                                    <Download className="mr-2 h-4 w-4" /> 
+                                    Export as PDF
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </Card>
                 <Card className="flex-1 overflow-hidden">
