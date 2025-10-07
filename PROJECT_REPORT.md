@@ -130,7 +130,18 @@ Designed for modern professionals, CareerCraft AI fills this gap with an intelli
 
 ### 2.3 Need for New System
 
-(This section is intentionally left blank for now.)
+While platforms like LinkedIn and Indeed offer a wide reach, they lack the focused, intelligent tools needed for effective career development and modern recruitment.
+
+**Key Limitations of Existing Platforms:**
+1.  **Generic Guidance** - Offer one-size-fits-all advice, not personalized AI analysis.
+2.  **Inefficient for Recruiters** - Manual screening is slow, biased, and resource-intensive.
+3.  **Fragmented Experience** - Users need separate tools for building, analyzing, and matching.
+4.  **Cluttered and Distracting** - Often filled with ads and irrelevant social features.
+5.  **Lack of Deep Insights** - Fail to provide actionable steps for resume improvement.
+6.  **Poor Skill-Job Alignment** - Basic keyword matching often misses true candidate potential.
+
+**Why CareerCraft AI?**
+CareerCraft AI provides a clean, focused, and intelligent alternative—ideal for targeted job seeking, skill enhancement, and efficient, unbiased recruitment.
 
 ---
 
@@ -242,4 +253,3 @@ CareerCraft AI successfully demonstrates the potential of generative AI to trans
 *   Official documentation for Next.js, React, Firebase, and Genkit.
 *   Articles and best practices on UI/UX design for web applications.
 *   Resources on prompt engineering for large language models.
-
