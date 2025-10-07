@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "clean-history": "git-filter-repo --path src/serviceAccountKey.json --invert-paths"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
