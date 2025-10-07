@@ -149,12 +149,26 @@ CareerCraft AI provides a clean, focused, and intelligent alternative—ideal fo
 
 ### 3.1 Software & Hardware Requirement
 
-*   **Software Requirements:**
+*   **Software Requirements (Development Environment):**
     *   **Operating System:** Windows, macOS, or Linux
-    *   **Web Browser:** Modern browsers like Google Chrome, Firefox, or Safari
-    *   **Development Environment:** Node.js (v18+), pnpm, Firebase CLI, Git
-*   **Hardware Requirements:**
-    *   A standard computer with an internet connection. No special hardware is needed.
+    *   **Web Browser:** Modern browsers like Google Chrome, Firefox, or Safari for development and testing.
+    *   **Development Tools:**
+        *   Node.js (v18 or later)
+        *   pnpm (or a compatible package manager like npm/yarn)
+        *   Firebase CLI
+        *   Git for version control
+        *   A code editor like Visual Studio Code
+
+*   **Hardware Requirements (Development Environment):**
+    *   A standard computer capable of running Node.js and a modern web browser.
+    *   A stable internet connection for installing packages and interacting with Firebase services.
+
+*   **Software Requirements (End-User/Client):**
+    *   Any modern web browser (e.g., Google Chrome, Mozilla Firefox, Safari, Microsoft Edge) with JavaScript enabled.
+    *   No other software installation is required.
+
+*   **Hardware Requirements (End-User/Client):**
+    *   Any device (desktop, laptop, tablet, or smartphone) with an internet connection and a web browser.
 
 ### 3.2 Objective
 
