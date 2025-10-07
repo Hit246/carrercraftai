@@ -92,15 +92,11 @@ CareerCraft AI is an innovative, AI-powered platform designed to revolutionize t
 
 ### 2.2 Existing System
 
-Popular job platforms like LinkedIn, Indeed, and Glassdoor dominate the market but are often overwhelming for job seekers and inefficient for recruiters. They can be cluttered with ads, generic listings, and lack personalized, actionable feedback for applicants. Key limitations include a lack of actionable feedback for candidates, generic and basic resume-building tools, time-consuming manual screening for recruiters, and limited personalization in job recommendations.
+(This section is intentionally left blank for now.)
 
 ### 2.3 Need for New System
 
-There is a clear need for a focused, intelligent solution that empowers both job seekers and recruiters with AI. This new system, CareerCraft AI, is designed to fill this gap by providing:
-*   **AI-Powered Resume Optimization:** Tools to analyze and improve resumes against specific job descriptions.
-*   **Automated Application Materials:** Generation of tailored cover letters to save time.
-*   **Efficient Candidate Screening:** AI-driven tools to rank and summarize candidates for recruiters.
-*   **An Integrated, User-Friendly Experience:** A single platform for building, analyzing, and matching.
+(This section is intentionally left blank for now.)
 
 ---
 
