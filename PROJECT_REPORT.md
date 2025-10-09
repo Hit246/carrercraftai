@@ -243,7 +243,7 @@ graph LR
 This diagram breaks down the main system into its primary sub-processes and shows the data stores they interact with.
 
 ```mermaid
-graph LR
+graph TD
     subgraph User
         U[User]
     end
@@ -277,8 +277,7 @@ graph LR
     P1 --> D1
     P2 --> D2
     P3 --> D1
-    P4 --> D1
-    P4 --> D4
+    P4 --> D1 & D4
     P5 --> D3
     P7 --> D5 & D1
     P6 --> D1 & D3 & D4
@@ -683,3 +682,4 @@ The development of CareerCraft AI involved learning and applying modern frontend
     *   **Genkit for Firebase Documentation** – Reference for defining AI flows, prompts, and integrating with Google's Gemini models.
     *   **Tailwind CSS Documentation** – Official utility-first CSS documentation used for all styling.
     *   **shadcn/ui Documentation** – Reference for component structure, usage, and theming.
+
