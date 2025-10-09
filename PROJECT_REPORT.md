@@ -277,7 +277,8 @@ graph TD
     P1 --> D1
     P2 --> D2
     P3 --> D1
-    P4 --> D1 & D4
+    P4 --> D1
+    P4 --> D4
     P5 --> D3
     P7 --> D5 & D1
     P6 --> D1 & D3 & D4
@@ -304,33 +305,26 @@ graph TD
     U[User]
     A[Admin]
     
-    D1[("D1: Users")]
-    D4[("D4: Settings")]
+    D1[("Users")]
+    D4[("Settings")]
 
-    subgraph "4.0 Manage Subscriptions"
-        P4_1("4.1<br>Display Pricing")
-        P4_2("4.2<br>Fetch Payment Details")
-        P4_3("4.3<br>Process Upgrade Request")
-        P4_4("4.4<br>Review Pending Upgrades")
-        P4_5("4.5<br>Update User Plan")
-    end
+    P4_1("4.1<br>Display Pricing &<br>Fetch Payment Details")
+    P4_2("4.2<br>Process Upgrade<br>Request")
+    P4_3("4.3<br>Review Pending<br>Upgrades")
+    P4_4("4.4<br>Update User<br>Plan")
 
     U -- "Views Pricing Page" --> P4_1
-    P4_1 -- "Initiates Upgrade" --> P4_2
+    P4_1 -- "Reads Payment Details" --> D4
+    P4_1 -- "Shows Payment Options" --> U
+    U -- "Submits Payment Proof" --> P4_2
+    P4_2 -- "Updates Status to 'pending'" --> D1
     
-    P4_2 -- "Reads" --> D4
-    D4 -- "Payment UPI & QR" --> P4_2
-    P4_2 -- "Payment Details" --> U
-
-    U -- "Submits Proof & Plan" --> P4_3
-    P4_3 -- "Updates Status to 'pending'" --> D1
-
-    P4_4 -- "Reads" --> D1
-    D1 -- "List of Pending Users" --> P4_4
-    P4_4 -- "Pending List" --> A
-
-    A -- "Approval/Rejection" --> P4_5
-    P4_5 -- "Updates User Plan" --> D1
+    A -- "Views Pending List" --> P4_3
+    P4_3 -- "Reads Pending Users" --> D1
+    P4_3 -- "Shows List to Admin" --> A
+    
+    A -- "Approves/Rejects" --> P4_4
+    P4_4 -- "Updates User Plan" --> D1
 ```
 
 ### 4.3 ER (Entity Relationship Diagram)
@@ -682,4 +676,5 @@ The development of CareerCraft AI involved learning and applying modern frontend
     *   **Genkit for Firebase Documentation** – Reference for defining AI flows, prompts, and integrating with Google's Gemini models.
     *   **Tailwind CSS Documentation** – Official utility-first CSS documentation used for all styling.
     *   **shadcn/ui Documentation** – Reference for component structure, usage, and theming.
+
 
