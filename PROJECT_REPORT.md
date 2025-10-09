@@ -218,9 +218,93 @@ The design methodology used in the development of the CareerCraft AI system is p
 
 ### 4.2 DFD (Data Flow Diagram)
 
-*   **Process 1: User Registration & Resume Management:** Users sign up/log in via Firebase Auth. User data and resume versions are stored in Firestore. Users interact with the Resume Builder UI, which reads from and writes to the `/users/{userId}/resumeVersions` subcollection.
-*   **Process 2: AI Feature Usage:** The user submits a resume and/or job description from the UI. The request is sent to a Next.js Server Action, which calls the relevant Genkit AI flow (e.g., `analyzeResume`, `candidateMatcher`). The AI flow processes the data, returns a result, and the UI displays it.
-*   **Process 3: Subscription Upgrade:** A user requests a plan upgrade from the UI. The system updates their status to 'pending' in Firestore. An admin reviews the request in the Admin Panel and approves/rejects it, which updates the user's document in Firestore.
+This section details the flow of data within the CareerCraft AI system at different levels of abstraction.
+
+#### **Level 0: Context-Level DFD**
+
+The context-level diagram shows the entire system as a single process interacting with external entities.
+
+*   **External Entities:**
+    *   `User (Job Seeker)`
+    *   `Recruiter`
+    *   `Administrator`
+
+*   **Process:**
+    *   `0.0 CareerCraft AI System`
+
+*   **Data Flows:**
+    *   `User` -> `System`: `Login/Signup Credentials`, `Profile Info`, `Resume Data`, `AI Tool Input (Resume PDF, Job Desc)`, `Support Request`, `Upgrade Request`
+    *   `System` -> `User`: `User Dashboard`, `Resume Preview`, `AI Analysis Results`, `Job Matches`, `Support History`, `Payment Details`
+    *   `Recruiter` -> `System`: `Login/Signup Credentials`, `Candidate Matcher Input (Resumes, Job Desc)`, `Team Member Invitations`
+    *   `System` -> `Recruiter`: `Recruiter Dashboard`, `Candidate Match Results`, `Team Member List`
+    *   `Administrator` -> `System`: `Admin Login`, `User Management Actions (Approve, Delete)`, `Payment Settings`, `Support Replies`
+    *   `System` -> `Administrator`: `Admin Dashboard`, `User Lists`, `Pending Upgrade Requests`, `Support Tickets`
+
+#### **Level 1: First-Level DFD**
+
+This diagram breaks down the main system into its primary sub-processes.
+
+*   **Processes:**
+    *   `1.0 Manage User Authentication`
+    *   `2.0 Manage Resumes`
+    *   `3.0 Execute AI Features`
+    *   `4.0 Manage Subscriptions`
+    *   `5.0 Manage Support`
+    *   `6.0 Admin Functions`
+    *   `7.0 Manage Teams`
+
+*   **Data Stores:**
+    *   `D1: Users` (Firestore `users` collection)
+    *   `D2: Resume Versions` (Firestore `/users/{userId}/resumeVersions` subcollection)
+    *   `D3: Support Tickets` (Firestore `supportRequests` collection)
+    *   `D4: Settings` (Firestore `settings` collection)
+    *   `D5: Teams` (Firestore `teams` collection)
+
+*   **Data Flows:**
+    *   `User` -> `1.0`: `Credentials` -> `D1`
+    *   `D1` -> `1.0`: `User Auth Status` -> `User`
+    *   `User` -> `2.0`: `Resume Edits` -> `D2`
+    *   `D2` -> `2.0`: `Resume Data` -> `User`
+    *   `User` -> `3.0`: `AI Input`
+    *   `3.0` -> `User`: `AI Output`
+    *   `3.0` -> `D1`: `Decrement Credits`
+    *   `User` -> `4.0`: `Upgrade Request` -> `D1`
+    *   `D4` -> `4.0`: `Payment Details` -> `User`
+    *   `User` -> `5.0`: `Support Request` -> `D3`
+    *   `D3` -> `5.0`: `Support History` -> `User`
+    *   `Admin` -> `6.0`: `Admin Actions` -> `D1, D3, D4`
+    *   `D1, D3, D4` -> `6.0`: `Management Data` -> `Admin`
+    *   `Recruiter` -> `7.0`: `Team Invitations` -> `D5`
+    *   `D5` -> `7.0`: `Team Data` -> `Recruiter`
+
+#### **Level 2: Second-Level DFD (Example: Process 4.0 Manage Subscriptions)**
+
+This diagram provides a detailed look into the "Manage Subscriptions" process.
+
+*   **External Entities:**
+    *   `User`
+    *   `Administrator`
+
+*   **Processes:**
+    *   `4.1 Display Pricing`
+    *   `4.2 Fetch Payment Details`
+    *   `4.3 Process Upgrade Request`
+    *   `4.4 Review Pending Upgrades`
+    *   `4.5 Update User Plan`
+
+*   **Data Stores:**
+    *   `D1: Users`
+    *   `D4: Settings`
+
+*   **Data Flows:**
+    *   `User` -> `4.1`: `View Pricing Page`
+    *   `4.1` -> `4.2`: `Initiate Upgrade`
+    *   `D4` -> `4.2`: `Payment UPI & QR Code` -> `User` (via UI)
+    *   `User` -> `4.3`: `Submitted Payment Proof & Requested Plan`
+    *   `4.3` -> `D1`: `Update User Status to 'pending'`
+    *   `D1` -> `4.4`: `List of Pending Users` -> `Administrator` (via Admin Panel)
+    *   `Administrator` -> `4.5`: `Approval/Rejection Decision`
+    *   `4.5` -> `D1`: `Update User Plan to 'pro'/'recruiter' or 'free'`
 
 ### 4.3 ER (Entity Relationship Diagram)
 
