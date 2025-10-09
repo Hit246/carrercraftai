@@ -209,102 +209,141 @@ The design methodology used in the development of the CareerCraft AI system is p
         *   Shows main external entities such as Users, Admins, and Recruiters interacting with the CareerCraft AI system.
         *   Highlights the general input-output relationship of major system functions.
     2.  **Level 1: First-Level DFD**
-        *   Breaks down major system functions into sub-processes such as:
-            *   User Authentication
-            *   Resume Management
-            *   AI Feature Usage (e.g., Resume Analyzer, Job Matcher)
-            *   Subscription Management
+        *   Breaks down major system functions into sub-processes.
         *   Helps visualize internal data flow and sub-process dependencies.
+    3.  **Level 2: Second-Level DFD**
+        *   Provides a detailed look into a single sub-process from the first-level diagram.
 
 ### 4.2 DFD (Data Flow Diagram)
 
-This section details the flow of data within the CareerCraft AI system at different levels of abstraction.
+This section details the flow of data within the CareerCraft AI system at different levels of abstraction using graphical diagrams.
 
 #### **Level 0: Context-Level DFD**
 
 The context-level diagram shows the entire system as a single process interacting with external entities.
 
-*   **External Entities:**
-    *   `User (Job Seeker)`
-    *   `Recruiter`
-    *   `Administrator`
+```mermaid
+graph TD
+    subgraph External Entities
+        U[User]
+        R[Recruiter]
+        A[Admin]
+    end
 
-*   **Process:**
-    *   `0.0 CareerCraft AI System`
+    subgraph System
+        P0("0.0<br>CareerCraft AI System")
+    end
 
-*   **Data Flows:**
-    *   `User` -> `System`: `Login/Signup Credentials`, `Profile Info`, `Resume Data`, `AI Tool Input (Resume PDF, Job Desc)`, `Support Request`, `Upgrade Request`
-    *   `System` -> `User`: `User Dashboard`, `Resume Preview`, `AI Analysis Results`, `Job Matches`, `Support History`, `Payment Details`
-    *   `Recruiter` -> `System`: `Login/Signup Credentials`, `Candidate Matcher Input (Resumes, Job Desc)`, `Team Member Invitations`
-    *   `System` -> `Recruiter`: `Recruiter Dashboard`, `Candidate Match Results`, `Team Member List`
-    *   `Administrator` -> `System`: `Admin Login`, `User Management Actions (Approve, Delete)`, `Payment Settings`, `Support Replies`
-    *   `System` -> `Administrator`: `Admin Dashboard`, `User Lists`, `Pending Upgrade Requests`, `Support Tickets`
+    U -- "Credentials, Profile Data, Resume Data, AI Inputs, Support Request, Upgrade Request" --> P0
+    P0 -- "Dashboard, Resume Preview, AI Results, Support History, Payment Details" --> U
+
+    R -- "Credentials, Candidate Matcher Inputs, Team Invitations" --> P0
+    P0 -- "Recruiter Dashboard, Match Results, Team List" --> R
+
+    A -- "Admin Login, User Management Actions, Settings, Support Replies" --> P0
+    P0 -- "Admin Dashboard, User Lists, Pending Requests, Support Tickets" --> A
+```
 
 #### **Level 1: First-Level DFD**
 
-This diagram breaks down the main system into its primary sub-processes.
+This diagram breaks down the main system into its primary sub-processes and shows the data stores they interact with.
 
-*   **Processes:**
-    *   `1.0 Manage User Authentication`
-    *   `2.0 Manage Resumes`
-    *   `3.0 Execute AI Features`
-    *   `4.0 Manage Subscriptions`
-    *   `5.0 Manage Support`
-    *   `6.0 Admin Functions`
-    *   `7.0 Manage Teams`
+```mermaid
+graph TD
+    subgraph External Entities
+        U[User]
+        R[Recruiter]
+        A[Admin]
+    end
 
-*   **Data Stores:**
-    *   `D1: Users` (Firestore `users` collection)
-    *   `D2: Resume Versions` (Firestore `/users/{userId}/resumeVersions` subcollection)
-    *   `D3: Support Tickets` (Firestore `supportRequests` collection)
-    *   `D4: Settings` (Firestore `settings` collection)
-    *   `D5: Teams` (Firestore `teams` collection)
+    subgraph Processes
+        P1("1.0<br>Manage User Auth")
+        P2("2.0<br>Manage Resumes")
+        P3("3.0<br>Execute AI Features")
+        P4("4.0<br>Manage Subscriptions")
+        P5("5.0<br>Manage Support")
+        P6("6.0<br>Admin Functions")
+        P7("7.0<br>Manage Teams")
+    end
 
-*   **Data Flows:**
-    *   `User` -> `1.0`: `Credentials` -> `D1`
-    *   `D1` -> `1.0`: `User Auth Status` -> `User`
-    *   `User` -> `2.0`: `Resume Edits` -> `D2`
-    *   `D2` -> `2.0`: `Resume Data` -> `User`
-    *   `User` -> `3.0`: `AI Input`
-    *   `3.0` -> `User`: `AI Output`
-    *   `3.0` -> `D1`: `Decrement Credits`
-    *   `User` -> `4.0`: `Upgrade Request` -> `D1`
-    *   `D4` -> `4.0`: `Payment Details` -> `User`
-    *   `User` -> `5.0`: `Support Request` -> `D3`
-    *   `D3` -> `5.0`: `Support History` -> `User`
-    *   `Admin` -> `6.0`: `Admin Actions` -> `D1, D3, D4`
-    *   `D1, D3, D4` -> `6.0`: `Management Data` -> `Admin`
-    *   `Recruiter` -> `7.0`: `Team Invitations` -> `D5`
-    *   `D5` -> `7.0`: `Team Data` -> `Recruiter`
+    subgraph Data Stores
+        D1[("D1: Users")]
+        D2[("D2: Resume Versions")]
+        D3[("D3: Support Tickets")]
+        D4[("D4: Settings")]
+        D5[("D5: Teams")]
+    end
+
+    U -- "Credentials" --> P1
+    P1 -- "Auth Status" --> U
+    P1 <--> D1
+
+    U -- "Resume Edits" --> P2
+    P2 -- "Resume Data" --> U
+    P2 <--> D2
+
+    U -- "AI Input" --> P3
+    P3 -- "AI Output" --> U
+    P3 --> D1
+
+    U -- "Upgrade Request" --> P4
+    P4 -- "Payment Details" --> U
+    P4 <--> D1
+    P4 <--> D4
+    
+    U -- "Support Request" --> P5
+    P5 -- "Support History" --> U
+    P5 <--> D3
+
+    R -- "Team Invitations" --> P7
+    P7 -- "Team Data" --> R
+    P7 <--> D5
+
+    A -- "Admin Actions" --> P6
+    P6 -- "Management Data" --> A
+    P6 <--> D1
+    P6 <--> D3
+    P6 <--> D4
+```
 
 #### **Level 2: Second-Level DFD (Example: Process 4.0 Manage Subscriptions)**
 
 This diagram provides a detailed look into the "Manage Subscriptions" process.
 
-*   **External Entities:**
-    *   `User`
-    *   `Administrator`
+```mermaid
+graph TD
+    subgraph External Entities
+        U[User]
+        A[Admin]
+    end
 
-*   **Processes:**
-    *   `4.1 Display Pricing`
-    *   `4.2 Fetch Payment Details`
-    *   `4.3 Process Upgrade Request`
-    *   `4.4 Review Pending Upgrades`
-    *   `4.5 Update User Plan`
+    subgraph Processes
+        P4_1("4.1<br>Display Pricing")
+        P4_2("4.2<br>Fetch Payment Details")
+        P4_3("4.3<br>Process Upgrade Request")
+        P4_4("4.4<br>Review Pending Upgrades")
+        P4_5("4.5<br>Update User Plan")
+    end
+    
+    subgraph Data Stores
+        D1[("D1: Users")]
+        D4[("D4: Settings")]
+    end
 
-*   **Data Stores:**
-    *   `D1: Users`
-    *   `D4: Settings`
+    U -- "Views Pricing Page" --> P4_1
+    P4_1 -- "Initiates Upgrade" --> P4_2
+    P4_2 -- "Payment UPI & QR" --> U
+    D4 -- "Reads" --> P4_2
 
-*   **Data Flows:**
-    *   `User` -> `4.1`: `View Pricing Page`
-    *   `4.1` -> `4.2`: `Initiate Upgrade`
-    *   `D4` -> `4.2`: `Payment UPI & QR Code` -> `User` (via UI)
-    *   `User` -> `4.3`: `Submitted Payment Proof & Requested Plan`
-    *   `4.3` -> `D1`: `Update User Status to 'pending'`
-    *   `D1` -> `4.4`: `List of Pending Users` -> `Administrator` (via Admin Panel)
-    *   `Administrator` -> `4.5`: `Approval/Rejection Decision`
-    *   `4.5` -> `D1`: `Update User Plan to 'pro'/'recruiter' or 'free'`
+    U -- "Submits Proof & Plan" --> P4_3
+    P4_3 -- "Updates Status to 'pending'" --> D1
+
+    P4_4 -- "List of Pending Users" --> A
+    D1 -- "Reads" --> P4_4
+
+    A -- "Approval/Rejection" --> P4_5
+    P4_5 -- "Updates User Plan" --> D1
+```
 
 ### 4.3 ER (Entity Relationship Diagram)
 
@@ -583,7 +622,6 @@ The CareerCraft AI application is divided into three primary modules, each respo
         ![Admin Dashboard Screenshot](./admin-dashboard.png)
     *   **Management Pages:** Pages for user management, upgrade requests, and support tickets are presented in a clean, tabular format, allowing admins to quickly view, search, and take action on items.
         ![User Management Screenshot](./user-management.png)
-    *   **Forms:** Simple forms are used for tasks like updating payment settings or replying to support tickets, ensuring a straightforward user experience for administrators.
 
 ---
 
