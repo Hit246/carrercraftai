@@ -224,17 +224,17 @@ The context-level diagram shows the entire system as a single process interactin
 
 ```mermaid
 graph LR
-    U[User] -->|Inputs| P0((0.0<br>CareerCraft AI))
-    R[Recruiter] -->|Inputs| P0
+    U[User] -->|User Inputs| P0((CareerCraft AI<br>System))
+    R[Recruiter] -->|Recruiter Inputs| P0
     A[Admin] -->|Admin Inputs| P0
     
-    P0 -->|Outputs| U
-    P0 -->|Outputs| R
+    P0 -->|User Outputs| U
+    P0 -->|Recruiter Outputs| R
     P0 -->|Admin Outputs| A
 
-    style U fill:#fff,stroke:#333,stroke-width:2px,rx:10,ry:10
-    style R fill:#fff,stroke:#333,stroke-width:2px,rx:10,ry:10
-    style A fill:#fff,stroke:#333,stroke-width:2px,rx:10,ry:10
+    style U fill:#fff,stroke:#333,stroke-width:2px
+    style R fill:#fff,stroke:#333,stroke-width:2px
+    style A fill:#fff,stroke:#333,stroke-width:2px
     style P0 fill:#f9f9f9,stroke:#333,stroke-width:2px
 ```
 
@@ -243,57 +243,57 @@ graph LR
 This diagram breaks down the main system into its primary sub-processes and shows the data stores they interact with.
 
 ```mermaid
-graph TD
-    U[User]
-    R[Recruiter]
-    A[Admin]
-
-    subgraph "CareerCraft AI System"
-        P1("1.0<br>Manage Auth")
-        P2("2.0<br>Manage Resumes")
-        P3("3.0<br>Execute AI Features")
-        P4("4.0<br>Manage Subscriptions")
-        P5("5.0<br>Manage Support")
-        P6("6.0<br>Admin Functions")
-        P7("7.0<br>Manage Teams")
+graph LR
+    subgraph User
+        U[User]
+    end
+    
+    subgraph Recruiter
+        R[Recruiter]
+    end
+    
+    subgraph Admin
+        A[Admin]
     end
 
-    D1[("D1: Users")]
-    D2[("D2: Resume Versions")]
-    D3[("D3: Support Tickets")]
-    D4[("D4: Settings")]
-    D5[("D5: Teams")]
+    P1(Manage<br>Auth)
+    P2(Manage<br>Resumes)
+    P3(Execute<br>AI Features)
+    P4(Manage<br>Subscriptions)
+    P5(Manage<br>Support)
+    P7(Manage<br>Teams)
+    P6(Admin<br>Functions)
 
-    U -- "Credentials" --> P1
-    P1 -- "Auth Status" --> U
-    P1 <--> D1
+    D1[("Users")]
+    D2[("Resume<br>Versions")]
+    D3[("Support<br>Tickets")]
+    D4[("Settings")]
+    D5[("Teams")]
 
-    U -- "Resume Edits" --> P2
-    P2 -- "Resume Data" --> U
-    P2 <--> D2
+    U --> P1 & P2 & P3 & P4 & P5
+    R --> P1 & P3 & P7
+    A --> P6
 
-    U -- "AI Input" --> P3
-    P3 -- "AI Output" --> U
+    P1 --> D1
+    P2 --> D2
     P3 --> D1
+    P4 --> D1
+    P4 --> D4
+    P5 --> D3
+    P7 --> D5 & D1
+    P6 --> D1 & D3 & D4
 
-    U -- "Upgrade Request" --> P4
-    P4 -- "Payment Details" --> U
-    P4 <--> D1
-    P4 <--> D4
-    
-    U -- "Support Request" --> P5
-    P5 -- "Support History" --> U
-    P5 <--> D3
+    style U fill:#fff,stroke:#333,stroke-width:2px
+    style R fill:#fff,stroke:#333,stroke-width:2px
+    style A fill:#fff,stroke:#333,stroke-width:2px
 
-    R -- "Team Invitations" --> P7
-    P7 -- "Team Data" --> R
-    P7 <--> D5
-
-    A -- "Admin Actions" --> P6
-    P6 -- "Management Data" --> A
-    P6 <--> D1
-    P6 <--> D3
-    P6 <--> D4
+    style P1 fill:#f0f9ff,stroke:#0284c7
+    style P2 fill:#f0f9ff,stroke:#0284c7
+    style P3 fill:#f0f9ff,stroke:#0284c7
+    style P4 fill:#f0f9ff,stroke:#0284c7
+    style P5 fill:#f0f9ff,stroke:#0284c7
+    style P6 fill:#f0f9ff,stroke:#0284c7
+    style P7 fill:#f0f9ff,stroke:#0284c7
 ```
 
 #### **Level 2: Second-Level DFD (Example: Process 4.0 Manage Subscriptions)**
