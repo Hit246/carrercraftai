@@ -223,25 +223,19 @@ This section details the flow of data within the CareerCraft AI system at differ
 The context-level diagram shows the entire system as a single process interacting with external entities.
 
 ```mermaid
-graph TD
-    subgraph External Entities
-        U[User]
-        R[Recruiter]
-        A[Admin]
-    end
+graph LR
+    U[User] -->|Inputs| P0((0.0<br>CareerCraft AI))
+    R[Recruiter] -->|Inputs| P0
+    A[Admin] -->|Admin Inputs| P0
+    
+    P0 -->|Outputs| U
+    P0 -->|Outputs| R
+    P0 -->|Admin Outputs| A
 
-    subgraph System
-        P0("0.0<br>CareerCraft AI System")
-    end
-
-    U -- "Credentials, Profile Data, Resume Data, AI Inputs, Support Request, Upgrade Request" --> P0
-    P0 -- "Dashboard, Resume Preview, AI Results, Support History, Payment Details" --> U
-
-    R -- "Credentials, Candidate Matcher Inputs, Team Invitations" --> P0
-    P0 -- "Recruiter Dashboard, Match Results, Team List" --> R
-
-    A -- "Admin Login, User Management Actions, Settings, Support Replies" --> P0
-    P0 -- "Admin Dashboard, User Lists, Pending Requests, Support Tickets" --> A
+    style U fill:#fff,stroke:#333,stroke-width:2px,rx:10,ry:10
+    style R fill:#fff,stroke:#333,stroke-width:2px,rx:10,ry:10
+    style A fill:#fff,stroke:#333,stroke-width:2px,rx:10,ry:10
+    style P0 fill:#f9f9f9,stroke:#333,stroke-width:2px
 ```
 
 #### **Level 1: First-Level DFD**
@@ -250,14 +244,12 @@ This diagram breaks down the main system into its primary sub-processes and show
 
 ```mermaid
 graph TD
-    subgraph External Entities
-        U[User]
-        R[Recruiter]
-        A[Admin]
-    end
+    U[User]
+    R[Recruiter]
+    A[Admin]
 
-    subgraph Processes
-        P1("1.0<br>Manage User Auth")
+    subgraph "CareerCraft AI System"
+        P1("1.0<br>Manage Auth")
         P2("2.0<br>Manage Resumes")
         P3("3.0<br>Execute AI Features")
         P4("4.0<br>Manage Subscriptions")
@@ -266,13 +258,11 @@ graph TD
         P7("7.0<br>Manage Teams")
     end
 
-    subgraph Data Stores
-        D1[("D1: Users")]
-        D2[("D2: Resume Versions")]
-        D3[("D3: Support Tickets")]
-        D4[("D4: Settings")]
-        D5[("D5: Teams")]
-    end
+    D1[("D1: Users")]
+    D2[("D2: Resume Versions")]
+    D3[("D3: Support Tickets")]
+    D4[("D4: Settings")]
+    D5[("D5: Teams")]
 
     U -- "Credentials" --> P1
     P1 -- "Auth Status" --> U
@@ -312,34 +302,33 @@ This diagram provides a detailed look into the "Manage Subscriptions" process.
 
 ```mermaid
 graph TD
-    subgraph External Entities
-        U[User]
-        A[Admin]
-    end
+    U[User]
+    A[Admin]
+    
+    D1[("D1: Users")]
+    D4[("D4: Settings")]
 
-    subgraph Processes
+    subgraph "4.0 Manage Subscriptions"
         P4_1("4.1<br>Display Pricing")
         P4_2("4.2<br>Fetch Payment Details")
         P4_3("4.3<br>Process Upgrade Request")
         P4_4("4.4<br>Review Pending Upgrades")
         P4_5("4.5<br>Update User Plan")
     end
-    
-    subgraph Data Stores
-        D1[("D1: Users")]
-        D4[("D4: Settings")]
-    end
 
     U -- "Views Pricing Page" --> P4_1
     P4_1 -- "Initiates Upgrade" --> P4_2
-    P4_2 -- "Payment UPI & QR" --> U
-    D4 -- "Reads" --> P4_2
+    
+    P4_2 -- "Reads" --> D4
+    D4 -- "Payment UPI & QR" --> P4_2
+    P4_2 -- "Payment Details" --> U
 
     U -- "Submits Proof & Plan" --> P4_3
     P4_3 -- "Updates Status to 'pending'" --> D1
 
-    P4_4 -- "List of Pending Users" --> A
-    D1 -- "Reads" --> P4_4
+    P4_4 -- "Reads" --> D1
+    D1 -- "List of Pending Users" --> P4_4
+    P4_4 -- "Pending List" --> A
 
     A -- "Approval/Rejection" --> P4_5
     P4_5 -- "Updates User Plan" --> D1
