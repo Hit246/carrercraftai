@@ -198,13 +198,11 @@ code {
         margin: 2cm;
     }
 
-    /* Force a page break before each major section */
-    section {
+    section > h2 {
         page-break-before: always;
     }
-
-    /* Prevent the page break for the VERY FIRST section after the chapter title */
-    h1 + section {
+    
+    h1 + section > h2 {
         page-break-before: auto;
     }
 
