@@ -1,0 +1,161 @@
+:root {
+    --background: #ffffff;
+    --foreground: #111827;
+    --sidebar-bg: #f9fafb;
+    --sidebar-border: #e5e7eb;
+    --active-link-bg: #eef2ff;
+    --active-link-border: #6366f1;
+    --active-link-color: #4338ca;
+    --link-color: #4b5563;
+    --link-hover-color: #111827;
+    --heading-color: #111827;
+    --card-bg: #ffffff;
+    --card-border: #e5e7eb;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: var(--background);
+    color: var(--foreground);
+    line-height: 1.6;
+}
+
+.report-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+    padding: 2rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.report-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--heading-color);
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--sidebar-border);
+}
+
+.navigation ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.navigation li a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--link-color);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.navigation li a:hover {
+    background-color: var(--active-link-bg);
+    color: var(--link-hover-color);
+}
+
+.navigation li a.active {
+    background-color: var(--active-link-bg);
+    color: var(--active-link-color);
+    font-weight: 600;
+    border-left: 3px solid var(--active-link-border);
+}
+
+.content {
+    flex-grow: 1;
+    padding: 2rem 3rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.content header {
+    border-bottom: 1px solid var(--sidebar-border);
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+}
+
+.content header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--heading-color);
+}
+
+.content section {
+    margin-bottom: 3rem;
+}
+
+.content h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--heading-color);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--sidebar-border);
+}
+
+.content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.content p, .content li {
+    font-size: 1rem;
+    color: #374151;
+}
+
+.content ul, .content ol {
+    padding-left: 1.5rem;
+}
+
+.content ul li, .content ol li {
+    margin-bottom: 0.5rem;
+}
+
+.content code {
+    background-color: #e5e7eb;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+    font-size: 0.9em;
+}
+
+.screenshot {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    margin: 1.5rem 0;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.diagram-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--sidebar-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    margin: 1.5rem 0;
+    overflow-x: auto;
+}
+
+pre.mermaid {
+    text-align: center;
+}

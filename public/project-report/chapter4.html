@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4 - CareerCraft AI Report</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="report-container">
+        <aside class="sidebar">
+            <h1 class="report-title">CareerCraft AI</h1>
+            <nav class="navigation">
+                <ul>
+                    <li><a href="index.html">1. Introduction</a></li>
+                    <li><a href="chapter2.html">2. Literature Survey</a></li>
+                    <li><a href="chapter3.html">3. Analysis</a></li>
+                    <li><a href="chapter4.html" class="active">4. System Design</a></li>
+                    <li><a href="chapter5.html">5. Implementation</a></li>
+                    <li><a href="chapter6.html">6. Conclusion</a></li>
+                    <li><a href="chapter7.html">7. Testing & Bibliography</a></li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="content">
+            <header>
+                <h1>Chapter 4: System Design (Experimental or Material Method)</h1>
+            </header>
+
+            <section id="design-methodology">
+                <h2>4.1 Design Methodology</h2>
+                <p>The design methodology used in the development of the CareerCraft AI system is primarily based on <strong>Data Flow Diagrams (DFDs)</strong>, which illustrate the logical flow of data through the application. These diagrams help in mapping out how data is processed, transferred, and stored within the system—independent of the physical or technical implementation.</p>
+                <h3>Purpose of Using DFDs</h3>
+                <ul>
+                    <li>To identify system inputs, outputs, and processing components.</li>
+                    <li>To visualize user interaction with the system.</li>
+                    <li>To understand how data moves and transforms through different stages.</li>
+                    <li>To separate logical design from the physical architecture, ensuring a clearer view of how features are structured.</li>
+                </ul>
+                <h3>DFD Levels Used in CareerCraft AI</h3>
+                <ol>
+                    <li><strong>Level 0: Context-Level DFD</strong>
+                        <p>Provides a high-level overview of the entire system. Shows main external entities such as Users, Admins, and Recruiters interacting with the CareerCraft AI system. Highlights the general input-output relationship of major system functions.</p>
+                    </li>
+                    <li><strong>Level 1: First-Level DFD</strong>
+                        <p>Breaks down major system functions into sub-processes. Helps visualize internal data flow and sub-process dependencies.</p>
+                    </li>
+                    <li><strong>Level 2: Second-Level DFD</strong>
+                        <p>Provides a detailed look into a single sub-process from the first-level diagram.</p>
+                    </li>
+                </ol>
+            </section>
+
+            <section id="dfd">
+                <h2>4.2 DFD (Data Flow Diagram)</h2>
+                
+                <h3>Level 0: Context-Level DFD</h3>
+                <div class="diagram-container">
+                    <pre class="mermaid">
+graph LR
+    U[User] -->|User Inputs| P0((CareerCraft AI<br>System))
+    R[Recruiter] -->|Recruiter Inputs| P0
+    A[Admin] -->|Admin Inputs| P0
+    
+    P0 -->|User Outputs| U
+    P0 -->|Recruiter Outputs| R
+    P0 -->|Admin Outputs| A
+
+    style U fill:#fff,stroke:#333,stroke-width:2px
+    style R fill:#fff,stroke:#333,stroke-width:2px
+    style A fill:#fff,stroke:#333,stroke-width:2px
+    style P0 fill:#f9f9f9,stroke:#333,stroke-width:2px
+                    </pre>
+                </div>
+
+                <h3>Level 1: First-Level DFD</h3>
+                <div class="diagram-container">
+                    <pre class="mermaid">
+graph TD
+    subgraph User
+        U[User]
+    end
+    
+    subgraph Recruiter
+        R[Recruiter]
+    end
+    
+    subgraph Admin
+        A[Admin]
+    end
+
+    P1(Manage<br>Auth)
+    P2(Manage<br>Resumes)
+    P3(Execute<br>AI Features)
+    P4(Manage<br>Subscriptions)
+    P5(Manage<br>Support)
+    P7(Manage<br>Teams)
+    P6(Admin<br>Functions)
+
+    D1[("Users")]
+    D2[("Resume<br>Versions")]
+    D3[("Support<br>Tickets")]
+    D4[("Settings")]
+    D5[("Teams")]
+
+    U --> P1 & P2 & P3 & P4 & P5
+    R --> P1 & P3 & P7
+    A --> P6
+
+    P1 --> D1
+    P2 --> D2
+    P3 --> D1
+    P4 --> D1 & D4
+    P5 --> D3
+    P7 --> D5 & D1
+    P6 --> D1 & D3 & D4
+
+    style U fill:#fff,stroke:#333,stroke-width:2px
+    style R fill:#fff,stroke:#333,stroke-width:2px
+    style A fill:#fff,stroke:#333,stroke-width:2px
+
+    style P1 fill:#f0f9ff,stroke:#0284c7
+    style P2 fill:#f0f9ff,stroke:#0284c7
+    style P3 fill:#f0f9ff,stroke:#0284c7
+    style P4 fill:#f0f9ff,stroke:#0284c7
+    style P5 fill:#f0f9ff,stroke:#0284c7
+    style P6 fill:#f0f9ff,stroke:#0284c7
+    style P7 fill:#f0f9ff,stroke:#0284c7
+                    </pre>
+                </div>
+
+                <h3>Level 2: Second-Level DFD (Example: Process 4.0 Manage Subscriptions)</h3>
+                <div class="diagram-container">
+                    <pre class="mermaid">
+graph TD
+    U[User]
+    A[Admin]
+    
+    D1[("Users")]
+    D4[("Settings")]
+
+    P4_1("4.1<br>Display Pricing &<br>Fetch Payment Details")
+    P4_2("4.2<br>Process Upgrade<br>Request")
+    P4_3("4.3<br>Review Pending<br>Upgrades")
+    P4_4("4.4<br>Update User<br>Plan")
+
+    U -- "Views Pricing Page" --> P4_1
+    P4_1 -- "Reads Payment Details" --> D4
+    P4_1 -- "Shows Payment Options" --> U
+    U -- "Submits Payment Proof" --> P4_2
+    P4_2 -- "Updates Status to 'pending'" --> D1
+    
+    A -- "Views Pending List" --> P4_3
+    P4_3 -- "Reads Pending Users" --> D1
+    P4_3 -- "Shows List to Admin" --> A
+    
+    A -- "Approves/Rejects" --> P4_4
+    P4_4 -- "Updates User Plan" --> D1
+                    </pre>
+                </div>
+            </section>
+            
+            <section id="er-diagram">
+                <h2>4.3 ER (Entity Relationship Diagram)</h2>
+                <p>An Entity-Relationship (ER) Diagram is a visual representation that outlines how data entities relate to one another within a database system. It helps in understanding the structure of the application's backend and serves as a guide for designing the database schema.</p>
+                <p>The ER diagram of CareerCraft AI demonstrates how <code>users</code> interact with <code>resumeVersions</code>, <code>teams</code>, and <code>supportRequests</code>.</p>
+                <h3>Building Blocks of the E-R Diagram</h3>
+                <h4>Entities (Rectangles)</h4>
+                <p>Entities are real-world objects that store data.</p>
+                <ul>
+                    <li><code>users</code>: Stores individual user profiles and subscription data.</li>
+                    <li><code>resumeVersions</code>: A subcollection storing different versions of a user's resume.</li>
+                    <li><code>teams</code>: For recruiter accounts, containing team data.</li>
+                    <li><code>members</code>: A subcollection storing team member information.</li>
+                    <li><code>supportRequests</code>: Stores user-submitted support tickets.</li>
+                    <li><code>history</code>: A subcollection for the conversation history of a support ticket.</li>
+                </ul>
+                <h4>Attributes (Ovals)</h4>
+                <p>Attributes define the properties of each entity.</p>
+                <ul>
+                    <li><code>user</code>: uid, displayName, email, plan, credits, teamId.</li>
+                    <li><code>resumeVersion</code>: versionName, updatedAt, resumeData (a map object).</li>
+                    <li><code>team</code>: owner, createdAt.</li>
+                    <li><code>member</code>: uid, email, role, name.</li>
+                    <li><code>supportRequest</code>: userId, subject, status, lastMessageAt.</li>
+                    <li><code>history</code>: message, sender, timestamp.</li>
+                </ul>
+                <h3>Relationships (Diamonds)</h3>
+                <p>Relationships explain how entities are connected.</p>
+                <ul>
+                    <li>A <code>user</code> → has → many <code>resumeVersions</code>.</li>
+                    <li>A <code>user</code> → submits → many <code>supportRequests</code>.</li>
+                    <li>A <code>supportRequest</code> → has → many <code>history</code> entries.</li>
+                    <li>A <code>user</code> (recruiter) → owns → a <code>team</code>.</li>
+                    <li>A <code>team</code> → has → many <code>members</code>.</li>
+                </ul>
+                <h3>Types of Relationships</h3>
+                <h4>One-to-Many</h4>
+                <ul>
+                    <li>One <code>user</code> can have multiple <code>resumeVersions</code>.</li>
+                    <li>One <code>user</code> can submit multiple <code>supportRequests</code>.</li>
+                    <li>One <code>team</code> can have many <code>members</code>.</li>
+                </ul>
+                <h3>Purpose of the ER Diagram</h3>
+                <ul>
+                    <li><strong>Data Modeling:</strong> Defines how data is structured and related in the application.</li>
+                    <li><strong>Communication Tool:</strong> Acts as a shared understanding between developers, designers, and stakeholders.</li>
+                    <li><strong>Database Design:</strong> Lays the foundation for database schema creation and relationships in Firestore.</li>
+                </ul>
+            </section>
+
+            <section id="data-dictionary">
+                <h2>4.4 Data Dictionary (Database Schema)</h2>
+                <p>A <strong>Data Dictionary</strong>, also known as a metadata repository, is a structured collection of definitions and information about the data used in a system or application. It acts as a reference guide for developers, analysts, and stakeholders, ensuring everyone understands what data exists, how it is structured, and how it should be used.</p>
+                <p>The detailed Data Dictionary for this project, outlining every collection, field, and data type, is maintained in the <code>DB_SCHEMA.md</code> file which can be found in the root of the project repository.</p>
+            </section>
+            
+            <script type="module">
+              import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+              mermaid.initialize({ startOnLoad: true });
+            </script>
+        </main>
+    </div>
+</body>
+</html>
