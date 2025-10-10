@@ -198,22 +198,22 @@ code {
         margin: 2cm;
     }
 
-    /* Force a page break before every major section heading */
-    h2 {
+    /* Force a page break before each major section */
+    section {
         page-break-before: always;
     }
-    
-    /* PREVENT a page break for the FIRST section right after a chapter title */
-    h1 + h2 {
+
+    /* Prevent the page break for the VERY FIRST section after the chapter title */
+    h1 + section {
         page-break-before: auto;
     }
 
-    /* Keep headings with the content that follows them */
-    h1, h2, h3, h4 {
+    h1,
+    h2,
+    h3 {
         page-break-after: avoid;
     }
 
-    /* Avoid breaking tables, images, and diagrams across pages */
     table,
     .mermaid,
     .report-image {
