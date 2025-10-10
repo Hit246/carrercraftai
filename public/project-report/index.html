@@ -1,305 +1,227 @@
-<!DOCTYPE html>
-<html lang="en">
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareerCraft AI - Project Report</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <script>
-        mermaid.initialize({ startOnLoad: true });
-    </script>
-</head>
+:root {
+    --primary-color: #4f46e5;
+    --background-color: #f8fafc;
+    --text-color: #1f2937;
+    --sidebar-bg: #ffffff;
+    --border-color: #e5e7eb;
+}
 
-<body>
-    <div class="report-container">
-        <aside class="sidebar">
-            <h3>CareerCraft AI</h3>
-            <nav>
-                <ul>
-                    <li><a href="index.html" class="active">Chapter 1: Introduction</a></li>
-                    <li><a href="chapter2.html">Chapter 2: Literature Survey</a></li>
-                    <li><a href="chapter3.html">Chapter 3: Analysis</a></li>
-                    <li><a href="chapter4.html">Chapter 4: Experimental Method</a></li>
-                    <li><a href="chapter5.html">Chapter 5: Results & Analysis</a></li>
-                    <li><a href="chapter6.html">Chapter 6: Conclusion</a></li>
-                    <li><a href="chapter7.html">Chapter 7: Testing & Bibliography</a></li>
-                </ul>
-            </nav>
-        </aside>
-        <main class="content">
-            <div class="page">
-                <h1>CareerCraft AI - Project Report</h1>
-                <p><strong>Author:</strong> CHAUHAN HITARTH</p>
-                <p><strong>Date:</strong> October 26, 2023</p>
-                <hr>
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
 
-                <h2>Index</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Sr No.</th>
-                            <th>Index</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1.</td>
-                            <td><strong>Introductions</strong></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>1.1 Acknowledgement</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>1.2 About College</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>1.3 About Organization</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>1.4 Project Profile</td>
-                        </tr>
-                        <tr>
-                            <td>2.</td>
-                            <td><strong>Literature Survey</strong></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>2.1 Overview of Project</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>2.2 Existing System</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>2.3 Need for New System</td>
-                        </tr>
-                        <tr>
-                            <td>3.</td>
-                            <td><strong>Analysis</strong></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>3.1 Software & Hardware Requirement</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>3.2 Objective</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>3.3 Feasibility Study</td>
-                        </tr>
-                        <tr>
-                            <td>4.</td>
-                            <td><strong>Experimental or Material Method</strong></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>4.1 Design Methodology</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>4.2 DFD (Data Flow Diagram)</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>4.3 ER (Entity Relationship Diagram)</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>4.4 Data Dictionary (Database Schema)</td>
-                        </tr>
-                        <tr>
-                            <td>5.</td>
-                            <td><strong>Result & Performance Analysis</strong></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>5.1 Process Description (Implementation)</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>5.2 Input Design (UI/UX)</td>
-                        </tr>
-                        <tr>
-                            <td>6.</td>
-                            <td><strong>Conclusion & Future Enhancement</strong></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>6.1 Conclusion</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>6.2 Future Enhancement</td>
-                        </tr>
-                        <tr>
-                            <td>7.</td>
-                            <td><strong>Testing & Bibliography</strong></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>7.1 Testing</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>7.2 Bibliography</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <hr>
+.report-container {
+    display: flex;
+    min-height: 100vh;
+}
 
-                <h2>Chapter 1: Introduction</h2>
+.sidebar {
+    width: 250px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    padding: 20px;
+    position: fixed;
+    height: 100%;
+    overflow-y: auto;
+}
 
-                <h3>1.1 Acknowledgement</h3>
-                <p>
-                    We would like to express our heartfelt gratitude to <strong>INSB INST OF INFO TECH & MGT STD, BCA
-                        COLLEGE & ACCHE PGDCA COLLEGE</strong> for their unwavering support and encouragement throughout
-                    the development of this <em>CareerCraft AI System</em>. Their expertise and guidance have been
-                    pivotal in shaping the project’s direction and ensuring its successful completion.
-                </p>
-                <p>
-                    We extend our sincere thanks to <strong>Project Guide</strong> for their invaluable mentorship.
-                    Their insightful feedback and constructive critiques have been instrumental in refining the project
-                    and enhancing its overall quality. We thank all of the staff members of our college who helped us
-                    directly or indirectly during our project period.
-                </p>
-                <p>
-                    This project would not have been possible without the collective contributions of these individuals
-                    and organizations. Their support has left an indelible mark on the success of this <em>CareerCraft
-                        AI System</em>, and for that, we are truly grateful.
-                </p>
-                <p>
-                    <strong>With Regards,</strong><br>
-                    <strong>Hitarth Chauhan</strong>
-                </p>
+.sidebar h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+}
 
-                <h3>1.2 About College</h3>
-                <p>
-                    BCA/PGDCA College, Idar was established by <strong>Uttar Sabarkantha Uchha Kelavani Mandal
-                        Idar</strong> in the year 2000 with the aim to serve the educational needs of the rural and
-                    developing area of north Sabarkantha.
-                    Our main objective is to provide society with competent men and women who have attributes of
-                    functional and social relevance, mental ability and physical dexterity, effectiveness and reliability
-                    and above all, the confidence and capability to communicate effectively and exercise initiative,
-                    innovation and experiments with new situations.
-                </p>
-                <p>
-                    The management of our college has a definite vision of achieving excellence in being an ideal
-                    educational institution, which is being materialized by the sincere efforts of all concerned
-                    stakeholders. Our college is engaged in the pious work of modeling the young people who are the
-                    builders of the nation.
-                </p>
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
 
-                <h3>1.3 About Organization</h3>
-                <h4>🧭 Who We Are</h4>
-                <p>
-                    <strong>CareerCraft AI</strong> is a dynamic team of developers, designers, and innovators dedicated
-                    to transforming the way students, job seekers, and recruiters connect through intelligent career
-                    management solutions.
-                    Our mission is to create a unified digital platform that empowers users to craft professional
-                    resumes, analyze job-fit, and collaborate with recruiters — all powered by artificial intelligence.
-                </p>
-                <h4>⚙️ What We Do</h4>
-                <p>
-                    CareerCraft AI integrates modern web technologies and AI-driven analytics to provide personalized
-                    career insights, resume optimization, and efficient candidate–recruiter matching.
-                    We focus on building scalable, responsive, and user-friendly systems that combine data intelligence
-                    with simplicity and design excellence.
-                </p>
-                <p>Our areas of expertise include:</p>
-                <ul>
-                    <li>Front-end development using <strong>Next.js</strong> and <strong>Tailwind CSS</strong></li>
-                    <li>Backend integration with <strong>Firebase Authentication</strong> and <strong>Cloud
-                            Firestore</strong></li>
-                    <li>Real-time <strong>AI resume analysis</strong> and <strong>candidate matcher</strong> tools</li>
-                    <li>Dashboard analytics for <strong>students, professionals, and recruiters</strong></li>
-                    <li>Secure payment and subscription management for premium features</li>
-                </ul>
-                <h4>💡 Why Choose CareerCraft AI</h4>
-                <ul>
-                    <li>AI-powered Resume & Job Matching System</li>
-                    <li>Clean, Modern, and Responsive UI</li>
-                    <li>Scalable Firebase-based Architecture</li>
-                    <li>Real-time Data Synchronization & Analytics</li>
-                    <li>Easy Collaboration for Recruiters and Teams</li>
-                </ul>
-                <h4>📞 Contact Us</h4>
-                <p>
-                    <strong>CareerCraft AI Development Team</strong><br>
-                    Department of Computer Science<br>
-                    INSB Institute of BCA & PGDCA, Near Bus Stand<br>
-                    Idar – 383430, Gujarat, India<br>
-                    📧 <a href="mailto:hitarth0236@gmail.com">hitarth0236@gmail.com</a><br>
-                    📱 +91-98987 60325
-                </p>
+.sidebar nav li {
+    margin-bottom: 10px;
+}
 
-                <h3>1.4 Project Profile</h3>
-                <ul>
-                    <li>
-                        <strong>1. Project Title</strong>
-                        <p>CareerCraft AI – An AI-Powered Career Platform</p>
-                    </li>
-                    <li>
-                        <strong>2. Objective</strong>
-                        <p>The objective of CareerCraft AI is to deliver a modern, intelligent platform that empowers
-                            job seekers with AI-driven tools for resume building and career planning, while also
-                            streamlining the recruitment process for hiring managers.</p>
-                        <p>Key goals include:</p>
-                        <ul>
-                            <li>Providing a seamless resume building and management experience.</li>
-                            <li>Offering AI-powered analysis and optimization for resumes and cover letters.</li>
-                            <li>Supporting secure user authentication and tiered subscription plans.</li>
-                            <li>Delivering an intuitive and responsive user interface for both job seekers and
-                                recruiters.</li>
-                            <li>Leveraging Firebase and Genkit for a scalable, serverless backend and AI integration.
-                            </li>
-                            <li>Equipping recruiters with advanced tools like AI Candidate Matcher and team management.
-                            </li>
-                            <li>Providing a comprehensive admin panel for user management and subscription approval.
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <strong>3. Developed By</strong>
-                        <p>CHAUHAN HITARTH</p>
-                    </li>
-                    <li>
-                        <strong>4. Project Guide</strong>
-                        <p>(Placeholder for Project Guide Name)</p>
-                    </li>
-                    <li>
-                        <strong>5. Frontend Technologies</strong>
-                        <ul>
-                            <li><strong>Next.js (React):</strong> A modern framework for building performant,
-                                server-rendered web applications.</li>
-                            <li><strong>TypeScript:</strong> For strong typing and improved code quality.</li>
-                            <li><strong>Tailwind CSS:</strong> A utility-first CSS framework for rapid UI development.
-                            </li>
-                            <li><strong>shadcn/ui:</strong> A collection of beautifully designed, accessible UI
-                                components.</li>
-                        </ul>
-                    </li>
-                    <li>
-                        <strong>6. Backend Technologies</strong>
-                        <ul>
-                            <li><strong>Firebase:</strong> Provides authentication, a NoSQL Firestore database for data
-                                storage, and file storage.</li>
-                            <li><strong>Genkit (Google AI):</strong> Used for integrating powerful generative AI models
-                                (like Gemini) for all intelligent features.</li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </main>
-    </div>
-</body>
+.sidebar nav a {
+    display: block;
+    text-decoration: none;
+    color: var(--text-color);
+    padding: 10px 15px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
 
-</html>
+.sidebar nav a:hover {
+    background-color: #f3f4f6;
+}
+
+.sidebar nav a.active {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+}
+
+.content {
+    margin-left: 250px;
+    padding: 30px;
+    width: calc(100% - 250px);
+}
+
+.page {
+    background: white;
+    padding: 2.5cm;
+    width: 21cm;
+    min-height: 29.7cm;
+    margin: 0 auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #111827;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+}
+
+h1 {
+    font-size: 2.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+
+h2 {
+    font-size: 1.8rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+h3 {
+    font-size: 1.4rem;
+}
+
+h4 {
+    font-size: 1.1rem;
+}
+
+p,
+li {
+    font-size: 1rem;
+    margin-bottom: 1em;
+}
+
+ul,
+ol {
+    padding-left: 25px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5em;
+    font-size: 0.9rem;
+}
+
+th,
+td {
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f9fafb;
+    font-weight: 600;
+}
+
+code {
+    background-color: #eef2ff;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.mermaid {
+    text-align: center;
+    margin: 2em 0;
+    padding: 1em;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: #fdfdfd;
+}
+
+.report-image {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin: 20px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Print styles */
+@media print {
+    body {
+        background-color: white;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .content {
+        margin-left: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .page {
+        width: auto;
+        min-height: auto;
+        margin: 0;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    @page {
+        size: A4;
+        margin: 2cm;
+    }
+
+    /* This is the key change: force a page break before every section */
+    section {
+        page-break-before: always;
+    }
+
+    /* This rule prevents a break inside the container holding the h1 and the first section */
+    .chapter-start {
+        page-break-inside: avoid;
+    }
+
+    /* And this rule prevents the very first section from having a break before it */
+    .chapter-start section {
+        page-break-before: avoid;
+    }
+
+    h1,
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+
+    table,
+    .mermaid,
+    .report-image {
+        page-break-inside: avoid;
+    }
+}
