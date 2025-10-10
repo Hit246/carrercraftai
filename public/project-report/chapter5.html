@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chapter 5: Result & Performance Analysis - CareerCraft AI Project Report</title>
+    <title>Chapter 5: Result & Performance Analysis - CareerCraft AI</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,13 +12,14 @@
             <h3>CareerCraft AI</h3>
             <nav>
                 <ul>
-                    <li><a href="index.html">1. Introduction</a></li>
+                    <li><a href="index.html">Index</a></li>
+                    <li><a href="chapter1.html">1. Introduction</a></li>
                     <li><a href="chapter2.html">2. Literature Survey</a></li>
                     <li><a href="chapter3.html">3. Analysis</a></li>
-                    <li><a href="chapter4.html">4. Experimental Method</a></li>
-                    <li><a href="chapter5.html" class="active">5. Result & Analysis</a></li>
+                    <li><a href="chapter4.html">4. Methodology</a></li>
+                    <li><a href="chapter5.html" class="active">5. Results</a></li>
                     <li><a href="chapter6.html">6. Conclusion</a></li>
-                    <li><a href="chapter7.html">7. Testing & Bibliography</a></li>
+                    <li><a href="chapter7.html">7. Testing</a></li>
                 </ul>
             </nav>
         </aside>
@@ -26,13 +27,12 @@
             <div class="page">
                 <h1>Chapter 5: Result & Performance Analysis</h1>
 
-                <section>
+                <section id="process-description">
                     <h2>5.1 Process Description (Implementation)</h2>
                     <p>The CareerCraft AI application is divided into three primary modules, each responsible for handling distinct user roles and system functionalities:</p>
                     
-                    <h3>1. User & Recruiter Module</h3>
+                    <h4>1. User & Recruiter Module</h4>
                     <p>This module enables registered job seekers and recruiters to interact with the platform's core features, focused on career enhancement and talent acquisition.</p>
-                    <p><strong>Key Functions:</strong></p>
                     <ul>
                         <li><strong>User Registration & Login:</strong> Users can sign up or log in using a secure email/password system powered by Firebase Authentication.</li>
                         <li><strong>Resume Builder:</strong> An intuitive interface allows users to create, edit, and manage multiple versions of their resumes with a live preview.</li>
@@ -41,9 +41,8 @@
                         <li><strong>Team Management (Recruiter Plan):</strong> Recruiters can create a team, invite members via email, and manage their roster.</li>
                     </ul>
 
-                    <h3>2. Admin Module</h3>
+                    <h4>2. Admin Module</h4>
                     <p>The admin panel provides authorized administrators with oversight and control over platform operations, content, and user management.</p>
-                    <p><strong>Key Functions:</strong></p>
                     <ul>
                         <li><strong>User Management:</strong> Admins can view a list of all registered users, edit their subscription plans manually, and delete user accounts.</li>
                         <li><strong>Subscription Approval:</strong> Admins can review and approve or reject pending subscription upgrade requests submitted by users.</li>
@@ -53,37 +52,28 @@
                     </ul>
                 </section>
 
-                <section>
+                <section id="input-design">
                     <h2>5.2 Input Design (UI/UX)</h2>
                     
-                    <h3>1. User & Recruiter Module</h3>
+                    <h4>1. User & Recruiter Module</h4>
                     <p>This is the primary interface for job seekers and recruiters.</p>
                     <ul>
                         <li><strong>Dashboard (Resume Builder):</strong> The main dashboard features a two-panel layout with an editable form on the left for all resume sections (personal info, summary, experience, etc.) and a live, real-time preview of the resume on the right.</li>
-                    </ul>
-                    <img src="/resume-builder.png" alt="Resume Builder Screenshot" class="report-image">
-                    
-                    <ul>
+                        <li><img src="/resume-builder.png" alt="Resume Builder Screenshot" class="report-image"></li>
                         <li><strong>AI Tools:</strong> Each AI tool (e.g., Resume Analyzer, Job Matcher) has a dedicated page with a simple and clear input form. This typically includes file uploads for resumes and text areas for job descriptions.</li>
-                    </ul>
-                    <img src="/resume-analyzer.png" alt="Resume Analyzer Screenshot" class="report-image">
-                    <img src="/ats-optimizer.png" alt="ATS Optimizer Screenshot" class="report-image">
-                    
-                    <ul>
+                        <li><img src="/resume-analyzer.png" alt="Resume Analyzer Screenshot" class="report-image"></li>
+                        <li><img src="/ats-optimizer.png" alt="ATS Optimizer Screenshot" class="report-image"></li>
                         <li><strong>Navigation:</strong> A collapsible sidebar provides easy and intuitive access to all features, including the resume builder, AI tools, support, and profile settings.</li>
                     </ul>
 
-                    <h3>2. Admin Module</h3>
+                    <h4>2. Admin Module</h4>
                     <p>The admin panel is designed for efficient management and oversight.</p>
                     <ul>
                         <li><strong>Admin Dashboard:</strong> The main landing page for admins, featuring statistical cards (e.g., total users, plan distribution) and a chart visualizing user data.</li>
-                    </ul>
-                    <img src="/admin-dashboard.png" alt="Admin Dashboard Screenshot" class="report-image">
-                    
-                    <ul>
+                        <li><img src="/admin-dashboard.png" alt="Admin Dashboard Screenshot" class="report-image"></li>
                         <li><strong>Management Pages:</strong> Pages for user management, upgrade requests, and support tickets are presented in a clean, tabular format, allowing admins to quickly view, search, and take action on items.</li>
+                        <li><img src="/user-management.png" alt="User Management Screenshot" class="report-image"></li>
                     </ul>
-                    <img src="/user-management.png" alt="User Management Screenshot" class="report-image">
                 </section>
             </div>
         </main>
