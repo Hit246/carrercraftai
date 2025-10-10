@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
@@ -199,26 +198,33 @@ code {
         margin: 2cm;
     }
 
-    /* Force a page break before each major section */
+    /* Start each new chapter on a new page */
+    h1 {
+        page-break-before: always;
+    }
+    
+    /* By default, start each major section on a new page */
     h2 {
         page-break-before: always;
     }
-
-    /* PREVENT a page break between the chapter title and the first section */
-    h1+h2 {
+    
+    /* BUT, prevent a page break for the first h2 right after the chapter title */
+    h1 + h2 {
         page-break-before: avoid;
     }
 
+    h3, h4 {
+        page-break-after: avoid;
+    }
 
-    /* Avoid breaking elements inside these containers */
     table,
     .mermaid,
     .report-image {
         page-break-inside: avoid;
     }
 
-    /* Avoid breaking after these elements */
-    h1, h2, h3, h4 {
-        page-break-after: avoid;
+    a {
+        text-decoration: none;
+        color: inherit;
     }
 }
