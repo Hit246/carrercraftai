@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
@@ -197,20 +198,27 @@ code {
         size: A4;
         margin: 2cm;
     }
-    
+
+    /* Force a page break before each major section */
     h2 {
         page-break-before: always;
     }
 
-    h1,
-    h2,
-    h3 {
-        page-break-after: avoid;
+    /* PREVENT a page break between the chapter title and the first section */
+    h1+h2 {
+        page-break-before: avoid;
     }
 
+
+    /* Avoid breaking elements inside these containers */
     table,
     .mermaid,
     .report-image {
         page-break-inside: avoid;
+    }
+
+    /* Avoid breaking after these elements */
+    h1, h2, h3, h4 {
+        page-break-after: avoid;
     }
 }
