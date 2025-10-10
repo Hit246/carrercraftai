@@ -198,33 +198,25 @@ code {
         margin: 2cm;
     }
 
-    /* Start each new chapter on a new page */
-    h1 {
-        page-break-before: always;
-    }
-    
-    /* By default, start each major section on a new page */
+    /* Force a page break before every major section heading */
     h2 {
         page-break-before: always;
     }
     
-    /* BUT, prevent a page break for the first h2 right after the chapter title */
+    /* PREVENT a page break for the FIRST section right after a chapter title */
     h1 + h2 {
-        page-break-before: avoid;
+        page-break-before: auto;
     }
 
-    h3, h4 {
+    /* Keep headings with the content that follows them */
+    h1, h2, h3, h4 {
         page-break-after: avoid;
     }
 
+    /* Avoid breaking tables, images, and diagrams across pages */
     table,
     .mermaid,
     .report-image {
         page-break-inside: avoid;
-    }
-
-    a {
-        text-decoration: none;
-        color: inherit;
     }
 }
