@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
@@ -199,19 +198,12 @@ code {
         margin: 2cm;
     }
 
-    /* This is the key change: force a page break before every section */
-    section {
-        page-break-before: always;
-    }
-
-    /* This rule prevents a break inside the container holding the h1 and the first section */
-    .chapter-start {
+    .no-break {
         page-break-inside: avoid;
     }
-
-    /* And this rule prevents the very first section from having a break before it */
-    .chapter-start section {
-        page-break-before: avoid;
+    
+    section {
+        page-break-before: always;
     }
 
     h1,
@@ -223,4 +215,6 @@ code {
     table,
     .mermaid,
     .report-image {
-        page-break-inside:
+        page-break-inside: avoid;
+    }
+}
