@@ -3,86 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chapter 7 - CareerCraft AI Report</title>
+    <title>Chapter 7: Testing & Bibliography - CareerCraft AI Project Report</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="report-container">
         <aside class="sidebar">
-            <h1 class="report-title">CareerCraft AI</h1>
-            <nav class="navigation">
+            <h3>CareerCraft AI</h3>
+            <nav>
                 <ul>
                     <li><a href="index.html">1. Introduction</a></li>
                     <li><a href="chapter2.html">2. Literature Survey</a></li>
                     <li><a href="chapter3.html">3. Analysis</a></li>
-                    <li><a href="chapter4.html">4. System Design</a></li>
-                    <li><a href="chapter5.html">5. Implementation</a></li>
+                    <li><a href="chapter4.html">4. Experimental Method</a></li>
+                    <li><a href="chapter5.html">5. Result & Analysis</a></li>
                     <li><a href="chapter6.html">6. Conclusion</a></li>
                     <li><a href="chapter7.html" class="active">7. Testing & Bibliography</a></li>
                 </ul>
             </nav>
         </aside>
         <main class="content">
-            <header>
+            <div class="page">
                 <h1>Chapter 7: Testing & Bibliography</h1>
-            </header>
-            <section id="testing">
-                <h2>7.1 Testing</h2>
-                <p>A multi-layered testing strategy was employed to ensure the application's quality, reliability, and performance. This approach combines manual checks with plans for automated testing to cover different aspects of the system.</p>
-                
-                <h3>Unit Testing (Planned)</h3>
-                <ul>
-                    <li><strong>Objective:</strong> To test individual components and functions in isolation to ensure they work correctly. This is crucial for maintaining a stable and predictable codebase.</li>
-                    <li><strong>Tools:</strong> The plan is to use <strong>Jest</strong> and <strong>React Testing Library</strong>.</li>
-                    <li><strong>Examples:</strong>
-                        <ul>
-                            <li>Testing a UI component like <code>&lt;Button&gt;</code> to verify it renders correctly and that its <code>onClick</code> handler fires when clicked.</li>
-                            <li>Testing a utility function, such as one that converts a file to a data URI, to ensure it produces the correct output for a given input.</li>
-                        </ul>
-                    </li>
-                </ul>
 
-                <h3>Integration Testing (Planned)</h3>
-                <ul>
-                    <li><strong>Objective:</strong> To verify that different parts of the application work together as expected. This is especially important for a full-stack application that relies on external services.</li>
-                    <li><strong>Tools:</strong> This would also leverage <strong>Jest</strong> and <strong>React Testing Library</strong>, but with a focus on component interactions and service mocking.</li>
-                    <li><strong>Examples:</strong>
-                        <ul>
-                            <li>Testing the login flow to ensure the <code>LoginForm</code> component correctly calls the <code>useAuth</code> hook, which in turn interacts with Firebase Authentication. This test would verify both successful login and error handling.</li>
-                            <li>Testing the Resume Builder's "Save" functionality to ensure that changes in the UI are correctly written to the user's Firestore document.</li>
-                        </ul>
-                    </li>
-                </ul>
+                <section>
+                    <h2>7.1 Testing</h2>
+                    <p>A multi-layered testing strategy was employed to ensure the application's quality, reliability, and performance. This approach combines manual checks with plans for automated testing to cover different aspects of the system.</p>
+                    
+                    <h3>Unit Testing (Planned)</h3>
+                    <ul>
+                        <li><strong>Objective:</strong> To test individual components and functions in isolation to ensure they work correctly. This is crucial for maintaining a stable and predictable codebase.</li>
+                        <li><strong>Tools:</strong> The plan is to use <strong>Jest</strong> and <strong>React Testing Library</strong>.</li>
+                        <li><strong>Examples:</strong>
+                            <ul>
+                                <li>Testing a UI component like <code>&lt;Button&gt;</code> to verify it renders correctly and that its <code>onClick</code> handler fires when clicked.</li>
+                                <li>Testing a utility function, such as one that converts a file to a data URI, to ensure it produces the correct output for a given input.</li>
+                            </ul>
+                        </li>
+                    </ul>
 
-                <h3>Manual Testing (Executed)</h3>
-                <ul>
-                    <li><strong>Objective:</strong> To test the application from an end-user's perspective, covering complete user journeys and identifying any UI/UX issues that automated tests might miss.</li>
-                    <li><strong>Process:</strong> Manually executed all key user flows across different browsers (Chrome, Firefox).</li>
-                    <li><strong>Key Scenarios Tested:</strong>
-                        <ul>
-                            <li><strong>User Authentication:</strong> Successfully signing up, logging in, and logging out.</li>
-                            <li><strong>Resume Builder:</strong> Creating, editing, saving, and exporting a resume.</li>
-                            <li><strong>AI Features:</strong> Using the Resume Analyzer, Job Matcher, and other AI tools to ensure inputs are processed and results are displayed correctly.</li>
-                            <li><strong>Subscription Flow:</strong> Simulating a user requesting a plan upgrade and an admin approving it.</li>
-                            <li><strong>Admin Panel:</strong> Verifying that admins can view users, manage subscriptions, and update settings.</li>
-                        </ul>
-                    </li>
-                </ul>
-            </section>
-            <section id="bibliography">
-                <h2>7.2 Bibliography</h2>
-                <p>The development of CareerCraft AI involved learning and applying modern frontend frameworks, serverless backend services, AI integration, and UI design principles. The following online documentation and resources were instrumental in successfully building and understanding the platform.</p>
-                <h3>Online Resources</h3>
-                <ul>
-                    <li><strong>Google & Stack Overflow</strong> – General web searches for syntax, error resolution, and code snippets.</li>
-                    <li><strong>YouTube</strong> – Tutorials for building Next.js apps, integrating Firebase, and UI component design.</li>
-                    <li><strong>Next.js Official Docs</strong> – Guidance on App Router, Server Components, page rendering, and API routes.</li>
-                    <li><strong>Firebase Documentation</strong> – Essential for understanding Firestore queries, Authentication, Storage, and Security Rules.</li>
-                    <li><strong>Genkit for Firebase Documentation</strong> – Reference for defining AI flows, prompts, and integrating with Google's Gemini models.</li>
-                    <li><strong>Tailwind CSS Documentation</strong> – Official utility-first CSS documentation used for all styling.</li>
-                    <li><strong>shadcn/ui Documentation</strong> – Reference for component structure, usage, and theming.</li>
-                </ul>
-            </section>
+                    <h3>Integration Testing (Planned)</h3>
+                    <ul>
+                        <li><strong>Objective:</strong> To verify that different parts of the application work together as expected. This is especially important for a full-stack application that relies on external services.</li>
+                        <li><strong>Tools:</strong> This would also leverage <strong>Jest</strong> and <strong>React Testing Library</strong>, but with a focus on component interactions and service mocking.</li>
+                        <li><strong>Examples:</strong>
+                            <ul>
+                                <li>Testing the login flow to ensure the <code>LoginForm</code> component correctly calls the <code>useAuth</code> hook, which in turn interacts with Firebase Authentication. This test would verify both successful login and error handling.</li>
+                                <li>Testing the Resume Builder's "Save" functionality to ensure that changes in the UI are correctly written to the user's Firestore document.</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h3>Manual Testing (Executed)</h3>
+                    <ul>
+                        <li><strong>Objective:</strong> To test the application from an end-user's perspective, covering complete user journeys and identifying any UI/UX issues that automated tests might miss.</li>
+                        <li><strong>Process:</strong> Manually executed all key user flows across different browsers (Chrome, Firefox).</li>
+                        <li><strong>Key Scenarios Tested:</strong>
+                            <ul>
+                                <li><strong>User Authentication:</strong> Successfully signing up, logging in, and logging out.</li>
+                                <li><strong>Resume Builder:</strong> Creating, editing, saving, and exporting a resume.</li>
+                                <li><strong>AI Features:</strong> Using the Resume Analyzer, Job Matcher, and other AI tools to ensure inputs are processed and results are displayed correctly.</li>
+                                <li><strong>Subscription Flow:</strong> Simulating a user requesting a plan upgrade and an admin approving it.</li>
+                                <li><strong>Admin Panel:</strong> Verifying that admins can view users, manage subscriptions, and update settings.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>7.2 Bibliography</h2>
+                    <p>The development of CareerCraft AI involved learning and applying modern frontend frameworks, serverless backend services, AI integration, and UI design principles. The following online documentation and resources were instrumental in successfully building and understanding the platform.</p>
+                    
+                    <h3>Online Resources</h3>
+                    <ul>
+                        <li><strong>Google & Stack Overflow</strong> – General web searches for syntax, error resolution, and code snippets.</li>
+                        <li><strong>YouTube</strong> – Tutorials for building Next.js apps, integrating Firebase, and UI component design.</li>
+                        <li><strong>Next.js Official Docs</strong> – Guidance on App Router, Server Components, page rendering, and API routes.</li>
+                        <li><strong>Firebase Documentation</strong> – Essential for understanding Firestore queries, Authentication, Storage, and Security Rules.</li>
+                        <li><strong>Genkit for Firebase Documentation</strong> – Reference for defining AI flows, prompts, and integrating with Google's Gemini models.</li>
+                        <li><strong>Tailwind CSS Documentation</strong> – Official utility-first CSS documentation used for all styling.</li>
+                        <li><strong>shadcn/ui Documentation</strong> – Reference for component structure, usage, and theming.</li>
+                    </ul>
+                </section>
+            </div>
         </main>
     </div>
 </body>

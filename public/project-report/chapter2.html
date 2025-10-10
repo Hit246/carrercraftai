@@ -3,88 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chapter 2 - CareerCraft AI Report</title>
+    <title>Chapter 2: Literature Survey - CareerCraft AI Project Report</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="report-container">
         <aside class="sidebar">
-            <h1 class="report-title">CareerCraft AI</h1>
-            <nav class="navigation">
+            <h3>CareerCraft AI</h3>
+            <nav>
                 <ul>
                     <li><a href="index.html">1. Introduction</a></li>
                     <li><a href="chapter2.html" class="active">2. Literature Survey</a></li>
                     <li><a href="chapter3.html">3. Analysis</a></li>
-                    <li><a href="chapter4.html">4. System Design</a></li>
-                    <li><a href="chapter5.html">5. Implementation</a></li>
+                    <li><a href="chapter4.html">4. Experimental Method</a></li>
+                    <li><a href="chapter5.html">5. Result & Analysis</a></li>
                     <li><a href="chapter6.html">6. Conclusion</a></li>
                     <li><a href="chapter7.html">7. Testing & Bibliography</a></li>
                 </ul>
             </nav>
         </aside>
         <main class="content">
-            <header>
+            <div class="page">
                 <h1>Chapter 2: Literature Survey</h1>
-            </header>
-            <section id="overview">
-                <h2>2.1 Overview of Project</h2>
-                <p>CareerCraft AI is an innovative, AI-powered platform designed to revolutionize the job application and recruitment process. For job seekers, it offers a suite of intelligent tools to help them craft compelling applications and stand out in a competitive market. For recruiters, the platform provides an AI Candidate Matcher to streamline the screening process, saving time and improving the quality of hires.</p>
-                <p>Built with a full-stack approach, the application uses:</p>
-                <ul>
-                    <li><strong>Next.js (React):</strong> For a component-based, responsive frontend.</li>
-                    <li><strong>Tailwind CSS & shadcn/ui:</strong> For clean, utility-first styling and a modern UI.</li>
-                    <li><strong>Firebase:</strong> As a serverless backend for authentication, database (Firestore), and storage.</li>
-                    <li><strong>Genkit (Google AI):</strong> For all AI-driven features, including resume analysis and candidate matching.</li>
-                </ul>
-                <p>Key Features Include:</p>
-                <ul>
-                    <li><strong>Intuitive Resume Builder:</strong> Create and manage multiple resume versions with a live preview.</li>
-                    <li><strong>AI Resume Analyzer:</strong> Get instant feedback on strengths, weaknesses, and keyword optimization.</li>
-                    <li><strong>AI Candidate Matcher:</strong> For recruiters to score and rank resumes against a job description.</li>
-                    <li><strong>Tiered Subscription Model:</strong> Offering 'Free', 'Pro', and 'Recruiter' plans with varying levels of access.</li>
-                    <li><strong>Admin & User Dashboards:</strong> Separate interfaces for user management and application functionality.</li>
-                </ul>
-                <p>The main goal of CareerCraft AI is to combine a user-friendly design with powerful AI functionality—creating a seamless, responsive experience for both job seekers and hiring managers. It serves as a practical demonstration of:</p>
-                <ul>
-                    <li>Real-time, serverless backend integration.</li>
-                    <li>Scalable architecture using modern cloud services.</li>
-                    <li>The application of generative AI in a real-world use case.</li>
-                </ul>
-            </section>
-            <section id="existing-system">
-                <h2>2.2 Existing System</h2>
-                <p>Popular platforms like LinkedIn, Indeed, and traditional resume builders dominate the job market but are often generic, ad-driven, and fail to provide deep, personalized guidance for job seekers.</p>
-                <h3>Limitations of Current Platforms:</h3>
-                <ul>
-                    <li><strong>Generic Templates and Feedback:</strong> Offer basic templates and superficial advice, lacking personalized, AI-driven analysis.</li>
-                    <li><strong>Fragmented User Experience:</strong> Job seekers must use separate tools for resume building, job searching, and application tracking.</li>
-                    <li><strong>Inefficient for Recruiters:</strong> Manual screening of hundreds of resumes is time-consuming and prone to bias.</li>
-                    <li><strong>Lack of Actionable Insights:</strong> Fail to provide users with clear, data-driven steps to improve their resume's effectiveness.</li>
-                </ul>
-                <h3>Need for a Better Alternative:</h3>
-                <p>An intelligent, all-in-one platform that empowers both job seekers and recruiters with:</p>
-                <ul>
-                    <li>An integrated resume builder with version control.</li>
-                    <li>AI-powered analysis for resumes, cover letters, and job matching.</li>
-                    <li>A streamlined, serverless architecture for a fast and reliable experience.</li>
-                    <li>Dedicated tools for recruiters to automate and enhance candidate screening.</li>
-                </ul>
-            </section>
-            <section id="new-system">
-                <h2>2.3 Need for New System</h2>
-                <p>While platforms like LinkedIn and Indeed offer a wide reach, they lack the focused, intelligent tools needed for effective career development and modern recruitment.</p>
-                <h3>Key Limitations of Existing Platforms:</h3>
-                <ol>
-                    <li><strong>Generic Guidance</strong> - Offer one-size-fits-all advice, not personalized AI analysis.</li>
-                    <li><strong>Inefficient for Recruiters</strong> - Manual screening is slow, biased, and resource-intensive.</li>
-                    <li><strong>Fragmented Experience</strong> - Users need separate tools for building, analyzing, and matching.</li>
-                    <li><strong>Cluttered and Distracting</strong> - Often filled with ads and irrelevant social features.</li>
-                    <li><strong>Lack of Deep Insights</strong> - Fail to provide actionable steps for resume improvement.</li>
-                    <li><strong>Poor Skill-Job Alignment</strong> - Basic keyword matching often misses true candidate potential.</li>
-                </ol>
-                <h3>Why CareerCraft AI?</h3>
-                <p>CareerCraft AI provides a clean, focused, and intelligent alternative—ideal for targeted job seeking, skill enhancement, and efficient, unbiased recruitment.</p>
-            </section>
+
+                <section>
+                    <h2>2.1 Overview of Project</h2>
+                    <p>CareerCraft AI is an innovative, AI-powered platform designed to revolutionize the job application and recruitment process. For job seekers, it offers a suite of intelligent tools to help them craft compelling applications and stand out in a competitive market. For recruiters, the platform provides an AI Candidate Matcher to streamline the screening process, saving time and improving the quality of hires.</p>
+                    <p>Built with a full-stack approach, the application uses:</p>
+                    <ul>
+                        <li><strong>Next.js (React):</strong> For a component-based, responsive frontend.</li>
+                        <li><strong>Tailwind CSS & shadcn/ui:</strong> For clean, utility-first styling and a modern UI.</li>
+                        <li><strong>Firebase:</strong> As a serverless backend for authentication, database (Firestore), and storage.</li>
+                        <li><strong>Genkit (Google AI):</strong> For all AI-driven features, including resume analysis and candidate matching.</li>
+                    </ul>
+                    <p>Key Features Include:</p>
+                    <ul>
+                        <li><strong>Intuitive Resume Builder:</strong> Create and manage multiple resume versions with a live preview.</li>
+                        <li><strong>AI Resume Analyzer:</strong> Get instant feedback on strengths, weaknesses, and keyword optimization.</li>
+                        <li><strong>AI Candidate Matcher:</strong> For recruiters to score and rank resumes against a job description.</li>
+                        <li><strong>Tiered Subscription Model:</strong> Offering 'Free', 'Pro', and 'Recruiter' plans with varying levels of access.</li>
+                        <li><strong>Admin & User Dashboards:</strong> Separate interfaces for user management and application functionality.</li>
+                    </ul>
+                    <p>The main goal of CareerCraft AI is to combine a user-friendly design with powerful AI functionality—creating a seamless, responsive experience for both job seekers and hiring managers. It serves as a practical demonstration of:</p>
+                    <ul>
+                        <li>Real-time, serverless backend integration.</li>
+                        <li>Scalable architecture using modern cloud services.</li>
+                        <li>The application of generative AI in a real-world use case.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>2.2 Existing System</h2>
+                    <p>Popular platforms like LinkedIn, Indeed, and traditional resume builders dominate the job market but are often generic, ad-driven, and fail to provide deep, personalized guidance for job seekers.</p>
+                    <p><strong>Limitations of Current Platforms:</strong></p>
+                    <ul>
+                        <li><strong>Generic Templates and Feedback:</strong> Offer basic templates and superficial advice, lacking personalized, AI-driven analysis.</li>
+                        <li><strong>Fragmented User Experience:</strong> Job seekers must use separate tools for resume building, job searching, and application tracking.</li>
+                        <li><strong>Inefficient for Recruiters:</strong> Manual screening of hundreds of resumes is time-consuming and prone to bias.</li>
+                        <li><strong>Lack of Actionable Insights:</strong> Fail to provide users with clear, data-driven steps to improve their resume's effectiveness.</li>
+                    </ul>
+                    <p><strong>Need for a Better Alternative:</strong></p>
+                    <p>An intelligent, all-in-one platform that empowers both job seekers and recruiters with:</p>
+                    <ul>
+                        <li>An integrated resume builder with version control.</li>
+                        <li>AI-powered analysis for resumes, cover letters, and job matching.</li>
+                        <li>A streamlined, serverless architecture for a fast and reliable experience.</li>
+                        <li>Dedicated tools for recruiters to automate and enhance candidate screening.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>2.3 Need for New System</h2>
+                    <p>While platforms like LinkedIn and Indeed offer a wide reach, they lack the focused, intelligent tools needed for effective career development and modern recruitment.</p>
+                    <p><strong>Key Limitations of Existing Platforms:</strong></p>
+                    <ol>
+                        <li><strong>Generic Guidance</strong> - Offer one-size-fits-all advice, not personalized AI analysis.</li>
+                        <li><strong>Inefficient for Recruiters</strong> - Manual screening is slow, biased, and resource-intensive.</li>
+                        <li><strong>Fragmented Experience</strong> - Users need separate tools for building, analyzing, and matching.</li>
+                        <li><strong>Cluttered and Distracting</strong> - Often filled with ads and irrelevant social features.</li>
+                        <li><strong>Lack of Deep Insights</strong> - Fail to provide actionable steps for resume improvement.</li>
+                        <li><strong>Poor Skill-Job Alignment</strong> - Basic keyword matching often misses true candidate potential.</li>
+                    </ol>
+                    <p><strong>Why CareerCraft AI?</strong></p>
+                    <p>CareerCraft AI provides a clean, focused, and intelligent alternative—ideal for targeted job seeking, skill enhancement, and efficient, unbiased recruitment.</p>
+                </section>
+            </div>
         </main>
     </div>
 </body>
