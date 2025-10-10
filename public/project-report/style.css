@@ -173,7 +173,6 @@ code {
 @media print {
     body {
         background-color: white;
-        font-size: 11pt;
     }
 
     .sidebar {
@@ -198,31 +197,21 @@ code {
         size: A4;
         margin: 2cm;
     }
-    
-    /* Ensure each chapter and section starts on a new page */
-    h1, h2, h3 {
+
+    /* Force a page break before each chapter and each main section */
+    h1, h2 {
         page-break-before: always;
     }
-    
-    /* Avoid breaking pages after a heading */
-    h1,
-    h2,
-    h3,
-    h4 {
+
+    /* Avoid breaking pages right after a heading */
+    h1, h2, h3, h4 {
         page-break-after: avoid;
     }
-    
-    /* Avoid breaking inside tables, diagrams, and images */
+
+    /* Avoid breaking tables, images, and diagrams across pages */
     table,
     .mermaid,
-    .report-image,
-    thead {
+    .report-image {
         page-break-inside: avoid;
-    }
-    
-    /* Ensure links are visible when printed */
-    a {
-        color: #52525b; /* a muted color for links */
-        text-decoration: none;
     }
 }
