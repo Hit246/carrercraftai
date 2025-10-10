@@ -197,19 +197,25 @@ code {
         size: A4;
         margin: 2cm;
     }
+    
+    h3, h2, h1 {
+        page-break-after: avoid;
+    }
 
-    .no-break {
+    .chapter-start {
         page-break-inside: avoid;
     }
     
-    section {
+    h3 {
         page-break-before: always;
     }
 
-    h1,
-    h2,
-    h3 {
-        page-break-after: avoid;
+    .chapter-start h3 {
+        page-break-before: auto;
+    }
+    
+    .no-break {
+        page-break-inside: avoid;
     }
 
     table,
@@ -218,3 +224,5 @@ code {
         page-break-inside: avoid;
     }
 }
+
+    
