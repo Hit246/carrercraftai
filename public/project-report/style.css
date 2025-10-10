@@ -1,144 +1,179 @@
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    margin: 0;
-    display: flex;
-    background-color: #f8f9fa;
-    color: #212529;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #4f46e5;
+    --background-color: #f8fafc;
+    --text-color: #1f2937;
+    --sidebar-bg: #ffffff;
+    --border-color: #e5e7eb;
 }
 
-.container {
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.report-container {
     display: flex;
-    width: 100%;
+    min-height: 100vh;
 }
 
 .sidebar {
     width: 250px;
-    background-color: #fff;
-    border-right: 1px solid #dee2e6;
-    padding: 1.5rem;
-    height: 100vh;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    padding: 20px;
     position: fixed;
+    height: 100%;
     overflow-y: auto;
 }
 
-.sidebar h2 {
+.sidebar h3 {
+    font-family: 'Space Grotesk', sans-serif;
     font-size: 1.5rem;
-    margin-top: 0;
-    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 30px;
 }
 
-.sidebar ul {
+.sidebar nav ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
-.sidebar ul li {
-    margin-bottom: 0.5rem;
+.sidebar nav li {
+    margin-bottom: 10px;
 }
 
-.sidebar ul li a {
-    text-decoration: none;
-    color: #495057;
-    font-weight: 500;
+.sidebar nav a {
     display: block;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
+    text-decoration: none;
+    color: var(--text-color);
+    padding: 10px 15px;
+    border-radius: 6px;
     transition: background-color 0.2s;
 }
 
-.sidebar ul li a:hover,
-.sidebar ul li a.active {
-    background-color: #e9ecef;
-    color: #000;
+.sidebar nav a:hover {
+    background-color: #f3f4f6;
 }
 
-.sidebar ul ul {
-    padding-left: 1.5rem;
-    margin-top: 0.5rem;
-}
-
-.sidebar ul ul li a {
-    font-weight: 400;
-    color: #6c757d;
-    font-size: 0.9rem;
+.sidebar nav a.active {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
 }
 
 .content {
     margin-left: 250px;
-    padding: 2rem;
+    padding: 30px;
     width: calc(100% - 250px);
 }
 
-article header h1 {
+.page {
+    background: white;
+    padding: 2.5cm;
+    width: 21cm;
+    min-height: 29.7cm;
+    margin: 0 auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: #111827;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+}
+
+h1 {
     font-size: 2.5rem;
-    font-weight: 700;
-    border-bottom: 2px solid #dee2e6;
-    padding-bottom: 1rem;
-    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
 }
 
-article section {
-    margin-bottom: 2.5rem;
+h2 {
+    font-size: 1.8rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
 }
 
-article section h2 {
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: #343a40;
-    margin-bottom: 1rem;
+h3 {
+    font-size: 1.4rem;
 }
 
-p, li {
-    line-height: 1.6;
+h4 {
+    font-size: 1.1rem;
+}
+
+p,
+li {
     font-size: 1rem;
+    margin-bottom: 1em;
 }
 
-pre, code {
-    background-color: #e9ecef;
-    border-radius: 0.25rem;
-    padding: 0.2rem 0.4rem;
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-}
-
-pre {
-    padding: 1rem;
-    overflow-x: auto;
+ul,
+ol {
+    padding-left: 25px;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
+    margin-bottom: 1.5em;
+    font-size: 0.9rem;
 }
 
-th, td {
-    border: 1px solid #dee2e6;
-    padding: 0.75rem;
+th,
+td {
+    border: 1px solid var(--border-color);
+    padding: 10px;
     text-align: left;
 }
 
 th {
-    background-color: #f8f9fa;
+    background-color: #f9fafb;
     font-weight: 600;
 }
 
-img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    margin-top: 1rem;
+code {
+    background-color: #eef2ff;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
 }
 
-/* Print-specific styles */
-@media print {
-    @page {
-        size: A4;
-        margin: 1in;
-    }
+.mermaid {
+    text-align: center;
+    margin: 2em 0;
+    padding: 1em;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: #fdfdfd;
+}
 
+.report-image {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin: 20px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Print styles */
+@media print {
     body {
-        background-color: #fff;
+        background-color: white;
+        font-size: 11pt;
     }
 
     .sidebar {
@@ -151,22 +186,43 @@ img {
         width: 100%;
     }
 
-    article header,
-    article section {
+    .page {
+        width: auto;
+        min-height: auto;
+        margin: 0;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    @page {
+        size: A4;
+        margin: 2cm;
+    }
+    
+    /* Ensure each chapter and section starts on a new page */
+    h1, h2, h3 {
         page-break-before: always;
     }
     
-    article header:first-child {
-        page-break-before: auto; /* Avoid page break before the very first element */
+    /* Avoid breaking pages after a heading */
+    h1,
+    h2,
+    h3,
+    h4 {
+        page-break-after: avoid;
     }
-
+    
+    /* Avoid breaking inside tables, diagrams, and images */
+    table,
+    .mermaid,
+    .report-image,
+    thead {
+        page-break-inside: avoid;
+    }
+    
+    /* Ensure links are visible when printed */
     a {
+        color: #52525b; /* a muted color for links */
         text-decoration: none;
-        color: #000;
-    }
-
-    img {
-        box-shadow: none;
-        border: 1px solid #ccc;
     }
 }
