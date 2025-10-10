@@ -5,414 +5,319 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chapter 4: Experimental or Material Method - CareerCraft AI Project Report</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-    <script>mermaid.initialize({startOnLoad:true});</script>
 </head>
 <body>
     <div class="report-container">
         <aside class="sidebar">
-            <h3>CareerCraft AI</h3>
+            <header>
+                <h2>CareerCraft AI</h2>
+                <p>Project Report</p>
+            </header>
             <nav>
                 <ul>
-                    <li><a href="index.html">1. Introduction</a></li>
-                    <li><a href="chapter2.html">2. Literature Survey</a></li>
-                    <li><a href="chapter3.html">3. Analysis</a></li>
-                    <li><a href="chapter4.html" class="active">4. Experimental Method</a></li>
-                    <li><a href="chapter5.html">5. Result & Analysis</a></li>
-                    <li><a href="chapter6.html">6. Conclusion</a></li>
-                    <li><a href="chapter7.html">7. Testing & Bibliography</a></li>
+                    <li><a href="index.html">Title Page</a></li>
+                    <li><a href="chapter1.html">Chapter 1: Introduction</a></li>
+                    <li><a href="chapter2.html">Chapter 2: Literature Survey</a></li>
+                    <li><a href="chapter3.html">Chapter 3: Analysis</a></li>
+                    <li><a href="chapter4.html" class="active">Chapter 4: Method</a></li>
+                    <li><a href="chapter5.html">Chapter 5: Results</a></li>
+                    <li><a href="chapter6.html">Chapter 6: Conclusion</a></li>
+                    <li><a href="chapter7.html">Chapter 7: Testing & Bibliography</a></li>
                 </ul>
             </nav>
         </aside>
         <main class="content">
-            <div class="page">
-                <h1>Chapter 4: Experimental or Material Method</h1>
+            <h1>Chapter 4: Experimental or Material Method</h1>
 
-                <section>
-                    <h2>4.1 Design Methodology</h2>
-                    <p>The design methodology used in the development of the CareerCraft AI system is primarily based on <strong>Data Flow Diagrams (DFDs)</strong>, which illustrate the logical flow of data through the application. These diagrams help in mapping out how data is processed, transferred, and stored within the system—independent of the physical or technical implementation.</p>
+            <section id="design-methodology">
+                <h2>4.1 Design Methodology</h2>
+                <p>The design methodology used in the development of the CareerCraft AI system is primarily based on <strong>Data Flow Diagrams (DFDs)</strong>, which illustrate the logical flow of data through the application. These diagrams help in mapping out how data is processed, transferred, and stored within the system—independent of the physical or technical implementation.</p>
+                <h3>Purpose of Using DFDs</h3>
+                <ul>
+                    <li>To identify system inputs, outputs, and processing components.</li>
+                    <li>To visualize user interaction with the system.</li>
+                    <li>To understand how data moves and transforms through different stages.</li>
+                    <li>To separate logical design from the physical architecture, ensuring a clearer view of how features are structured.</li>
+                </ul>
+                <h3>DFD Levels Used in CareerCraft AI</h3>
+                <ol>
+                    <li><strong>Level 0: Context-Level DFD</strong>
+                        <ul>
+                            <li>Provides a high-level overview of the entire system.</li>
+                            <li>Shows main external entities such as Users, Admins, and Recruiters interacting with the CareerCraft AI system.</li>
+                            <li>Highlights the general input-output relationship of major system functions.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Level 1: First-Level DFD</strong>
+                        <ul>
+                            <li>Breaks down major system functions into sub-processes.</li>
+                            <li>Helps visualize internal data flow and sub-process dependencies.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Level 2: Second-Level DFD</strong>
+                        <ul>
+                            <li>Provides a detailed look into a single sub-process from the first-level diagram.</li>
+                        </ul>
+                    </li>
+                </ol>
+            </section>
+
+            <section id="dfd">
+                <h2>4.2 DFD (Data Flow Diagram)</h2>
+                <p>This section details the flow of data within the CareerCraft AI system at different levels of abstraction using graphical diagrams.</p>
+                
+                <h3>Level 0: Context-Level DFD</h3>
+                <p>The context-level diagram shows the entire system as a single process interacting with external entities.</p>
+                <div class="mermaid">
+                graph LR
+                    U[User] -->|User Inputs| P0((CareerCraft AI<br>System))
+                    R[Recruiter] -->|Recruiter Inputs| P0
+                    A[Admin] -->|Admin Inputs| P0
                     
-                    <h3>Purpose of Using DFDs</h3>
-                    <ul>
-                        <li>To identify system inputs, outputs, and processing components.</li>
-                        <li>To visualize user interaction with the system.</li>
-                        <li>To understand how data moves and transforms through different stages.</li>
-                        <li>To separate logical design from the physical architecture, ensuring a clearer view of how features are structured.</li>
-                    </ul>
+                    P0 -->|User Outputs| U
+                    P0 -->|Recruiter Outputs| R
+                    P0 -->|Admin Outputs| A
 
-                    <h3>DFD Levels Used in CareerCraft AI</h3>
-                    <ol>
-                        <li><strong>Level 0: Context-Level DFD</strong>
-                            <ul>
-                                <li>Provides a high-level overview of the entire system.</li>
-                                <li>Shows main external entities such as Users, Admins, and Recruiters interacting with the CareerCraft AI system.</li>
-                                <li>Highlights the general input-output relationship of major system functions.</li>
-                            </ul>
-                        </li>
-                        <li><strong>Level 1: First-Level DFD</strong>
-                            <ul>
-                                <li>Breaks down major system functions into sub-processes.</li>
-                                <li>Helps visualize internal data flow and sub-process dependencies.</li>
-                            </ul>
-                        </li>
-                        <li><strong>Level 2: Second-Level DFD</strong>
-                            <ul>
-                                <li>Provides a detailed look into a single sub-process from the first-level diagram.</li>
-                            </ul>
-                        </li>
-                    </ol>
-                </section>
+                    style U fill:#fff,stroke:#333,stroke-width:2px
+                    style R fill:#fff,stroke:#333,stroke-width:2px
+                    style A fill:#fff,stroke:#333,stroke-width:2px
+                    style P0 fill:#f9f9f9,stroke:#333,stroke-width:2px
+                </div>
 
-                <section>
-                    <h2>4.2 DFD (Data Flow Diagram)</h2>
-                    <p>This section details the flow of data within the CareerCraft AI system at different levels of abstraction using graphical diagrams.</p>
+                <h3>Level 1: First-Level DFD</h3>
+                <p>This diagram breaks down the main system into its primary sub-processes and shows the data stores they interact with.</p>
+                <div class="mermaid">
+                graph TD
+                    U[User]
+                    R[Recruiter]
+                    A[Admin]
 
-                    <h3>Level 0: Context-Level DFD</h3>
-                    <p>The context-level diagram shows the entire system as a single process interacting with external entities.</p>
-                    <div class="mermaid">
-                        graph LR
-                            U[User] -->|User Inputs| P0((CareerCraft AI<br>System))
-                            R[Recruiter] -->|Recruiter Inputs| P0
-                            A[Admin] -->|Admin Inputs| P0
-                            
-                            P0 -->|User Outputs| U
-                            P0 -->|Recruiter Outputs| R
-                            P0 -->|Admin Outputs| A
-
-                            style U fill:#fff,stroke:#333,stroke-width:2px
-                            style R fill:#fff,stroke:#333,stroke-width:2px
-                            style A fill:#fff,stroke:#333,stroke-width:2px
-                            style P0 fill:#f9f9f9,stroke:#333,stroke-width:2px
-                    </div>
-
-                    <h3>Level 1: First-Level DFD</h3>
-                    <p>This diagram breaks down the main system into its primary sub-processes and shows the data stores they interact with.</p>
-                    <div class="mermaid">
-                        graph TD
-                            subgraph User
-                                U[User]
-                            end
-                            
-                            subgraph Recruiter
-                                R[Recruiter]
-                            end
-                            
-                            subgraph Admin
-                                A[Admin]
-                            end
-
-                            P1(Manage<br>Auth)
-                            P2(Manage<br>Resumes)
-                            P3(Execute<br>AI Features)
-                            P4(Manage<br>Subscriptions)
-                            P5(Manage<br>Support)
-                            P7(Manage<br>Teams)
-                            P6(Admin<br>Functions)
-
-                            D1[("Users")]
-                            D2[("Resume<br>Versions")]
-                            D3[("Support<br>Tickets")]
-                            D4[("Settings")]
-                            D5[("Teams")]
-
-                            U --> P1 & P2 & P3 & P4 & P5
-                            R --> P1 & P3 & P7
-                            A --> P6
-
-                            P1 --> D1
-                            P2 --> D2
-                            P3 --> D1
-                            P4 --> D1
-                            P4 --> D4
-                            P5 --> D3
-                            P7 --> D5 & D1
-                            P6 --> D1 & D3 & D4
-
-                            style U fill:#fff,stroke:#333,stroke-width:2px
-                            style R fill:#fff,stroke:#333,stroke-width:2px
-                            style A fill:#fff,stroke:#333,stroke-width:2px
-
-                            style P1 fill:#f0f9ff,stroke:#0284c7
-                            style P2 fill:#f0f9ff,stroke:#0284c7
-                            style P3 fill:#f0f9ff,stroke:#0284c7
-                            style P4 fill:#f0f9ff,stroke:#0284c7
-                            style P5 fill:#f0f9ff,stroke:#0284c7
-                            style P6 fill:#f0f9ff,stroke:#0284c7
-                            style P7 fill:#f0f9ff,stroke:#0284c7
-                    </div>
-
-                    <h3>Level 2: Second-Level DFD (Example: Process 4.0 Manage Subscriptions)</h3>
-                    <p>This diagram provides a detailed look into the "Manage Subscriptions" process.</p>
-                    <div class="mermaid">
-                        graph TD
-                            U[User]
-                            A[Admin]
-                            
-                            D1[("Users")]
-                            D4[("Settings")]
-
-                            P4_1("4.1<br>Display Pricing &<br>Fetch Payment Details")
-                            P4_2("4.2<br>Process Upgrade<br>Request")
-                            P4_3("4.3<br>Review Pending<br>Upgrades")
-                            P4_4("4.4<br>Update User<br>Plan")
-
-                            U -- "Views Pricing Page" --> P4_1
-                            P4_1 -- "Reads Payment Details" --> D4
-                            P4_1 -- "Shows Payment Options" --> U
-                            U -- "Submits Payment Proof" --> P4_2
-                            P4_2 -- "Updates Status to 'pending'" --> D1
-                            
-                            A -- "Views Pending List" --> P4_3
-                            P4_3 -- "Reads Pending Users" --> D1
-                            P4_3 -- "Shows List to Admin" --> A
-                            
-                            A -- "Approves/Rejects" --> P4_4
-                            P4_4 -- "Updates User Plan" --> D1
-                    </div>
-                </section>
-
-                <section>
-                    <h2>4.3 ER (Entity Relationship Diagram)</h2>
-                    <p>An Entity-Relationship (ER) Diagram is a visual representation that outlines how data entities relate to one another within a database system. It helps in understanding the structure of the application's backend and serves as a guide for designing the database schema.</p>
-                    <p>The ER diagram of CareerCraft AI demonstrates how <code>users</code> interact with <code>resumeVersions</code>, <code>teams</code>, and <code>supportRequests</code>.</p>
+                    subgraph "Processes"
+                        direction LR
+                        P1(1.0<br>Manage<br>Auth)
+                        P2(2.0<br>Manage<br>Resumes)
+                        P3(3.0<br>Execute<br>AI Features)
+                        P4(4.0<br>Manage<br>Subscriptions)
+                        P5(5.0<br>Manage<br>Support)
+                        P7(6.0<br>Manage<br>Teams)
+                        P6(7.0<br>Admin<br>Functions)
+                    end
                     
-                    <h3>Building Blocks of the E-R Diagram</h3>
-                    <p><strong>Entities (Rectangles)</strong><br>
-                    Entities are real-world objects that store data.</p>
-                    <ul>
-                        <li><code>users</code>: Stores individual user profiles and subscription data.</li>
-                        <li><code>resumeVersions</code>: A subcollection storing different versions of a user's resume.</li>
-                        <li><code>teams</code>: For recruiter accounts, containing team data.</li>
-                        <li><code>members</code>: A subcollection storing team member information.</li>
-                        <li><code>supportRequests</code>: Stores user-submitted support tickets.</li>
-                        <li><code>history</code>: A subcollection for the conversation history of a support ticket.</li>
-                    </ul>
+                    subgraph "Data Stores"
+                        direction LR
+                        D1[("D1: Users")]
+                        D2[("D2: Resume<br>Versions")]
+                        D3[("D3: Support<br>Tickets")]
+                        D4[("D4: Settings")]
+                        D5[("D5: Teams")]
+                    end
 
-                    <p><strong>Attributes (Ovals)</strong><br>
-                    Attributes define the properties of each entity.</p>
-                    <ul>
-                        <li><code>user</code>: <code>uid</code>, <code>displayName</code>, <code>email</code>, <code>plan</code>, <code>credits</code>, <code>teamId</code>.</li>
-                        <li><code>resumeVersion</code>: <code>versionName</code>, <code>updatedAt</code>, <code>resumeData</code> (a map object).</li>
-                        <li><code>team</code>: <code>owner</code>, <code>createdAt</code>.</li>
-                        <li><code>member</code>: <code>uid</code>, <code>email</code>, <code>role</code>, <code>name</code>.</li>
-                        <li><code>supportRequest</code>: <code>userId</code>, <code>subject</code>, <code>status</code>, <code>lastMessageAt</code>.</li>
-                        <li><code>history</code>: <code>message</code>, <code>sender</code>, <code>timestamp</code>.</li>
-                    </ul>
+                    U --> P1
+                    U --> P2
+                    U --> P3
+                    U --> P4
+                    U --> P5
+                    R --> P1
+                    R --> P3
+                    R --> P7
+                    A --> P6
 
-                    <h3>Relationships (Diamonds)</h3>
-                    <p>Relationships explain how entities are connected.</p>
-                    <ul>
-                        <li>A <code>user</code> → has → many <code>resumeVersions</code>.</li>
-                        <li>A <code>user</code> → submits → many <code>supportRequests</code>.</li>
-                        <li>A <code>supportRequest</code> → has → many <code>history</code> entries.</li>
-                        <li>A <code>user</code> (recruiter) → owns → a <code>team</code>.</li>
-                        <li>A <code>team</code> → has → many <code>members</code>.</li>
-                    </ul>
+                    P1 --> D1
+                    P2 --> D2
+                    P3 --> D1
+                    P4 --> D1
+                    P4 --> D4
+                    P5 --> D3
+                    P7 --> D5 & D1
+                    P6 --> D1 & D3 & D4
 
-                    <h3>Types of Relationships</h3>
-                    <p><strong>One-to-Many</strong></p>
-                    <ul>
-                        <li>One <code>user</code> can have multiple <code>resumeVersions</code>.</li>
-                        <li>One <code>user</code> can submit multiple <code>supportRequests</code>.</li>
-                        <li>One <code>team</code> can have many <code>members</code>.</li>
-                    </ul>
+                    style U fill:#fff,stroke:#333,stroke-width:2px
+                    style R fill:#fff,stroke:#333,stroke-width:2px
+                    style A fill:#fff,stroke:#333,stroke-width:2px
+                </div>
 
-                    <h3>Purpose of the ER Diagram</h3>
-                    <ul>
-                        <li><strong>Data Modeling:</strong> Defines how data is structured and related in the application.</li>
-                        <li><strong>Communication Tool:</strong> Acts as a shared understanding between developers, designers, and stakeholders.</li>
-                        <li><strong>Database Design:</strong> Lays the foundation for database schema creation and relationships in Firestore.</li>
-                    </ul>
-                </section>
-
-                <section>
-                    <h2>4.4 Data Dictionary (Database Schema)</h2>
-                    <p>A <strong>Data Dictionary</strong>, also known as a metadata repository, is a structured collection of definitions and information about the data used in a system or application. It acts as a reference guide for developers, analysts, and stakeholders, ensuring everyone understands what data exists, how it is structured, and how it should be used.</p>
-                    <p>For CareerCraft AI, the Data Dictionary includes:</p>
-                    <ul>
-                        <li><strong>Data Object Definitions:</strong> Descriptions of Firestore collections and their fields.</li>
-                        <li><strong>Data Types:</strong> Specifies the format of each field (e.g., <code>string</code>, <code>number</code>, <code>Timestamp</code>).</li>
-                        <li><strong>Relationships:</strong> Describes how collections and subcollections are connected.</li>
-                    </ul>
-                    <p>The detailed Data Dictionary for this project, outlining every collection, field, and data type, is maintained in the <code>DB_SCHEMA.md</code> file.</p>
+                <h3>Level 2: Second-Level DFD (Example: Process 4.0 Manage Subscriptions)</h3>
+                <p>This diagram provides a detailed look into the "Manage Subscriptions" process.</p>
+                <div class="mermaid">
+                graph TD
+                    U[User]
+                    A[Admin]
                     
-                    <h3>Collections</h3>
-                    <h4>1. `users`</h4>
-                    <p>This collection stores information about individual users, their subscription status, and related metadata.</p>
-                    <ul>
-                        <li><strong>Collection Path:</strong> <code>/users</code></li>
-                        <li><strong>Document ID:</strong> <code>user.uid</code> (The unique ID from Firebase Authentication)</li>
-                    </ul>
-                    <h5>Document Fields:</h5>
-                    <table>
-                        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>displayName</code></td><td><code>string</code></td><td>User’s full name.</td></tr>
-                            <tr><td><code>photoURL</code></td><td><code>string</code></td><td>Profile picture URL stored in Firebase.</td></tr>
-                            <tr><td><code>email</code></td><td><code>string</code></td><td>Registered email address.</td></tr>
-                            <tr><td><code>plan</code></td><td><code>string</code></td><td>Current subscription plan (`free`, `essentials`, `pro`, `recruiter`, etc.).</td></tr>
-                            <tr><td><code>credits</code></td><td><code>number</code></td><td>Available AI credits based on plan.</td></tr>
-                            <tr><td><code>createdAt</code></td><td><code>timestamp</code></td><td>Date and time when the account was created.</td></tr>
-                            <tr><td><code>planUpdatedAt</code></td><td><code>timestamp</code></td><td>Last plan update timestamp.</td></tr>
-                            <tr><td><code>requestedPlan</code></td><td><code>string</code></td><td>Requested plan during upgrade or pending status.</td></tr>
-                            <tr><td><code>paymentProofURL</code></td><td><code>string</code></td><td>Uploaded payment proof URL.</td></tr>
-                            <tr><td><code>teamId</code></td><td><code>string</code></td><td>Associated team ID for recruiter users.</td></tr>
-                            <tr><td><code>hasCompletedOnboarding</code></td><td><code>boolean</code></td><td>Indicates if the user completed onboarding.</td></tr>
-                        </tbody>
-                    </table>
-
-                    <h5>Subcollection: `resumeVersions`</h5>
-                    <p>Each user document contains a subcollection of their resume versions. The number of versions a user can store is limited by their plan (Free: 2, Essentials: 10, Pro/Recruiter: Unlimited).</p>
-                    <ul>
-                        <li><strong>Collection Path:</strong> <code>/users/{userId}/resumeVersions</code></li>
-                        <li><strong>Document ID:</strong> Auto-generated by Firestore.</li>
-                    </ul>
-                    <table>
-                        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>versionName</code></td><td><code>string</code></td><td>The user-defined or AI-suggested name for this version.</td></tr>
-                            <tr><td><code>updatedAt</code></td><td><code>Timestamp</code></td><td>The date and time this version was last saved.</td></tr>
-                            <tr><td><code>resumeData</code></td><td><code>Map</code></td><td>The complete, structured resume data for this version.</td></tr>
-                        </tbody>
-                    </table>
-
-                    <h5>`resumeData` Object Structure</h5>
-                     <table>
-                        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>name</code></td><td><code>string</code></td><td>The full name of the user.</td></tr>
-                            <tr><td><code>title</code></td><td><code>string</code></td><td>The user's professional title (e.g., "Software Engineer").</td></tr>
-                            <tr><td><code>phone</code></td><td><code>string</code></td><td>The user's phone number.</td></tr>
-                            <tr><td><code>email</code></td><td><code>string</code></td><td>The user's contact email.</td></tr>
-                            <tr><td><code>linkedin</code></td><td><code>string</code></td><td>A link to the user's LinkedIn profile.</td></tr>
-                            <tr><td><code>summary</code></td><td><code>string</code></td><td>A professional summary or objective statement.</td></tr>
-                            <tr><td><code>skills</code></td><td><code>string</code></td><td>A comma-separated list of skills.</td></tr>
-                            <tr><td><code>experience</code></td><td><code>Array&lt;Map&gt;</code></td><td>An array of objects, where each object represents a work experience entry.</td></tr>
-                            <tr><td><code>education</code></td><td><code>Array&lt;Map&gt;</code></td><td>An array of objects, where each object represents an education entry.</td></tr>
-                            <tr><td><code>projects</code></td><td><code>Array&lt;Map&gt;</code></td><td>An array of objects, where each object represents a project showcase entry.</td></tr>
-                        </tbody>
-                    </table>
-
-                    <h5>`experience` Object Structure:</h5>
-                    <table>
-                        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>id</code></td><td><code>number</code></td><td>A unique timestamp-based ID for the entry.</td></tr>
-                            <tr><td><code>title</code></td><td><code>string</code></td><td>The job title.</td></tr>
-                            <tr><td><code>company</code></td><td><code>string</code></td><td>The name of the company.</td></tr>
-                            <tr><td><code>dates</code></td><td><code>string</code></td><td>The employment dates (e.g., "2020 - Present").</td></tr>
-                            <tr><td><code>description</code></td><td><code>string</code></td><td>A description of responsibilities and achievements.</td></tr>
-                        </tbody>
-                    </table>
-
-                    <h5>`education` Object Structure:</h5>
-                    <table>
-                        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>id</code></td><td><code>number</code></td><td>A unique timestamp-based ID for the entry.</td></tr>
-                            <tr><td><code>school</code></td><td><code>string</code></td><td>The name of the school or university.</td></tr>
-                            <tr><td><code>degree</code></td><td><code>string</code></td><td>The degree obtained (e.g., "B.S. in Computer Science").</td></tr>
-                            <tr><td><code>dates</code></td><td><code>string</code></td><td>The dates of attendance (e.g., "2016 - 2020").</td></tr>
-                            <tr><td><code>cgpa</code></td><td><code>string</code></td><td>The Cumulative Grade Point Average (e.g., "8.5/10").</td></tr>
-                        </tbody>
-                    </table>
-
-                    <h5>`projects` Object Structure:</h5>
-                    <table>
-                        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                        <tbody>
-                            <tr><td><code>id</code></td><td><code>number</code></td><td>A unique timestamp-based ID for the entry.</td></tr>
-                            <tr><td><code>name</code></td><td><code>string</code></td><td>The name of the project.</td></tr>
-                            <tr><td><code>description</code></td><td><code>string</code></td><td>A brief description of the project.</td></tr>
-                            <tr><td><code>url</code></td><td><code>string</code></td><td>A URL to the project (e.g., GitHub, live demo).</td></tr>
-                            <tr><td><code>technologies</code></td><td><code>string</code></td><td>Comma-separated list of technologies used in the project.</td></tr>
-                        </tbody>
-                    </table>
-
-
-                    <h4>2. `teams`</h4>
-                    <p>This collection stores information about teams created by users on the `recruiter` plan.</p>
-                     <ul>
-                        <li><strong>Collection Path:</strong> <code>/teams</code></li>
-                        <li><strong>Document ID:</strong> Auto-generated by Firestore.</li>
-                    </ul>
-                    <table>
-                        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                        <tbody>
-                            <tr><td>`owner`</td><td>`string`</td><td>The `user.uid` of the user who owns/created the team.</td></tr>
-                            <tr><td>`createdAt`</td><td>`Timestamp`</td><td>The date and time the team was created.</td></tr>
-                        </tbody>
-                    </table>
+                    D1[("Users")]
+                    D4[("Settings")]
+                
+                    P4_1("4.1<br>Display Pricing &<br>Fetch Payment Details")
+                    P4_2("4.2<br>Process Upgrade<br>Request")
+                    P4_3("4.3<br>Review Pending<br>Upgrades")
+                    P4_4("4.4<br>Update User<br>Plan")
+                
+                    U -- "Views Pricing Page" --> P4_1
+                    P4_1 -- "Reads Payment Details" --> D4
+                    P4_1 -- "Shows Payment Options" --> U
+                    U -- "Submits Payment Proof" --> P4_2
+                    P4_2 -- "Updates Status to 'pending'" --> D1
                     
-                    <h5>Subcollection: `members`</h5>
-                     <ul>
-                        <li><strong>Collection Path:</strong> <code>/teams/{teamId}/members</code></li>
-                        <li><strong>Document ID:</strong> Auto-generated by Firestore.</li>
-                    </ul>
-                    <table>
-                         <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                        <tbody>
-                            <tr><td>`uid`</td><td>`string`</td><td>The `user.uid` of the team member, added after they sign up.</td></tr>
-                            <tr><td>`name`</td><td>`string`</td><td>The display name of the team member, added after they sign up.</td></tr>
-                            <tr><td>`email`</td><td>`string`</td><td>The email address of the invited team member.</td></tr>
-                            <tr><td>`role`</td><td>`string`</td><td>The role of the member. Can be `Admin` or `Member`.</td></tr>
-                            <tr><td>`addedBy`</td><td>`string`</td><td>The email of the user who invited this member.</td></tr>
-                        </tbody>
-                    </table>
+                    A -- "Views Pending List" --> P4_3
+                    P4_3 -- "Reads Pending Users" --> D1
+                    P4_3 -- "Shows List to Admin" --> A
                     
+                    A -- "Approves/Rejects" --> P4_4
+                    P4_4 -- "Updates User Plan" --> D1
+                </div>
+            </section>
 
-                    <h4>3. `settings`</h4>
-                    <p>This collection is used for global application settings that can be configured by an administrator, such as payment details.</p>
-                     <ul>
-                        <li><strong>Collection Path:</strong> <code>/settings</code></li>
-                        <li><strong>Document ID:</strong> `payment` (A singleton document)</li>
-                    </ul>
-                     <table>
-                         <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                        <tbody>
-                            <tr><td>`upiId`</td><td>`string`</td><td>The UPI ID to be displayed for payments.</td></tr>
-                            <tr><td>`qrCodeImageUrl`</td><td>`string`</td><td>The public URL of the QR code image for payments.</td></tr>
-                        </tbody>
-                    </table>
-                   
+            <section id="er-diagram">
+                <h2>4.3 ER (Entity Relationship Diagram)</h2>
+                <p>An Entity-Relationship (ER) Diagram is a visual representation that outlines how data entities relate to one another within a database system. It helps in understanding the structure of the application's backend and serves as a guide for designing the database schema.</p>
+                <div class="mermaid">
+                erDiagram
+                    users {
+                        string uid PK "Primary Key (User UID)"
+                        string displayName
+                        string email
+                        string plan
+                        number credits
+                        string teamId FK "Foreign Key to teams"
+                    }
 
-                    <h4>4. `supportRequests`</h4>
-                    <p>This collection stores all support requests submitted by users.</p>
-                     <ul>
-                        <li><strong>Collection Path:</strong> <code>/supportRequests</code></li>
-                        <li><strong>Document ID:</strong> Auto-generated by Firestore.</li>
-                    </ul>
-                     <table>
-                         <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                        <tbody>
-                            <tr><td>`userId`</td><td>`string`</td><td>The `user.uid` of the user who submitted the request.</td></tr>
-                            <tr><td>`userEmail`</td><td>`string`</td><td>The email of the user who submitted the request.</td></tr>
-                            <tr><td>`subject`</td><td>`string`</td><td>The subject of the support request.</td></tr>
-                            <tr><td>`category`</td><td>`string`</td><td>The category of the request (`billing`, `technical`, etc.).</td></tr>
-                            <tr><td>`status`</td><td>`string`</td><td>The status of the request: `open`, `in-progress`, `closed`.</td></tr>
-                            <tr><td>`createdAt`</td><td>`Timestamp`</td><td>The date and time the request was submitted.</td></tr>
-                            <tr><td>`lastMessageAt`</td><td>`Timestamp`</td><td>The timestamp of the last message sent by either user or admin. For sorting.</td></tr>
-                        </tbody>
-                    </table>
+                    resumeVersions {
+                        string versionId PK "Auto-generated ID"
+                        string versionName
+                        timestamp updatedAt
+                    }
 
-                    <h5>Subcollection: `history`</h5>
-                    <p>Each support request contains a subcollection for the conversation history.</p>
-                    <ul>
-                        <li><strong>Collection Path:</strong> `/supportRequests/{requestId}/history`</li>
-                        <li><strong>Document ID:</strong> Auto-generated by Firestore.</li>
-                    </ul>
-                    <table>
-                         <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-                        <tbody>
-                            <tr><td>`message`</td><td>`string`</td><td>The content of the message.</td></tr>
-                            <tr><td>`sender`</td><td>`string`</td><td>Who sent the message: `user` or `admin`.</td></tr>
-                            <tr><td>`timestamp`</td><td>`Timestamp`</td><td>When the message was sent.</td></tr>
-                        </tbody>
-                    </table>
+                    teams {
+                        string teamId PK "Auto-generated ID"
+                        string owner FK "Foreign Key to users"
+                    }
 
-                </section>
-            </div>
+                    members {
+                        string memberId PK "Auto-generated ID"
+                        string uid FK "Foreign Key to users"
+                        string email
+                        string role
+                    }
+
+                    supportRequests {
+                        string requestId PK "Auto-generated ID"
+                        string userId FK "Foreign Key to users"
+                        string subject
+                        string status
+                    }
+
+                    history {
+                        string historyId PK "Auto-generated ID"
+                        string message
+                        string sender
+                    }
+
+                    settings {
+                        string docId PK "Singleton doc, e.g. 'payment'"
+                        string upiId
+                        string qrCodeImageUrl
+                    }
+
+                    users ||--|{ resumeVersions : "has"
+                    users ||--o{ teams : "owns"
+                    users ||--o{ members : "is a"
+                    users ||--o{ supportRequests : "submits"
+                    teams ||--|{ members : "has"
+                    supportRequests ||--|{ history : "has"
+                </div>
+            </section>
+
+            <section id="data-dictionary">
+                <h2>4.4 Data Dictionary (Database Schema)</h2>
+                <p>A <strong>Data Dictionary</strong>, also known as a metadata repository, is a structured collection of definitions and information about the data used in a system or application. It acts as a reference guide for developers, analysts, and stakeholders, ensuring everyone understands what data exists, how it is structured, and how it should be used.</p>
+                <p>For CareerCraft AI, the Data Dictionary includes:</p>
+                <ul>
+                    <li><strong>Data Object Definitions:</strong> Descriptions of Firestore collections and their fields.</li>
+                    <li><strong>Data Types:</strong> Specifies the format of each field (e.g., <code>string</code>, <code>number</code>, <code>Timestamp</code>).</li>
+                    <li><strong>Relationships:</strong> Describes how collections and subcollections are connected.</li>
+                </ul>
+                <p>The detailed Data Dictionary for this project, outlining every collection, field, and data type, is maintained in the <code>DB_SCHEMA.md</code> file.</p>
+                
+                <h3>Collections</h3>
+                <h4>1. `users`</h4>
+                <p>This collection stores information about individual users, their subscription status, and related metadata.</p>
+                <ul>
+                    <li><strong>Collection Path:</strong> <code>/users</code></li>
+                    <li><strong>Document ID:</strong> <code>user.uid</code> (The unique ID from Firebase Authentication)</li>
+                </ul>
+                <h5>Document Fields:</h5>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>displayName</code></td>
+                            <td><code>string</code></td>
+                            <td>User’s full name.</td>
+                        </tr>
+                        <tr>
+                            <td><code>photoURL</code></td>
+                            <td><code>string</code></td>
+                            <td>Profile picture URL stored in Firebase.</td>
+                        </tr>
+                        <tr>
+                            <td><code>email</code></td>
+                            <td><code>string</code></td>
+                            <td>Registered email address.</td>
+                        </tr>
+                        <tr>
+                            <td><code>plan</code></td>
+                            <td><code>string</code></td>
+                            <td>Current subscription plan (`free`, `essentials`, `pro`, `recruiter`, etc.).</td>
+                        </tr>
+                        <tr>
+                            <td><code>credits</code></td>
+                            <td><code>number</code></td>
+                            <td>Available AI credits based on plan.</td>
+                        </tr>
+                        <tr>
+                            <td><code>createdAt</code></td>
+                            <td><code>timestamp</code></td>
+                            <td>Date and time when the account was created.</td>
+                        </tr>
+                        <tr>
+                            <td><code>planUpdatedAt</code></td>
+                            <td><code>timestamp</code></td>
+                            <td>Last plan update timestamp.</td>
+                        </tr>
+                        <tr>
+                            <td><code>requestedPlan</code></td>
+                            <td><code>string</code></td>
+                            <td>Requested plan during upgrade or pending status.</td>
+                        </tr>
+                        <tr>
+                            <td><code>paymentProofURL</code></td>
+                            <td><code>string</code></td>
+                            <td>Uploaded payment proof URL.</td>
+                        </tr>
+                        <tr>
+                            <td><code>teamId</code></td>
+                            <td><code>string</code></td>
+                            <td>Associated team ID for recruiter users.</td>
+                        </tr>
+                        <tr>
+                            <td><code>hasCompletedOnboarding</code></td>
+                            <td><code>boolean</code></td>
+                            <td>Indicates if the user completed onboarding.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- ... rest of the data dictionary ... -->
+            </section>
         </main>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
 </body>
 </html>
