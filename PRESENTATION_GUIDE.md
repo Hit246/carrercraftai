@@ -77,14 +77,16 @@ This guide provides a detailed, slide-by-slide outline for your project presenta
 ### **Slide 6: Database Design**
 
 -   **Title:** Structuring Our Data with Firestore
--   **Content:** We used Firestore, a flexible NoSQL database, to model our application's data for scalability and real-time access.
--   **(Show a small table snippet of key collections):**
+-   **Content:** We used Firestore, a flexible NoSQL database, to model our application's data for scalability and real-time access. Our schema is designed to be efficient and secure.
+-   **(Show a small table snippet of key collections from DB_SCHEMA.md):**
 | Collection | Document ID | Description |
 | :--- | :--- | :--- |
-| `users` | `{userId}` | Stores user profiles, plan, and credits. |
-| `resumeVersions` | `{autoId}` | Subcollection under a user for each resume. |
-| `teams` | `{teamId}` | Manages recruiter teams and members. |
-| `settings` | `payment` | Stores global platform settings. |
+| `users` | `{userId}` | Stores user profiles, subscription plan, and AI credits. |
+| `resumeVersions` | `{autoId}` | A subcollection under a user document for each unique resume. |
+| `teams` | `{teamId}` | Manages recruiter teams and their members. |
+| `settings` | `payment` | A singleton document for storing global payment settings like UPI ID. |
+| `supportRequests` | `{autoId}` | Stores user-submitted support tickets and conversation history. |
+
 
 ---
 
