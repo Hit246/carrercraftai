@@ -1,44 +1,47 @@
 # CareerCraft AI: College Presentation Guide
 
-This guide provides a slide-by-slide outline for your project presentation. You can copy and paste this content into your preferred presentation software (like PowerPoint or Google Slides).
+This guide provides a detailed, slide-by-slide outline for your project presentation. You can copy this content directly into your presentation software (like PowerPoint or Google Slides) and apply a clean, blue-white theme with gradient accents.
 
 ---
 
 ### **Slide 1: Title Slide**
 
 -   **Title:** CareerCraft AI: An AI-Powered Career Platform
+-   **Subtitle:** Craft Your Future with Artificial Intelligence
 -   **Your Name:** CHAUHAN HITARTH
 -   **College Name:** INSB Institute of BCA & PGDCA
 -   **Project Guide:** [Your Guide's Name]
--   **Date:** [Date of Presentation]
+-   **(Footer):** `[Date of Presentation]`
 
 ---
 
-### **Slide 2: Introduction & Problem Statement**
+### **Slide 2: The Problem**
 
--   **Title:** The Challenge in Today's Job Market
--   **Content:**
-    -   **For Job Seekers:**
-        -   Generic, one-size-fits-all resume templates.
-        -   Difficulty tailoring resumes for different jobs.
-        -   Uncertainty about how to beat Applicant Tracking Systems (ATS).
-    -   **For Recruiters:**
-        -   Manually screening hundreds of resumes is slow and inefficient.
-        -   High risk of human bias in the selection process.
-        -   Difficulty finding the best-fit candidates quickly.
--   **Question:** How can we use AI to solve these problems for everyone?
+-   **Title:** The Modern Job Hunt is Broken
+-   **Key Statistic (Large Font):** "Over 75% of resumes are rejected by ATS before a human ever reads them."
+-   **For Job Seekers:**
+    -   Struggling to stand out in a crowded market.
+    -   Difficulty tailoring resumes for Applicant Tracking Systems (ATS).
+    -   Uncertainty about what recruiters are truly looking for.
+-   **For Recruiters:**
+    -   Overwhelmed by the high volume of applications.
+    -   Time-consuming manual screening process.
+    -   Risk of human bias affecting candidate selection.
 
 ---
 
 ### **Slide 3: Our Solution: CareerCraft AI**
 
--   **Title:** Introducing CareerCraft AI
--   **Content:**
-    -   An intelligent, all-in-one platform for modern career development and recruitment.
-    -   **Our Mission:** To empower job seekers with AI-driven tools and to streamline the hiring process for recruiters.
--   **Key Value Proposition:**
-    -   **For Job Seekers:** Build better resumes, get smarter feedback, and find the right job faster.
-    -   **For Recruiters:** Automate screening, reduce bias, and identify top talent instantly.
+-   **Title:** An Intelligent Platform for Everyone
+-   **Content:** CareerCraft AI is a unified platform that leverages AI to bridge the gap between job seekers and recruiters.
+-   **For Job Seekers (Icon: User):**
+    -   Build professional, ATS-friendly resumes.
+    -   Receive instant, AI-driven feedback.
+    -   Discover perfectly matched job opportunities.
+-   **For Recruiters (Icon: Briefcase):**
+    -   Automate candidate screening and ranking.
+    -   Reduce bias and identify top talent faster.
+    -   Streamline team collaboration and workflow.
 
 ---
 
@@ -46,89 +49,88 @@ This guide provides a slide-by-slide outline for your project presentation. You 
 
 -   **Title:** What We Set Out to Build
 -   **Content:**
-    1.  An **Intuitive Resume Builder** with live preview and version management.
-    2.  A suite of **AI-Powered Tools** (Analyzer, Job Matcher, Candidate Matcher).
-    3.  A secure backend using **Firebase** for authentication and data storage.
-    4.  A **Tiered Subscription Model** (Free, Pro, Recruiter) to serve different user needs.
-    5.  A dedicated **Admin Panel** for user management and platform oversight.
-    6.  A clean, modern, and responsive user interface using **Next.js** and **Tailwind CSS**.
+    1.  **Intuitive Resume Builder:** A live-preview editor for creating and managing multiple resume versions.
+    2.  **AI-Powered Tools:** A suite of tools including a Resume Analyzer, Job Matcher, and Candidate Matcher.
+    3.  **Secure Firebase Backend:** For scalable user authentication, data storage (Firestore), and file management.
+    4.  **Tiered Subscription Model:** Free, Pro, and Recruiter plans to serve diverse user needs.
+    5.  **Admin Panel:** A dashboard for user management, subscription approvals, and platform oversight.
+    6.  **Modern UI/UX:** A clean, responsive interface built with Next.js and Tailwind CSS.
 
 ---
 
-### **Slide 5: System Architecture & Tech Stack**
+### **Slide 5: System Architecture**
 
--   **Title:** How It's Built
--   **Content:** A modern, full-stack, serverless architecture.
--   **Diagram:** (You can create a simple block diagram showing the flow)
-    -   *User -> Next.js Frontend -> Firebase (Auth, Firestore) & Genkit (AI Flows) -> Google AI (Gemini)*
--   **Tech Stack:**
-    -   **Frontend:** Next.js, React, TypeScript, Tailwind CSS, shadcn/ui
-    -   **Backend & Database:** Firebase (Authentication, Firestore, Storage)
-    -   **AI Integration:** Genkit for Firebase, Google AI (Gemini Models)
+-   **Title:** How It's Built: A Scalable Architecture
+-   **(Simple 3-Layer Diagram):**
+    -   **Presentation Layer (Frontend):**
+        -   *Technology:* Next.js, React, Tailwind CSS, shadcn/ui
+        -   *Description:* Handles all user interaction and renders the interface.
+    -   **Logic Layer (Backend & AI):**
+        -   *Technology:* Genkit for Firebase, Google AI (Gemini)
+        -   *Description:* Executes AI flows for analysis, matching, and generation. Manages business logic.
+    -   **Data Layer (Database):**
+        -   *Technology:* Firebase (Firestore, Authentication, Storage)
+        -   *Description:* Securely stores all user data, resume versions, and application settings.
 
 ---
 
-### **Slide 6: Database Design (ER Diagram)**
+### **Slide 6: Database Design**
 
--   **Title:** Structuring Our Data
+-   **Title:** Structuring Our Data with Firestore
+-   **Content:** We used Firestore, a flexible NoSQL database, to model our application's data for scalability and real-time access.
+-   **(Show a small table snippet of key collections):**
+| Collection | Document ID | Description |
+| :--- | :--- | :--- |
+| `users` | `{userId}` | Stores user profiles, plan, and credits. |
+| `resumeVersions` | `{autoId}` | Subcollection under a user for each resume. |
+| `teams` | `{teamId}` | Manages recruiter teams and members. |
+| `settings` | `payment` | Stores global platform settings. |
+
+---
+
+### **Slide 7: Live Demo - The Job Seeker**
+
+-   **Action:** (Switch to the live application and demonstrate the user flow)
+-   **Demo Points:**
+    1.  Show the resume builder with its live preview.
+    2.  Run the **AI Resume Analyzer** and explain the feedback.
+    3.  Use the **AI Job Matcher** to discover tailored opportunities.
+    4.  Export the final resume to PDF.
+-   **(Footer):** `Demo Mode: User`
+
+---
+
+### **Slide 8: Live Demo - The Recruiter**
+
+-   **Action:** (Log in as a recruiter and showcase the recruiter-specific tools)
+-   **Demo Points:**
+    1.  Use the **AI Candidate Matcher** by uploading a job description and several resumes.
+    2.  Show the ranked list of candidates with match scores and AI-generated justifications.
+    3.  Briefly show the Team Management page.
+-   **(Footer):** `Demo Mode: Recruiter`
+
+---
+
+### **Slide 9: Live Demo - The Admin**
+
+-   **Action:** (Log in as an admin to show the backend management panel)
+-   **Demo Points:**
+    1.  Display the Admin Dashboard with user statistics.
+    2.  Show the User Management table and how to change a user's plan.
+    3.  Demonstrate the Upgrade Requests page where admins approve payments.
+-   **(Footer):** `Demo Mode: Admin`
+
+---
+
+### **Slide 10: Conclusion & Achievements**
+
+-   **Title:** Project Success & Impact
 -   **Content:**
-    -   We used Firestore, a NoSQL database, to store our application data.
-    -   The schema is designed to be scalable and secure.
--   **Visual:**
-    -   (Insert the ER Diagram from `chapter4.html` or `DB_SCHEMA.md` here)
--   **Key Collections:**
-    -   `/users`: Stores user profiles, plans, and credits.
-    -   `/users/{userId}/resumeVersions`: Subcollection for each user's resumes.
-    -   `/teams`: For recruiter plan team management.
-    -   `/supportRequests`: Manages user support tickets.
-
----
-
-### **Slide 7: Live Demo - The Job Seeker Experience**
-
--   **Title:** Demo 1: Crafting the Perfect Resume
--   **Action:** (Switch to the live application and log in as a regular user)
--   **Demo Points:**
-    1.  **Dashboard:** Show the resume builder, with the editor on the left and live preview on the right. Make a small change (e.g., edit the title) to show it updating in real-time.
-    2.  **Save Version:** Show the "Save" and "Save as New" functionality.
-    3.  **AI Resume Analyzer:** Upload a resume and run the analyzer. Explain the feedback (Strengths, Weaknesses, Suggestions).
-    4.  **AI Job Matcher:** Run the job matcher to find fictional job roles.
-    5.  **Export to PDF:** Click the export button to show the final, professional PDF.
-
----
-
-### **Slide 8: Live Demo - The Recruiter Experience**
-
--   **Title:** Demo 2: Finding the Best Talent
--   **Action:** (Log in as a recruiter user)
--   **Demo Points:**
-    1.  **AI Candidate Matcher:**
-        -   Paste a job description.
-        -   Upload several sample resumes.
-        -   Run the matcher and show the ranked list of candidates with their match scores and justifications.
-    2.  **Team Management:**
-        -   Briefly show the team management page where a recruiter can invite or remove members.
-
----
-
-### **Slide 9: Live Demo - The Admin Panel**
-
--   **Title:** Demo 3: Platform Management
--   **Action:** (Log in as an admin user: `admin@careercraft.ai`)
--   **Demo Points:**
-    1.  **Admin Dashboard:** Show the dashboard with user statistics.
-    2.  **User Management:** Display the list of users and show how an admin can manually change a user's plan.
-    3.  **Upgrade Requests:** Show the screen where admins approve or reject payment proofs for plan upgrades.
-
----
-
-### **Slide 10: Conclusion**
-
--   **Title:** Project Conclusion
--   **Content:**
-    -   **Success:** Successfully developed a responsive, AI-powered platform that meets all core objectives.
-    -   **Achievement:** Integrated a modern tech stack (Next.js, Firebase, Genkit) to create a scalable and feature-rich application.
-    -   **Impact:** CareerCraft AI provides a powerful solution for both job seekers looking to enhance their careers and recruiters seeking to find talent efficiently.
+    -   Successfully developed a feature-rich, AI-powered platform that meets all project objectives.
+    -   Created a scalable and maintainable application using a modern tech stack (Next.js, Firebase, Genkit).
+    -   Delivered a valuable tool that empowers job seekers and streamlines the hiring process for recruiters.
+-   **Key Success Metric (Large Font):** "AI analysis under 3 seconds per resume."
+-   **Deployment Note:** "Live application hosted on **Vercel** with a **Firebase** backend."
 
 ---
 
@@ -136,14 +138,20 @@ This guide provides a slide-by-slide outline for your project presentation. You 
 
 -   **Title:** What's Next for CareerCraft AI?
 -   **Content:**
-    -   **Automated Payment Gateway:** Integrate Stripe to fully automate subscription upgrades.
-    -   **AI Mock Interviews:** Develop an AI agent that simulates job interviews based on the user's resume and a job description.
-    -   **Job Board Integration:** Connect with live job board APIs (like LinkedIn or Indeed) to provide real job listings.
-    -   **Advanced Analytics:** Give users data on how their resume performs and recruiters insights into their hiring funnel.
+    -   **Automated Payment Gateway:** Integrate **Stripe** to fully automate the subscription and payment process.
+    -   **AI Mock Interviews:** Develop an interactive AI agent to simulate job interviews and provide performance feedback.
+    -   **Live Job Board Integration:** Connect with APIs from platforms like LinkedIn or Indeed to show real-time job listings.
+    -   **Advanced Analytics:** Provide a dashboard for users to track resume views and application success rates.
 
 ---
 
 ### **Slide 12: Q&A**
 
 -   **Title:** Thank You!
--   **Subtitle:** Questions?
+-   **Subtitle:** Questions & Answers
+-   **(Footer with Contact Info):**
+    -   `careercraftai.vercel.app`
+    -   `hitarth0236@gmail.com`
+    -   `+91-98987-60325`
+
+---
