@@ -22,9 +22,17 @@ const AtsOptimizerInputSchema = z.object({
 export type AtsOptimizerInput = z.infer<typeof AtsOptimizerInputSchema>;
 
 const AtsOptimizerOutputSchema = z.object({
-    matchScore: z.number().min(0).max(100).describe('A score from 0-100 indicating how well the resume matches the job description based on ATS criteria.'),
-    missingKeywords: z.array(z.string()).describe('A list of important keywords found in the job description that are missing from the resume.'),
-    suggestedImprovements: z.array(z.string()).describe('A list of actionable suggestions for improving the resume to better match the job description.'),
+    overall_score: z.number().int().min(0).max(100).describe("The final, overall score from 0-100."),
+    breakdown: z.object({
+        skill_match: z.number().int().min(0).max(50),
+        experience_alignment: z.number().int().min(0).max(25),
+        education_certifications: z.number().int().min(0).max(10),
+        keyword_fit: z.number().int().min(0).max(10),
+        formatting_readability: z.number().int().min(0).max(5),
+    }),
+    skills_matched: z.array(z.string()).describe("A list of skills found in both the job description and the resume."),
+    skills_missing: z.array(z.string()).describe("A list of important skills from the job description that were not found in the resume."),
+    summary: z.string().describe("A single, one-sentence factual summary of the match result."),
 });
 export type AtsOptimizerOutput = z.infer<typeof AtsOptimizerOutputSchema>;
 
@@ -38,27 +46,48 @@ const prompt = ai.definePrompt({
   input: {schema: AtsOptimizerInputSchema},
   output: {schema: AtsOptimizerOutputSchema},
   config: {
-    temperature: 0.1, // Set to a very low temperature for deterministic behavior
+    temperature: 0, // Set to 0 for deterministic behavior
   },
-  prompt: `You are an advanced Applicant Tracking System (ATS) simulator. Your task is to perform a semantic analysis of a resume against a job description and provide a consistent, accurate match score.
+  prompt: `You are an Applicant Tracking System (ATS) evaluation engine.
 
-**Resume PDF**:
+Task:
+Evaluate how well the provided RESUME matches the JOB DESCRIPTION.
+Be deterministic and consistent — identical inputs must yield identical output.
+
+Scoring Criteria (Total 100 points):
+
+1. Skill Match (50 pts)
+   - Identify overlap between technical and professional skills.
+   - Consider close synonyms (e.g., "React" ≈ "Next.js", "SQL" ≈ "PostgreSQL").
+   - Partial similarity = half credit.
+
+2. Experience Alignment (25 pts)
+   - Check whether the candidate’s experience, job titles, and responsibilities align with the described role and level.
+
+3. Education & Certifications (10 pts)
+   - Determine if degrees or certifications satisfy stated requirements.
+
+4. Keyword & Industry Fit (10 pts)
+   - Evaluate language similarity and relevance to the target industry.
+
+5. Formatting & Readability (5 pts)
+   - Penalize for poor structure, images, or excessive tables.
+
+**RESUME PDF**:
 {{media url=resumeDataUri}}
 
-**Job Description**:
+**JOB DESCRIPTION**:
 {{{jobDescription}}}
 
-**Execution Steps**:
-1.  **Analyze Job Requirements**: Identify the core skills, experience level (e.g., years of experience), and key qualifications required by the **Job Description**.
-2.  **Semantic Resume Scan**: Read the **Resume PDF** and analyze its content based on semantic relevance, not just exact keyword matches. Understand concepts and synonyms (e.g., "managed a team" is similar to "led a group").
-3.  **Calculate Score**:
-    -   Assess the alignment between the resume and the job description across three categories: Skills, Experience, and Qualifications.
-    -   The **matchScore** should be a weighted average reflecting the overall fit. A strong candidate who meets most critical requirements should score above 80. A candidate missing several key requirements should score lower.
-    -   For identical inputs, the score must be highly consistent.
-4.  **Identify Missing Keywords**: Based on your analysis, list the most important skills and qualifications mentioned in the job description that are not adequately represented in the resume.
-5.  **Provide Actionable Suggestions**: Generate a list of concrete suggestions for improving the resume. Each suggestion should directly relate to a weakness or a missing keyword you identified. For example: "Incorporate the term 'SaaS' in your project descriptions to better align with the job's focus on software-as-a-service products."
 
-Your output must be a valid JSON object conforming to the AtsOptimizerOutputSchema.
+Rules:
+- Output must be valid JSON only.
+- Never invent skills not present in either text.
+- Always ground scores in textual evidence.
+- The sum of the breakdown scores must equal the overall_score.
+- Do not add any commentary or explanation outside of the JSON structure.
+
+Your output must be a valid JSON object conforming to the schema I have provided.
 `,
 });
 

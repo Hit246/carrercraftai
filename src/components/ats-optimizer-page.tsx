@@ -182,11 +182,19 @@ export function AtsOptimizerPage() {
     {analysisResult && (
         <div className="mt-8 space-y-6">
              <h3 className="text-xl font-headline text-center">Optimization Results</h3>
+             <Card>
+                <CardHeader>
+                    <CardTitle>AI Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">{analysisResult.summary}</p>
+                </CardContent>
+             </Card>
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-3">
                         <TrendingUp /> 
-                        Match Score
+                        Overall Match Score
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger>
@@ -212,13 +220,13 @@ export function AtsOptimizerPage() {
                                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                 className="stroke-current text-primary"
                                 strokeWidth="2"
-                                strokeDasharray={`${analysisResult.matchScore}, 100`}
+                                strokeDasharray={`${analysisResult.overall_score}, 100`}
                                 fill="none"
                                 strokeLinecap="round"
                             />
                         </svg>
                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-3xl font-bold text-primary">{analysisResult.matchScore}%</span>
+                            <span className="text-3xl font-bold text-primary">{analysisResult.overall_score}%</span>
                         </div>
                     </div>
                     <p className="text-muted-foreground mt-2">Your resume's alignment with the job description.</p>
@@ -228,11 +236,11 @@ export function AtsOptimizerPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center gap-3 space-y-0">
                         <Zap className="w-6 h-6 text-primary" />
-                        <CardTitle>Missing Keywords</CardTitle>
+                        <CardTitle>Skills Matched</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-wrap gap-2">
-                            {analysisResult.missingKeywords.map((keyword, index) => (
+                            {analysisResult.skills_matched.map((keyword, index) => (
                                 <Badge key={index} variant="secondary">{keyword}</Badge>
                             ))}
                         </div>
@@ -241,12 +249,14 @@ export function AtsOptimizerPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center gap-3 space-y-0">
                         <Target className="w-6 h-6 text-amber-500" />
-                        <CardTitle>Suggested Improvements</CardTitle>
+                        <CardTitle>Skills Missing</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-2">
-                             {analysisResult.suggestedImprovements.map((item, index) => <li key={index}>{item}</li>)}
-                        </ul>
+                        <div className="flex flex-wrap gap-2">
+                             {analysisResult.skills_missing.map((item, index) => (
+                                <Badge key={index} variant="destructive">{item}</Badge>
+                             ))}
+                        </div>
                     </CardContent>
                 </Card>
             </div>
