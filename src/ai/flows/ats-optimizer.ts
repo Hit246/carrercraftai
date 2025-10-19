@@ -38,22 +38,27 @@ const prompt = ai.definePrompt({
   input: {schema: AtsOptimizerInputSchema},
   output: {schema: AtsOptimizerOutputSchema},
   config: {
-    temperature: 0.2,
+    temperature: 0.1, // Set to a very low temperature for deterministic behavior
   },
-  prompt: `You are an expert Applicant Tracking System (ATS) analyst and career coach. Your task is to analyze a resume against a given job description and provide a detailed optimization report.
-
-**Job Description**:
-{{{jobDescription}}}
+  prompt: `You are a deterministic ATS scanning script. Your only purpose is to calculate a match score based on a strict formula.
 
 **Resume PDF**:
 {{media url=resumeDataUri}}
 
-**Instructions**:
-1.  **Calculate Match Score**: Thoroughly compare the resume to the job description. Calculate a "Match Score" from 0 to 100 representing the alignment. A score of 100 means a perfect match. Your scoring must be consistent.
-2.  **Identify Missing Keywords**: Extract the most critical keywords and phrases (skills, technologies, qualifications) from the job description that are absent from the resume.
-3.  **Provide Actionable Suggestions**: Give specific, actionable advice on how to improve the resume. Suggestions should be concrete, such as "Incorporate the phrase 'agile methodologies' into your project descriptions" or "Add a 'Project Management' section to highlight your experience leading teams."
+**Job Description**:
+{{{jobDescription}}}
 
-Return the analysis as a valid JSON object conforming to the AtsOptimizerOutputSchema.
+**Execution Steps**:
+1.  **Extract Keywords**: From the **Job Description**, create a definitive list of all important keywords (skills, technologies, qualifications, and responsibilities).
+2.  **Scan Resume**: Read the **Resume PDF** and identify which keywords from the list you created in Step 1 are present. The matching must be exact or a very close synonym.
+3.  **Calculate Score**:
+    -   Let \`A\` be the total number of unique keywords extracted from the **Job Description**.
+    -   Let \`B\` be the number of those keywords found in the **Resume**.
+    -   The **matchScore** MUST be calculated with the formula: \`(B / A) * 100\`, rounded to the nearest whole number. Do not use any other method.
+4.  **Identify Missing Keywords**: List the keywords that were in the Job Description list but not found in the resume.
+5.  **Provide Suggestions**: Based on the missing keywords, provide specific, actionable suggestions for improving the resume.
+
+Your output must be a valid JSON object conforming to the AtsOptimizerOutputSchema. The matchScore must be consistent for identical inputs.
 `,
 });
 
