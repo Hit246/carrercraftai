@@ -37,6 +37,9 @@ const prompt = ai.definePrompt({
   name: 'atsOptimizerPrompt',
   input: {schema: AtsOptimizerInputSchema},
   output: {schema: AtsOptimizerOutputSchema},
+  config: {
+    temperature: 0.2,
+  },
   prompt: `You are an expert Applicant Tracking System (ATS) analyst and career coach. Your task is to analyze a resume against a given job description and provide a detailed optimization report.
 
 **Job Description**:
@@ -46,7 +49,7 @@ const prompt = ai.definePrompt({
 {{media url=resumeDataUri}}
 
 **Instructions**:
-1.  **Calculate Match Score**: Thoroughly compare the resume to the job description. Calculate a "Match Score" from 0 to 100 representing the alignment. A score of 100 means a perfect match.
+1.  **Calculate Match Score**: Thoroughly compare the resume to the job description. Calculate a "Match Score" from 0 to 100 representing the alignment. A score of 100 means a perfect match. Your scoring must be consistent.
 2.  **Identify Missing Keywords**: Extract the most critical keywords and phrases (skills, technologies, qualifications) from the job description that are absent from the resume.
 3.  **Provide Actionable Suggestions**: Give specific, actionable advice on how to improve the resume. Suggestions should be concrete, such as "Incorporate the phrase 'agile methodologies' into your project descriptions" or "Add a 'Project Management' section to highlight your experience leading teams."
 
