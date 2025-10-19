@@ -40,7 +40,7 @@ const prompt = ai.definePrompt({
   config: {
     temperature: 0.1, // Set to a very low temperature for deterministic behavior
   },
-  prompt: `You are a deterministic ATS scanning script. Your only purpose is to calculate a match score based on a strict formula.
+  prompt: `You are an advanced Applicant Tracking System (ATS) simulator. Your task is to perform a semantic analysis of a resume against a job description and provide a consistent, accurate match score.
 
 **Resume PDF**:
 {{media url=resumeDataUri}}
@@ -49,16 +49,16 @@ const prompt = ai.definePrompt({
 {{{jobDescription}}}
 
 **Execution Steps**:
-1.  **Extract Keywords**: From the **Job Description**, create a definitive list of all important keywords (skills, technologies, qualifications, and responsibilities).
-2.  **Scan Resume**: Read the **Resume PDF** and identify which keywords from the list you created in Step 1 are present. The matching must be exact or a very close synonym.
+1.  **Analyze Job Requirements**: Identify the core skills, experience level (e.g., years of experience), and key qualifications required by the **Job Description**.
+2.  **Semantic Resume Scan**: Read the **Resume PDF** and analyze its content based on semantic relevance, not just exact keyword matches. Understand concepts and synonyms (e.g., "managed a team" is similar to "led a group").
 3.  **Calculate Score**:
-    -   Let \`A\` be the total number of unique keywords extracted from the **Job Description**.
-    -   Let \`B\` be the number of those keywords found in the **Resume**.
-    -   The **matchScore** MUST be calculated with the formula: \`(B / A) * 100\`, rounded to the nearest whole number. Do not use any other method.
-4.  **Identify Missing Keywords**: List the keywords that were in the Job Description list but not found in the resume.
-5.  **Provide Suggestions**: Based on the missing keywords, provide specific, actionable suggestions for improving the resume.
+    -   Assess the alignment between the resume and the job description across three categories: Skills, Experience, and Qualifications.
+    -   The **matchScore** should be a weighted average reflecting the overall fit. A strong candidate who meets most critical requirements should score above 80. A candidate missing several key requirements should score lower.
+    -   For identical inputs, the score must be highly consistent.
+4.  **Identify Missing Keywords**: Based on your analysis, list the most important skills and qualifications mentioned in the job description that are not adequately represented in the resume.
+5.  **Provide Actionable Suggestions**: Generate a list of concrete suggestions for improving the resume. Each suggestion should directly relate to a weakness or a missing keyword you identified. For example: "Incorporate the term 'SaaS' in your project descriptions to better align with the job's focus on software-as-a-service products."
 
-Your output must be a valid JSON object conforming to the AtsOptimizerOutputSchema. The matchScore must be consistent for identical inputs.
+Your output must be a valid JSON object conforming to the AtsOptimizerOutputSchema.
 `,
 });
 
