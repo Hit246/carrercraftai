@@ -227,18 +227,31 @@ export const ResumeBuilder = () => {
         }
 
         doc.setFontSize(9);
+        doc.setTextColor(lightTextColor);
+
         const contactInfo = [
-            resumeData.phone, 
-            resumeData.email, 
-            resumeData.linkedin && `https://${resumeData.linkedin}`
+            resumeData.phone,
+            resumeData.email,
+            resumeData.linkedin,
         ].filter(Boolean);
-        
-        if (contactInfo.length > 0) {
-            doc.setTextColor(lightTextColor);
-            const contactInfoString = contactInfo.join('  |  ');
-            doc.text(contactInfoString, pageW / 2, y, { align: 'center' });
-            y += 15;
+        const contactInfoString = contactInfo.join('  |  ');
+        const totalWidth = doc.getStringUnitWidth(contactInfoString) * doc.getFontSize();
+        let currentX = (pageW - totalWidth) / 2;
+
+        if (resumeData.phone) {
+            doc.text(resumeData.phone, currentX, y);
+            currentX += doc.getTextWidth(resumeData.phone) + doc.getTextWidth('  |  ');
         }
+        if (resumeData.email) {
+            doc.textWithLink(resumeData.email, currentX, y, { url: `mailto:${resumeData.email}` });
+            currentX += doc.getTextWidth(resumeData.email) + doc.getTextWidth('  |  ');
+        }
+        if (resumeData.linkedin) {
+            const linkedInUrl = resumeData.linkedin.startsWith('http') ? resumeData.linkedin : `https://${resumeData.linkedin}`;
+            doc.textWithLink(resumeData.linkedin, currentX, y, { url: linkedInUrl });
+        }
+        y += 15;
+
 
         // --- BORDER ---
         doc.setDrawColor(229, 231, 235); // gray-200
