@@ -227,7 +227,7 @@ export const ResumeBuilder = () => {
         }
 
         doc.setFontSize(9);
-        doc.setTextColor(lightTextColor);
+        doc.setTextColor(primaryColor);
 
         const contactInfo = [
             resumeData.phone,
@@ -239,7 +239,7 @@ export const ResumeBuilder = () => {
         let currentX = (pageW - totalWidth) / 2;
 
         if (resumeData.phone) {
-            doc.text(resumeData.phone, currentX, y);
+            doc.textWithLink(resumeData.phone, currentX, y, { url: `tel:${resumeData.phone}` });
             currentX += doc.getTextWidth(resumeData.phone) + doc.getTextWidth('  |  ');
         }
         if (resumeData.email) {
