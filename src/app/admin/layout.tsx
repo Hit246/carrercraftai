@@ -58,10 +58,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
   const getPageTitle = () => {
     if (isActive('/admin/dashboard')) return 'Admin Dashboard';
     if (isActive('/admin/users')) return 'User Management';
-    if (isActive('/admin/upgrades')) return 'Upgrade Requests';
-    if (isActive('/admin/payments')) return 'Payment History';
     if (isActive('/admin/cancellations')) return 'Cancellation Requests';
-    if (isActive('/admin/settings')) return 'Payment Settings';
     if (isActive('/admin/support')) return 'Support Tickets';
     return 'Admin Panel';
   };
@@ -109,17 +106,6 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/admin/upgrades')}
-              >
-                <Link href="/admin/upgrades">
-                  <CheckCircle />
-                  <span>Upgrades</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
              <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
@@ -134,33 +120,11 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
-                isActive={isActive('/admin/payments')}
-              >
-                <Link href="/admin/payments">
-                  <History />
-                  <span>Payments</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
                 isActive={isActive('/admin/cancellations')}
               >
                 <Link href="/admin/cancellations">
                   <FileX />
                   <span>Cancellations</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/admin/settings')}
-              >
-                <Link href="/admin/settings">
-                  <Settings />
-                  <span>Settings</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

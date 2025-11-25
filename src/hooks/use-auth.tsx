@@ -5,7 +5,6 @@ import React, { createContext, useContext, useEffect, useState, ReactNode, useCa
 import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, onSnapshot, collectionGroup } from 'firebase/firestore';
-import { sendPaymentVerificationEmailAction } from '@/lib/actions';
 
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
@@ -35,9 +34,6 @@ interface AuthContextType {
   credits: number;
   userData: UserData | null;
   useCredit: () => Promise<void>;
-  requestEssentialsUpgrade: (paymentProofURL: string) => Promise<void>;
-  requestProUpgrade: (paymentProofURL: string) => Promise<void>;
-  requestRecruiterUpgrade: (paymentProofURL: string) => Promise<void>;
   requestCancellation: () => Promise<void>;
   logout: () => Promise<void>;
   login: (email:string, password:string) => Promise<any>;
@@ -201,42 +197,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return signOut(auth);
   };
   
-  const requestEssentialsUpgrade = async (paymentProofURL: string) => {
-    if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
-    const userRef = doc(db, 'users', user.uid);
-    const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'essentials' as const, planUpdatedAt: new Date(), paymentProofURL };
-    await updateDoc(userRef, newPlanData);
-    await sendPaymentVerificationEmailAction({
-        userEmail: user.email!,
-        requestedPlan: 'essentials',
-        paymentProofURL,
-    });
-  }
-
-  const requestProUpgrade = async (paymentProofURL: string) => {
-    if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
-    const userRef = doc(db, 'users', user.uid);
-    const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'pro' as const, planUpdatedAt: new Date(), paymentProofURL };
-    await updateDoc(userRef, newPlanData);
-    await sendPaymentVerificationEmailAction({
-        userEmail: user.email!,
-        requestedPlan: 'pro',
-        paymentProofURL,
-    });
-  }
-
-  const requestRecruiterUpgrade = async (paymentProofURL: string) => {
-    if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
-    const userRef = doc(db, 'users', user.uid);
-    const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'recruiter' as const, planUpdatedAt: new Date(), paymentProofURL };
-    await updateDoc(userRef, newPlanData);
-    await sendPaymentVerificationEmailAction({
-        userEmail: user.email!,
-        requestedPlan: 'recruiter',
-        paymentProofURL,
-    });
-  }
-
   const requestCancellation = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
@@ -289,9 +249,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     credits,
     userData,
     useCredit,
-    requestEssentialsUpgrade,
-    requestProUpgrade,
-    requestRecruiterUpgrade,
     requestCancellation,
     logout,
     login,

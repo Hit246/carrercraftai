@@ -5,59 +5,91 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
-import { Check, Crown, Users, Target, Star, Trophy, Diamond, Key } from "lucide-react"
+import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay"
+import { Check, Crown, Users, Target, Star, Trophy, Diamond, Key, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { PaymentDialog } from "./payment-dialog"
+import { useState, useEffect } from "react"
 import { Badge } from "./ui/badge"
+import useRazorpay from "react-razorpay";
 
-type PlanToUpgrade = 'essentials' | 'pro' | 'recruiter' | null;
+type Plan = 'essentials' | 'pro' | 'recruiter';
+
+const planDetails = {
+    essentials: { name: "Essentials Plan", amount: 199 },
+    pro: { name: "Pro Plan", amount: 399 },
+    recruiter: { name: "Recruiter Plan", amount: 999 },
+};
 
 export function PricingPage() {
-  const { user, plan, requestProUpgrade, requestRecruiterUpgrade, requestEssentialsUpgrade } = useAuth();
+  const { user, plan } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
-  const [planToUpgrade, setPlanToUpgrade] = useState<PlanToUpgrade>(null);
+  const [Razorpay, isLoaded] = useRazorpay();
+  const [isProcessing, setIsProcessing] = useState<Plan | null>(null);
   
-  const handleUpgrade = (selectedPlan: PlanToUpgrade) => {
-    if (!user) {
-        router.push('/login');
-        return;
+  const handlePayment = async (selectedPlan: Plan) => {
+    if (!user || !isLoaded) {
+      if (!user) router.push('/login');
+      else toast({ title: 'Error', description: 'Payment gateway is not ready.', variant: 'destructive' });
+      return;
     }
-    setPlanToUpgrade(selectedPlan);
-  }
+    
+    setIsProcessing(selectedPlan);
 
-  const onPaymentConfirm = async (paymentProofURL: string) => {
-    if (!planToUpgrade) return;
-
+    const planInfo = planDetails[selectedPlan];
+    
     try {
-      if (planToUpgrade === 'pro') {
-        await requestProUpgrade(paymentProofURL);
-      } else if (planToUpgrade === 'recruiter') {
-        await requestRecruiterUpgrade(paymentProofURL);
-      } else if (planToUpgrade === 'essentials') {
-        await requestEssentialsUpgrade(paymentProofURL);
+      const orderResponse = await createRazorpayOrder(planInfo.amount, 'INR');
+
+      if (!orderResponse.success || !orderResponse.order) {
+        throw new Error('Failed to create payment order.');
       }
-      toast({
-          title: "Request Submitted!",
-          description: "Your upgrade request has been submitted for review. An admin will verify it shortly.",
-      });
-      router.push('/order-status');
+      
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+        amount: orderResponse.order.amount.toString(),
+        currency: orderResponse.order.currency,
+        name: "CareerCraft AI",
+        description: `Upgrade to ${planInfo.name}`,
+        order_id: orderResponse.order.id,
+        handler: async function (response: any) {
+          const verificationResponse = await verifyRazorpayPayment(
+            response.razorpay_order_id,
+            response.razorpay_payment_id,
+            response.razorpay_signature,
+            user.uid,
+            selectedPlan
+          );
+
+          if (verificationResponse.success) {
+            toast({ title: 'Payment Successful!', description: 'Your plan has been upgraded.' });
+            router.push('/dashboard');
+          } else {
+            toast({ title: 'Payment Verification Failed', description: verificationResponse.error, variant: 'destructive' });
+          }
+        },
+        prefill: {
+            name: user.displayName || "",
+            email: user.email || "",
+            contact: user.phoneNumber || "",
+        },
+        theme: {
+            color: "#6d28d9"
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+
     } catch (error) {
-      toast({ title: "Error", description: "Failed to submit upgrade request.", variant: "destructive" });
+      console.error(error);
+      toast({ title: "Payment Error", description: "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
-      setPlanToUpgrade(null);
+        setIsProcessing(null);
     }
   }
 
   return (
-    <>
-    <PaymentDialog 
-      isOpen={!!planToUpgrade}
-      onClose={() => setPlanToUpgrade(null)}
-      onConfirm={onPaymentConfirm}
-      plan={planToUpgrade}
-    />
     <div className="flex flex-col items-center text-center">
       <div className="max-w-2xl">
         <h1 className="text-4xl font-bold font-headline tracking-tight lg:text-5xl">
@@ -113,8 +145,8 @@ export function PricingPage() {
                   <Key className="w-4 h-4"/>
                   <span>Great for people applying regularly.</span>
                 </div>
-                <Button className="w-full mt-2" onClick={() => handleUpgrade('essentials')} disabled={plan === 'essentials' || plan === 'pro' || plan === 'recruiter' || plan === 'pending'}>
-                  {plan === 'essentials' ? 'Your Current Plan' : 'Upgrade'}
+                <Button className="w-full mt-2" onClick={() => handlePayment('essentials')} disabled={isProcessing !== null || plan === 'essentials' || plan === 'pro' || plan === 'recruiter'}>
+                  {isProcessing === 'essentials' ? <Loader2 className="animate-spin" /> : (plan === 'essentials' ? 'Your Current Plan' : 'Upgrade')}
                 </Button>
             </CardFooter>
           </Card>
@@ -144,8 +176,8 @@ export function PricingPage() {
                 {plan === 'pro' ? (
                   <Button className="w-full mt-2" disabled>Your Current Plan</Button>
                 ) : (
-                  <Button className="w-full mt-2" onClick={() => handleUpgrade('pro')} disabled={plan === 'recruiter' || plan === 'pending'}>
-                    {plan === 'recruiter' ? 'Included in Recruiter' : (plan === 'pending' ? 'Request Pending' : 'Upgrade to Pro')}
+                  <Button className="w-full mt-2" onClick={() => handlePayment('pro')} disabled={isProcessing !== null || plan === 'pro' || plan === 'recruiter'}>
+                    {isProcessing === 'pro' ? <Loader2 className="animate-spin" /> : (plan === 'recruiter' ? 'Included in Recruiter' : 'Upgrade to Pro')}
                   </Button>
                 )}
             </CardFooter>
@@ -174,14 +206,13 @@ export function PricingPage() {
                  {plan === 'recruiter' ? (
                   <Button className="w-full mt-2" disabled>Your Current Plan</Button>
                 ) : (
-                  <Button className="w-full mt-2" variant="secondary" onClick={() => handleUpgrade('recruiter')} disabled={plan === 'pending'}>
-                       {plan === 'pending' ? 'Request Pending' : 'Upgrade to Recruiter'}
+                  <Button className="w-full mt-2" variant="secondary" onClick={() => handlePayment('recruiter')} disabled={isProcessing !== null || plan === 'recruiter'}>
+                       {isProcessing === 'recruiter' ? <Loader2 className="animate-spin" /> : 'Upgrade to Recruiter'}
                   </Button>
                 )}
             </CardFooter>
           </Card>
       </div>
     </div>
-    </>
   )
 }
