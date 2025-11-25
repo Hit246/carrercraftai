@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 import Image from "next/image";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Skeleton } from "./ui/skeleton";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadFile } from "@/lib/firebase";
 import { Loader2, Upload } from "lucide-react";
+import { getPaymentSettings } from "@/lib/actions";
 
 type PlanToUpgrade = 'essentials' | 'pro' | 'recruiter' | null;
 
@@ -29,8 +30,6 @@ interface PaymentDialogProps {
     onClose: () => void;
     onConfirm: (paymentProofURL: string) => void;
     plan: PlanToUpgrade;
-    settings: PaymentSettings | null;
-    isLoadingSettings: boolean;
 }
 
 
@@ -44,14 +43,40 @@ const formSchema = z.object({
     proofFile: z.instanceof(File).refine(file => file.size > 0, "Please upload proof of payment."),
 });
 
-export function PaymentDialog({ isOpen, onClose, onConfirm, plan, settings, isLoadingSettings }: PaymentDialogProps) {
+export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialogProps) {
     const [isConfirming, setIsConfirming] = useState(false);
+    const [settings, setSettings] = useState<PaymentSettings | null>(null);
+    const [isLoadingSettings, setIsLoadingSettings] = useState(true);
     const { toast } = useToast();
     const { user } = useAuth();
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     });
+
+    useEffect(() => {
+        if (!isOpen) return;
+        
+        async function fetchSettings() {
+            setIsLoadingSettings(true);
+            try {
+                const data = await getPaymentSettings();
+                setSettings(data as PaymentSettings);
+            } catch (error) {
+                toast({
+                    title: 'Error',
+                    description: 'Could not load payment details. Please try again.',
+                    variant: 'destructive',
+                });
+                onClose();
+            } finally {
+                setIsLoadingSettings(false);
+            }
+        }
+        
+        fetchSettings();
+    }, [isOpen, toast, onClose]);
+
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!user) {
