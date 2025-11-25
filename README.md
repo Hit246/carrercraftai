@@ -75,6 +75,7 @@ This project requires a connection to a Firebase project to function.
     -   Copy the contents of `.env.example` into `.env`.
     -   Fill in the values with your Firebase project's configuration keys.
     -   You will also need a `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/) for the AI features to work.
+    -   If using Razorpay, add your `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`.
 
 Your `.env` file should look like this:
 
@@ -86,6 +87,11 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
 
 # Genkit AI
 GEMINI_API_KEY=your-google-ai-api-key
+
+# Razorpay
+RAZORPAY_KEY_ID=your-razorpay-key-id
+RAZORPAY_KEY_SECRET=your-razorpay-key-secret
+NEXT_PUBLIC_RAZORPAY_KEY_ID=your-razorpay-key-id
 ```
 
 ### 4. Run the Development Server
@@ -117,15 +123,15 @@ The CLI will use the `firestore.rules` and `storage.rules` files in the project 
 
 ### Enable Password Reset Emails
 
-For the "Forgot Password" feature to work, you must configure an SMTP server in Firebase.
+For the "Forgot Password" feature to work, you must configure an SMTP server in Firebase. Firebase **does not** send these emails for you by default.
 
 1.  Go to the **Firebase Console** and select your project.
-2.  Navigate to **Authentication**, then click on the **Templates** tab.
-3.  In the "Sender name and email" section, click **Edit** (the pencil icon).
-4.  You will be prompted to set up an SMTP server. You can use a service like **SendGrid**, **Mailgun**, or your own SMTP server.
-5.  Follow the on-screen instructions to provide your SMTP server address, username, and password.
-
-Once this is configured, Firebase will be able to send password reset and email verification emails.
+2.  In the left-hand navigation menu, go to **Build > Authentication**.
+3.  Click on the **Templates** tab at the top of the page.
+4.  You will see a list of email templates (Password reset, Email verification, etc.). In the **"Sender name and email address"** section above the list, click the **Edit** (pencil) icon.
+5.  A dialog will open. Firebase will now prompt you to set up an **SMTP server**. You need to provide credentials for an external email service. You can use services like **SendGrid**, **Mailgun**, **Resend**, or even your own Gmail account (though this is not recommended for production).
+6.  Follow the on-screen instructions to enter your SMTP server address, username, and password for that service.
+7.  Once this is configured and saved, Firebase will use that service to send all authentication-related emails.
 
 ## ✍️ Author
 
