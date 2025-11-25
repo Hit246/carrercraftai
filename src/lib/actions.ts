@@ -26,7 +26,7 @@ import { atsOptimizer, AtsOptimizerInput, AtsOptimizerOutput } from '@/ai/flows/
 import { submitSupportRequest, replyToSupportRequest } from '@/ai/flows/support-request';
 import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeVersionNameOutput } from '@/ai/flows/resume-version-namer';
 import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput } from '@/ai/flows/candidate-summarizer';
-import { sendPaymentVerificationEmail } from '@/ai/flows/payment-verifier';
+import { sendPaymentVerificationEmail, SendPaymentVerificationEmailInput } from '@/ai/flows/payment-verifier';
 import { db, uploadFile } from './firebase';
 import type { SupportRequestInput, ReplySupportRequestInput } from './types';
 
@@ -78,7 +78,8 @@ export async function getPaymentSettings() {
     if (settingsSnap.exists()) {
         return settingsSnap.data();
     }
-    return { upiId: 'chauhanhitarth6@oksbi', qrCodeImageUrl: 'https://i.imgur.com/2O0s4Jm.png' };
+    // Return a default object if no settings are found in Firestore.
+    return { upiId: 'admin@careercraft.ai', qrCodeImageUrl: 'https://i.imgur.com/2O0s4Jm.png' };
 }
 
 export async function submitSupportRequestAction(
@@ -107,7 +108,7 @@ export async function summarizeCandidateAction(
 }
 
 export async function sendPaymentVerificationEmailAction(
-    input: { userEmail: string; requestedPlan: string; paymentProofURL: string; }
+    input: SendPaymentVerificationEmailInput
 ): Promise<void> {
     return await sendPaymentVerificationEmail(input);
 }
