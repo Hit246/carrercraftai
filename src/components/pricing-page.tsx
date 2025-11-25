@@ -40,10 +40,11 @@ export function PricingPage() {
     }
     
     setIsProcessing(selectedPlan);
-
     const planInfo = planDetails[selectedPlan];
-    
-    createRazorpayOrder(planInfo.amount, 'INR').then(orderResponse => {
+
+    try {
+      const orderResponse = await createRazorpayOrder(planInfo.amount, 'INR');
+
       if (!orderResponse.success || !orderResponse.order) {
         throw new Error(orderResponse.error || 'Failed to create payment order.');
       }
@@ -82,13 +83,22 @@ export function PricingPage() {
       };
 
       const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+          toast({
+            title: "Payment Failed",
+            description: response.error.description || "Something went wrong.",
+            variant: "destructive",
+          });
+      });
+
       rzp.open();
-    }).catch((error: any) => {
+
+    } catch (error: any) {
         console.error("Handle Payment Error:", error);
         toast({ title: "Payment Error", description: error.message || "Something went wrong. Please try again.", variant: "destructive" });
-    }).finally(() => {
+    } finally {
         setIsProcessing(null);
-    });
+    }
   }
 
   return (
