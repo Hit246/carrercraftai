@@ -43,12 +43,7 @@ export function PricingPage() {
 
     const planInfo = planDetails[selectedPlan];
     
-    try {
-      const orderResponse = await createRazorpayOrder(planInfo.amount, 'INR').catch(err => {
-          console.error("Caught error creating order:", err);
-          throw new Error("Failed to connect to the payment server. Please try again.");
-      });
-
+    createRazorpayOrder(planInfo.amount, 'INR').then(orderResponse => {
       if (!orderResponse.success || !orderResponse.order) {
         throw new Error(orderResponse.error || 'Failed to create payment order.');
       }
@@ -88,13 +83,12 @@ export function PricingPage() {
 
       const rzp = new Razorpay(options);
       rzp.open();
-
-    } catch (error: any) {
-      console.error("Handle Payment Error:", error);
-      toast({ title: "Payment Error", description: error.message || "Something went wrong. Please try again.", variant: "destructive" });
-    } finally {
+    }).catch((error: any) => {
+        console.error("Handle Payment Error:", error);
+        toast({ title: "Payment Error", description: error.message || "Something went wrong. Please try again.", variant: "destructive" });
+    }).finally(() => {
         setIsProcessing(null);
-    }
+    });
   }
 
   return (
