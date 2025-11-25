@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { Button } from "@/components/ui/button"
@@ -43,7 +44,10 @@ export function PricingPage() {
     const planInfo = planDetails[selectedPlan];
     
     try {
-      const orderResponse = await createRazorpayOrder(planInfo.amount, 'INR');
+      const orderResponse = await createRazorpayOrder(planInfo.amount, 'INR').catch(err => {
+          console.error("Caught error creating order:", err);
+          throw new Error("Failed to connect to the payment server. Please try again.");
+      });
 
       if (!orderResponse.success || !orderResponse.order) {
         throw new Error(orderResponse.error || 'Failed to create payment order.');
@@ -86,7 +90,7 @@ export function PricingPage() {
       rzp.open();
 
     } catch (error: any) {
-      console.error(error);
+      console.error("Handle Payment Error:", error);
       toast({ title: "Payment Error", description: error.message || "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
         setIsProcessing(null);
