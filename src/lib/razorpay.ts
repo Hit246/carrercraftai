@@ -1,38 +1,43 @@
+
 'use server';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
-let razorpay: Razorpay;
+let razorpayInstance: Razorpay | null = null;
 
-if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
-    razorpay = new Razorpay({
-        key_id: process.env.RAZORPAY_KEY_ID,
-        key_secret: process.env.RAZORPAY_KEY_SECRET,
-    });
-} else {
-    console.warn("Razorpay keys not found. Please add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to your .env file.");
+function getRazorpayInstance(): Razorpay {
+    if (razorpayInstance) {
+        return razorpayInstance;
+    }
+
+    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+        razorpayInstance = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET,
+        });
+        return razorpayInstance;
+    } else {
+        console.error("Razorpay keys not found in environment variables.");
+        throw new Error('Razorpay is not configured. Missing API keys on the server.');
+    }
 }
 
 
 export async function createRazorpayOrder(amount: number, currency: string) {
-    if (!razorpay) {
-        throw new Error('Razorpay is not initialized. Missing API keys.');
-    }
-
-    const options = {
-        amount: amount * 100, // amount in the smallest currency unit
-        currency,
-        receipt: `receipt_order_${new Date().getTime()}`,
-    };
-
     try {
+        const razorpay = getRazorpayInstance();
+        const options = {
+            amount: amount * 100, // amount in the smallest currency unit
+            currency,
+            receipt: `receipt_order_${new Date().getTime()}`,
+        };
         const order = await razorpay.orders.create(options);
         return { success: true, order };
-    } catch (error) {
-        console.error('Error creating Razorpay order:', error);
-        return { success: false, error: 'Failed to create order.' };
+    } catch (error: any) {
+        console.error('Error creating Razorpay order:', error.message);
+        return { success: false, error: 'Failed to create payment order on the server.' };
     }
 }
 
@@ -44,7 +49,7 @@ export async function verifyRazorpayPayment(
     plan: 'essentials' | 'pro' | 'recruiter'
 ) {
     if (!process.env.RAZORPAY_KEY_SECRET) {
-        throw new Error('Razorpay secret key is not configured.');
+        return { success: false, error: 'Razorpay secret key is not configured.' };
     }
 
     const body = orderId + '|' + paymentId;
@@ -54,14 +59,13 @@ export async function verifyRazorpayPayment(
         .digest('hex');
     
     if (expectedSignature === signature) {
-        // Payment is verified, update user's plan in Firestore
         try {
             const userRef = doc(db, 'users', userId);
             await updateDoc(userRef, {
                 plan: plan,
                 planUpdatedAt: new Date(),
-                requestedPlan: null, // Clear any pending requests
-                paymentProofURL: `razorpay_order_${orderId}` // Store order ID as reference
+                requestedPlan: null, 
+                paymentProofURL: `razorpay_order_${orderId}`
             });
             return { success: true, message: 'Payment verified and plan updated.' };
         } catch (dbError) {
