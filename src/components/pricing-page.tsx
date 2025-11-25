@@ -28,6 +28,10 @@ export function PricingPage() {
   const [isProcessing, setIsProcessing] = useState<Plan | null>(null);
   
   const handlePayment = async (selectedPlan: Plan) => {
+    if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) {
+        toast({ title: 'Configuration Error', description: 'Razorpay is not configured. Please contact support.', variant: 'destructive' });
+        return;
+    }
     if (!user || !isLoaded) {
       if (!user) router.push('/login');
       else toast({ title: 'Error', description: 'Payment gateway is not ready.', variant: 'destructive' });
@@ -42,11 +46,11 @@ export function PricingPage() {
       const orderResponse = await createRazorpayOrder(planInfo.amount, 'INR');
 
       if (!orderResponse.success || !orderResponse.order) {
-        throw new Error('Failed to create payment order.');
+        throw new Error(orderResponse.error || 'Failed to create payment order.');
       }
       
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: orderResponse.order.amount.toString(),
         currency: orderResponse.order.currency,
         name: "CareerCraft AI",
@@ -81,9 +85,9 @@ export function PricingPage() {
       const rzp = new Razorpay(options);
       rzp.open();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast({ title: "Payment Error", description: "Something went wrong. Please try again.", variant: "destructive" });
+      toast({ title: "Payment Error", description: error.message || "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
         setIsProcessing(null);
     }

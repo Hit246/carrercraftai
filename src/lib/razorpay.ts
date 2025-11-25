@@ -4,12 +4,23 @@ import crypto from 'crypto';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID!,
-    key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
+let razorpay: Razorpay;
+
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+} else {
+    console.warn("Razorpay keys not found. Please add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to your .env file.");
+}
+
 
 export async function createRazorpayOrder(amount: number, currency: string) {
+    if (!razorpay) {
+        throw new Error('Razorpay is not initialized. Missing API keys.');
+    }
+
     const options = {
         amount: amount * 100, // amount in the smallest currency unit
         currency,
@@ -32,9 +43,13 @@ export async function verifyRazorpayPayment(
     userId: string,
     plan: 'essentials' | 'pro' | 'recruiter'
 ) {
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+        throw new Error('Razorpay secret key is not configured.');
+    }
+
     const body = orderId + '|' + paymentId;
     const expectedSignature = crypto
-        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
         .update(body.toString())
         .digest('hex');
     
