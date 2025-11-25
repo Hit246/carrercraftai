@@ -37,10 +37,12 @@ export function ForgotPasswordForm() {
       await forgotPassword(values.email);
       setIsSuccess(true);
     } catch (error: any) {
+      console.error("Full 'Forgot Password' error object:", error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to send password reset email. Please try again.',
+        description: `Failed to send email. Check the browser console for more details. (Code: ${error.code})`,
         variant: 'destructive',
+        duration: 10000,
       });
     } finally {
       setIsLoading(false);
