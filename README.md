@@ -103,7 +103,9 @@ The application uses two concurrent development servers: one for the Next.js fro
 
 Open [http://localhost:9002](http://localhost:9002) with your browser to see the result. The Genkit server will run on a different port and will be proxied by the Next.js server.
 
-## ⚙️ Firebase Security Rules
+## ⚙️ Firebase Configuration
+
+### Security Rules
 
 For the application to interact with Firestore and Storage securely, you must deploy the provided security rules.
 
@@ -112,6 +114,18 @@ For the application to interact with Firestore and Storage securely, you must de
 3.  Deploy the rules: `firebase deploy --only firestore,storage`
 
 The CLI will use the `firestore.rules` and `storage.rules` files in the project root.
+
+### Enable Password Reset Emails
+
+For the "Forgot Password" feature to work, you must configure an SMTP server in Firebase.
+
+1.  Go to the **Firebase Console** and select your project.
+2.  Navigate to **Authentication** > **Settings** > **Email templates**.
+3.  In the "Sender name and email" section, click **Edit** (the pencil icon).
+4.  You will be prompted to set up an SMTP server. You can use a service like **SendGrid**, **Mailgun**, or your own SMTP server.
+5.  Follow the on-screen instructions to provide your SMTP server address, username, and password.
+
+Once this is configured, Firebase will be able to send password reset and email verification emails.
 
 ## ✍️ Author
 
