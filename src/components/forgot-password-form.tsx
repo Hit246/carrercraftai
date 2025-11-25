@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -33,20 +34,23 @@ export function ForgotPasswordForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setIsSuccess(false);
-    try {
-      await forgotPassword(values.email);
-      setIsSuccess(true);
-    } catch (error: any) {
-      console.error("Full 'Forgot Password' error object:", error);
-      toast({
-        title: 'Error',
-        description: `Failed to send email. Check the browser console for more details. (Code: ${error.code})`,
-        variant: 'destructive',
-        duration: 10000,
+    
+    forgotPassword(values.email)
+      .then(() => {
+        setIsSuccess(true);
+      })
+      .catch((error: any) => {
+        console.error("Full 'Forgot Password' error object:", error);
+        toast({
+          title: 'Error Sending Email',
+          description: `Failed to send reset email. Please check your SMTP settings and the browser console for details. (Code: ${error.code})`,
+          variant: 'destructive',
+          duration: 10000,
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-    } finally {
-      setIsLoading(false);
-    }
   }
 
   if (isSuccess) {
