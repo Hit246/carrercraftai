@@ -127,7 +127,7 @@ export function PaymentDialog({ isOpen, onClose, onConfirm, plan }: PaymentDialo
                                 <div className="flex flex-col items-center space-y-2">
                                     <Label>1. Scan QR Code to Pay</Label>
                                     <Image
-                                        src={settings.qrCodeImageUrl}
+                                        src={settings.qrCodeImageUrl || 'https://i.imgur.com/2O0s4Jm.png'}
                                         alt="Payment QR Code"
                                         width={200}
                                         height={200}
