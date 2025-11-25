@@ -57,20 +57,28 @@ export function PricingPage() {
         description: `Upgrade to ${planInfo.name}`,
         order_id: orderResponse.order.id,
         handler: async function (response: any) {
-          const verificationResponse = await verifyRazorpayPayment(
-            response.razorpay_order_id,
-            response.razorpay_payment_id,
-            response.razorpay_signature,
-            user.uid,
-            selectedPlan
-          );
+            try {
+                const verificationResponse = await verifyRazorpayPayment(
+                    response.razorpay_order_id,
+                    response.razorpay_payment_id,
+                    response.razorpay_signature,
+                    user.uid,
+                    selectedPlan
+                );
 
-          if (verificationResponse.success) {
-            toast({ title: 'Payment Successful!', description: 'Your plan has been upgraded.' });
-            router.push('/dashboard');
-          } else {
-            toast({ title: 'Payment Verification Failed', description: verificationResponse.error, variant: 'destructive' });
-          }
+                if (verificationResponse.success) {
+                    toast({ title: 'Payment Successful!', description: 'Your plan has been upgraded.' });
+                    router.push('/dashboard');
+                } else {
+                    throw new Error(verificationResponse.error || 'Payment verification failed.');
+                }
+            } catch (verificationError: any) {
+                toast({
+                    title: "Payment Verification Failed",
+                    description: verificationError.message || "Something went wrong during verification.",
+                    variant: "destructive",
+                });
+            }
         },
         prefill: {
             name: user.displayName || "",
