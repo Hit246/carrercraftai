@@ -120,7 +120,7 @@ The CLI will use the `firestore.rules` and `storage.rules` files in the project 
 For the "Forgot Password" feature to work, you must configure an SMTP server in Firebase.
 
 1.  Go to the **Firebase Console** and select your project.
-2.  Navigate to **Authentication** > **Settings** > **Email templates**.
+2.  Navigate to **Authentication**, then click on the **Templates** tab.
 3.  In the "Sender name and email" section, click **Edit** (the pencil icon).
 4.  You will be prompted to set up an SMTP server. You can use a service like **SendGrid**, **Mailgun**, or your own SMTP server.
 5.  Follow the on-screen instructions to provide your SMTP server address, username, and password.
