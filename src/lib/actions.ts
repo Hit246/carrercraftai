@@ -26,6 +26,7 @@ import { atsOptimizer, AtsOptimizerInput, AtsOptimizerOutput } from '@/ai/flows/
 import { submitSupportRequest, replyToSupportRequest } from '@/ai/flows/support-request';
 import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeVersionNameOutput } from '@/ai/flows/resume-version-namer';
 import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput } from '@/ai/flows/candidate-summarizer';
+import { sendPaymentVerificationEmail } from '@/ai/flows/payment-verifier';
 import { db, uploadFile } from './firebase';
 import type { SupportRequestInput, ReplySupportRequestInput } from './types';
 
@@ -103,4 +104,10 @@ export async function summarizeCandidateAction(
   input: SummarizeCandidateInput
 ): Promise<SummarizeCandidateOutput> {
   return await summarizeCandidate(input);
+}
+
+export async function sendPaymentVerificationEmailAction(
+    input: { userEmail: string; requestedPlan: string; paymentProofURL: string; }
+): Promise<void> {
+    return await sendPaymentVerificationEmail(input);
 }

@@ -5,6 +5,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode, useCa
 import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, onSnapshot, collectionGroup } from 'firebase/firestore';
+import { sendPaymentVerificationEmailAction } from '@/lib/actions';
 
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
@@ -205,6 +206,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userRef = doc(db, 'users', user.uid);
     const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'essentials' as const, planUpdatedAt: new Date(), paymentProofURL };
     await updateDoc(userRef, newPlanData);
+    await sendPaymentVerificationEmailAction({
+        userEmail: user.email!,
+        requestedPlan: 'essentials',
+        paymentProofURL,
+    });
   }
 
   const requestProUpgrade = async (paymentProofURL: string) => {
@@ -212,6 +218,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userRef = doc(db, 'users', user.uid);
     const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'pro' as const, planUpdatedAt: new Date(), paymentProofURL };
     await updateDoc(userRef, newPlanData);
+    await sendPaymentVerificationEmailAction({
+        userEmail: user.email!,
+        requestedPlan: 'pro',
+        paymentProofURL,
+    });
   }
 
   const requestRecruiterUpgrade = async (paymentProofURL: string) => {
@@ -219,6 +230,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userRef = doc(db, 'users', user.uid);
     const newPlanData = { plan: 'pending' as Plan, requestedPlan: 'recruiter' as const, planUpdatedAt: new Date(), paymentProofURL };
     await updateDoc(userRef, newPlanData);
+    await sendPaymentVerificationEmailAction({
+        userEmail: user.email!,
+        requestedPlan: 'recruiter',
+        paymentProofURL,
+    });
   }
 
   const requestCancellation = async () => {
