@@ -128,7 +128,8 @@ For the "Forgot Password" feature to work, you must configure an SMTP server in 
 1.  Go to the **Firebase Console** and select your project.
 2.  In the left-hand navigation menu, go to **Build > Authentication**.
 3.  Click on the **Templates** tab at the top of the page.
-4.  You will see a list of email templates (Password reset, Email verification, etc.). In the **"Sender name and email address"** section above the list, click the **Edit** (pencil) icon.
+4.  You will see a list of email templates (Password reset, Email verification, etc.). In the **"Sender name and email address"** section above the list, click the **Edit (pencil) icon**.
+    ![Edit SMTP Settings](./public/edit-smtp.png)
 5.  A dialog will open. Firebase will now prompt you to set up an **SMTP server**. You need to provide credentials for an external email service. You can use services like **SendGrid**, **Mailgun**, **Resend**, or even your own Gmail account (though this is not recommended for production).
 6.  Follow the on-screen instructions to enter your SMTP server address, username, and password for that service.
 7.  Once this is configured and saved, Firebase will use that service to send all authentication-related emails.
