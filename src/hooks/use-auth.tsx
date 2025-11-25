@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
-import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, onSnapshot, collectionGroup } from 'firebase/firestore';
 
@@ -38,6 +38,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   login: (email:string, password:string) => Promise<any>;
   signup: (email:string, password:string) => Promise<any>;
+  forgotPassword: (email: string) => Promise<void>;
   updateUserProfile: (profile: UserProfile) => Promise<void>;
   updatePaymentProof: (url: string) => Promise<void>;
 }
@@ -139,6 +140,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = (email:string, password:string) => {
     return signInWithEmailAndPassword(auth, email, password);
   }
+
+  const forgotPassword = (email: string) => {
+    return sendPasswordResetEmail(auth, email);
+  };
 
   const signup = async (email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -253,6 +258,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     logout,
     login,
     signup,
+    forgotPassword,
     updateUserProfile,
     updatePaymentProof,
   };
