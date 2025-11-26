@@ -115,6 +115,8 @@ export function ProfilePage() {
 
     const getPlanBadge = () => {
         switch (plan) {
+            case 'essentials':
+                return <Badge className="bg-gray-400/20 text-gray-500 border-gray-400/30"><User className="mr-2 h-4 w-4"/> Essentials</Badge>;
             case 'pro':
                 return <Badge className="bg-amber-400/20 text-amber-500 border-amber-400/30"><Crown className="mr-2 h-4 w-4"/> Pro</Badge>;
             case 'recruiter':
