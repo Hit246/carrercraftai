@@ -35,6 +35,19 @@ export function PricingPage() {
       router.replace("/login");
       return;
     }
+
+    const displayName = userData?.displayName || user.displayName;
+    const phoneNumber = userData?.phoneNumber;
+
+    if (!displayName || !phoneNumber) {
+        toast({
+            title: "Profile Incomplete",
+            description: "Please save your name and phone number in your profile before making a payment.",
+            variant: "destructive",
+            action: <Button variant="secondary" onClick={() => router.push('/profile')}>Go to Profile</Button>
+        });
+        return;
+    }
   
     setIsProcessing(selectedPlan);
     const planInfo = planDetails[selectedPlan];
@@ -45,9 +58,9 @@ export function PricingPage() {
         planInfo.amount, 
         planInfo.name,
         {
-          name: userData?.displayName || user.displayName || "Valued Customer",
+          name: displayName,
           email: user.email,
-          contact: userData?.phoneNumber || "+919999999999" 
+          contact: phoneNumber,
         }
       );
   
