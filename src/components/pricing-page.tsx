@@ -94,7 +94,7 @@ export function PricingPage() {
       rzp.on("payment.failed", (response: any) => {
           toast({
             title: "Payment Failed",
-            description: response?.error?.description || "Payment failure, no need to pretend we know more.",
+            description: response?.error?.description || "Your payment could not be processed. Please try again.",
             variant: "destructive",
           });
       });
