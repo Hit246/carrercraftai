@@ -23,12 +23,13 @@ function PaymentStatus() {
     const paymentId = searchParams.get('razorpay_payment_id');
     const signature = searchParams.get('razorpay_signature');
     const plan = searchParams.get('plan') as 'essentials' | 'pro' | 'recruiter' | null;
+    const userId = searchParams.get('userId');
 
-    if (!paymentLinkId || !paymentId || !signature || !user || !plan) {
+    if (!paymentLinkId || !paymentId || !signature || !userId || !plan) {
       setMessage('Invalid payment details or session. Redirecting...');
       setStatus('failed');
       setTimeout(() => router.push('/pricing'), 3000);
-      return; // This return was missing
+      return; 
     }
 
     const verify = async () => {
@@ -37,7 +38,7 @@ function PaymentStatus() {
           paymentLinkId,
           paymentId,
           signature,
-          user.uid,
+          userId,
           plan
         );
 
@@ -69,7 +70,7 @@ function PaymentStatus() {
     };
 
     verify();
-  }, [searchParams, router, user, toast]);
+  }, [searchParams, router, toast]);
 
   const StatusIcon = () => {
     switch (status) {
