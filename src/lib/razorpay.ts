@@ -2,7 +2,7 @@
 'use server';
 import Razorpay from 'razorpay';
 import { db } from './firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, deleteField } from 'firebase/firestore';
 
 function getRazorpay() {
   const id = process.env.RAZORPAY_KEY_ID;
@@ -16,9 +16,10 @@ function getRazorpay() {
     throw new Error('Missing Razorpay credentials');
   }
 
-  console.log('Razorpay instance created with key:', id.substring(0, 10) + '...');
   return new Razorpay({ key_id: id, key_secret: secret });
 }
+
+type Plan = "free" | "essentials" | "pro" | "recruiter";
 
 export async function createPaymentLink(
   amount: number,
@@ -28,18 +29,14 @@ export async function createPaymentLink(
 ) {
   try {
     const razorpay = getRazorpay();
-    console.log('Creating Payment Link >>>', { amount, planName, customer });
-
     const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
     if (!appUrl) {
-      throw new Error("NEXT_PUBLIC_APP_URL is not set in the environment variables. This is required for payment callbacks.");
+      throw new Error("NEXT_PUBLIC_APP_URL is not set in the environment variables.");
     }
     
-    // The callback URL should be clean. We will pass custom data via 'notes'.
     const callbackUrl = `${appUrl}/payment/success`;
 
-
-    // Payment Link API requires these specific fields
     const paymentLinkData = {
       amount: amount * 100, // Convert to paise
       currency: 'INR',
@@ -81,16 +78,9 @@ export async function createPaymentLink(
       linkId: link.id,
     };
   } catch (err: any) {
-    // Razorpay errors have specific structure
     console.error('Payment Link Error >>>', {
       message: err.message,
       description: err.description,
-      code: err.code,
-      statusCode: err.statusCode,
-      source: err.source,
-      step: err.step,
-      reason: err.reason,
-      metadata: err.metadata,
       raw: JSON.stringify(err, null, 2),
     });
 
@@ -104,71 +94,54 @@ export async function createPaymentLink(
   }
 }
 
-type Plan = 'free' | 'essentials' | 'pro' | 'recruiter';
-
 export async function verifyAndUpgrade(
   paymentLinkId: string,
   paymentId: string,
   signature: string,
-  userId: string,
-  plan: Exclude<Plan, 'free'>
+  userId: string
 ) {
   try {
     const crypto = require('crypto');
     const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret) return { success: false, message: 'Server secret missing' };
 
-    if (!secret) {
-      throw new Error('Missing Razorpay secret on server');
+    const body = `${paymentLinkId}|${paymentId}`;
+    const expectedSig = crypto.createHmac('sha256', secret).update(body).digest('hex');
+
+    if (expectedSig !== signature) {
+      console.error('Signature mismatch', {
+        expected: expectedSig,
+        received: signature,
+        body: body,
+      })
+      return { success: false, message: 'Signature mismatch – fake or corrupt callback' };
     }
 
-    // For Payment Links callback, the signature format must be:
-    // payment_link_id|razorpay_payment_id
-    const body = `${paymentLinkId}|${paymentId}`;
+    // Signature verified — now check DB for intended plan
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
 
-    const expectedSignature = crypto
-      .createHmac('sha256', secret)
-      .update(body)
-      .digest('hex');
+    if (!userSnap.exists()) {
+      return { success: false, message: 'User not found in database' };
+    }
 
-    const isAuthentic = expectedSignature === signature;
+    const plan = userSnap.data()?.requestedPlan;
+    if (!plan) {
+      return { success: false, message: 'No plan stored in DB – cannot activate' };
+    }
 
-    console.log('Payment verification details:', {
-      isAuthentic,
-      userId,
+    // Upgrade user plan
+    await updateDoc(userRef, {
       plan,
-      bodyUsedForSignature: body,
-      generatedSignature: expectedSignature,
-      receivedSignature: signature,
+      planUpdatedAt: new Date(),
+      paymentId,
+      paymentLinkId,
+      requestedPlan: deleteField(),
+      paymentPending: false,
     });
 
-    if (isAuthentic) {
-      // Signature is valid, upgrade the user's plan
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, {
-        plan: plan,
-        planUpdatedAt: new Date(),
-        paymentId: paymentId,
-        paymentLinkId: paymentLinkId,
-      });
-      
-      console.log(`✅ User ${userId} upgraded to ${plan} plan`);
-      
-      return { 
-        success: true, 
-        message: 'Payment verified and plan upgraded successfully!' 
-      };
-    } else {
-      console.error('❌ Payment signature verification failed');
-      return { 
-        success: false, 
-        message: 'Payment verification failed. Invalid signature.' 
-      };
-    }
-  } catch (error: any) {
-    console.error('Verification error:', error);
-    return {
-      success: false,
-      message: error.message || 'An error occurred during verification.',
-    };
+    return { success: true, message: `Upgraded to ${plan} plan` };
+  } catch (e: any) {
+    return { success: false, message: e.message };
   }
 }

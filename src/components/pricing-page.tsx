@@ -57,7 +57,10 @@ export function PricingPage() {
      // Before creating the payment link, set the `requestedPlan` in Firestore
     try {
         const userRef = doc(db, 'users', user.uid);
-        await updateDoc(userRef, { requestedPlan: selectedPlan });
+        await updateDoc(userRef, { 
+            requestedPlan: selectedPlan,
+            paymentPending: true,
+        });
     } catch (dbError) {
         console.error("Failed to update requestedPlan:", dbError);
         toast({

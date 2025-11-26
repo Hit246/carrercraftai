@@ -25,110 +25,54 @@ function PaymentStatus() {
   useEffect(() => {
     const verifyPayment = async () => {
       if (!user) {
-        // Wait for user object to be available
         return;
       }
       
-      // Get Razorpay callback parameters
       const paymentLinkId = searchParams.get('razorpay_payment_link_id');
-      const paymentLinkReferenceId = searchParams.get('razorpay_payment_link_reference_id');
       const paymentId = searchParams.get('razorpay_payment_id');
       const signature = searchParams.get('razorpay_signature');
       const paymentLinkStatus = searchParams.get('razorpay_payment_link_status');
       
-      // Since we can't get notes from a simple GET callback, we have to assume
-      // the logged-in user is the one who paid. This is less secure but the only
-      // way without using webhooks. We also need to retrieve the requested plan from the user's document.
-      const requestedPlan = (user as any)?.requestedPlan; // Assuming this is set before payment
-
-      console.log('Payment callback received:', {
-        paymentLinkId,
-        paymentLinkReferenceId,
-        paymentId,
-        signature,
-        paymentLinkStatus,
-        userId: user.uid,
-        requestedPlan,
-      });
-
-
       // Handle cancelled payment
       if (paymentLinkStatus === 'cancelled') {
         setStatus('cancelled');
-        setMessage('Payment was cancelled. No charges were made to your account.');
-        toast({
-          title: 'Payment Cancelled',
-          description: 'You cancelled the payment process.',
-          variant: 'default',
-        });
+        setMessage('Payment was cancelled. You will not be charged.');
+        toast({ title: 'Payment Cancelled' });
         return;
       }
 
       // Handle failed payment
       if (paymentLinkStatus === 'failed') {
         setStatus('failed');
-        setMessage('Payment failed. Please try again or use a different payment method.');
-        toast({
-          title: 'Payment Failed',
-          description: 'The payment could not be processed.',
-          variant: 'destructive',
-        });
+        setMessage('Payment failed. Please try again.');
+        toast({ title: 'Payment Failed', variant: 'destructive' });
         return;
       }
 
-      // Validate all required parameters
-      if (!paymentLinkId || !paymentId || !signature || !user.uid || !requestedPlan) {
-        console.error('Missing payment parameters:', {
-          paymentLinkId: !!paymentLinkId,
-          paymentId: !!paymentId,
-          signature: !!signature,
-          userId: !!user.uid,
-          plan: !!requestedPlan,
-        });
-        
+      if (!paymentLinkId || !paymentId || !signature) {
         setStatus('failed');
-        setMessage('Invalid payment details. Please contact support if you were charged.');
-        toast({
-          title: 'Invalid Payment Data',
-          description: 'Required payment information is missing.',
-          variant: 'destructive',
-        });
+        setMessage('Invalid payment details received from the payment gateway.');
+        toast({ title: 'Invalid Payment Data', variant: 'destructive' });
         return;
       }
-
-      // Check if payment was marked as paid by Razorpay
-      if (paymentLinkStatus !== 'paid') {
-        setStatus('failed');
-        setMessage(`Payment status: ${paymentLinkStatus}. Please contact support.`);
-        toast({
-          title: 'Payment Not Completed',
-          description: 'The payment was not marked as successful.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
+      
       // Verify payment signature and upgrade plan
       try {
-        console.log('Verifying payment signature...');
         const result = await verifyAndUpgrade(
           paymentLinkId,
           paymentId,
-          signature,
+          signature, 
           user.uid,
-          requestedPlan
         );
 
         if (result.success) {
-          console.log('✅ Payment verified successfully');
           setStatus('success');
-          setMessage(result.message || `Successfully upgraded to ${requestedPlan} plan!`);
+          setMessage(result.message || `Plan upgraded successfully!`);
           toast({
             title: 'Payment Successful! 🎉',
             description: 'Your plan has been upgraded.',
           });
         } else {
-          console.error('❌ Payment verification failed:', result.message);
           setStatus('failed');
           setMessage(result.message || 'Payment verification failed. Please contact support.');
           toast({
@@ -138,7 +82,6 @@ function PaymentStatus() {
           });
         }
       } catch (error: any) {
-        console.error('Payment verification error:', error);
         setStatus('failed');
         setMessage(error.message || 'An unexpected error occurred during verification.');
         toast({
@@ -149,7 +92,9 @@ function PaymentStatus() {
       }
     };
 
-    verifyPayment();
+    if (user) {
+      verifyPayment();
+    }
   }, [searchParams, router, toast, user]);
 
   // Auto-redirect countdown for successful payments
@@ -216,52 +161,22 @@ function PaymentStatus() {
             {message}
           </p>
 
-          {status === 'verifying' && (
-            <div className="flex justify-center">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            </div>
-          )}
-
           <div className="space-y-2 pt-4">
             {status === 'success' && (
-              <>
-                <Button 
-                  onClick={() => router.push('/dashboard')} 
-                  className="w-full"
-                >
-                  Go to Dashboard Now
-                </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  Your plan has been activated. Enjoy your new features!
-                </p>
-              </>
+              <Button onClick={() => router.push('/dashboard')} className="w-full">
+                Go to Dashboard Now
+              </Button>
             )}
             
             {(status === 'cancelled' || status === 'failed') && (
-              <>
-                <Button 
-                  onClick={() => router.push('/pricing')} 
-                  className="w-full"
-                >
+              <div className="space-y-2">
+                <Button onClick={() => router.push('/pricing')} className="w-full">
                   Try Again
                 </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => router.push('/dashboard')} 
-                  className="w-full"
-                >
+                <Button variant="outline" onClick={() => router.push('/dashboard')} className="w-full">
                   Back to Dashboard
                 </Button>
-                {searchParams.get('razorpay_payment_id') && (
-                  <p className="text-xs text-center text-muted-foreground mt-2">
-                    Reference ID: {searchParams.get('razorpay_payment_id')}
-                  </p>
-                )}
-              </>
+              </div>
             )}
           </div>
         </CardContent>
@@ -272,16 +187,16 @@ function PaymentStatus() {
 
 export default function PaymentSuccessPage() {
   return (
-    <Suspense 
-      fallback={
-        <div className="flex h-screen w-full items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      }
-    >
-      <AuthProvider>
-          <PaymentStatus />
-      </AuthProvider>
-    </Suspense>
+    <AuthProvider>
+      <Suspense 
+        fallback={
+          <div className="flex h-screen w-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        }
+      >
+        <PaymentStatus />
+      </Suspense>
+    </AuthProvider>
   );
 }
