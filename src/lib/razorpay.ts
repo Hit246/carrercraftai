@@ -116,8 +116,8 @@ export async function verifyAndUpgrade(
       throw new Error('Missing Razorpay secret on server');
     }
 
-    // For Payment Links, the signature format is:
-    // payment_link_id|payment_id
+    // For Payment Links callback, the signature format must be:
+    // payment_link_id|razorpay_payment_id
     const body = `${paymentLinkId}|${paymentId}`;
 
     const expectedSignature = crypto
@@ -132,7 +132,9 @@ export async function verifyAndUpgrade(
       paymentId,
       isAuthentic,
       userId,
-      plan
+      plan,
+      generatedSignature: expectedSignature,
+      receivedSignature: signature,
     });
 
     if (isAuthentic) {
