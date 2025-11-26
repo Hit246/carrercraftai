@@ -1,36 +1,38 @@
-
-'use server'
-import Razorpay from "razorpay"
+'use server';
+import Razorpay from 'razorpay';
+import { db } from './firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 
 function getRazorpay() {
-  const id = process.env.RAZORPAY_KEY_ID
-  const secret = process.env.RAZORPAY_KEY_SECRET
+  const id = process.env.RAZORPAY_KEY_ID;
+  const secret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!id || !secret) {
-    console.error("Razorpay ENV missing on server ❌", {
+    console.error('Razorpay ENV missing on server ❌', {
       hasId: !!id,
-      hasSecret: !!secret
-    })
-    throw new Error("Missing Razorpay credentials")
+      hasSecret: !!secret,
+    });
+    throw new Error('Missing Razorpay credentials');
   }
 
-  console.log("Razorpay instance created with key:", id.substring(0, 10) + "...")
-  return new Razorpay({ key_id: id, key_secret: secret })
+  console.log('Razorpay instance created with key:', id.substring(0, 10) + '...');
+  return new Razorpay({ key_id: id, key_secret: secret });
 }
 
 export async function createPaymentLink(
-  amount: number, 
-  planName: string, 
-  customer: { name: string; email: string; contact: string }
+  amount: number,
+  planName: Exclude<Plan, 'free'>,
+  customer: { name: string; email: string; contact: string },
+  userId: string
 ) {
   try {
-    const razorpay = getRazorpay()
-    console.log("Creating Payment Link >>>", { amount, planName, customer })
+    const razorpay = getRazorpay();
+    console.log('Creating Payment Link >>>', { amount, planName, customer });
 
     // Payment Link API requires these specific fields
     const paymentLinkData = {
       amount: amount * 100, // Convert to paise
-      currency: "INR",
+      currency: 'INR',
       description: `Upgrade to ${planName}`,
       customer: {
         name: customer.name,
@@ -39,32 +41,36 @@ export async function createPaymentLink(
       },
       notify: {
         sms: true,
-        email: true
+        email: true,
       },
       reminder_enable: true,
-      callback_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard`,
-      callback_method: "get" as const
-    }
+      callback_url: `${
+        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002'
+      }/payment/success?plan=${planName}`,
+      callback_method: 'get' as const,
+    };
 
-    console.log("Payment Link Request:", JSON.stringify(paymentLinkData, null, 2))
+    console.log(
+      'Payment Link Request:',
+      JSON.stringify(paymentLinkData, null, 2)
+    );
 
-    const link = await razorpay.paymentLink.create(paymentLinkData)
+    const link = await razorpay.paymentLink.create(paymentLinkData);
 
-    console.log("Payment Link created ✅", {
+    console.log('Payment Link created ✅', {
       id: link.id,
       short_url: link.short_url,
-      status: link.status
-    })
+      status: link.status,
+    });
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       url: link.short_url,
-      linkId: link.id 
-    }
-
+      linkId: link.id,
+    };
   } catch (err: any) {
     // Razorpay errors have specific structure
-    console.error("Payment Link Error >>>", {
+    console.error('Payment Link Error >>>', {
       message: err.message,
       description: err.description,
       code: err.code,
@@ -73,60 +79,63 @@ export async function createPaymentLink(
       step: err.step,
       reason: err.reason,
       metadata: err.metadata,
-      raw: JSON.stringify(err, null, 2)
-    })
-    
-    return { 
-      success: false, 
-      error: err.description || err.message || "Failed to create payment link. Please try again." 
-    }
+      raw: JSON.stringify(err, null, 2),
+    });
+
+    return {
+      success: false,
+      error:
+        err.description ||
+        err.message ||
+        'Failed to create payment link. Please try again.',
+    };
   }
 }
 
-export async function createRazorpayOrder(amount: number, planName: string) {
-  try {
-    const razorpay = getRazorpay()
-    
-    const order = await razorpay.orders.create({
-      amount: amount * 100,
-      currency: "INR",
-      receipt: `receipt_${Date.now()}`,
-      notes: {
-        plan: planName
-      }
-    })
+type Plan = 'free' | 'essentials' | 'pro' | 'recruiter';
 
-    return { success: true, orderId: order.id, amount: order.amount }
-  } catch (err: any) {
-    console.error("Order creation error:", err)
-    return { success: false, error: err.description || err.message }
-  }
-}
-
-export async function verifyRazorpayPayment(
-  razorpayOrderId: string,
-  razorpayPaymentId: string,
-  razorpaySignature: string
+export async function verifyAndUpgrade(
+  paymentLinkId: string,
+  paymentId: string,
+  signature: string,
+  userId: string,
+  plan: Plan
 ) {
   try {
-    const crypto = require("crypto")
-    const secret = process.env.RAZORPAY_KEY_SECRET
+    const crypto = require('crypto');
+    const secret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!secret) {
-      throw new Error("Missing Razorpay secret")
+      throw new Error('Missing Razorpay secret on server');
     }
 
-    const body = razorpayOrderId + "|" + razorpayPaymentId
+    const body = paymentLinkId + '|' + paymentId;
+
     const expectedSignature = crypto
-      .createHmac("sha256", secret)
+      .createHmac('sha256', secret)
       .update(body.toString())
-      .digest("hex")
+      .digest('hex');
 
-    const isValid = expectedSignature === razorpaySignature
+    const isAuthentic = expectedSignature === signature;
 
-    return { success: isValid }
-  } catch (err: any) {
-    console.error("Payment verification error:", err)
-    return { success: false, error: err.message }
+    if (isAuthentic) {
+      // Signature is valid, upgrade the user's plan
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, {
+        plan: plan,
+        planUpdatedAt: new Date(),
+        requestedPlan: null,
+      });
+      return { success: true, message: 'Payment verified and plan upgraded.' };
+    } else {
+      // Signature is invalid
+      return { success: false, message: 'Payment verification failed.' };
+    }
+  } catch (error: any) {
+    console.error('Verification error:', error);
+    return {
+      success: false,
+      message: error.message || 'An error occurred during verification.',
+    };
   }
 }

@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState, useEffect, useCallback } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { createPaymentLink } from "@/lib/razorpay"
 
-import { Check, Crown, Users, Target, Star, Trophy, Diamond, Key, Loader2 } from "lucide-react"
+import { Check, Crown, Trophy, Diamond, Key, Loader2, Star } from "lucide-react"
 
 type Plan = "free" | "essentials" | "pro" | "recruiter"
 
@@ -56,12 +56,13 @@ export function PricingPage() {
       // Pass customer information to the payment link
       const res = await createPaymentLink(
         planInfo.amount, 
-        planInfo.name,
+        selectedPlan,
         {
           name: displayName,
           email: user.email,
           contact: phoneNumber,
-        }
+        },
+        user.uid
       );
   
       if (!res.success) {
@@ -185,9 +186,9 @@ export function PricingPage() {
               className="w-full"
               onClick={() => handlePayment("essentials")}
               variant="default"
-              disabled={isProcessing !== null || plan !== "free"}
+              disabled={isProcessing !== null || (plan !== "free" && plan !== "pending")}
             >
-              {isProcessing === "essentials" ? <Loader2 className="animate-spin"/> : "Upgrade"}
+              {isProcessing === "essentials" ? <Loader2 className="animate-spin"/> : (plan === "essentials" ? "Your Current Plan" : "Upgrade")}
             </Button>
           </CardFooter>
         </Card>
