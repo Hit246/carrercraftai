@@ -228,29 +228,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const updateUserProfile = async (profile: UserProfile) => {
     if (!user) throw new Error("Not authenticated");
-    
-    // Update Firebase Auth profile
-    await updateProfile(user, {
-        displayName: profile.displayName,
-        photoURL: profile.photoURL,
-    });
-
+  
+    // Prepare the data for Firebase Auth and Firestore, ensuring no undefined values
+    const authProfile: { displayName?: string, photoURL?: string } = {};
+    if (profile.displayName !== undefined) authProfile.displayName = profile.displayName;
+    if (profile.photoURL !== undefined) authProfile.photoURL = profile.photoURL;
+  
+    await updateProfile(user, authProfile);
+  
     // Also update the user's document in Firestore
     const userRef = doc(db, 'users', user.uid);
-    await updateDoc(userRef, {
-        displayName: profile.displayName,
-        photoURL: profile.photoURL,
-        phoneNumber: profile.phoneNumber,
-    });
-
+    const firestoreData: { [key: string]: any } = {};
+    if (profile.displayName !== undefined) firestoreData.displayName = profile.displayName ?? null;
+    if (profile.photoURL !== undefined) firestoreData.photoURL = profile.photoURL ?? null;
+    if (profile.phoneNumber !== undefined) firestoreData.phoneNumber = profile.phoneNumber ?? null;
+  
+    if (Object.keys(firestoreData).length > 0) {
+        await updateDoc(userRef, firestoreData);
+    }
+  
     // Create a new user object with the updated info to force a state update
-    const updatedUser = Object.assign(Object.create(Object.getPrototypeOf(user)), user);
-    updatedUser.displayName = profile.displayName;
-    updatedUser.photoURL = profile.photoURL;
-
-    // Refresh the local user state
-    setUser(updatedUser);
-  }
+    // This part is tricky because the user object from Firebase is read-only in some aspects.
+    // A better approach is to rely on the onSnapshot listener to update the userData state.
+    // For immediate UI feedback, we can optimistically update component state if needed.
+    setUser({ ...user, ...authProfile });
+  };
+  
 
   const updatePaymentProof = async (url: string) => {
     if (!user) throw new Error("Not authenticated");
