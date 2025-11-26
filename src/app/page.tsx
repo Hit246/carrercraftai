@@ -1,4 +1,5 @@
 
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -238,9 +239,11 @@ function HomePageContent() {
       <footer className="py-8 bg-card border-t">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground text-sm">
           <p>&copy; {new Date().getFullYear()} CareerCraft AI. All rights reserved.</p>
-          <p className="mt-1">
+          <div className="flex justify-center gap-4 mt-2">
+            <Link href="/terms" className="underline hover:text-foreground">Terms of Service</Link>
+            <Link href="/privacy" className="underline hover:text-foreground">Privacy Policy</Link>
             <Link href="/cancellation" className="underline hover:text-foreground">Cancellation & Refund Policy</Link>
-          </p>
+          </div>
         </div>
       </footer>
     </div>
