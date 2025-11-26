@@ -20,6 +20,7 @@ interface UserData {
     credits: number;
     planUpdatedAt?: any;
     paymentProofURL?: string | null;
+    paymentId?: string | null;
     requestedPlan?: 'essentials' | 'pro' | 'recruiter';
     teamId?: string;
     hasCompletedOnboarding?: boolean;

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -7,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
-import { Crown, User, Handshake, Loader2, Upload, ExternalLink, ShieldCheck, Hourglass, Ban } from 'lucide-react';
+import { Crown, User, Handshake, Loader2, Upload, ExternalLink, ShieldCheck, Hourglass, Ban, Wallet, Calendar, BotIcon } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -27,7 +28,7 @@ const formSchema = z.object({
 });
 
 export function ProfilePage() {
-    const { user, plan, loading, userData, logout, updateUserProfile, requestCancellation } = useAuth();
+    const { user, plan, loading, userData, credits, logout, updateUserProfile, requestCancellation } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
@@ -245,56 +246,59 @@ export function ProfilePage() {
                     <CardDescription>Manage your subscription plan and payment details.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
+                    <div className="space-y-4 rounded-lg border p-4">
+                         <div className="flex items-center justify-between">
                             <Label>Current Plan</Label>
-                            <div className="mt-1">{getPlanBadge()}</div>
-                        </div>
-                         {plan !== 'recruiter' && plan !== 'pending' && plan !== 'cancellation_requested' && (
-                            <Button variant="outline" size="sm" onClick={() => router.push('/pricing')}>
-                                Upgrade Plan
-                            </Button>
-                        )}
+                            {getPlanBadge()}
+                         </div>
+                         <div className="flex items-center justify-between">
+                            <Label>AI Credits</Label>
+                            <Badge variant="outline">
+                                <BotIcon className="mr-2 h-4 w-4"/>
+                                {plan === 'free' || plan === 'essentials' ? `${credits} remaining` : 'Unlimited'}
+                            </Badge>
+                         </div>
                     </div>
                     
-                    { (plan === 'pro' || plan === 'recruiter' || plan === 'pending') && (
-                        <div className="space-y-4">
-                            {userData?.planUpdatedAt && (plan !== 'pending' && plan !== 'free') && (
-                                <div className="space-y-1">
-                                    <Label>Last Upgrade Date</Label>
-                                    <p className="text-sm text-muted-foreground">
+                    { (plan !== 'free') && (
+                        <div className="space-y-4 rounded-lg border p-4">
+                            <div className="flex items-center gap-2">
+                                <Wallet className="h-5 w-5 text-muted-foreground"/>
+                                <h4 className="font-semibold">Payment Details</h4>
+                            </div>
+                            {userData?.planUpdatedAt && (
+                                <div className="flex items-center justify-between">
+                                    <Label className="flex items-center gap-2 text-muted-foreground"><Calendar className="h-4 w-4"/> Last Payment</Label>
+                                    <p className="text-sm font-medium">
                                         {new Date(userData.planUpdatedAt.seconds * 1000).toLocaleDateString()}
                                     </p>
                                 </div>
                             )}
-
-                             <div className="space-y-2">
-                                <Label>Payment Proof</Label>
-                                {userData?.paymentProofURL ? (
-                                    <div className="flex items-center gap-2 text-sm text-green-600">
-                                        <ShieldCheck className="h-5 w-5" />
-                                        <span>Proof submitted for review.</span>
-                                        <Button variant="link" size="sm" asChild className="p-0 h-auto">
-                                            <Link href={userData.paymentProofURL} target="_blank" rel="noopener noreferrer">
-                                                View Proof <ExternalLink className="ml-1 h-3 w-3" />
-                                            </Link>
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <p className="text-sm text-muted-foreground">
-                                        No payment proof was required or submitted for this plan.
+                            {userData?.paymentId && (
+                                <div className="flex items-center justify-between">
+                                    <Label className="flex items-center gap-2 text-muted-foreground"><ShieldCheck className="h-4 w-4"/> Payment ID</Label>
+                                    <p className="text-sm font-mono text-muted-foreground truncate" title={userData.paymentId}>
+                                        {userData.paymentId}
                                     </p>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     )}
-
                 </CardContent>
-                {(plan === 'pro' || plan === 'recruiter') && (
-                     <CardFooter className="flex justify-end border-t pt-4">
+                {(plan === 'pro' || plan === 'recruiter' || plan === 'essentials') && (
+                     <CardFooter className="flex justify-between items-center border-t pt-4">
+                        <p className="text-xs text-muted-foreground">Need to cancel? <Link href="/cancellation" className="underline">View policy</Link></p>
                         <Button variant="destructive" onClick={handleCancellation} disabled={plan === 'cancellation_requested'}>
                             <Ban className="mr-2 h-4 w-4" />
                             {plan === 'cancellation_requested' ? 'Cancellation Requested' : 'Request Cancellation'}
+                        </Button>
+                    </CardFooter>
+                )}
+                 {plan === 'free' && (
+                     <CardFooter className="border-t pt-4">
+                        <Button className="w-full" onClick={() => router.push('/pricing')}>
+                            <Crown className="mr-2 h-4 w-4" />
+                            Upgrade to Pro
                         </Button>
                     </CardFooter>
                 )}
