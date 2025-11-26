@@ -108,7 +108,7 @@ function PaymentStatus() {
 export default function PaymentSuccessPage() {
     return (
         <AuthProvider>
-            <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin" />}>
+            <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
                 <PaymentStatus />
             </Suspense>
         </AuthProvider>
