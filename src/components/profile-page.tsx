@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -263,7 +262,7 @@ export function ProfilePage() {
                          </div>
                     </div>
                     
-                    { (plan !== 'free') && (
+                    { (plan !== 'free' && plan !== 'pending' && plan !== 'cancellation_requested') && (
                         <div className="space-y-4 rounded-lg border p-4">
                             <div className="flex items-center gap-2">
                                 <Wallet className="h-5 w-5 text-muted-foreground"/>
@@ -316,3 +315,5 @@ export function ProfilePage() {
         </div>
     );
 }
+
+    
