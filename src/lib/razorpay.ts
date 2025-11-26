@@ -127,12 +127,11 @@ export async function verifyAndUpgrade(
 
     const isAuthentic = expectedSignature === signature;
 
-    console.log('Payment verification:', {
-      paymentLinkId,
-      paymentId,
+    console.log('Payment verification details:', {
       isAuthentic,
       userId,
       plan,
+      bodyUsedForSignature: body,
       generatedSignature: expectedSignature,
       receivedSignature: signature,
     });
