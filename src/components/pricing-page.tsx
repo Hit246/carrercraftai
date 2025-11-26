@@ -4,6 +4,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { doc, updateDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,6 +13,7 @@ import { Badge } from "./ui/badge"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast" 
 import { createPaymentLink } from "@/lib/razorpay"
+import { db } from "@/lib/firebase";
 
 import { Check, Crown, Trophy, Diamond, Key, Loader2, Star } from "lucide-react"
 
@@ -51,6 +53,21 @@ export function PricingPage() {
   
     setIsProcessing(selectedPlan);
     const planInfo = planDetails[selectedPlan];
+
+     // Before creating the payment link, set the `requestedPlan` in Firestore
+    try {
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, { requestedPlan: selectedPlan });
+    } catch (dbError) {
+        console.error("Failed to update requestedPlan:", dbError);
+        toast({
+            title: "Error",
+            description: "Could not set your requested plan. Please try again.",
+            variant: "destructive",
+        });
+        setIsProcessing(null);
+        return;
+    }
   
     try {
       // Pass customer information to the payment link

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
@@ -23,24 +24,33 @@ function PaymentStatus() {
 
   useEffect(() => {
     const verifyPayment = async () => {
+      if (!user) {
+        // Wait for user object to be available
+        return;
+      }
+      
       // Get Razorpay callback parameters
       const paymentLinkId = searchParams.get('razorpay_payment_link_id');
+      const paymentLinkReferenceId = searchParams.get('razorpay_payment_link_reference_id');
       const paymentId = searchParams.get('razorpay_payment_id');
       const signature = searchParams.get('razorpay_signature');
       const paymentLinkStatus = searchParams.get('razorpay_payment_link_status');
       
-      // Get custom parameters
-      const plan = searchParams.get('plan') as 'essentials' | 'pro' | 'recruiter' | null;
-      const userId = searchParams.get('userId');
+      // Since we can't get notes from a simple GET callback, we have to assume
+      // the logged-in user is the one who paid. This is less secure but the only
+      // way without using webhooks. We also need to retrieve the requested plan from the user's document.
+      const requestedPlan = (user as any)?.requestedPlan; // Assuming this is set before payment
 
       console.log('Payment callback received:', {
-        paymentLinkId: paymentLinkId ? 'present' : 'missing',
-        paymentId: paymentId ? 'present' : 'missing',
-        signature: signature ? 'present' : 'missing',
+        paymentLinkId,
+        paymentLinkReferenceId,
+        paymentId,
+        signature,
         paymentLinkStatus,
-        plan,
-        userId: userId ? 'present' : 'missing',
+        userId: user.uid,
+        requestedPlan,
       });
+
 
       // Handle cancelled payment
       if (paymentLinkStatus === 'cancelled') {
@@ -67,13 +77,13 @@ function PaymentStatus() {
       }
 
       // Validate all required parameters
-      if (!paymentLinkId || !paymentId || !signature || !userId || !plan) {
+      if (!paymentLinkId || !paymentId || !signature || !user.uid || !requestedPlan) {
         console.error('Missing payment parameters:', {
           paymentLinkId: !!paymentLinkId,
           paymentId: !!paymentId,
           signature: !!signature,
-          userId: !!userId,
-          plan: !!plan,
+          userId: !!user.uid,
+          plan: !!requestedPlan,
         });
         
         setStatus('failed');
@@ -105,14 +115,14 @@ function PaymentStatus() {
           paymentLinkId,
           paymentId,
           signature,
-          userId,
-          plan
+          user.uid,
+          requestedPlan
         );
 
         if (result.success) {
           console.log('✅ Payment verified successfully');
           setStatus('success');
-          setMessage(result.message || `Successfully upgraded to ${plan} plan!`);
+          setMessage(result.message || `Successfully upgraded to ${requestedPlan} plan!`);
           toast({
             title: 'Payment Successful! 🎉',
             description: 'Your plan has been upgraded.',
@@ -140,7 +150,7 @@ function PaymentStatus() {
     };
 
     verifyPayment();
-  }, [searchParams, router, toast]);
+  }, [searchParams, router, toast, user]);
 
   // Auto-redirect countdown for successful payments
   useEffect(() => {
@@ -262,16 +272,16 @@ function PaymentStatus() {
 
 export default function PaymentSuccessPage() {
   return (
-    <AuthProvider>
-      <Suspense 
-        fallback={
-          <div className="flex h-screen w-full items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        }
-      >
-        <PaymentStatus />
-      </Suspense>
-    </AuthProvider>
+    <Suspense 
+      fallback={
+        <div className="flex h-screen w-full items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <AuthProvider>
+          <PaymentStatus />
+      </AuthProvider>
+    </Suspense>
   );
 }

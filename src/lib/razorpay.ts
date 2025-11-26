@@ -34,8 +34,9 @@ export async function createPaymentLink(
     if (!appUrl) {
       throw new Error("NEXT_PUBLIC_APP_URL is not set in the environment variables. This is required for payment callbacks.");
     }
-
-    const callbackUrl = `${appUrl}/payment/success?plan=${planName}&userId=${userId}`;
+    
+    // The callback URL should be clean. We will pass custom data via 'notes'.
+    const callbackUrl = `${appUrl}/payment/success`;
 
 
     // Payment Link API requires these specific fields
@@ -47,6 +48,10 @@ export async function createPaymentLink(
         name: customer.name,
         email: customer.email,
         contact: customer.contact,
+      },
+      notes: {
+        plan: planName,
+        userId: userId,
       },
       notify: {
         sms: true,
