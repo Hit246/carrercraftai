@@ -103,33 +103,41 @@ export async function verifyAndUpgrade(
   try {
     const crypto = require('crypto');
     const secret = process.env.RAZORPAY_KEY_SECRET;
-    if (!secret) return { success: false, message: 'Server secret missing' };
+    if (!secret) {
+        console.error('Razorpay secret key is not configured.');
+        return { success: false, message: 'Server configuration error.' };
+    }
 
+    // The body should be payment_link_id|razorpay_payment_id
     const body = `${paymentLinkId}|${paymentId}`;
     const expectedSig = crypto.createHmac('sha256', secret).update(body).digest('hex');
 
+    console.log("Signature Verification Body:", body);
+    console.log("Received Signature:", signature);
+    console.log("Expected Signature:", expectedSig);
+
     if (expectedSig !== signature) {
-      console.error('Signature mismatch', {
-        expected: expectedSig,
-        received: signature,
-        body: body,
-      })
+      console.error('Signature mismatch – fake or corrupt callback');
       return { success: false, message: 'Signature mismatch – fake or corrupt callback' };
     }
 
     // Signature verified — now check DB for intended plan
+    console.log(`Signature verified for user ${userId}. Checking database for requested plan...`);
     const userRef = doc(db, 'users', userId);
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
+      console.error(`User with ID ${userId} not found in database.`);
       return { success: false, message: 'User not found in database' };
     }
 
     const plan = userSnap.data()?.requestedPlan;
     if (!plan) {
+      console.error(`No 'requestedPlan' found for user ${userId}. Cannot activate.`);
       return { success: false, message: 'No plan stored in DB – cannot activate' };
     }
 
+    console.log(`Found requested plan '${plan}' for user ${userId}. Upgrading...`);
     // Upgrade user plan
     await updateDoc(userRef, {
       plan,
@@ -140,8 +148,10 @@ export async function verifyAndUpgrade(
       paymentPending: false,
     });
 
+    console.log(`Successfully upgraded user ${userId} to ${plan} plan.`);
     return { success: true, message: `Upgraded to ${plan} plan` };
   } catch (e: any) {
-    return { success: false, message: e.message };
+    console.error('Error during payment verification and upgrade:', e);
+    return { success: false, message: e.message || 'An unexpected server error occurred.' };
   }
 }
