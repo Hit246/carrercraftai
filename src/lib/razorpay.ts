@@ -1,11 +1,9 @@
 'use server'
 import Razorpay from "razorpay"
-
-let razorpayInstance: Razorpay | null = null
+import { config } from 'dotenv';
+config();
 
 function getRazorpay() {
-  if (razorpayInstance) return razorpayInstance
-
   const id = process.env.RAZORPAY_KEY_ID
   const secret = process.env.RAZORPAY_KEY_SECRET
 
@@ -14,17 +12,15 @@ function getRazorpay() {
     throw new Error("Missing Razorpay keys")
   }
 
-  razorpayInstance = new Razorpay({ key: id, secret: secret })
-  return razorpayInstance
+  return new Razorpay({ key_id: id, key_secret: secret })
 }
 
 export async function createPaymentLink(amount: number, planName: string) {
-  const razorpay = getRazorpay()
-
-  console.log("Attempting Payment Link >>>", { amount, planName })
-
   try {
-    const link = await razorpay.payment_links.create({
+    const razorpay = getRazorpay()
+    console.log("Attempting Payment Link >>>", { amount, planName })
+
+    const link = await razorpay.paymentLink.create({
       amount: amount * 100,
       currency: "INR",
       description: `Upgrade to ${planName}`,
