@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -29,13 +28,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import Link from 'next/link';
 
-type Plan = 'free' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
+type Plan = 'free' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested' | 'essentials';
 
 interface UserData {
   id: string;
   email: string;
   plan: Plan;
-  requestedPlan?: 'pro' | 'recruiter';
+  requestedPlan?: 'essentials' | 'pro' | 'recruiter';
   createdAt?: { seconds: number };
   planUpdatedAt?: { seconds: number };
   paymentProofURL?: string;
@@ -109,7 +108,6 @@ export function UpgradeRequestsPage() {
             <TableRow>
               <TableHead>User</TableHead>
               <TableHead>Requested Plan</TableHead>
-              <TableHead>Payment Proof</TableHead>
               <TableHead>Requested On</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -120,7 +118,6 @@ export function UpgradeRequestsPage() {
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-10 w-48" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                   </TableRow>
@@ -149,17 +146,6 @@ export function UpgradeRequestsPage() {
                         <Badge variant="destructive">
                           Pending ({user.requestedPlan})
                         </Badge>
-                    </TableCell>
-                    <TableCell>
-                        {user.paymentProofURL ? (
-                            <Button variant="link" asChild size="sm" className="h-auto p-0">
-                                <Link href={user.paymentProofURL} target="_blank" rel="noopener noreferrer">
-                                    View Proof <ExternalLink className="ml-1 h-3 w-3"/>
-                                </Link>
-                            </Button>
-                        ) : (
-                            <span className="text-xs text-muted-foreground">None</span>
-                        )}
                     </TableCell>
                     <TableCell>
                       {user.planUpdatedAt
