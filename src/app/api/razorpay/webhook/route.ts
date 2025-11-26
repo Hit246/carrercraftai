@@ -1,6 +1,6 @@
 
 import { db } from '@/lib/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import * as crypto from 'crypto';
 
 export async function POST(req: Request) {
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
 
         await updateDoc(doc(db, 'users', userId), {
             plan: plan,
-            planUpdatedAt: new Date(),
+            planUpdatedAt: serverTimestamp(),
             paymentId: paymentId,
             webhookVerified: true, // Add a flag to show it was verified by a trusted source
         });
