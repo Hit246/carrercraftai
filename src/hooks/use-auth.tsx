@@ -141,8 +141,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
-  const forgotPassword = (email: string) => {
-    return sendPasswordResetEmail(auth, email);
+  const forgotPassword = async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      console.error('Error sending password reset email: ', error);
+      // Re-throw the error so the UI can catch it and display a message
+      throw error;
+    }
   };
 
   const signup = async (email: string, password: string) => {

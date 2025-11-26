@@ -13,7 +13,7 @@ import { useState, useEffect } from "react"
 import { Badge } from "./ui/badge"
 import useRazorpay from "react-razorpay";
 
-type Plan = 'essentials' | 'pro' | 'recruiter';
+type Plan = 'free' | 'essentials' | 'pro' | 'recruiter';
 
 const planDetails = {
     essentials: { name: "Essentials Plan", amount: 199 },
@@ -51,7 +51,7 @@ export function PricingPage() {
       
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderResponse.order.amount.toString(),
+        amount: orderResponse.order.amount,
         currency: orderResponse.order.currency,
         name: "CareerCraft AI",
         description: `Upgrade to ${planInfo.name}`,
@@ -90,15 +90,14 @@ export function PricingPage() {
         }
       };
 
-      const rzp = new Razorpay(options);
-      rzp.on('payment.failed', function (response: any) {
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on("payment.failed", (response: any) => {
           toast({
             title: "Payment Failed",
-            description: response?.error?.description || "Something went wrong during payment.",
+            description: response?.error?.description || "Payment failure, no need to pretend we know more.",
             variant: "destructive",
           });
       });
-
       rzp.open();
 
     } catch (error: any) {
