@@ -30,9 +30,12 @@ export async function createPaymentLink(
     const razorpay = getRazorpay();
     console.log('Creating Payment Link >>>', { amount, planName, customer });
 
-    const callbackUrl = `${
-      process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002'
-    }/payment/success?plan=${planName}&userId=${userId}`;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!appUrl) {
+      throw new Error("NEXT_PUBLIC_APP_URL is not set in the environment variables. This is required for payment callbacks.");
+    }
+
+    const callbackUrl = `${appUrl}/payment/success?plan=${planName}&userId=${userId}`;
 
 
     // Payment Link API requires these specific fields
