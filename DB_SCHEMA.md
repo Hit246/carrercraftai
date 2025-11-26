@@ -18,6 +18,7 @@ This collection stores information about individual users, their subscription st
 | `displayName`            | `string`  | The user's full name.                                                                                     | `"Jane Doe"`                          |
 | `photoURL`               | `string`  | The URL of the user's profile picture in Firebase Storage.                                                | `"https://firebasestorage.googleapis.com/..."` |
 | `email`                  | `string`  | The user's email address.                                                                                 | `"user@example.com"`                  |
+| `phoneNumber`            | `string`  | The user's 10-digit phone number.                                                                         | `"9876543210"`                        |
 | `plan`                   | `string`  | The user's current subscription plan. Can be `free`, `essentials`, `pro`, `recruiter`, `pending`, `cancellation_requested`. | `"pro"`                               |
 | `credits`                | `number`  | The number of AI credits available. Free: 5, Essentials: 50, Pro/Recruiter: Unlimited.                       | `50`                                  |
 | `createdAt`              | `Timestamp` | The date and time when the user account was created.                                                      | `October 26, 2023 at 10:00:00 AM UTC+0` |

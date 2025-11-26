@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { useState, useEffect, useCallback } from "react"
@@ -46,7 +47,7 @@ export function PricingPage() {
         {
           name: userData?.displayName || user.displayName || "Valued Customer",
           email: user.email,
-          contact: "+919999999999" // Default contact, should be updated if available
+          contact: userData?.phoneNumber || "+919999999999" 
         }
       );
   

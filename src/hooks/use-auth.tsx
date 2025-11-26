@@ -12,6 +12,7 @@ type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellat
 interface UserProfile {
     displayName?: string | null;
     photoURL?: string | null;
+    phoneNumber?: string | null;
 }
 
 interface UserData {
@@ -24,6 +25,7 @@ interface UserData {
     hasCompletedOnboarding?: boolean;
     displayName?: string | null;
     photoURL?: string | null;
+    phoneNumber?: string | null;
 }
 
 interface AuthContextType {
@@ -228,13 +230,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user) throw new Error("Not authenticated");
     
     // Update Firebase Auth profile
-    await updateProfile(user, profile);
+    await updateProfile(user, {
+        displayName: profile.displayName,
+        photoURL: profile.photoURL,
+    });
 
     // Also update the user's document in Firestore
     const userRef = doc(db, 'users', user.uid);
     await updateDoc(userRef, {
         displayName: profile.displayName,
-        photoURL: profile.photoURL
+        photoURL: profile.photoURL,
+        phoneNumber: profile.phoneNumber,
     });
 
     // Create a new user object with the updated info to force a state update

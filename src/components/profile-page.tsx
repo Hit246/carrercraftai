@@ -22,6 +22,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const formSchema = z.object({
     displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }).optional(),
+    phoneNumber: z.string().min(10, { message: 'Please enter a valid 10-digit phone number.' }).optional(),
     photoFile: z.instanceof(File).optional(),
 });
 
@@ -36,6 +37,7 @@ export function ProfilePage() {
         resolver: zodResolver(formSchema),
         values: {
             displayName: user?.displayName || '',
+            phoneNumber: userData?.phoneNumber || '',
         }
     });
 
@@ -69,6 +71,7 @@ export function ProfilePage() {
             const profileData = {
                 displayName: values.displayName || user.displayName,
                 photoURL: photoURL,
+                phoneNumber: values.phoneNumber || userData?.phoneNumber,
             }
 
             await updateUserProfile(profileData);
@@ -210,6 +213,20 @@ export function ProfilePage() {
                                 <Label htmlFor="email">Email Address</Label>
                                 <Input id="email" value={user.email || ''} readOnly disabled />
                             </div>
+
+                            <FormField
+                                control={form.control}
+                                name="phoneNumber"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <Label>Phone Number</Label>
+                                    <FormControl>
+                                        <Input type="tel" placeholder="Your 10-digit phone number" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
                         </CardContent>
                         <CardFooter className="flex justify-between">
                             <Button variant="outline" onClick={handleLogout}>Log Out</Button>
