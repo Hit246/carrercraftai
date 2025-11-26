@@ -139,9 +139,14 @@ function PaymentStatus() {
 
           <div className="space-y-2 pt-4">
             {status === 'success' && (
-              <Button onClick={() => router.push('/dashboard')} className="w-full">
-                Go to Dashboard Now
-              </Button>
+               <div className="space-y-2">
+                <Button onClick={() => router.push('/dashboard')} className="w-full">
+                    Go to Dashboard
+                </Button>
+                <Button onClick={() => router.push('/profile')} className="w-full" variant="outline">
+                    View My Profile
+                </Button>
+               </div>
             )}
             
             {(status === 'cancelled' || status === 'failed') && (
