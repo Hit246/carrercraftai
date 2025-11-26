@@ -3,7 +3,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/use-auth';
+import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { verifyAndUpgrade } from '@/lib/razorpay';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -107,8 +107,10 @@ function PaymentStatus() {
 
 export default function PaymentSuccessPage() {
     return (
-        <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin" />}>
-            <PaymentStatus />
-        </Suspense>
+        <AuthProvider>
+            <Suspense fallback={<Loader2 className="h-8 w-8 animate-spin" />}>
+                <PaymentStatus />
+            </Suspense>
+        </AuthProvider>
     )
 }
