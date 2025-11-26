@@ -227,17 +227,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const updateUserProfile = async (profile: UserProfile) => {
-    if (!user) throw new Error("Not authenticated");
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("Not authenticated");
   
     // Prepare the data for Firebase Auth and Firestore, ensuring no undefined values
     const authProfile: { displayName?: string, photoURL?: string } = {};
     if (profile.displayName !== undefined) authProfile.displayName = profile.displayName;
     if (profile.photoURL !== undefined) authProfile.photoURL = profile.photoURL;
   
-    await updateProfile(user, authProfile);
+    await updateProfile(currentUser, authProfile);
   
     // Also update the user's document in Firestore
-    const userRef = doc(db, 'users', user.uid);
+    const userRef = doc(db, 'users', currentUser.uid);
     const firestoreData: { [key: string]: any } = {};
     if (profile.displayName !== undefined) firestoreData.displayName = profile.displayName ?? null;
     if (profile.photoURL !== undefined) firestoreData.photoURL = profile.photoURL ?? null;
@@ -247,11 +248,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await updateDoc(userRef, firestoreData);
     }
   
-    // Create a new user object with the updated info to force a state update
-    // This part is tricky because the user object from Firebase is read-only in some aspects.
-    // A better approach is to rely on the onSnapshot listener to update the userData state.
-    // For immediate UI feedback, we can optimistically update component state if needed.
-    setUser({ ...user, ...authProfile });
+    // The onSnapshot listener will automatically update the `user` and `userData` state.
+    // To give immediate feedback, we can manually update the local `user` state if needed,
+    // but it's often better to rely on the real-time listener for consistency.
   };
   
 
