@@ -1,78 +1,43 @@
+'use server'
+import Razorpay from "razorpay"
 
-'use server';
-import Razorpay from 'razorpay';
-import crypto from 'crypto';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from './firebase';
+let razorpayInstance: Razorpay | null = null
 
-let razorpayInstance: Razorpay | null = null;
+function getRazorpay() {
+  if (razorpayInstance) return razorpayInstance
 
-function getRazorpayInstance(): Razorpay {
-    if (razorpayInstance) {
-        return razorpayInstance;
-    }
+  const id = process.env.RAZORPAY_KEY_ID
+  const secret = process.env.RAZORPAY_KEY_SECRET
 
-    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
-        razorpayInstance = new Razorpay({
-            key_id: process.env.RAZORPAY_KEY_ID,
-            key_secret: process.env.RAZORPAY_KEY_SECRET,
-        });
-        return razorpayInstance;
-    } else {
-        console.error("Razorpay keys not found in environment variables.");
-        throw new Error('Razorpay is not configured. Missing API keys on the server.');
-    }
+  if (!id || !secret) {
+    console.error("Razorpay ENV missing on server ❌")
+    throw new Error("Missing Razorpay keys")
+  }
+
+  razorpayInstance = new Razorpay({ key: id, secret: secret })
+  return razorpayInstance
 }
 
+export async function createPaymentLink(amount: number, planName: string) {
+  const razorpay = getRazorpay()
 
-export async function createRazorpayOrder(amount: number, currency: string) {
-    try {
-        const razorpay = getRazorpayInstance();
-        const options = {
-            amount: amount * 100, // amount in the smallest currency unit
-            currency,
-            receipt: `receipt_order_${new Date().getTime()}`,
-        };
-        const order = await razorpay.orders.create(options);
-        return { success: true, order };
-    } catch (error: any) {
-        console.error('Error creating Razorpay order:', error.message);
-        return { success: false, error: 'Failed to create payment order on the server.' };
-    }
-}
+  console.log("Attempting Payment Link >>>", { amount, planName })
 
-export async function verifyRazorpayPayment(
-    orderId: string,
-    paymentId: string,
-    signature: string,
-    userId: string,
-    plan: 'essentials' | 'pro' | 'recruiter'
-) {
-    if (!process.env.RAZORPAY_KEY_SECRET) {
-        return { success: false, error: 'Razorpay secret key is not configured.' };
-    }
+  try {
+    const link = await razorpay.payment_links.create({
+      amount: amount * 100,
+      currency: "INR",
+      description: `Upgrade to ${planName}`,
+      receipt: `receipt_${Date.now()}`,
+      notify: { sms: true, email: true },
+      reminder_enable: true,
+    })
 
-    const body = orderId + '|' + paymentId;
-    const expectedSignature = crypto
-        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-        .update(body.toString())
-        .digest('hex');
-    
-    if (expectedSignature === signature) {
-        try {
-            const userRef = doc(db, 'users', userId);
-            await updateDoc(userRef, {
-                plan: plan,
-                planUpdatedAt: new Date(),
-                requestedPlan: null, 
-                paymentProofURL: `razorpay_order_${orderId}`
-            });
-            return { success: true, message: 'Payment verified and plan updated.' };
-        } catch (dbError) {
-            console.error('Error updating user plan:', dbError);
-            return { success: false, error: 'Payment verified, but failed to update plan.' };
-        }
-    } else {
-        return { success: false, error: 'Payment verification failed.' };
-    }
+    console.log("Payment Link created ✅ >>>", link.short_url)
+    return { success: true, url: link.short_url }
+
+  } catch (err: any) {
+    console.error("Payment Link crashed RAW >>>", err, typeof err)
+    return { success: false, error: "Payment Link creation crashed" }
+  }
 }

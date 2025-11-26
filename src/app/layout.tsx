@@ -11,9 +11,12 @@ import { FirebaseErrorListener } from "@/components/FirebaseErrorListener";
 export const metadata: Metadata = {
   title: "CareerCraft AI",
   description: "Craft the perfect resume and find your dream job with AI.",
-  icons: {
-    icon: '/logo.jpg',
-  },
+  icons: { icon: "/logo.jpg" },
+  other: {
+    "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    "Cross-Origin-Embedder-Policy": "unsafe-none",
+    "Permissions-Policy": "clipboard-write=*; autoplay=*",
+  }  
 };
 
 export default function RootLayout({
@@ -34,7 +37,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
-         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       </head>
       <body className="font-body antialiased">
          <ThemeProvider
@@ -47,6 +49,7 @@ export default function RootLayout({
             <Toaster />
             <FirebaseErrorListener />
         </ThemeProvider>
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       </body>
     </html>
   );
