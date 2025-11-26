@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
@@ -27,7 +28,7 @@ function PaymentStatus() {
       setMessage('Invalid payment details or session. Redirecting...');
       setStatus('failed');
       setTimeout(() => router.push('/pricing'), 3000);
-      return;
+      return; // This return was missing
     }
 
     const verify = async () => {
@@ -49,7 +50,7 @@ function PaymentStatus() {
           });
         } else {
           setStatus('failed');
-setMessage(result.message);
+          setMessage(result.message);
           toast({
             title: 'Payment Verification Failed',
             description: result.message,
