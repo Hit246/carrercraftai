@@ -304,7 +304,16 @@ export function ProfilePage() {
                         </Button>
                     </CardFooter>
                 )}
+                 {plan === 'pending' && (
+                     <CardFooter className="border-t pt-4">
+                        <Button className="w-full" onClick={() => router.push('/pricing')} variant="secondary">
+                            Change Plan
+                        </Button>
+                    </CardFooter>
+                )}
             </Card>
         </div>
     );
 }
+
+    
