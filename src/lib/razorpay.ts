@@ -1,3 +1,4 @@
+
 'use server';
 import Razorpay from 'razorpay';
 import { db } from './firebase';
@@ -29,6 +30,11 @@ export async function createPaymentLink(
     const razorpay = getRazorpay();
     console.log('Creating Payment Link >>>', { amount, planName, customer });
 
+    const callbackUrl = `${
+      process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002'
+    }/payment/success?plan=${planName}&userId=${userId}`;
+
+
     // Payment Link API requires these specific fields
     const paymentLinkData = {
       amount: amount * 100, // Convert to paise
@@ -44,9 +50,7 @@ export async function createPaymentLink(
         email: true,
       },
       reminder_enable: true,
-      callback_url: `${
-        process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002'
-      }/payment/success?plan=${planName}`,
+      callback_url: callbackUrl,
       callback_method: 'get' as const,
     };
 
