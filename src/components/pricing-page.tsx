@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useEffect, useCallback } from "react"
@@ -9,7 +10,7 @@ import { Badge } from "./ui/badge"
 
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
-import { createPaymentLink, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/razorpay"
+import { createPaymentLink } from "@/lib/razorpay"
 
 import { Check, Crown, Users, Target, Star, Trophy, Diamond, Key, Loader2 } from "lucide-react"
 
@@ -22,53 +23,66 @@ const planDetails: Record<Exclude<Plan,'free'>, { name: string; amount: number }
 };
 
 export function PricingPage() {
-  const { user, plan } = useAuth()
+  const { user, plan, userData } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
-
-  // Track script readiness properly
-  const [razorpayReady, setRazorpayReady] = useState(false)
+  
   const [isProcessing, setIsProcessing] = useState<Exclude<Plan,'free'> | null>(null)
 
   const handlePayment = async (selectedPlan: Exclude<Plan, "free">) => {
-    if (!user) {
+    if (!user || !user.email) {
       router.replace("/login");
       return;
     }
   
-    const plan = planDetails[selectedPlan];
+    setIsProcessing(selectedPlan);
+    const planInfo = planDetails[selectedPlan];
   
     try {
-      const res = await createPaymentLink(plan.amount, plan.name);
+      // Pass customer information to the payment link
+      const res = await createPaymentLink(
+        planInfo.amount, 
+        planInfo.name,
+        {
+          name: userData?.displayName || user.displayName || "Valued Customer",
+          email: user.email,
+          contact: "+919999999999" // Default contact, should be updated if available
+        }
+      );
   
       if (!res.success) {
         toast({ 
           title: "Payment Error", 
-          description: res.error ?? "Unknown error", 
+          description: res.error ?? "Unknown error occurred while creating payment link.", 
           variant: "destructive" 
         });
+        setIsProcessing(null);
         return;
       }
   
       if (!res.url) {
         toast({
           title: "Gateway Error",
-          description: "Payment link was created but URL is missing in response.",
+          description: "Payment link was created but the URL is missing.",
           variant: "destructive",
         });
+        setIsProcessing(null);
         return;
       }
   
+      // Redirect to Razorpay payment page
       window.location.href = res.url;
+  
     } catch (err) {
-      console.error("Payment handler crashed RAW >>>", err);
+      console.error("Payment handler error:", err);
       toast({
         title: "Critical Error",
-        description: "Payment flow crashed before execution.",
+        description: "The payment flow failed unexpectedly. Please try again.",
         variant: "destructive",
       });
+      setIsProcessing(null);
     }
-  };      
+  };
 
   return (
     <div className="flex flex-col items-center text-center">
@@ -213,8 +227,8 @@ export function PricingPage() {
               <Button
               className="w-full mt-2"
               onClick={() => handlePayment("pro")}
-              variant="secondary"
-              disabled={isProcessing !== null || plan === "recruiter"}
+              variant="default"
+              disabled={isProcessing !== null || plan === "recruiter" || plan === "pro"}
               >
                 {isProcessing === "pro" ? <Loader2 className="animate-spin"/> : plan === "pro" ? "Your Current Plan" : "Upgrade to Pro"}
               </Button>
