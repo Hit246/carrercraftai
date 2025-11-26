@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerCraft AI - Project Report</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3, h4 {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #2c3e50;
+            margin-bottom: 0.5em;
+        }
+        h1 { font-size: 2.5em; text-align: center; border-bottom: 2px solid #34495e; padding-bottom: 10px; }
+        h2 { font-size: 2em; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 1.5em; }
+        h3 { font-size: 1.5em; }
+        h4 { font-size: 1.2em; }
+        p {
+            text-align: justify;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+        .title-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .title-page h1 {
+            border-bottom: none;
+        }
+        .title-page-subtitle {
+            font-size: 1.5em;
+            margin-bottom: 2em;
+        }
+        .title-page-info {
+            margin-top: auto;
+            text-align: center;
+        }
+        .certificate-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2em;
+        }
+        .signature {
+            margin-top: 4em;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature div {
+            text-align: center;
+        }
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 200px;
+            margin: 0 auto;
+            margin-top: 3em;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .img-placeholder {
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="title-page">
+    <h1><strong>CareerCraft AI: An AI-Powered Career Platform</strong></h1>
+    <div class="page-break"></div>
+
+    <div class="title-page-subtitle">A Project Report Submitted in Partial Fulfillment of the Requirements for the Degree of</div>
+    <h2><strong>Bachelor of Computer Applications</strong></h2>
+
+    <div style="flex-grow: 1;"></div>
+
+    <div>
+        <h3><strong>Submitted By:</strong></h3>
+        <p><strong>CHAUHAN HITARTH</strong></p>
+    </div>
+
+    <div style="margin-top: 2em;">
+        <h3><strong>Guided By:</strong></h3>
+        <p><strong>[Your Project Guide's Name]</strong></p>
+    </div>
+    
+    <div style="flex-grow: 1;"></div>
+    
+    <div class="title-page-info">
+        <img src="https://placehold.co/150x150?text=College+Logo" alt="College Logo" class="img-placeholder">
+        <p><strong>INSB Institute of BCA & PGDCA, Idar</strong></p>
+        <p>Affiliated with Hemchandracharya North Gujarat University, Patan</p>
+        <p>Gujarat, India</p>
+        <p><strong>Year: 2024</strong></p>
+    </div>
+</div>
+
+<div class="page-break"></div>
+
+<div class="certificate-page">
+    <h1><strong>Certificate</strong></h1>
+    <p style="margin-top: 2em; font-size: 1.2em; text-align: justify;">
+        This is to certify that the project work entitled <strong>“CareerCraft AI”</strong> is a bonafide work carried out by <strong>CHAUHAN HITARTH</strong> in partial fulfillment of the requirements for the award of the degree of <strong>Bachelor of Computer Applications (B.C.A.)</strong> from INSB Institute of BCA & PGDCA, Idar, affiliated with Hemchandracharya North Gujarat University, Patan, during the academic year 2023-2024.
+    </p>
+    <p style="margin-top: 1em; font-size: 1.2em; text-align: justify;">
+        The project work has been carried out under my guidance and is a result of their own work. This work is original and has not been submitted for any other degree or diploma of this or any other university.
+    </p>
+
+    <div class="signature">
+        <div>
+            <div class="signature-line"></div>
+            <strong>[Your Project Guide's Name]</strong><br>
+            (Internal Guide)
+        </div>
+        <div>
+            <div class="signature-line"></div>
+            <strong>[Principal's Name]</strong><br>
+            (Principal)<br>
+            INSB Institute of BCA & PGDCA, Idar
+        </div>
+    </div>
+    
+    <div style="margin-top: 4em;">
+        <p><strong>Place:</strong> Idar</p>
+        <p><strong>Date:</strong> [Date]</p>
+    </div>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h1><strong>Preface</strong></h1>
+    <p>
+        The modern job market is a challenging landscape, characterized by intense competition and technological gatekeepers like Applicant Tracking Systems (ATS). For job seekers, crafting a compelling resume that stands out is more difficult than ever. For recruiters, the deluge of applications makes identifying top talent a time-consuming and often biased process.
+    </p>
+    <p>
+        This project, <strong>CareerCraft AI</strong>, was born from the vision to bridge this gap using the power of Artificial Intelligence. It is an attempt to create a comprehensive, intelligent platform that serves both sides of the hiring equation. Our goal was to move beyond traditional, static resume builders and develop a dynamic ecosystem of tools that provide actionable insights, automate tedious tasks, and ultimately empower users in their professional journeys.
+    </p>
+    <p>
+        The development process was a deep dive into modern full-stack technologies, including Next.js for a reactive frontend, Firebase for a scalable serverless backend, and Google's Genkit for integrating sophisticated AI models. This report documents our journey—from conceptualization and design to implementation, testing, and future enhancements. It details the system's architecture, data flows, and the technical challenges we overcame.
+    </p>
+    <p>
+        We hope that CareerCraft AI serves as a practical demonstration of how cutting-edge technology can be applied to solve real-world problems, making the path from application to employment more efficient, transparent, and successful for everyone involved.
+    </p>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h1><strong>Index / Table of Contents</strong></h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Chapter</th>
+                <th>Section</th>
+                <th>Title</th>
+                <th>Page No.</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1.</td>
+                <td></td>
+                <td><strong>Introduction</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>1.1</td>
+                <td>Acknowledgement</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>1.2</td>
+                <td>About College</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>1.3</td>
+                <td>About Organization/Team</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>1.4</td>
+                <td>Project Profile</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>2.</td>
+                <td></td>
+                <td><strong>Literature Survey / Project Overview</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>2.1</td>
+                <td>Overview of Project</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>2.2</td>
+                <td>Existing System</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>2.3</td>
+                <td>Need for New System</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>3.</td>
+                <td></td>
+                <td><strong>Analysis</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>3.1</td>
+                <td>Software & Hardware Requirements</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>3.2</td>
+                <td>Objectives</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>3.3</td>
+                <td>Feasibility Study</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>4.</td>
+                <td></td>
+                <td><strong>Experimental / Design & Material Method</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>4.1</td>
+                <td>Design Methodology</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>4.2</td>
+                <td>DFD (Data Flow Diagrams)</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>4.3</td>
+                <td>ER (Entity Relationship Diagram)</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>4.4</td>
+                <td>Data Dictionary</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>5.</td>
+                <td></td>
+                <td><strong>Result & Performance Analysis</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>5.1</td>
+                <td>Process Description (Implementation)</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>5.2</td>
+                <td>Input Design (UI/UX Screenshots)</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>6.</td>
+                <td></td>
+                <td><strong>Conclusion & Future Enhancement</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>6.1</td>
+                <td>Conclusion</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>6.2</td>
+                <td>Future Enhancement</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>7.</td>
+                <td></td>
+                <td><strong>Testing & Bibliography</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>7.1</td>
+                <td>Testing</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>7.2</td>
+                <td>Bibliography</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h2><strong>Chapter 1 — Introduction</strong></h2>
+    
+    <h3><strong>1.1 Acknowledgement</strong></h3>
+    <p>
+        We would like to express our heartfelt gratitude to <strong>INSB Institute of BCA & PGDCA</strong> for their unwavering support and encouragement throughout the development of this <em>CareerCraft AI System</em>. Their expertise and guidance have been pivotal in shaping the project’s direction and ensuring its successful completion.
+    </p>
+    <p>
+        We extend our sincere thanks to our <strong>Project Guide</strong> for their invaluable mentorship. Their insightful feedback and constructive critiques have been instrumental in refining the project and enhancing its overall quality. We thank all of the staff members of our college who helped us directly or indirectly during our project period.
+    </p>
+    <p>
+        This project would not have been possible without the collective contributions of these individuals and organizations. Their support has left an indelible mark on the success of this <em>CareerCraft AI System</em>, and for that, we are truly grateful.
+    </p>
+    <p><strong>With Regards,</strong><br><strong>CHAUHAN HITARTH</strong></p>
+
+    <hr>
+
+    <h3><strong>1.2 About College</strong></h3>
+    <p>
+        BCA/PGDCA College, Idar was established by <strong>Uttar Sabarkantha Uchha Kelavani Mandal Idar</strong> in the year 2000 with the aim to serve the educational needs of the rural and developing area of north Sabarkantha. Our main objective is to provide society with competent men and women who have attributes of functional and social relevance, mental ability and physical dexterity, effectiveness and reliability and above all, the confidence and capability to communicate effectively and exercise initiative, innovation and experiments with new situations.
+    </p>
+    <p>
+        The management of our college has a definite vision of achieving excellence in being an ideal educational institution, which is being materialized by the sincere efforts of all concerned stakeholders. Our college is engaged in the pious work of modeling the young people who are the builders of the nation.
+    </p>
+
+    <hr>
+
+    <h3><strong>1.3 About Organization/Team</strong></h3>
+    <h4><strong>🧭 Who We Are</strong></h4>
+    <p>
+        <strong>CareerCraft AI</strong> is a project developed by a dedicated student developer with a passion for leveraging technology to solve real-world challenges. This project represents a commitment to transforming the way students, job seekers, and recruiters connect through intelligent career management solutions. Our mission is to create a unified digital platform that empowers users to craft professional resumes, analyze job-fit, and collaborate with recruiters — all powered by artificial intelligence.
+    </p>
+
+    <h4><strong>⚙️ What We Do</strong></h4>
+    <p>
+        CareerCraft AI integrates modern web technologies and AI-driven analytics to provide personalized career insights, resume optimization, and efficient candidate–recruiter matching. We focus on building scalable, responsive, and user-friendly systems that combine data intelligence with simplicity and design excellence.
+    </p>
+    <p>Our areas of expertise demonstrated in this project include:</p>
+    <ul>
+        <li>Front-end development using <strong>Next.js</strong> and <strong>Tailwind CSS</strong>.</li>
+        <li>Backend integration with <strong>Firebase Authentication</strong>, <strong>Cloud Firestore</strong>, and <strong>Firebase Storage</strong>.</li>
+        <li>Real-time <strong>AI resume analysis</strong>, <strong>job matching</strong>, and <strong>candidate matcher</strong> tools using <strong>Genkit for Firebase</strong>.</li>
+        <li>Dashboard analytics and management tools for <strong>users, administrators, and recruiters</strong>.</li>
+        <li>Secure payment integration with <strong>Razorpay</strong> and webhook-based subscription management.</li>
+    </ul>
+
+    <h4><strong>💡 Why CareerCraft AI</strong></h4>
+    <ul>
+        <li>AI-powered Resume, Job Matching, and Candidate Screening System.</li>
+        <li>Clean, Modern, and Responsive UI built with <code>shadcn/ui</code>.</li>
+        <li>Scalable and Secure Firebase-based Serverless Architecture.</li>
+        <li>Real-time Data Synchronization & AI-driven Analytics.</li>
+        <li>Dedicated Tools for Recruiters and Team Management.</li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>1.4 Project Profile</strong></h3>
+    <ul>
+        <li>
+            <strong>Project Title</strong>
+            <p>CareerCraft AI – An AI-Powered Career Platform</p>
+        </li>
+        <li>
+            <strong>Objective</strong>
+            <p>The primary objective of CareerCraft AI is to deliver a modern, intelligent platform that empowers job seekers with AI-driven tools for resume building and career planning, while simultaneously streamlining the recruitment process for hiring managers. The system aims to bridge the gap between candidate qualifications and employer requirements through smart technology.</p>
+            <p>Key goals include:</p>
+            <ul>
+                <li>Providing a seamless, real-time resume building and version management experience.</li>
+                <li>Offering a suite of AI-powered tools for analysis, optimization, and matching.</li>
+                <li>Supporting secure user authentication and a tiered subscription model with automated payment verification.</li>
+                <li>Delivering an intuitive and responsive user interface for job seekers, recruiters, and administrators.</li>
+                <li>Leveraging Firebase and Genkit for a scalable, serverless backend and AI integration.</li>
+                <li>Equipping recruiters with advanced tools like AI Candidate Matcher and team management.</li>
+                <li>Providing a comprehensive admin panel for user management, subscription approval, and platform oversight.</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Developed By</strong>
+            <p>CHAUHAN HITARTH</p>
+        </li>
+        <li>
+            <strong>Project Guide/Mentor</strong>
+            <p>[Your Project Guide's Name]</p>
+        </li>
+        <li>
+            <strong>Frontend Technologies</strong>
+            <ul>
+                <li><strong>Next.js (v15):</strong> A modern React framework for building performant, server-rendered web applications with the App Router.</li>
+                <li><strong>TypeScript:</strong> For strong typing, improved code quality, and developer experience.</li>
+                <li><strong>Tailwind CSS:</strong> A utility-first CSS framework for rapid and consistent UI development.</li>
+                <li><strong>shadcn/ui:</strong> A collection of beautifully designed, accessible, and composable UI components.</li>
+                <li><strong>React Hook Form & Zod:</strong> For robust and type-safe form management and validation.</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Backend Technologies</strong>
+            <ul>
+                <li><strong>Firebase:</strong> Provides a comprehensive serverless backend including:
+                    <ul>
+                        <li><strong>Authentication:</strong> For secure user sign-up and login.</li>
+                        <li><strong>Firestore:</strong> A NoSQL database for all application data storage.</li>
+                        <li><strong>Storage:</strong> For hosting user-uploaded files like avatars and payment proofs.</li>
+                    </ul>
+                </li>
+                <li><strong>Genkit for Firebase:</strong> A framework for building production-ready AI flows, used to integrate Google's Gemini models for all intelligent features.</li>
+                <li><strong>Razorpay:</strong> A payment gateway for handling subscription payments, with verification managed via secure webhooks.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h2><strong>Chapter 2 — Literature Survey / Project Overview</strong></h2>
+    
+    <h3><strong>2.1 Overview of Project</strong></h3>
+    <p>
+        CareerCraft AI is an innovative, AI-powered platform meticulously engineered to revolutionize the job application and recruitment lifecycle. It addresses the converging pain points of both modern job seekers and recruiters by providing a centralized ecosystem of intelligent tools.
+    </p>
+    <p>For <strong>job seekers</strong>, the platform offers more than just a resume builder. It’s a career-enhancement toolkit. Users can create, manage, and version-control professional resumes through an intuitive live-preview editor. The core value lies in the suite of AI-powered features:</p>
+    <ul>
+        <li><strong>AI Resume Analyzer:</strong> Provides instant, detailed feedback on a resume's strengths, weaknesses, and keyword optimization, offering concrete suggestions for improvement.</li>
+        <li><strong>AI Job Matcher:</strong> Analyzes a user's resume to suggest relevant, albeit fictional, job opportunities tailored to their skills.</li>
+        <li><strong>AI ATS Optimizer:</strong> Scores a resume against a specific job description, helping users tailor their application to pass through automated screening systems.</li>
+        <li><strong>AI Cover Letter Generator:</strong> Automatically drafts compelling and personalized cover letters.</li>
+    </ul>
+    <p>For <strong>recruiters</strong>, the platform streamlines the talent acquisition process:</p>
+    <ul>
+        <li><strong>AI Candidate Matcher:</strong> Efficiently scores and ranks a batch of resumes against a job description, drastically reducing manual screening time.</li>
+        <li><strong>Team Management:</strong> Allows recruiters to create teams, invite members, and collaborate within a shared workspace.</li>
+    </ul>
+    <p>
+        The application is built with a modern, full-stack approach using <strong>Next.js</strong> for a responsive frontend and <strong>Firebase</strong> as a comprehensive serverless backend. All AI functionality is powered by <strong>Genkit for Firebase</strong>, which integrates with Google's powerful Gemini models. A tiered subscription model ('Free', 'Essentials', 'Pro', 'Recruiter') caters to different user needs, with payments handled securely by <strong>Razorpay</strong> and verified via webhooks.
+    </p>
+    <p>
+        The project’s architecture is designed for scalability, security, and maintainability, serving as a robust case study for integrating serverless backends, payment gateways, and generative AI into a real-world application.
+    </p>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>2.2 Existing System</strong></h3>
+    <p>
+        The current digital landscape for career management is dominated by large-scale job portals, professional networking sites, and standalone resume-building tools. While these platforms serve a purpose, they often present a fragmented and inefficient experience.
+    </p>
+    <h4><strong>1. Major Job Platforms (e.g., LinkedIn, Indeed, Naukri):</strong></h4>
+    <ul>
+        <li><strong>Functionality:</strong> These platforms excel at aggregating job listings and providing a vast network for professionals. LinkedIn, in particular, has become the de facto standard for professional online identity.</li>
+        <li><strong>Limitations:</strong>
+            <ul>
+                <li><strong>Generic Tools:</strong> Their resume-building tools are often basic, offering limited templates and minimal guidance.</li>
+                <li><strong>Overwhelming Volume:</strong> For recruiters, these platforms generate an overwhelming number of applications, leading to reliance on crude keyword-based filtering.</li>
+                <li><strong>Lack of Deep Feedback:</strong> They do not provide actionable, personalized feedback on how to improve a candidate's application materials. The focus is on quantity and reach, not quality and fit.</li>
+                <li><strong>Ad-Driven & Distracting:</strong> The user experience can be cluttered with ads, social media features, and sponsored content, distracting from the core task of job hunting.</li>
+            </ul>
+        </li>
+    </ul>
+    
+    <h4><strong>2. Standalone Resume Builders (e.g., Zety, Resume.com):</strong></h4>
+    <ul>
+        <li><strong>Functionality:</strong> These tools specialize in creating visually appealing resumes from various templates. They focus on the aesthetic and structural aspects of a resume.</li>
+        <li><strong>Limitations:</strong>
+            <ul>
+                <li><strong>Superficial Analysis:</strong> While some offer basic "scoring," this is typically based on simple heuristics like length or keyword density, not a deep, contextual understanding of the content.</li>
+                <li><strong>Siloed Experience:</strong> They are disconnected from the job application process. A user must create a resume, then take it elsewhere to find and apply for jobs.</li>
+                <li><strong>Aggressive Monetization:</strong> Many operate on a "bait-and-switch" model, allowing users to build a resume for free but charging a fee to download it.</li>
+            </ul>
+        </li>
+    </ul>
+    
+    <h4><strong>3. Applicant Tracking Systems (ATS) (e.g., Greenhouse, Lever):</strong></h4>
+    <ul>
+        <li><strong>Functionality:</strong> These are recruiter-facing tools designed to manage the hiring pipeline. They parse and filter resumes based on predefined criteria.</li>
+        <li><strong>Limitations (from a job seeker's perspective):</strong>
+            <ul>
+                <li><strong>The "Black Box" Problem:</strong> Job seekers have no visibility into why their resume was rejected by an ATS. They receive no feedback, leading to a frustrating cycle of trial and error.</li>
+                <li><strong>Parsing Errors:</strong> Many ATS systems struggle with complex layouts, graphics, or non-standard fonts, unfairly penalizing well-designed resumes.</li>
+            </ul>
+        </li>
+    </ul>
+    
+    <h4><strong>Summary of Existing System Limitations:</strong></h4>
+    <p>
+        The current ecosystem is a patchwork of disconnected tools. Job seekers lack a unified platform that guides them through the entire process—from crafting a high-impact resume to tailoring it for specific roles and finding the right opportunities. Recruiters are buried in manual work and lack intelligent tools to surface the best candidates efficiently and without bias.
+    </p>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>2.3 Need for New System</strong></h3>
+    <p>
+        The limitations of the existing systems create a clear and pressing need for a more integrated, intelligent, and user-centric platform. CareerCraft AI is designed to address these specific gaps by building a new system founded on the principles of AI-driven guidance, efficiency, and a unified user experience.
+    </p>
+    
+    <h4><strong>1. The Need for Intelligent, Actionable Feedback:</strong></h4>
+    <ul>
+        <li><strong>Problem:</strong> Existing tools offer generic advice ("Use action verbs") but fail to provide personalized feedback based on the actual content of a user's resume in the context of a specific job.</li>
+        <li><strong>Solution:</strong> CareerCraft AI's core feature is its suite of AI analyzers that provide deep, contextual feedback. The <strong>Resume Analyzer</strong> identifies specific weaknesses and offers concrete suggestions, while the <strong>ATS Optimizer</strong> gives a quantifiable match score, empowering users to make targeted improvements.</li>
+    </ul>
+    
+    <h4><strong>2. The Need for a Unified, Seamless Workflow:</strong></h4>
+    <ul>
+        <li><strong>Problem:</strong> Job seekers are forced to jump between different platforms: a resume builder, a job board, and a word processor to write cover letters. This is inefficient and leads to a disjointed experience.</li>
+        <li><strong>Solution:</strong> CareerCraft AI consolidates these functions into a single dashboard. A user can build their resume, analyze it, find matching jobs, and generate a cover letter without ever leaving the platform. This creates a seamless workflow from creation to application.</li>
+    </ul>
+    
+    <h4><strong>3. The Need to Demystify the "ATS Black Box":</strong></h4>
+    <ul>
+        <li><strong>Problem:</strong> Over 75% of resumes are rejected by Applicant Tracking Systems before a human sees them. Job seekers have no way of knowing if their resume is ATS-compatible.</li>
+        <li><strong>Solution:</strong> The <strong>ATS Optimizer</strong> simulates how an automated system would score a resume against a job description. It identifies missing keywords and formatting issues, giving users the power to optimize their resume and increase their chances of passing the initial screening.</li>
+    </ul>
+    
+    <h4><strong>4. The Need for Efficient and Unbiased Recruitment Tools:</strong></h4>
+    <ul>
+        <li><strong>Problem:</strong> Recruiters spend countless hours manually sifting through hundreds of resumes, a process that is not only time-consuming but also susceptible to unconscious bias.</li>
+        <li><strong>Solution:</strong> The <strong>AI Candidate Matcher</strong> automates the initial screening process. By uploading a job description and a batch of resumes, recruiters can instantly get a ranked list of the most qualified candidates with a match score and a justification summary, enabling them to focus their time on the best-fit applicants.</li>
+    </ul>
+    
+    <h4><strong>5. The Need for a Clean, Focused, and Scalable Platform:</strong></h4>
+    <ul>
+        <li><strong>Problem:</strong> Many existing platforms are cluttered, slow, and built on legacy architecture that is difficult to maintain and scale.</li>
+        <li><strong>Solution:</strong> CareerCraft AI is built on a modern, serverless technology stack (Next.js, Firebase, Genkit). This provides a fast, responsive user experience and ensures the platform is scalable, secure, and cost-effective to operate. The focus is on providing value, not on displaying ads or superfluous social features.</li>
+    </ul>
+    
+    <p>
+        In conclusion, CareerCraft AI is not just another resume builder. It is a new-generation career platform designed to meet the sophisticated demands of the modern job market by providing intelligent, actionable, and integrated tools for both job seekers and recruiters.
+    </p>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h2><strong>Chapter 3 — Analysis</strong></h2>
+    
+    <h3><strong>3.1 Software & Hardware Requirements</strong></h3>
+    
+    <h4><strong>Server/Development Requirements</strong></h4>
+    <ul>
+        <li><strong>Software Requirements:</strong>
+            <ul>
+                <li><strong>Operating System:</strong> Windows 10/11, macOS 11 (Big Sur) or later, or a modern Linux distribution (e.g., Ubuntu 20.04+).</li>
+                <li><strong>Runtime Environment:</strong> Node.js (v18 or later).</li>
+                <li><strong>Package Manager:</strong> pnpm (recommended), npm, or yarn.</li>
+                <li><strong>Version Control:</strong> Git.</li>
+                <li><strong>Code Editor:</strong> Visual Studio Code (recommended) or any other modern IDE like WebStorm.</li>
+                <li><strong>CLI Tools:</strong>
+                    <ul>
+                        <li>Firebase CLI (for deploying Firestore rules and managing the backend).</li>
+                        <li>Genkit CLI (for running and managing AI flows locally).</li>
+                    </ul>
+                </li>
+                <li><strong>Web Browser:</strong> Latest version of Google Chrome, Mozilla Firefox, or Microsoft Edge for development and testing.</li>
+                <li><strong>Cloud Services Accounts:</strong>
+                    <ul>
+                        <li>A Google Account for accessing Firebase and Google AI Studio.</li>
+                        <li>A Razorpay Account for obtaining payment gateway API keys.</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li><strong>Hardware Requirements:</strong>
+            <ul>
+                <li><strong>Processor:</strong> Dual-core processor or better.</li>
+                <li><strong>RAM:</strong> 8 GB minimum, 16 GB recommended for a smooth development experience.</li>
+                <li><strong>Storage:</strong> 20 GB of free disk space for the project, Node.js modules, and associated tools.</li>
+                <li><strong>Internet Connection:</strong> A stable broadband internet connection for downloading packages, accessing cloud services, and testing the application.</li>
+            </ul>
+        </li>
+    </ul>
+    
+    <h4><strong>Client/End-User Requirements</strong></h4>
+    <ul>
+        <li><strong>Software Requirements:</strong>
+            <ul>
+                <li>Any modern, up-to-date web browser with JavaScript enabled. Supported browsers include:
+                    <ul>
+                        <li>Google Chrome (latest 2 versions)</li>
+                        <li>Mozilla Firefox (latest 2 versions)</li>
+                        <li>Microsoft Edge (latest 2 versions)</li>
+                        <li>Safari (latest 2 versions)</li>
+                    </ul>
+                </li>
+                <li>A PDF viewer for viewing exported resumes.</li>
+                <li>No other software installation is required.</li>
+            </ul>
+        </li>
+        <li><strong>Hardware Requirements:</strong>
+            <ul>
+                <li>Any device capable of running a modern web browser, including desktops, laptops, tablets, or smartphones.</li>
+                <li>A stable internet connection to access the web application.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>3.2 Objectives</strong></h3>
+    <p>
+        The core objectives of the CareerCraft AI project were to design, develop, and deploy a comprehensive, AI-driven career platform that serves the needs of job seekers, recruiters, and administrators. The specific, measurable goals are outlined below.
+    </p>
+    
+    <h4><strong>1. For Job Seekers:</strong></h4>
+    <ul>
+        <li><strong>Intuitive Resume Builder:</strong> To create a user-friendly interface with a live preview for building and editing professional resumes. The system must support multiple sections, including experience, education, projects, and skills.</li>
+        <li><strong>Resume Version Management:</strong> To allow users to save, manage, and switch between multiple versions of their resume, with limits based on their subscription plan.</li>
+        <li><strong>AI-Powered Resume Analysis:</strong> To integrate a generative AI model that provides qualitative feedback on a resume's strengths, weaknesses, and areas for improvement.</li>
+        <li><strong>ATS Optimization:</strong> To develop an AI tool that scores a resume against a given job description, identifying keyword gaps and providing a quantifiable match score.</li>
+        <li><strong>Intelligent Job Matching:</strong> To implement an AI feature that suggests relevant (fictional) job opportunities based on the content of a user's resume.</li>
+        <li><strong>Automated Cover Letter Generation:</strong> To create a tool that automatically generates a personalized cover letter by analyzing a user's resume and a target job description.</li>
+        <li><strong>PDF Export:</strong> To enable users to download their final resume in a professional, well-formatted PDF format.</li>
+    </ul>
+    
+    <h4><strong>2. For Recruiters:</strong></h4>
+    <ul>
+        <li><strong>AI Candidate Matcher:</strong> To build a tool that allows recruiters to upload a job description and multiple resumes, and receive an AI-generated ranked list of candidates with match scores and justifications.</li>
+        <li><strong>Team Management:</strong> To provide functionality for recruiters on a specific plan to create a team and invite other members via email to collaborate.</li>
+    </ul>
+    
+    <h4><strong>3. System-Wide & Administrative Objectives:</strong></h4>
+    <ul>
+        <li><strong>Secure User Authentication:</strong> To implement a secure login and registration system using Firebase Authentication, supporting email and password sign-in.</li>
+        <li><strong>Tiered Subscription Model:</strong> To establish a multi-tiered subscription model (Free, Essentials, Pro, Recruiter) with distinct feature access and credit limits.</li>
+        <li><strong>Automated Payment Verification:</strong> To build a secure, webhook-based system with Razorpay to handle payment confirmation and automatically upgrade user plans in real-time.</li>
+        <li><strong>Admin Dashboard:</strong> To create a dedicated dashboard for administrators to manage users, approve subscriptions, and configure platform settings.</li>
+        <li><strong>Scalable & Secure Backend:</strong> To utilize Firebase (Firestore, Storage) to create a secure, scalable, and serverless backend architecture.</li>
+        <li><strong>Modern & Responsive UI:</strong> To design and build a clean, modern, and responsive user interface using Next.js and Tailwind CSS that works seamlessly across devices.</li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>3.3 Feasibility Study</strong></h3>
+    
+    <h4><strong>1. Technical Feasibility</strong></h4>
+    <ul>
+        <li><strong>Assessment:</strong> The project is highly technically feasible. The chosen technology stack is modern, mature, and well-documented.
+            <ul>
+                <li><strong>Next.js (React):</strong> A leading framework for building high-performance web applications. Its ecosystem is vast, providing solutions for routing, rendering, and data fetching.</li>
+                <li><strong>Firebase:</strong> Offers a complete, managed backend-as-a-service (BaaS), which significantly reduces the complexity of building and maintaining server infrastructure, databases, and authentication systems. Its scalability is well-proven.</li>
+                <li><strong>Genkit for Firebase:</strong> Provides a streamlined and officially supported way to integrate Google's powerful Gemini AI models. This abstracts away much of the complexity of calling large language models.</li>
+                <li><strong>Razorpay:</strong> A popular and well-documented payment gateway in India, offering clear APIs and webhook support for secure payment processing.</li>
+            </ul>
+        </li>
+        <li><strong>Technical Risks:</strong> The primary technical risk was the integration of these disparate services. However, since they are all designed to work together (especially Firebase and Genkit), this risk was manageable. Potential performance issues with real-time AI analysis were mitigated by using efficient serverless functions and providing clear loading states in the UI.</li>
+        <li><strong>Conclusion:</strong> The technology is available, proven, and fits the project requirements perfectly. The technical feasibility is high.</li>
+    </ul>
+    
+    <h4><strong>2. Economic Feasibility</strong></h4>
+    <ul>
+        <li><strong>Assessment:</strong> The project is economically feasible, especially for development and initial deployment.
+            <ul>
+                <li><strong>Development Costs:</strong> The primary cost is the developer's time. All software and tools used (VS Code, Node.js, Git, Firebase CLI) are open-source or free.</li>
+                <li><strong>Operational Costs:</strong>
+                    <ul>
+                        <li><strong>Firebase:</strong> Offers a generous free tier ("Spark Plan") that is more than sufficient for development, testing, and supporting a small user base. Costs scale with usage, making it a "pay-as-you-go" model that avoids large upfront expenses.</li>
+                        <li><strong>Google AI (via Genkit):</strong> The Gemini models also have a free tier for a certain number of requests, making development cost-effective.</li>
+                        <li><strong>Vercel/Firebase App Hosting:</strong> Hosting for Next.js applications is available with a generous free tier.</li>
+                    </ul>
+                </li>
+                <li><strong>Monetization Potential:</strong> The tiered subscription model provides a clear path to revenue, which could cover and exceed the operational costs as the user base grows.</li>
+            </ul>
+        </li>
+        <li><strong>Conclusion:</strong> With low initial investment and a scalable, usage-based cost model, the project is economically viable.</li>
+    </ul>
+    
+    <h4><strong>3. Operational Feasibility</strong></h4>
+    <ul>
+        <li><strong>Assessment:</strong> The system is designed to be highly operational.
+            <ul>
+                <li><strong>For End-Users (Job Seekers & Recruiters):</strong> The UI is designed to be intuitive and user-friendly, requiring no special training. The AI tools automate complex tasks, simplifying the user's workflow.</li>
+                <li><strong>For Administrators:</strong> The admin panel centralizes user management and subscription approvals, making platform oversight straightforward. The use of a managed backend (Firebase) means there are no servers to maintain, patches to apply, or databases to manually back up.</li>
+            </ul>
+        </li>
+        <li><strong>Conclusion:</strong> The application is operationally feasible and designed to be low-maintenance from a technical administration perspective.</li>
+    </ul>
+    
+    <h4><strong>4. Legal & Regulatory Feasibility</strong></h4>
+    <ul>
+        <li><strong>Assessment:</strong>
+            <ul>
+                <li><strong>Data Privacy:</strong> The application handles personal and sensitive data (resumes, contact information). It is crucial to comply with data privacy regulations. A Privacy Policy has been created to inform users about what data is collected and how it is used. All data is stored securely within Firebase.</li>
+                <li><strong>Payment Processing:</strong> Integration with Razorpay requires adherence to their terms of service and standard security practices for handling payments. Using secure webhooks for verification is a key part of this compliance.</li>
+            </ul>
+        </li>
+        <li><strong>Conclusion:</strong> The project is legally feasible, provided that data privacy best practices are followed and clear terms of service and privacy policies are maintained.</li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h2><strong>Chapter 4 — Experimental / Design & Material Method</strong></h2>
+    
+    <h3><strong>4.1 Design Methodology</strong></h3>
+    <p>
+        The design and development of CareerCraft AI were guided by a structured, top-down methodology centered on <strong>Data Flow Diagrams (DFDs)</strong>. This approach was chosen because it allows for a clear and logical representation of the system's processes and data transformations, independent of the underlying physical implementation. By focusing on <em>what</em> the system does rather than <em>how</em> it does it, we could establish a robust logical model before committing to specific technologies or coding patterns.
+    </p>
+    <p>The DFD-based methodology proceeds in levels of increasing detail:</p>
+    <ol>
+        <li><strong>Level 0 (Context Diagram):</strong> This initial, high-level view defines the boundary of the CareerCraft AI system. It identifies the primary external entities that interact with the system (User, Recruiter, Admin) and the major data flows between them and the system as a whole. This step was crucial for establishing the project's scope.</li>
+        <li><strong>Level 1 (System Breakdown):</strong> The single process from the Context Diagram is decomposed into its major sub-processes. For CareerCraft AI, this included functions like <code>Manage Authentication</code>, <code>Manage Resumes</code>, <code>Execute AI Features</code>, and <code>Admin Functions</code>. This level also introduces the primary data stores (e.g., <code>Users</code> collection, <code>Resumes</code> collection) and shows how the sub-processes interact with them. This helped in architecting the main modules of the application.</li>
+        <li><strong>Level 2 (Process Decomposition):</strong> Each major sub-process from Level 1 is further broken down to reveal more granular detail. For instance, the <code>Manage Subscriptions</code> process was detailed to show the flow of a user requesting an upgrade, an admin reviewing it, and the final plan update. This level of detail provided a clear blueprint for implementing specific features and functions.</li>
+    </ol>
+    <p>By following this layered DFD approach, we were able to:</p>
+    <ul>
+        <li>Ensure a clear understanding of all system requirements.</li>
+        <li>Identify all necessary data inputs, outputs, and storage points.</li>
+        <li>Logically structure the application into distinct, manageable modules.</li>
+        <li>Create a solid foundation for designing the database schema (ER Diagram) and the application's UI/UX.</li>
+    </ul>
+    <p>
+        This methodology ensured that the system's architecture was driven by its functional requirements, leading to a more coherent, robust, and maintainable final product.
+    </p>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>4.2 DFD (Data Flow Diagram)</strong></h3>
+    <p>This section provides a graphical representation of the data flow within the CareerCraft AI system using Data Flow Diagrams (DFDs) at different levels of abstraction.</p>
+    
+    <h4><strong>Level 0: Context-Level DFD</strong></h4>
+    <p>The context-level diagram shows the entire system as a single process and illustrates its interaction with external entities.</p>
+    <pre><code>
+graph LR
+    U[User] -->|Resume Data, Profile Info, AI Tool Inputs| P0((CareerCraft AI<br>System))
+    R[Recruiter] -->|Job Descriptions, Candidate Resumes| P0
+    A[Admin] -->|Management Actions, Plan Approvals| P0
+    
+    P0 -->|AI Analysis, Job Matches, Built Resume| U
+    P0 -->|Ranked Candidate List| R
+    P0 -->|User Statistics, Pending Requests| A
+    P0 -->|Payment Confirmation| RZP[Razorpay API]
+
+    style U fill:#fff,stroke:#333,stroke-width:2px
+    style R fill:#fff,stroke:#333,stroke-width:2px
+    style A fill:#fff,stroke:#333,stroke-width:2px
+    style RZP fill:#fff,stroke:#333,stroke-width:2px
+    style P0 fill:#f9f9f9,stroke:#333,stroke-width:2px
+    </code></pre>
+    <ul>
+        <li><strong>External Entities:</strong> User, Recruiter, Admin, Razorpay API.</li>
+        <li><strong>Process:</strong> The entire CareerCraft AI System.</li>
+        <li><strong>Data Flows:</strong> Represents the high-level exchange of information between the entities and the system.</li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h4><strong>Level 1: First-Level DFD</strong></h4>
+    <p>This diagram breaks down the main system into its primary sub-processes and shows the data stores they interact with.</p>
+    <pre><code>
+graph TD
+    subgraph External Entities
+        U[User]
+        R[Recruiter]
+        A[Admin]
+    end
+
+    P1(1.0<br>Manage<br>Authentication)
+    P2(2.0<br>Manage<br>Resumes)
+    P3(3.0<br>Execute<br>AI Features)
+    P4(4.0<br>Manage<br>Subscriptions)
+    P5(5.0<br>Manage<br>Support)
+    P6(6.0<br>Admin<br>Functions)
+    P7(7.0<br>Manage<br>Teams)
+
+    D1[("Users")]
+    D2[("Resume<br>Versions")]
+    D3[("Support<br>Requests")]
+    D4[("Settings")]
+    D5[("Teams")]
+
+    U -- "Login/Signup" --> P1
+    U -- "Create/Edit Resume" --> P2
+    U -- "Use AI Tools" --> P3
+    U -- "Request Upgrade" --> P4
+    U -- "Submit Ticket" --> P5
+    
+    R -- "Login/Signup" --> P1
+    R -- "Use Candidate Matcher" --> P3
+    R -- "Create/Manage Team" --> P7
+
+    A -- "Manage Users/Plans" --> P6
+
+    P1 -- "Read/Write User Profile" --> D1
+    P2 -- "Read/Write Resume Data" --> D2
+    P3 -- "Read Credits / Write-back Results" --> D1
+    P4 -- "Update Plan Status" --> D1
+    P4 -- "Read Payment Details" --> D4
+    P5 -- "Read/Write Tickets" --> D3
+    P6 -- "Read/Write All Data Stores" --> D1 & D2 & D3 & D4 & D5
+    P7 -- "Read/Write Team Data" --> D5
+    P7 -- "Update User's teamId" --> D1
+
+    style U fill:#fff,stroke:#333,stroke-width:2px
+    style R fill:#fff,stroke:#333,stroke-width:2px
+    style A fill:#fff,stroke:#333,stroke-width:2px
+
+    style P1 fill:#f0f9ff,stroke:#0284c7
+    style P2 fill:#f0f9ff,stroke:#0284c7
+    style P3 fill:#f0f9ff,stroke:#0284c7
+    style P4 fill:#f0f9ff,stroke:#0284c7
+    style P5 fill:#f0f9ff,stroke:#0284c7
+    style P6 fill:#f0f9ff,stroke:#0284c7
+    style P7 fill:#f0f9ff,stroke:#0284c7
+    </code></pre>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h4><strong>Level 2: Second-Level DFD (Example: Process 4.0 Manage Subscriptions)</strong></h4>
+    <p>This diagram provides a detailed look into the "Manage Subscriptions" process, including the automated webhook flow.</p>
+    <pre><code>
+graph TD
+    subgraph External Entities
+        U[User]
+        A[Admin]
+        RZP[Razorpay Webhook]
+    end
+    
+    subgraph Data Stores
+        D1[("Users")]
+    end
+
+    P4_1("4.1<br>Initiate<br>Upgrade")
+    P4_2("4.2<br>Redirect to<br>Payment Gateway")
+    P4_3("4.3<br>Handle Webhook<br>Confirmation")
+    P4_4("4.4<br>Handle Manual<br>Admin Approval")
+
+    U -- "Selects Plan" --> P4_1
+    P4_1 -- "Sets plan='pending', requestedPlan" --> D1
+    P4_1 -- "Creates Payment Link" --> P4_2
+    P4_2 -- "Redirects User" --> U
+    
+    U -- "Completes Payment" --> RZP
+    RZP -- "Sends 'payment_link.paid' Event" --> P4_3
+    P4_3 -- "Verifies Webhook Secret" --> P4_3
+    P4_3 -- "Updates plan, planUpdatedAt" --> D1
+
+    A -- "Views Pending List<br>(Fallback)" --> P4_4
+    P4_4 -- "Reads Users where plan='pending'" --> D1
+    P4_4 -- "Shows List to Admin" --> A
+    A -- "Approves/Rejects" --> P4_4
+    P4_4 -- "Updates User Plan" --> D1
+
+    style U fill:#fff,stroke:#333,stroke-width:2px
+    style A fill:#fff,stroke:#333,stroke-width:2px
+    style RZP fill:#fff,stroke:#333,stroke-width:2px
+    </code></pre>
+    <p>This flow shows the primary path for subscription upgrades is now automated via the Razorpay webhook (Process 4.3). The admin approval flow (Process 4.4) acts as a fallback or for payment methods that don't use the automated link.</p>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>4.3 ER (Entity Relationship Diagram)</strong></h3>
+    <p>An Entity-Relationship (ER) Diagram visually represents the database structure, showing the relationships between different data entities. This diagram for CareerCraft AI illustrates the Firestore collections and the connections between them.</p>
+    <pre><code>
+erDiagram
+    users {
+        string uid PK "Primary Key (User UID)"
+        string displayName
+        string email
+        string phoneNumber
+        string plan "free, essentials, pro, recruiter, pending, etc."
+        number credits
+        boolean hasCompletedOnboarding
+        timestamp createdAt
+        timestamp planUpdatedAt
+        string requestedPlan
+        string paymentId
+        string teamId FK
+    }
+
+    resumeVersions {
+        string versionId PK "Auto-generated ID"
+        string versionName
+        timestamp updatedAt
+        map resumeData
+    }
+
+    teams {
+        string teamId PK "Auto-generated ID"
+        string owner FK "User UID of the creator"
+        timestamp createdAt
+    }
+
+    members {
+        string memberId PK "Auto-generated ID"
+        string uid FK "User UID of the member"
+        string email
+        string role "Admin or Member"
+        string addedBy
+    }
+
+    supportRequests {
+        string requestId PK "Auto-generated ID"
+        string userId FK "User UID of submitter"
+        string userEmail
+        string subject
+        string category
+        string status
+        timestamp lastMessageAt
+    }
+
+    history {
+        string messageId PK "Auto-generated ID"
+        string message
+        string sender "user or admin"
+        timestamp timestamp
+    }
+
+    settings {
+        string docId PK "Singleton, e.g., 'payment'"
+        string upiId
+        string qrCodeImageUrl
+    }
+
+    users ||--|{ resumeVersions : "has"
+    users |o--o| teams : "can own"
+    users |o--o{ members : "is a member of"
+    users ||--o{ supportRequests : "submits"
+    teams ||--|{ members : "contains"
+    supportRequests ||--|{ history : "has conversation"
+    </code></pre>
+    <h4><strong>Description of Relationships:</strong></h4>
+    <ul>
+        <li><strong>users ⟷ resumeVersions (One-to-Many):</strong> A user can have many resume versions. This is implemented as a subcollection (`resumeVersions`) within each `user` document.</li>
+        <li><strong>users ⟷ teams (One-to-Many):</strong> A user with a 'recruiter' plan can own a team. The `teams` document stores the `owner`'s UID. A user's document also contains a `teamId` linking them to the team they belong to.</li>
+        <li><strong>teams ⟷ members (One-to-Many):</strong> A team can have many members. This is implemented as a `members` subcollection within each `team` document.</li>
+        <li><strong>users ⟷ supportRequests (One-to-Many):</strong> A user can submit multiple support requests. The `supportRequests` document contains a `userId` to link back to the user.</li>
+        <li><strong>supportRequests ⟷ history (One-to-Many):</strong> A support request can have many messages in its history. This is implemented as a `history` subcollection within each `supportRequest` document.</li>
+        <li><strong>settings (Singleton):</strong> This collection is not directly related to others. It holds global configuration documents like `payment`.</li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>4.4 Data Dictionary (Database Schema)</strong></h3>
+    <p>The Data Dictionary provides a detailed specification for each data entity (collection) and its attributes (fields) within the Firestore database. This serves as the blueprint for all data operations in CareerCraft AI.</p>
+    
+    <h4><strong>1. `users` Collection</strong></h4>
+    <ul>
+        <li><strong>Description:</strong> Stores primary information for each user account.</li>
+        <li><strong>Document ID:</strong> User's UID from Firebase Authentication.</li>
+    </ul>
+    <table>
+        <thead><tr><th>Field Name</th><th>Data Type</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><code>uid</code></td><td><code>string</code></td><td>The user's unique authentication ID.</td></tr>
+            <tr><td><code>displayName</code></td><td><code>string</code></td><td>The user's full name.</td></tr>
+            <tr><td><code>email</code></td><td><code>string</code></td><td>The user's registered email address.</td></tr>
+            <tr><td><code>phoneNumber</code></td><td><code>string</code></td><td>The user's 10-digit phone number, used for payment gateway.</td></tr>
+            <tr><td><code>plan</code></td><td><code>string</code></td><td>The current subscription plan (`free`, `essentials`, `pro`, etc.).</td></tr>
+            <tr><td><code>credits</code></td><td><code>number</code></td><td>Number of available AI credits.</td></tr>
+            <tr><td><code>hasCompletedOnboarding</code></td><td><code>boolean</code></td><td>`true` if the user has finished the initial guided tour.</td></tr>
+            <tr><td><code>createdAt</code></td><td><code>Timestamp</code></td><td>Timestamp of account creation.</td></tr>
+            <tr><td><code>planUpdatedAt</code></td><td><code>Timestamp</code></td><td>Timestamp of the last successful plan upgrade.</td></tr>
+            <tr><td><code>requestedPlan</code></td><td><code>string</code></td><td>The plan a user requested if their status is `pending`.</td></tr>
+            <tr><td><code>paymentId</code></td><td><code>string</code></td><td>The transaction ID from the last successful Razorpay payment.</td></tr>
+            <tr><td><code>teamId</code></td><td><code>string</code></td><td>Foreign key to the `teams` collection if the user is in a team.</td></tr>
+        </tbody>
+    </table>
+
+    <h4><strong>2. `resumeVersions` Subcollection</strong></h4>
+    <ul>
+        <li><strong>Description:</strong> A subcollection under each user document, storing different versions of their resume.</li>
+        <li><strong>Path:</strong> `/users/{userId}/resumeVersions/{versionId}`</li>
+    </ul>
+    <table>
+        <thead><tr><th>Field Name</th><th>Data Type</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><code>versionName</code></td><td><code>string</code></td><td>A user-defined or AI-suggested name.</td></tr>
+            <tr><td><code>updatedAt</code></td><td><code>Timestamp</code></td><td>Timestamp of the last save operation.</td></tr>
+            <tr><td><code>resumeData</code></td><td><code>map</code></td><td>An object containing the structured resume content.</td></tr>
+        </tbody>
+    </table>
+
+    <h4><strong>3. `teams` Collection</strong></h4>
+    <ul>
+        <li><strong>Description:</strong> Stores information about teams created by recruiters.</li>
+        <li><strong>Document ID:</strong> Auto-generated by Firestore.</li>
+    </ul>
+    <table>
+        <thead><tr><th>Field Name</th><th>Data Type</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><code>owner</code></td><td><code>string</code></td><td>The UID of the user who created the team.</td></tr>
+            <tr><td><code>createdAt</code></td><td><code>Timestamp</code></td><td>Timestamp of when the team was created.</td></tr>
+        </tbody>
+    </table>
+
+    <h4><strong>4. `members` Subcollection</strong></h4>
+    <ul>
+        <li><strong>Description:</strong> A subcollection under each team document, storing team member information.</li>
+        <li><strong>Path:</strong> `/teams/{teamId}/members/{memberId}`</li>
+    </ul>
+    <table>
+        <thead><tr><th>Field Name</th><th>Data Type</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><code>uid</code></td><td><code>string</code></td><td>The member's UID (added after they sign up).</td></tr>
+            <tr><td><code>email</code></td><td><code>string</code></td><td>The email address of the invited member.</td></tr>
+            <tr><td><code>role</code></td><td><code>string</code></td><td>The member's role (`Admin` or `Member`).</td></tr>
+            <tr><td><code>addedBy</code></td><td><code>string</code></td><td>The email of the user who invited this member.</td></tr>
+        </tbody>
+    </table>
+
+    <h4><strong>5. `supportRequests` Collection</strong></h4>
+    <ul>
+        <li><strong>Description:</strong> Stores support tickets submitted by users.</li>
+        <li><strong>Document ID:</strong> Auto-generated by Firestore.</li>
+    </ul>
+    <table>
+        <thead><tr><th>Field Name</th><th>Data Type</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><code>userId</code></td><td><code>string</code></td><td>The UID of the user who submitted the ticket.</td></tr>
+            <tr><td><code>userEmail</code></td><td><code>string</code></td><td>The email of the user at the time of submission.</td></tr>
+            <tr><td><code>subject</code></td><td><code>string</code></td><td>The subject line of the support request.</td></tr>
+            <tr><td><code>category</code></td><td><code>string</code></td><td>The type of request (`billing`, `technical`, etc.).</td></tr>
+            <tr><td><code>status</code></td><td><code>string</code></td><td>The current status (`open`, `in-progress`, `closed`).</td></tr>
+            <tr><td><code>lastMessageAt</code></td><td><code>Timestamp</code></td><td>Timestamp of the last message, for sorting.</td></tr>
+        </tbody>
+    </table>
+
+    <h4><strong>6. `settings` Collection</strong></h4>
+    <ul>
+        <li><strong>Description:</strong> A singleton collection for global application settings.</li>
+        <li><strong>Document ID:</strong> A fixed string, e.g., `payment`.</li>
+    </ul>
+    <table>
+        <thead><tr><th>Field Name</th><th>Data Type</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><code>upiId</code></td><td><code>string</code></td><td>UPI ID for manual payments (fallback).</td></tr>
+            <tr><td><code>qrCodeImageUrl</code></td><td><code>string</code></td><td>URL of the QR code image (fallback).</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h2><strong>Chapter 5 — Result & Performance Analysis</strong></h2>
+    
+    <h3><strong>5.1 Process Description (Implementation)</strong></h3>
+    <p>
+        The CareerCraft AI application is implemented as a modern, full-stack web application with a clear separation of concerns between the user-facing modules and the administrative backend. The implementation leverages a serverless architecture to ensure scalability, security, and ease of maintenance.
+    </p>
+    
+    <h4><strong>1. User & Recruiter Module</strong></h4>
+    <ul>
+        <li><strong>User Authentication & Session Management:</strong>
+            <ul>
+                <li>Implemented using <strong>Firebase Authentication</strong>. The `useAuth` custom hook (`src/hooks/use-auth.tsx`) provides a centralized interface for managing user state (login, logout, signup) and listening to authentication changes.</li>
+                <li>Upon successful login/signup, a corresponding user document is created or read from the `users` collection in <strong>Firestore</strong>. This document stores application-specific data like `plan` and `credits`.</li>
+                <li>The user's plan and permissions are made available throughout the application via the `AuthContext`, ensuring that feature access is dynamically controlled.</li>
+            </ul>
+        </li>
+        <li><strong>Resume Builder & Versioning:</strong>
+            <ul>
+                <li>The `ResumeBuilder` component (`src/components/resume-builder.tsx`) is the heart of the user dashboard. It uses React state to manage the resume data in real-time.</li>
+                <li>Input fields are tied to the state, and any change immediately triggers a re-render of the live preview panel, providing instant visual feedback.</li>
+                <li>Resume versions are stored as separate documents in the `/users/{userId}/resumeVersions` subcollection. A dropdown menu allows users to switch between versions, which updates the component's state with the selected version's data.</li>
+            </ul>
+        </li>
+        <li><strong>AI Feature Integration:</strong>
+            <ul>
+                <li>All AI features are implemented as <strong>Genkit Flows</strong> in the `src/ai/flows/` directory. Each flow is a server-side function that defines a prompt, input/output schemas (using Zod), and calls the Google Gemini model.</li>
+                <li>Client components call the AI flows via <strong>Next.js Server Actions</strong> defined in `src/lib/actions.ts`.</li>
+                <li>This architecture keeps all expensive AI processing and API key usage securely on the server, while the client only handles UI and data submission/display.</li>
+            </ul>
+        </li>
+        <li><strong>Subscription & Payment Flow:</strong>
+            <ul>
+                <li>When a user clicks "Upgrade," the `handlePayment` function is called. It first updates the user's plan to `pending` in Firestore.</li>
+                <li>It then calls a Server Action (`createPaymentLink`) which securely communicates with the Razorpay API to create a unique payment link. The user is redirected to complete the payment.</li>
+                <li>Upon successful payment, Razorpay sends a notification to our secure webhook endpoint (`/api/razorpay/webhook`). This server-side route verifies the request's signature and, upon success, updates the user's plan in Firestore to `pro`, `recruiter`, etc.</li>
+            </ul>
+        </li>
+    </ul>
+    
+    <h4><strong>2. Admin Module</strong></h4>
+    <ul>
+        <li><strong>Access Control:</strong>
+            <ul>
+                <li>The `AdminLayout` component uses the `useAuth` hook to check if the logged-in user's email is in the `ADMIN_EMAILS` list. If not, it redirects the user, ensuring security.</li>
+            </ul>
+        </li>
+        <li><strong>User & Subscription Management:</strong>
+            <ul>
+                <li>Admin components query the `users` collection to display lists of all users or those with a specific plan status like `pending`.</li>
+                <li>Admin actions (e.g., changing a user's plan) are implemented as functions that perform authenticated writes to Firestore using the Firebase SDK.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>5.2 Input Design (UI/UX Screenshots)</strong></h3>
+    <p>
+        The user interface of CareerCraft AI is designed to be clean, modern, and intuitive, ensuring a seamless user experience for all user types. The design leverages the `shadcn/ui` component library and Tailwind CSS for a consistent and responsive layout.
+    </p>
+    
+    <h4><strong>1. User & Recruiter Module</strong></h4>
+    <ul>
+        <li><strong>Dashboard (Resume Builder):</strong> The main dashboard features a two-panel layout: an editable form on the left for all resume sections and a live, real-time preview of the resume on the right.
+            <img src="https://firebasestorage.googleapis.com/v0/b/careercraft-ai.appspot.com/o/screenshots%2Fresume-builder.png?alt=media" alt="Resume Builder Screenshot" style="width:100%; border:1px solid #ccc; margin-top:10px;">
+        </li>
+        <li><strong>AI Tools (ATS Optimizer):</strong> Each AI tool has a dedicated page with a simple input form. Results are displayed in a structured and easy-to-digest format.
+            <img src="https://firebasestorage.googleapis.com/v0/b/careercraft-ai.appspot.com/o/screenshots%2Fats-optimizer.png?alt=media" alt="ATS Optimizer Screenshot" style="width:100%; border:1px solid #ccc; margin-top:10px;">
+        </li>
+        <li><strong>Candidate Matcher (Recruiter):</strong> The recruiter tool allows uploading a job description and multiple resumes. Results are presented in a clean table.
+            <img src="https://firebasestorage.googleapis.com/v0/b/careercraft-ai.appspot.com/o/screenshots%2Fcandidate-matcher.png?alt=media" alt="Candidate Matcher Screenshot" style="width:100%; border:1px solid #ccc; margin-top:10px;">
+        </li>
+    </ul>
+    
+    <h4><strong>2. Admin Module</strong></h4>
+    <ul>
+        <li><strong>Admin Dashboard:</strong> The main landing page for admins features statistical cards and charts, providing a quick overview of platform health.
+            <img src="https://firebasestorage.googleapis.com/v0/b/careercraft-ai.appspot.com/o/screenshots%2Fadmin-dashboard.png?alt=media" alt="Admin Dashboard Screenshot" style="width:100%; border:1px solid #ccc; margin-top:10px;">
+        </li>
+        <li><strong>User Management:</strong> Presents a list of all users in a clean, tabular format with actions for each user.
+            <img src="https://firebasestorage.googleapis.com/v0/b/careercraft-ai.appspot.com/o/screenshots%2Fuser-management.png?alt=media" alt="User Management Screenshot" style="width:100%; border:1px solid #ccc; margin-top:10px;">
+        </li>
+        <li><strong>Upgrade Requests:</strong> Pending upgrade requests are displayed in a dedicated table for admin approval or rejection.
+            <img src="https://firebasestorage.googleapis.com/v0/b/careercraft-ai.appspot.com/o/screenshots%2Fupgrade-requests.png?alt=media" alt="Upgrade Requests Screenshot" style="width:100%; border:1px solid #ccc; margin-top:10px;">
+        </li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h2><strong>Chapter 6 — Conclusion & Future Enhancement</strong></h2>
+    
+    <h3><strong>6.1 Conclusion</strong></h3>
+    <p>
+        The CareerCraft AI project successfully achieves its objective of delivering a modern, responsive, and intelligent web application designed to streamline the career development and recruitment process. By integrating a user-friendly interface with a powerful suite of AI-driven tools, the platform provides significant value to job seekers, recruiters, and administrators alike.
+    </p>
+    <p>The project effectively demonstrates the seamless integration of a cutting-edge technology stack:</p>
+    <ul>
+        <li><strong>Next.js</strong> provides a performant, server-rendered frontend with a component-based architecture.</li>
+        <li><strong>Firebase</strong> serves as a robust, scalable, and secure serverless backend, handling authentication, database (Firestore), and file storage with ease.</li>
+        <li><strong>Genkit for Firebase</strong> proves to be an exceptional framework for abstracting the complexities of generative AI, allowing for the rapid development of powerful features.</li>
+        <li><strong>Razorpay and Webhooks</strong> establish a secure and reliable automated payment and subscription management system, which is critical for a production-ready application.</li>
+    </ul>
+    <p>
+        The final application provides a cohesive and efficient workflow for all user types. Job seekers are empowered with tools that give them a competitive edge. Recruiters benefit from AI-powered automation that saves time and reduces bias. The comprehensive admin panel ensures that the platform is manageable and ready for growth.
+    </p>
+    <p>
+        In summary, CareerCraft AI stands as a successful proof-of-concept and a solid foundation for a real-world Software-as-a-Service (SaaS) product. It not only meets all the initial project objectives but also provides a flexible and scalable architecture poised for future expansion and innovation.
+    </p>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>6.2 Future Enhancement</strong></h3>
+    <p>
+        While the current version of CareerCraft AI is a robust platform, there are numerous opportunities for future enhancements that could further increase its value.
+    </p>
+    
+    <h4><strong>User & Job Seeker Features</strong></h4>
+    <ul>
+        <li><strong>AI Mock Interviews:</strong> Develop an interactive AI agent to simulate job interviews and provide performance feedback.</li>
+        <li><strong>Live Job Board Integration:</strong> Connect with APIs from platforms like LinkedIn or Indeed to pull in real-time job listings.</li>
+        <li><strong>Advanced Resume Performance Analytics:</strong> Create a dashboard for users to track resume views and application success rates.</li>
+        <li><strong>Skill Gap Learning Pathways:</strong> Integrate with online learning platforms (like Coursera or Udemy) to provide direct links to courses for missing skills.</li>
+        <li><strong>Portfolio Showcase:</strong> Allow users to build a more comprehensive portfolio page that can be shared via a public link.</li>
+    </ul>
+    
+    <h4><strong>Recruiter & Admin Tools</strong></h4>
+    <ul>
+        <li><strong>Advanced Recruiter Analytics:</strong> Provide a dashboard to visualize the hiring funnel, including statistics on resumes screened and time-to-hire metrics.</li>
+        <li><strong>Automated Candidate Outreach:</strong> Allow recruiters to create email templates and send outreach messages to top-ranked candidates.</li>
+        <li><strong>Admin Moderation Dashboard:</strong> Implement tools for admins to review user-generated content to ensure platform integrity.</li>
+        <li><strong>Detailed Audit Logs:</strong> Create a logging system for all major admin actions for security and accountability.</li>
+    </ul>
+    
+    <h4><strong>Monetization & UI/UX Improvements</strong></h4>
+    <ul>
+        <li><strong>Fully Automated Payment Gateway:</strong> Integrate a complete subscription management service like Stripe Billing to handle recurring payments automatically.</li>
+        <li><strong>Enterprise Plan for Companies:</strong> Introduce a higher-tier plan for larger companies with features like Single Sign-On (SSO).</li>
+        <li><strong>PWA (Progressive Web App) Support:</strong> Enhance the mobile experience by adding PWA capabilities.</li>
+        <li><strong>UI Theme Customization:</strong> Allow users to choose from a wider variety of themes and color palettes.</li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h2><strong>Chapter 7 — Testing & Bibliography</strong></h2>
+    
+    <h3><strong>7.1 Testing</strong></h3>
+    <p>
+        A multi-layered testing strategy was employed to ensure the application's quality, reliability, and performance.
+    </p>
+    <ul>
+        <li><strong>1. Manual Testing (Executed):</strong>
+            <ul>
+                <li><strong>Objective:</strong> To test the application from an end-user's perspective, covering complete user journeys.</li>
+                <li><strong>Process:</strong> Manually executed all key user flows across different modern browsers (Chrome, Firefox, Edge).</li>
+                <li><strong>Key Scenarios Tested:</strong>
+                    <ul>
+                        <li>User Authentication (Signup, Login, Logout, Forgot Password).</li>
+                        <li>Resume Builder (Create, Edit, Save, Versioning).</li>
+                        <li>AI Features (Resume Analyzer, ATS Optimizer, etc.).</li>
+                        <li>Subscription & Payment Flow (Upgrade, Webhook Verification).</li>
+                        <li>Admin Panel (Login, User Management, Upgrade Approvals).</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li><strong>2. Integration Testing (Planned):</strong>
+            <ul>
+                <li><strong>Objective:</strong> To verify that different parts of the application work together as expected.</li>
+                <li><strong>Tools:</strong> The plan is to use <strong>Jest</strong> and <strong>React Testing Library</strong>, with mocking for external services like Firebase.</li>
+            </ul>
+        </li>
+        <li><strong>3. Validation Testing (Executed Manually):</strong>
+            <ul>
+                <li><strong>Objective:</strong> To ensure all form inputs are correctly validated.</li>
+                <li><strong>Process:</strong> Used <strong>Zod</strong> for schema definition and <strong>React Hook Form</strong> for client-side validation. Manually tested all forms to ensure appropriate error messages are displayed.</li>
+            </ul>
+        </li>
+        <li><strong>4. Responsiveness & Cross-Browser Testing (Executed Manually):</strong>
+            <ul>
+                <li><strong>Objective:</strong> To ensure a consistent and usable experience across different screen sizes and browsers.</li>
+                <li><strong>Process:</strong> Used browser developer tools to simulate various device viewports. Manually tested the layout on Chrome, Firefox, and Edge.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>7.2 Bibliography</strong></h3>
+    <p>
+        The development of CareerCraft AI was made possible by referencing the official documentation and community resources of the various technologies and frameworks used. These resources were instrumental in understanding best practices, troubleshooting issues, and implementing features correctly.
+    </p>
+    
+    <h4><strong>Reference Books</strong></h4>
+    <ul>
+        <li><em>Learning React: Modern Patterns for Developing React Apps</em> by Alex Banks & Eve Porcello.</li>
+        <li><em>Programming TypeScript: Making Your JavaScript Applications Scale</em> by Boris Cherny.</li>
+    </ul>
+    
+    <h4><strong>Online Resources</strong></h4>
+    <ul>
+        <li><strong>Next.js Official Documentation:</strong> <a href="https://nextjs.org/docs">https://nextjs.org/docs</a></li>
+        <li><strong>Firebase Documentation:</strong> <a href="https://firebase.google.com/docs">https://firebase.google.com/docs</a></li>
+        <li><strong>Genkit for Firebase Documentation:</strong> <a href="https://firebase.google.com/docs/genkit">https://firebase.google.com/docs/genkit</a></li>
+        <li><strong>Tailwind CSS Documentation:</strong> <a href="https://tailwindcss.com/docs">https://tailwindcss.com/docs</a></li>
+        <li><strong>shadcn/ui Documentation:</strong> <a href="https://ui.shadcn.com/">https://ui.shadcn.com/</a></li>
+        <li><strong>React Hook Form Documentation:</strong> <a href="https://react-hook-form.com/">https://react-hook-form.com/</a></li>
+        <li><strong>Zod Documentation:</strong> <a href="https://zod.dev/">https://zod.dev/</a></li>
+        <li><strong>Razorpay Documentation:</strong> <a href="https://razorpay.com/docs/">https://razorpay.com/docs/</a></li>
+        <li><strong>Stack Overflow & GitHub:</strong> Used for troubleshooting specific technical issues and exploring community-contributed code examples.</li>
+    </ul>
+</div>
+
+</body>
+</html>
