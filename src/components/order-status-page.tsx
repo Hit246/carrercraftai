@@ -43,7 +43,7 @@ export function OrderStatusPage() {
     
     // This component should primarily handle the 'pending' state.
     // Other states are handled by redirects, but we can have fallbacks.
-    if (plan === 'pro' || plan === 'recruiter') {
+    if (plan === 'pro' || plan === 'recruiter') { 
         StatusIcon = CheckCircle;
         title = "Upgrade Successful!";
         description = "Your plan has been successfully upgraded. You now have access to all new features.";

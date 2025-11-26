@@ -106,7 +106,7 @@ export async function verifyAndUpgrade(
   paymentId: string,
   signature: string,
   userId: string,
-  plan: Plan
+  plan: Exclude<Plan, 'free'>
 ) {
   try {
     const crypto = require('crypto');
@@ -116,14 +116,24 @@ export async function verifyAndUpgrade(
       throw new Error('Missing Razorpay secret on server');
     }
 
-    const body = paymentLinkId + '|' + paymentId;
+    // For Payment Links, the signature format is:
+    // payment_link_id|payment_id
+    const body = `${paymentLinkId}|${paymentId}`;
 
     const expectedSignature = crypto
       .createHmac('sha256', secret)
-      .update(body.toString())
+      .update(body)
       .digest('hex');
 
     const isAuthentic = expectedSignature === signature;
+
+    console.log('Payment verification:', {
+      paymentLinkId,
+      paymentId,
+      isAuthentic,
+      userId,
+      plan
+    });
 
     if (isAuthentic) {
       // Signature is valid, upgrade the user's plan
@@ -131,12 +141,22 @@ export async function verifyAndUpgrade(
       await updateDoc(userRef, {
         plan: plan,
         planUpdatedAt: new Date(),
-        requestedPlan: null,
+        paymentId: paymentId,
+        paymentLinkId: paymentLinkId,
       });
-      return { success: true, message: 'Payment verified and plan upgraded.' };
+      
+      console.log(`✅ User ${userId} upgraded to ${plan} plan`);
+      
+      return { 
+        success: true, 
+        message: 'Payment verified and plan upgraded successfully!' 
+      };
     } else {
-      // Signature is invalid
-      return { success: false, message: 'Payment verification failed.' };
+      console.error('❌ Payment signature verification failed');
+      return { 
+        success: false, 
+        message: 'Payment verification failed. Invalid signature.' 
+      };
     }
   } catch (error: any) {
     console.error('Verification error:', error);
