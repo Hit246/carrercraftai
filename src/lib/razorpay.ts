@@ -3,6 +3,7 @@
 import Razorpay from 'razorpay';
 import { db } from './firebase';
 import { doc, updateDoc, getDoc, deleteField } from 'firebase/firestore';
+import * as crypto from 'crypto';
 
 function getRazorpay() {
   const id = process.env.RAZORPAY_KEY_ID;
@@ -101,7 +102,6 @@ export async function verifyAndUpgrade(
   userId: string
 ) {
   try {
-    const crypto = require('crypto');
     const secret = process.env.RAZORPAY_KEY_SECRET;
     if (!secret) {
         console.error('Razorpay secret key is not configured.');
@@ -118,7 +118,7 @@ export async function verifyAndUpgrade(
 
     if (expectedSig !== signature) {
       console.error('Signature mismatch – fake or corrupt callback');
-      return { success: false, message: 'Signature mismatch – fake or corrupt callback' };
+      return { success: false, message: 'Payment verification failed. Invalid signature.' };
     }
 
     // Signature verified — now check DB for intended plan
@@ -133,8 +133,13 @@ export async function verifyAndUpgrade(
 
     const plan = userSnap.data()?.requestedPlan;
     if (!plan) {
-      console.error(`No 'requestedPlan' found for user ${userId}. Cannot activate.`);
-      return { success: false, message: 'No plan stored in DB – cannot activate' };
+      console.warn(`No 'requestedPlan' found for user ${userId}. The plan might have already been activated by a webhook.`);
+      // Check if the plan is already active
+      const currentPlan = userSnap.data()?.plan;
+      if (currentPlan !== 'free' && currentPlan !== 'pending') {
+        return { success: true, message: `Plan is already active.` };
+      }
+      return { success: false, message: 'No upgrade plan was requested. Please contact support.' };
     }
 
     console.log(`Found requested plan '${plan}' for user ${userId}. Upgrading...`);
