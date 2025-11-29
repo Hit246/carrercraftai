@@ -243,6 +243,7 @@ function HomePageContent() {
             <Link href="/terms" className="underline hover:text-foreground">Terms of Service</Link>
             <Link href="/privacy" className="underline hover:text-foreground">Privacy Policy</Link>
             <Link href="/cancellation" className="underline hover:text-foreground">Cancellation & Refund Policy</Link>
+            <Link href="/contact" className="underline hover:text-foreground">Contact Us</Link>
           </div>
         </div>
       </footer>
