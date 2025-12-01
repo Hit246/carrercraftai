@@ -62,6 +62,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
     if (isActive('/admin/upgrades')) return 'Upgrade Requests';
     if (isActive('/admin/cancellations')) return 'Cancellation Requests';
     if (isActive('/admin/support')) return 'Support Tickets';
+    if (isActive('/admin/payment-history')) return 'Payment History';
     return 'Admin Panel';
   };
 
@@ -138,6 +139,17 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 <Link href="/admin/cancellations">
                   <FileX />
                   <span>Cancellations</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/admin/payment-history')}
+              >
+                <Link href="/admin/payment-history">
+                  <History />
+                  <span>Payment History</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
