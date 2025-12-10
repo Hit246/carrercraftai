@@ -100,6 +100,10 @@
             display: block;
             margin: 20px auto;
         }
+        .er-diagram {
+            width: 100%;
+            margin: 2rem 0;
+        }
     </style>
 </head>
 <body>
@@ -934,74 +938,9 @@ graph TD
 <div class="container">
     <h3><strong>4.3 ER (Entity Relationship Diagram)</strong></h3>
     <p>An Entity-Relationship (ER) Diagram visually represents the database structure, showing the relationships between different data entities. This diagram for CareerCraft AI illustrates the Firestore collections and the connections between them.</p>
-    <pre><code>
-erDiagram
-    users {
-        string uid PK "Primary Key (User UID)"
-        string displayName
-        string email
-        string phoneNumber
-        string plan "free, essentials, pro, recruiter, pending, etc."
-        number credits
-        boolean hasCompletedOnboarding
-        timestamp createdAt
-        timestamp planUpdatedAt
-        string requestedPlan
-        string paymentId
-        string teamId FK
-    }
 
-    resumeVersions {
-        string versionId PK "Auto-generated ID"
-        string versionName
-        timestamp updatedAt
-        map resumeData
-    }
+    <img src="https://storage.googleapis.com/app-protopiper.appspot.com/66a4f911ea610c0014e21a22/er_diagram_full.svg" alt="Full ER Diagram" class="er-diagram">
 
-    teams {
-        string teamId PK "Auto-generated ID"
-        string owner FK "User UID of the creator"
-        timestamp createdAt
-    }
-
-    members {
-        string memberId PK "Auto-generated ID"
-        string uid FK "User UID of the member"
-        string email
-        string role "Admin or Member"
-        string addedBy
-    }
-
-    supportRequests {
-        string requestId PK "Auto-generated ID"
-        string userId FK "User UID of submitter"
-        string userEmail
-        string subject
-        string category
-        string status
-        timestamp lastMessageAt
-    }
-
-    history {
-        string messageId PK "Auto-generated ID"
-        string message
-        string sender "user or admin"
-        timestamp timestamp
-    }
-
-    settings {
-        string docId PK "Singleton, e.g., 'payment'"
-        string upiId
-        string qrCodeImageUrl
-    }
-
-    users ||--|{ resumeVersions : "has"
-    users |o--o| teams : "can own"
-    users |o--o{ members : "is a member of"
-    users ||--o{ supportRequests : "submits"
-    teams ||--|{ members : "contains"
-    supportRequests ||--|{ history : "has conversation"
-    </code></pre>
     <h4><strong>Description of Relationships:</strong></h4>
     <ul>
         <li><strong>users ⟷ resumeVersions (One-to-Many):</strong> A user can have many resume versions. This is implemented as a subcollection (`resumeVersions`) within each `user` document.</li>
@@ -1011,6 +950,19 @@ erDiagram
         <li><strong>supportRequests ⟷ history (One-to-Many):</strong> A support request can have many messages in its history. This is implemented as a `history` subcollection within each `supportRequest` document.</li>
         <li><strong>settings (Singleton):</strong> This collection is not directly related to others. It holds global configuration documents like `payment`.</li>
     </ul>
+
+    <div class="page-break"></div>
+
+    <h4><strong>Individual Entity Diagrams</strong></h4>
+    <p>The following diagrams break down each individual entity and its attributes for clarity.</p>
+
+    <img src="https://storage.googleapis.com/app-protopiper.appspot.com/66a4f911ea610c0014e21a22/er_users.svg" alt="Users Entity Diagram" class="er-diagram">
+    <img src="https://storage.googleapis.com/app-protopiper.appspot.com/66a4f911ea610c0014e21a22/er_resumeVersions.svg" alt="Resume Versions Entity Diagram" class="er-diagram">
+    <img src="https://storage.googleapis.com/app-protopiper.appspot.com/66a4f911ea610c0014e21a22/er_teams.svg" alt="Teams Entity Diagram" class="er-diagram">
+    <img src="https://storage.googleapis.com/app-protopiper.appspot.com/66a4f911ea610c0014e21a22/er_members.svg" alt="Members Entity Diagram" class="er-diagram">
+    <img src="https://storage.googleapis.com/app-protopiper.appspot.com/66a4f911ea610c0014e21a22/er_supportRequests.svg" alt="Support Requests Entity Diagram" class="er-diagram">
+    <img src="https://storage.googleapis.com/app-protopiper.appspot.com/66a4f911ea610c0014e21a22/er_history.svg" alt="History Entity Diagram" class="er-diagram">
+    <img src="https://storage.googleapis.com/app-protopiper.appspot.com/66a4f911ea610c0014e21a22/er_settings.svg" alt="Settings Entity Diagram" class="er-diagram">
 </div>
 
 <div class="page-break"></div>
