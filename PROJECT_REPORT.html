@@ -159,7 +159,7 @@
             <div class="signature-line"></div>
             <strong>[Principal's Name]</strong><br>
             (Principal)<br>
-            INSB Institute of BCA & PGDCA, Idar
+            INSB Institute of BCA & PGDca, Idar
         </div>
     </div>
     
@@ -800,29 +800,32 @@
     <p>This section provides a graphical representation of the data flow within the CareerCraft AI system using Data Flow Diagrams (DFDs) at different levels of abstraction.</p>
     
     <h4><strong>Level 0: Context-Level DFD</strong></h4>
-    <p>The context-level diagram shows the entire system as a single process and illustrates its interaction with external entities.</p>
+    <p>The context-level diagram shows the entire system as a single process and illustrates its interaction with external entities, including the automated Razorpay webhook.</p>
     <pre><code>
 graph LR
     U[User] -->|Resume Data, Profile Info, AI Tool Inputs| P0((CareerCraft AI<br>System))
     R[Recruiter] -->|Job Descriptions, Candidate Resumes| P0
-    A[Admin] -->|Management Actions, Plan Approvals| P0
+    A[Admin] -->|Management Actions| P0
     
+    subgraph Payment Gateway
+        direction LR
+        P0 -- "Creates Payment Link" --> RZP_API[Razorpay API]
+        RZP_API -- "Redirects User" --> U
+        U -- "Completes Payment" --> RZP_API
+        RZP_WEBHOOK[Razorpay Webhook] -- "Sends 'payment.paid' Event" --> P0
+    end
+
     P0 -->|AI Analysis, Job Matches, Built Resume| U
     P0 -->|Ranked Candidate List| R
     P0 -->|User Statistics, Pending Requests| A
-    P0 -->|Payment Confirmation| RZP[Razorpay API]
 
     style U fill:#fff,stroke:#333,stroke-width:2px
     style R fill:#fff,stroke:#333,stroke-width:2px
     style A fill:#fff,stroke:#333,stroke-width:2px
-    style RZP fill:#fff,stroke:#333,stroke-width:2px
+    style RZP_API fill:#fff,stroke:#333,stroke-width:2px
+    style RZP_WEBHOOK fill:#fff,stroke:#333,stroke-width:2px
     style P0 fill:#f9f9f9,stroke:#333,stroke-width:2px
     </code></pre>
-    <ul>
-        <li><strong>External Entities:</strong> User, Recruiter, Admin, Razorpay API.</li>
-        <li><strong>Process:</strong> The entire CareerCraft AI System.</li>
-        <li><strong>Data Flows:</strong> Represents the high-level exchange of information between the entities and the system.</li>
-    </ul>
 </div>
 
 <div class="page-break"></div>
@@ -892,45 +895,49 @@ graph TD
 
 <div class="container">
     <h4><strong>Level 2: Second-Level DFD (Example: Process 4.0 Manage Subscriptions)</strong></h4>
-    <p>This diagram provides a detailed look into the "Manage Subscriptions" process, including the automated webhook flow.</p>
+    <p>This diagram provides a detailed look into the "Manage Subscriptions" process, showing the primary automated path via webhook and the fallback manual approval path.</p>
     <pre><code>
 graph TD
-    subgraph External Entities
+    subgraph "External Entities"
         U[User]
         A[Admin]
         RZP[Razorpay Webhook]
     end
     
-    subgraph Data Stores
+    subgraph "Data Stores"
         D1[("Users")]
     end
 
-    P4_1("4.1<br>Initiate<br>Upgrade")
-    P4_2("4.2<br>Redirect to<br>Payment Gateway")
-    P4_3("4.3<br>Handle Webhook<br>Confirmation")
-    P4_4("4.4<br>Handle Manual<br>Admin Approval")
+    subgraph "Primary Automated Flow"
+        P4_1("4.1<br>Initiate<br>Upgrade")
+        P4_2("4.2<br>Create Payment<br>Link")
+        P4_3("4.3<br>Handle Webhook<br>Confirmation")
+        
+        U -- "Selects Plan" --> P4_1
+        P4_1 -- "Sets plan='pending'<br>in Firestore" --> D1
+        P4_1 -- "Customer & Plan Details" --> P4_2
+        P4_2 -- "Redirect User to<br>Payment Gateway" --> U
+        U -- "Completes Payment" --> RZP
+        RZP -- "Sends 'payment.paid' Event" --> P4_3
+        P4_3 -- "Verifies Signature" --> P4_3
+        P4_3 -- "Updates plan, planUpdatedAt" --> D1
+    end
 
-    U -- "Selects Plan" --> P4_1
-    P4_1 -- "Sets plan='pending', requestedPlan" --> D1
-    P4_1 -- "Creates Payment Link" --> P4_2
-    P4_2 -- "Redirects User" --> U
-    
-    U -- "Completes Payment" --> RZP
-    RZP -- "Sends 'payment_link.paid' Event" --> P4_3
-    P4_3 -- "Verifies Webhook Secret" --> P4_3
-    P4_3 -- "Updates plan, planUpdatedAt" --> D1
-
-    A -- "Views Pending List<br>(Fallback)" --> P4_4
-    P4_4 -- "Reads Users where plan='pending'" --> D1
-    P4_4 -- "Shows List to Admin" --> A
-    A -- "Approves/Rejects" --> P4_4
-    P4_4 -- "Updates User Plan" --> D1
+    subgraph "Fallback Manual Flow"
+        P4_4("4.4<br>Admin Views<br>Pending List")
+        P4_5("4.5<br>Admin<br>Approves/Rejects")
+        
+        A -- "Navigates to<br>Upgrade Requests" --> P4_4
+        P4_4 -- "Reads Users where<br>plan='pending'" --> D1
+        P4_4 -- "Shows List to Admin" --> A
+        A -- "Approves/Rejects" --> P4_5
+        P4_5 -- "Updates User Plan" --> D1
+    end
 
     style U fill:#fff,stroke:#333,stroke-width:2px
     style A fill:#fff,stroke:#333,stroke-width:2px
     style RZP fill:#fff,stroke:#333,stroke-width:2px
     </code></pre>
-    <p>This flow shows the primary path for subscription upgrades is now automated via the Razorpay webhook (Process 4.3). The admin approval flow (Process 4.4) acts as a fallback or for payment methods that don't use the automated link.</p>
 </div>
 
 <div class="page-break"></div>
