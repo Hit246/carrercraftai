@@ -54,10 +54,11 @@ export function PricingPage() {
     setIsProcessing(selectedPlan);
     const planInfo = planDetails[selectedPlan];
 
-     // Before creating the payment link, set the `requestedPlan` in Firestore
+     // Before creating the payment link, set the `requestedPlan` and `previousPlan` in Firestore
     try {
         const userRef = doc(db, 'users', user.uid);
         await updateDoc(userRef, { 
+            previousPlan: plan, // Store the current plan before changing
             plan: 'pending',
             requestedPlan: selectedPlan,
             planUpdatedAt: new Date(),

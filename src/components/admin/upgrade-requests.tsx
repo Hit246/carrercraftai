@@ -35,6 +35,7 @@ interface UserData {
   email: string;
   plan: Plan;
   requestedPlan?: 'essentials' | 'pro' | 'recruiter';
+  previousPlan?: Plan;
   createdAt?: { seconds: number };
   planUpdatedAt?: { seconds: number };
   paymentProofURL?: string;
@@ -69,28 +70,53 @@ export function UpgradeRequestsPage() {
     fetchUsers();
   }, []);
 
-  const handlePlanChange = async (userId: string, newPlan: Plan) => {
-    const userRef = doc(db, 'users', userId);
+  const handleApprove = async (user: UserData) => {
+    if (!user.requestedPlan) return;
+    const userRef = doc(db, 'users', user.id);
     try {
       const updateData: any = { 
-        plan: newPlan, 
-        planUpdatedAt: newPlan !== 'free' ? new Date() : null,
+        plan: user.requestedPlan, 
+        planUpdatedAt: new Date(),
+        requestedPlan: null,
+        previousPlan: null, // Clear previousPlan on approval
       };
-
-      if (newPlan !== 'pending') {
-        updateData.requestedPlan = null;
-      }
-
       await updateDoc(userRef, updateData);
       toast({
-        title: 'Plan Updated',
-        description: `User's plan has been changed to ${newPlan}.`,
+        title: 'Plan Approved',
+        description: `User's plan has been changed to ${user.requestedPlan}.`,
       });
       fetchUsers(); // Refresh users list
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to update user plan.',
+        description: 'Failed to approve user plan.',
+        variant: 'destructive',
+      });
+    }
+  };
+  
+  const handleReject = async (user: UserData) => {
+    const userRef = doc(db, 'users', user.id);
+    // Revert to the previous plan if it exists, otherwise default to 'free'
+    const revertPlan = user.previousPlan || 'free'; 
+    try {
+      const updateData: any = {
+        plan: revertPlan,
+        planUpdatedAt: revertPlan === 'free' ? null : user.planUpdatedAt, // Keep old update time if reverting to paid plan
+        requestedPlan: null,
+        previousPlan: null, // Clear previousPlan on rejection
+      };
+      await updateDoc(userRef, updateData);
+      toast({
+        title: 'Request Rejected',
+        description: `User's plan has been reverted to ${revertPlan}.`,
+        variant: 'destructive',
+      });
+      fetchUsers(); // Refresh users list
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to reject the request.',
         variant: 'destructive',
       });
     }
@@ -163,11 +189,11 @@ export function UpgradeRequestsPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                                  <DropdownMenuItem onClick={() => handlePlanChange(user.id, user.requestedPlan as Plan)}>
+                                  <DropdownMenuItem onClick={() => handleApprove(user)}>
                                     <CheckCircle className="mr-2 h-4 w-4 text-green-500"/>
                                     Approve as {user.requestedPlan}
                                   </DropdownMenuItem>
-                                   <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')}>
+                                   <DropdownMenuItem onClick={() => handleReject(user)}>
                                     <XCircle className="mr-2 h-4 w-4 text-red-500"/>
                                     Reject Payment
                                   </DropdownMenuItem>
