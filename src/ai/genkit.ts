@@ -8,5 +8,5 @@ export const ai = genkit({
       apiVersion: 'v1',
     }),
   ],
-  model: "googleai/gemini-1.5-pro-latest",
+  model: "googleai/gemini-3-pro-preview",
 });
