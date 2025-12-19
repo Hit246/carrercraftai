@@ -38,6 +38,27 @@
             font-family: 'Courier New', Courier, monospace;
             border: 1px solid #eee;
         }
+        .explanation {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #e9ecef;
+            border-left: 4px solid #007bff;
+            font-size: 0.95em;
+        }
+        .explanation ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .explanation li {
+            margin-bottom: 0.5rem;
+        }
+        .explanation code {
+            font-weight: bold;
+            color: #c7254e;
+            background-color: #f9f2f4;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -47,7 +68,7 @@
     
     <h2><strong>Introduction</strong></h2>
     <p>
-        This document contains key Unified Modeling Language (UML) diagrams for the CareerCraft AI system. These diagrams provide a standardized way to visualize the design, structure, and behavior of the application, offering insights into its architecture and core workflows.
+        This document contains key Unified Modeling Language (UML) diagrams for the CareerCraft AI system. These diagrams provide a standardized way to visualize the design, structure, and behavior of the application, offering insights into its architecture and core workflows. The diagrams below are represented using PlantUML syntax, a tool for creating diagrams from plain text.
     </p>
 
     <h2 id="use-case">1. Use Case Diagram</h2>
@@ -97,11 +118,19 @@ rectangle "CareerCraft AI System" {
 }
 @enduml
     </code></pre>
-    <p><strong>Note:</strong> This is PlantUML syntax. You can use an online renderer or a local tool to generate the visual diagram.</p>
+    <div class="explanation">
+        <h3>Explanation of Shapes</h3>
+        <ul>
+            <li><code>actor</code> (stick figure): Represents a user or external system that interacts with the system (e.g., Job Seeker, Admin).</li>
+            <li><code>usecase</code> (oval): Represents a specific function or service the system provides (e.g., "Manage Account").</li>
+            <li><code>rectangle</code>: Represents the boundary of the system, separating internal functions from external actors.</li>
+            <li><code>--</code> (solid line): A line connecting an actor to a use case, indicating an interaction.</li>
+        </ul>
+    </div>
 
     <h2 id="sequence">2. Sequence Diagram: AI Resume Analysis</h2>
     <p>
-        This diagram shows the sequence of interactions that occur when a user performs an AI-powered resume analysis. It details the messages passed between the UI, the server, the AI flow, and the database.
+        This diagram shows the sequence of interactions that occur when a user performs an AI-powered resume analysis. It details the messages passed between the UI, the server, the AI flow, and the database in chronological order.
     </p>
     <pre><code>
 @startuml
@@ -150,7 +179,17 @@ else User has no credits
 end
 @enduml
     </code></pre>
-     <p><strong>Note:</strong> This is PlantUML syntax. You can use an online renderer or a local tool to generate the visual diagram.</p>
+    <div class="explanation">
+        <h3>Explanation of Shapes</h3>
+        <ul>
+            <li><code>actor</code>: The user initiating the action.</li>
+            <li><code>participant</code> (rectangle): Represents a component or object in the system (e.g., UI, Server). The dashed line below it is its "lifeline".</li>
+            <li><code>-></code> (solid arrow): A message or function call sent from one participant to another.</li>
+            <li><code>--></code> (dashed arrow): A return message or response.</li>
+            <li><code>activate/deactivate</code> (thin rectangle on lifeline): Shows the period when a participant is active or processing a task.</li>
+            <li><code>alt</code> (box with sections): Represents alternative flows, like an if/else condition (e.g., if the user has credits vs. if they don't).</li>
+        </ul>
+    </div>
 
     <h2 id="activity">3. Activity Diagram: Subscription Upgrade Process</h2>
     <p>
@@ -196,7 +235,15 @@ else (no)
 endif
 @enduml
     </code></pre>
-     <p><strong>Note:</strong> This is PlantUML syntax. You can use an online renderer or a local tool to generate the visual diagram.</p>
+     <div class="explanation">
+        <h3>Explanation of Shapes</h3>
+        <ul>
+            <li><code>start/stop</code> (filled circle/circled dot): The beginning and end points of the workflow.</li>
+            <li><code>|Actor|</code> (swimlane): A vertical lane that groups activities performed by a specific actor or system (e.g., User, System, Admin).</li>
+            <li><code>:Action;</code> (rounded rectangle): Represents a single action or task in the workflow (e.g., "Selects a new plan").</li>
+            <li><code>if/else</code> (diamond shape, implicitly shown by arrows): A decision point where the flow can branch into different paths based on a condition.</li>
+        </ul>
+    </div>
 
 </div>
 
