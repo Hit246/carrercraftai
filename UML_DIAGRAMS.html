@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerCraft AI - UML Diagrams</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .container {
+            width: 80%;
+            margin: 2rem auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #2c3e50;
+        }
+        h1 { font-size: 2.5em; text-align: center; border-bottom: 2px solid #34495e; padding-bottom: 10px; }
+        h2 { font-size: 2em; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 2em; }
+        h3 { font-size: 1.5em; margin-top: 1.5em; }
+        p { text-align: justify; }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1><strong>UML Diagrams for CareerCraft AI</strong></h1>
+    
+    <h2><strong>Introduction</strong></h2>
+    <p>
+        This document contains key Unified Modeling Language (UML) diagrams for the CareerCraft AI system. These diagrams provide a standardized way to visualize the design, structure, and behavior of the application, offering insights into its architecture and core workflows.
+    </p>
+
+    <h2 id="use-case">1. Use Case Diagram</h2>
+    <p>
+        This diagram provides a high-level view of the system's functionality from the perspective of different users (actors). It illustrates the main services the system provides and which actors interact with them.
+    </p>
+    <pre><code>
+@startuml
+left to right direction
+
+actor "Job Seeker" as JobSeeker
+actor "Recruiter"
+actor "Admin"
+
+rectangle "CareerCraft AI System" {
+  usecase "Manage Account" as UC1
+  usecase "Build & Manage Resumes" as UC2
+  usecase "Use AI Job Seeker Tools" as UC3
+  usecase "Manage Subscriptions" as UC4
+  usecase "Manage Support Tickets" as UC5
+  
+  usecase "Use AI Recruiter Tools" as UC6
+  usecase "Manage Team" as UC7
+
+  usecase "Manage Users" as UC8
+  usecase "Manage All Subscriptions" as UC9
+  usecase "Manage All Support" as UC10
+  usecase "Manage Platform Settings" as UC11
+  
+  JobSeeker -- UC1
+  JobSeeker -- UC2
+  JobSeeker -- UC3
+  JobSeeker -- UC4
+  JobSeeker -- UC5
+  
+  Recruiter -- UC1
+  Recruiter -- UC6
+  Recruiter -- UC7
+  
+  Admin -- UC8
+  Admin -- UC9
+  Admin -- UC10
+  Admin -- UC11
+  
+  UC3 ..> UC2 : "<<extends>>"
+  UC6 ..> UC7 : "<<extends>>"
+}
+@enduml
+    </code></pre>
+    <p><strong>Note:</strong> This is PlantUML syntax. You can use an online renderer or a local tool to generate the visual diagram.</p>
+
+    <h2 id="sequence">2. Sequence Diagram: AI Resume Analysis</h2>
+    <p>
+        This diagram shows the sequence of interactions that occur when a user performs an AI-powered resume analysis. It details the messages passed between the UI, the server, the AI flow, and the database.
+    </p>
+    <pre><code>
+@startuml
+actor User
+participant "Resume Analyzer Page (UI)" as UI
+participant "Next.js Server Action" as ServerAction
+participant "Genkit AI Flow" as GenkitFlow
+participant "Google AI (Gemini)" as GoogleAI
+participant "Firestore DB" as DB
+
+User -> UI : Uploads Resume PDF
+activate UI
+
+UI -> ServerAction : analyzeResumeAction(resumeDataUri)
+activate ServerAction
+
+ServerAction -> DB : Read User Credits
+activate DB
+DB --> ServerAction : Return Credits
+deactivate DB
+
+alt User has credits
+    ServerAction -> GenkitFlow : analyzeResume(input)
+    activate GenkitFlow
+    GenkitFlow -> GoogleAI : generateContent(prompt)
+    activate GoogleAI
+    GoogleAI --> GenkitFlow : Return Analysis JSON
+    deactivate GoogleAI
+    GenkitFlow --> ServerAction : Return AnalysisResult
+    deactivate GenkitFlow
+
+    ServerAction -> DB : Decrement User Credits
+    activate DB
+    DB --> ServerAction : Success
+    deactivate DB
+
+    ServerAction --> UI : Return AnalysisResult
+    deactivate ServerAction
+    UI -> User : Display Strengths, Weaknesses, Suggestions
+    deactivate UI
+else User has no credits
+    ServerAction --> UI : Return Error (Upgrade needed)
+    deactivate ServerAction
+    UI -> User : Display "Upgrade to Pro" message
+    deactivate UI
+end
+@enduml
+    </code></pre>
+     <p><strong>Note:</strong> This is PlantUML syntax. You can use an online renderer or a local tool to generate the visual diagram.</p>
+
+    <h2 id="activity">3. Activity Diagram: Subscription Upgrade Process</h2>
+    <p>
+        This diagram illustrates the flow of activities for the subscription upgrade process. It shows the different paths the system can take, including the primary automated webhook-based flow and the manual fallback flow for admin verification.
+    </p>
+    <pre><code>
+@startuml
+|User|
+start
+:Selects a new plan;
+:Fills profile (name, phone);
+:Is redirected to Razorpay;
+:Completes payment;
+
+|Razorpay|
+:Processes payment;
+:Sends webhook notification;
+
+|System|
+:Receives webhook;
+:Verifies webhook signature;
+if (Signature is valid?) then (yes)
+  :Updates user plan in Firestore;
+  :Sets plan to 'pro'/'recruiter';
+  :Logs transaction ID;
+  |User|
+  :Sees "Success" page;
+  stop
+else (no)
+  :Logs verification failure;
+  |Admin|
+  :Sees user in "Pending Upgrades";
+  :Manually verifies payment;
+  if (Payment is valid?) then (yes)
+    |System|
+    :Admin updates plan to 'pro'/'recruiter';
+  else (no)
+    :Admin reverts plan to 'free';
+  endif
+  |User|
+  :Receives plan update;
+  stop
+endif
+@enduml
+    </code></pre>
+     <p><strong>Note:</strong> This is PlantUML syntax. You can use an online renderer or a local tool to generate the visual diagram.</p>
+
+</div>
+
+</body>
+</html>
