@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   title: "CareerCraft AI",
   description: "Craft the perfect resume and find your dream job with AI.",
   icons: {
-    icon: "/logo.jpg",
-    shortcut: "/logo.jpg",
-    apple: "/logo.jpg",
+    icon: "./logo.jpg",
+    shortcut: "./logo.jpg",
+    apple: "./logo.jpg",
   },
   other: {
     "Cross-Origin-Opener-Policy": "same-origin-allow-popups",

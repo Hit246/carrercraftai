@@ -92,6 +92,7 @@
             border-radius: 5px;
             white-space: pre-wrap;
             word-wrap: break-word;
+            font-family: 'Courier New', Courier, monospace;
         }
         code {
             font-family: 'Courier New', Courier, monospace;
@@ -306,6 +307,12 @@
             <tr>
                 <td></td>
                 <td>4.4</td>
+                <td>UML (Unified Modeling Language) Diagrams</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>4.5</td>
                 <td>Data Dictionary</td>
                 <td></td>
             </tr>
@@ -975,7 +982,150 @@ graph TD
 <div class="page-break"></div>
 
 <div class="container">
-    <h3><strong>4.4 Data Dictionary (Database Schema)</strong></h3>
+    <h3><strong>4.4 UML (Unified Modeling Language) Diagrams</strong></h3>
+    <p>UML diagrams provide a standardized way to visualize the design of a system. This section includes several key diagrams that model the structure and behavior of CareerCraft AI.</p>
+    
+    <h4><strong>Use Case Diagram</strong></h4>
+    <p>This diagram provides a high-level view of the system's functionality, showing the interactions between different actors (users) and the system's use cases.</p>
+    <pre><code>
+@startuml
+left to right direction
+
+actor "Job Seeker" as JobSeeker
+actor "Recruiter"
+actor "Admin"
+
+rectangle "CareerCraft AI System" {
+  usecase "Manage Account" as UC1
+  usecase "Build & Manage Resumes" as UC2
+  usecase "Use AI Job Seeker Tools" as UC3
+  usecase "Manage Subscriptions" as UC4
+  usecase "Manage Support Tickets" as UC5
+  
+  usecase "Use AI Recruiter Tools" as UC6
+  usecase "Manage Team" as UC7
+
+  usecase "Manage Users" as UC8
+  usecase "Manage All Subscriptions" as UC9
+  usecase "Manage All Support" as UC10
+  usecase "Manage Platform Settings" as UC11
+  
+  JobSeeker -- UC1
+  JobSeeker -- UC2
+  JobSeeker -- UC3
+  JobSeeker -- UC4
+  JobSeeker -- UC5
+  
+  Recruiter -- UC1
+  Recruiter -- UC6
+  Recruiter -- UC7
+  
+  Admin -- UC8
+  Admin -- UC9
+  Admin -- UC10
+  Admin -- UC11
+  
+  UC3 ..> UC2 : <<extends>>
+  UC6 ..> UC7 : <<extends>>
+}
+@enduml
+    </code></pre>
+
+    <h4><strong>Sequence Diagram: AI Resume Analysis</strong></h4>
+    <p>This diagram shows the sequence of interactions that occur when a user performs an AI-powered resume analysis.</p>
+    <pre><code>
+@startuml
+actor User
+participant "Resume Analyzer Page (UI)" as UI
+participant "Next.js Server Action" as ServerAction
+participant "Genkit AI Flow" as GenkitFlow
+participant "Google AI (Gemini)" as GoogleAI
+participant "Firestore DB" as DB
+
+User -> UI : Uploads Resume PDF
+UI -> ServerAction : analyzeResumeAction(resumeDataUri)
+activate ServerAction
+
+ServerAction -> DB : Read User Credits
+activate DB
+DB --> ServerAction : Return Credits
+deactivate DB
+
+alt User has credits
+    ServerAction -> GenkitFlow : analyzeResume(input)
+    activate GenkitFlow
+    GenkitFlow -> GoogleAI : generateContent(prompt)
+    activate GoogleAI
+    GoogleAI --> GenkitFlow : Return Analysis JSON
+    deactivate GoogleAI
+    GenkitFlow --> ServerAction : Return AnalysisResult
+    deactivate GenkitFlow
+
+    ServerAction -> DB : Decrement User Credits
+    activate DB
+    DB --> ServerAction : Success
+    deactivate DB
+
+    ServerAction --> UI : Return AnalysisResult
+    UI -> User : Display Strengths, Weaknesses, Suggestions
+else User has no credits
+    ServerAction --> UI : Return Error (Upgrade needed)
+    UI -> User : Display "Upgrade to Pro" message
+end
+
+deactivate ServerAction
+@enduml
+    </code></pre>
+
+    <h4><strong>Activity Diagram: Subscription Upgrade Process</strong></h4>
+    <p>This diagram illustrates the flow of activities for the subscription upgrade process, involving both automated and manual paths.</p>
+    <pre><code>
+@startuml
+|User|
+start
+:Selects a new plan;
+:Fills profile (name, phone);
+:Is redirected to Razorpay;
+:Completes payment;
+
+|Razorpay|
+:Processes payment;
+:Sends webhook notification;
+
+|System|
+:Receives webhook;
+:Verifies webhook signature;
+if (Signature is valid?) then (yes)
+  :Updates user plan in Firestore;
+  :Sets plan to 'pro'/'recruiter';
+  :Logs transaction ID;
+  |User|
+  :Sees "Success" page;
+  stop
+else (no)
+  :Logs verification failure;
+  |Admin|
+  :Sees user in "Pending Upgrades";
+  :Manually verifies payment;
+  if (Payment is valid?) then (yes)
+    |System|
+    :Admin updates plan to 'pro'/'recruiter';
+  else (no)
+    :Admin reverts plan to 'free';
+  endif
+  |User|
+  :Receives plan update;
+  stop
+endif
+@enduml
+    </code></pre>
+
+</div>
+
+<div class="page-break"></div>
+
+<div class="container">
+    <h3><strong>4.5 Data Dictionary (Database Schema)</strong></h3>
     <p>The Data Dictionary provides a detailed specification for each data entity (collection) and its attributes (fields) within the Firestore database. This serves as the blueprint for all data operations in CareerCraft AI.</p>
     
     <h4><strong>1. `users` Collection</strong></h4>
