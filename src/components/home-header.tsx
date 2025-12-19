@@ -38,7 +38,7 @@ export function HomeHeader() {
           ) : user ? (
             <Button asChild>
               <Link href="/dashboard">
-                <LayoutDashboard className="mr-2" />
+                <LayoutDashboard className="mr-2 h-4 w-4" />
                 Dashboard
               </Link>
             </Button>
@@ -48,7 +48,7 @@ export function HomeHeader() {
                 <Link href="/login">Log In</Link>
               </Button>
               <Button asChild>
-                <Link href="/signup">Get Started Free <MoveRight className="ml-2"/></Link>
+                <Link href="/signup">Get Started Free <MoveRight className="ml-2 h-4 w-4"/></Link>
               </Button>
             </>
           )}
