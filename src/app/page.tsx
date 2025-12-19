@@ -1,15 +1,22 @@
 
 
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { AuthProvider } from '@/hooks/use-auth';
+import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { HomeHeader } from '@/components/home-header';
 
 
 function HomePageContent() {
+  const { user, loading } = useAuth();
+  
+  const getStartedLink = user ? '/dashboard' : '/signup';
+  const pricingLink = user ? '/pricing' : '/signup';
+
   return (
     <div className="flex flex-col min-h-dvh bg-background">
       <HomeHeader />
@@ -29,7 +36,7 @@ function HomePageContent() {
             </p>
             <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
               <Button size="lg" asChild className="w-full sm:w-auto">
-                <Link href="/signup">Create My Resume</Link>
+                <Link href={getStartedLink}>Create My Resume</Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
                 <Link href="#features">Explore Features</Link>
@@ -148,7 +155,7 @@ function HomePageContent() {
                         <span>Good for beginners.</span>
                       </div>
                       <Button asChild variant="outline" className="w-full mt-2">
-                          <Link href="/signup">Get Started</Link>
+                          <Link href={getStartedLink}>Get Started</Link>
                       </Button>
                   </CardFooter>
                 </Card>
@@ -174,7 +181,7 @@ function HomePageContent() {
                         <span>Great for people applying regularly.</span>
                       </div>
                       <Button asChild className="w-full mt-2">
-                         <Link href="/signup">Choose Essentials</Link>
+                         <Link href={pricingLink}>Choose Essentials</Link>
                       </Button>
                   </CardFooter>
                 </Card>
@@ -202,7 +209,7 @@ function HomePageContent() {
                         <span>Perfect for experienced professionals.</span>
                       </div>
                       <Button asChild className="w-full mt-2">
-                         <Link href="/signup">Choose Pro</Link>
+                         <Link href={pricingLink}>Choose Pro</Link>
                       </Button>
                   </CardFooter>
                 </Card>
@@ -228,7 +235,7 @@ function HomePageContent() {
                         <span>Best for freelance recruiters.</span>
                       </div>
                       <Button asChild variant="secondary" className="w-full mt-2">
-                         <Link href="/signup">Contact Sales</Link>
+                         <Link href={pricingLink}>Contact Sales</Link>
                       </Button>
                   </CardFooter>
                 </Card>

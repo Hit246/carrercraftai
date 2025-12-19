@@ -11,6 +11,9 @@ import Image from 'next/image';
 export function HomeHeader() {
   const { user, loading } = useAuth();
 
+  const resumeBuilderLink = user ? '/dashboard' : '/login';
+  const forRecruitersLink = user ? '/candidate-matcher' : '/login';
+
   return (
     <header className="container mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex h-20 items-center justify-between gap-8">
@@ -23,8 +26,8 @@ export function HomeHeader() {
         <nav className="hidden md:flex gap-6 items-center text-sm font-medium flex-1">
           <Link href="#features" className="text-muted-foreground transition-colors hover:text-foreground">Features</Link>
           <Link href="#pricing" className="text-muted-foreground transition-colors hover:text-foreground">Pricing</Link>
-          <Link href="/login" className="text-muted-foreground transition-colors hover:text-foreground">Resume Builder</Link>
-          <Link href="/login" className="text-muted-foreground transition-colors hover:text-foreground">For Recruiters</Link>
+          <Link href={resumeBuilderLink} className="text-muted-foreground transition-colors hover:text-foreground">Resume Builder</Link>
+          <Link href={forRecruitersLink} className="text-muted-foreground transition-colors hover:text-foreground">For Recruiters</Link>
         </nav>
         <div className="flex items-center gap-2">
           {loading ? (
@@ -54,5 +57,3 @@ export function HomeHeader() {
     </header>
   );
 }
-
-    
