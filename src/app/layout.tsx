@@ -11,6 +11,9 @@ import { FirebaseErrorListener } from "@/components/FirebaseErrorListener";
 export const metadata: Metadata = {
   title: "CareerCraft AI",
   description: "Craft the perfect resume and find your dream job with AI.",
+  icons: {
+    icon: "/logo.jpg",
+  },
   other: {
     "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
     "Cross-Origin-Embedder-Policy": "unsafe-none",
