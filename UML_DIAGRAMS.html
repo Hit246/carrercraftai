@@ -244,6 +244,123 @@ endif
             <li><code>if/else</code> (diamond shape, implicitly shown by arrows): A decision point where the flow can branch into different paths based on a condition.</li>
         </ul>
     </div>
+    
+    <h2 id="class">4. Class Diagram</h2>
+    <p>
+        This diagram models the main data entities of the system as classes, showing their attributes (fields), operations (methods), and the relationships between them. It provides a static blueprint of the system's structure.
+    </p>
+    <pre><code>
+@startuml
+skinparam classAttributeIconSize 0
+
+class User {
+  +uid: string
+  +email: string
+  +plan: Plan
+  +credits: number
+  +teamId: string
+  --
+  +updateProfile()
+  +useCredit()
+  +requestCancellation()
+}
+
+class ResumeVersion {
+  +versionName: string
+  +updatedAt: Timestamp
+  +resumeData: Map
+}
+
+class Team {
+  +owner: string (User UID)
+  +createdAt: Timestamp
+  --
+  +addMember()
+  +removeMember()
+}
+
+class TeamMember {
+  +uid: string
+  +email: string
+  +role: string
+}
+
+class SupportRequest {
+  +userId: string
+  +subject: string
+  +status: string
+  --
+  +addMessage()
+  +updateStatus()
+}
+
+class SupportMessage {
+  +message: string
+  +sender: string
+  +timestamp: Timestamp
+}
+
+User "1" *-- "0..*" ResumeVersion : has
+User "1" -- "0..1" Team : owns
+Team "1" *-- "1..*" TeamMember : has
+User "1" -- "0..*" SupportRequest : submits
+SupportRequest "1" *-- "1..*" SupportMessage : contains
+@enduml
+    </code></pre>
+    <div class="explanation">
+        <h3>Explanation of Shapes & Symbols</h3>
+        <ul>
+            <li><code>class</code> (rectangle): Represents a data entity or object (e.g., User, Team). The top part is the name, the middle lists attributes, and the bottom lists operations (methods).</li>
+            <li><code>+</code> / <code>-</code>: Represents public (+) or private (-) visibility of attributes/methods.</li>
+            <li><code>*--</code> (Composition): A "has-a" relationship where the child object (e.g., ResumeVersion) cannot exist without the parent (User). Represented by a filled diamond.</li>
+            <li><code>--</code> (Association): A general relationship between two classes. The numbers ("1", "0..*") indicate multiplicity (e.g., one User can have zero or many Support Requests).</li>
+        </ul>
+    </div>
+
+    <h2 id="component">5. Component Diagram</h2>
+    <p>
+        This diagram shows the high-level organization of the system's major software components and their dependencies. It illustrates how the frontend, backend, and external services are connected.
+    </p>
+    <pre><code>
+@startuml
+package "Browser" {
+  [Frontend (Next.js)] as Frontend
+}
+
+package "Google Cloud" {
+  [Genkit AI Flows] as Genkit
+  [Firebase Services] as Firebase
+}
+
+[Google AI (Gemini)] as GeminiAPI
+[Razorpay API] as RazorpayAPI
+
+Frontend ..> Genkit : (HTTP/S)
+Frontend ..> Firebase : (SDK)
+Genkit ..> GeminiAPI : (API Call)
+Genkit ..> Firebase : (Server SDK)
+Frontend ..> RazorpayAPI : (Redirect)
+RazorpayAPI ..> Frontend : (Redirect)
+
+[CareerCraft AI System] as SystemBoundary
+
+SystemBoundary -[hidden]down- Frontend
+SystemBoundary -[hidden]down- Genkit
+SystemBoundary -[hidden]down- Firebase
+SystemBoundary -[hidden]down- GeminiAPI
+SystemBoundary -[hidden]down- RazorpayAPI
+
+@enduml
+    </code></pre>
+    <div class="explanation">
+        <h3>Explanation of Shapes & Symbols</h3>
+        <ul>
+            <li><code>package</code> (folder icon): Groups related components together (e.g., everything running in the Browser or on Google Cloud).</li>
+            <li><code>[Component]</code> (rectangle with two small rectangles): Represents a major modular part of the system (e.g., Frontend, Firebase Services).</li>
+            <li><code>..></code> (dashed arrow): Represents a dependency. The arrow points from the dependent component to the one it depends on (e.g., the Frontend depends on Genkit AI Flows).</li>
+        </ul>
+    </div>
+
 
 </div>
 
