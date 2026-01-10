@@ -28,9 +28,9 @@ function HomePageContent() {
               <Sparkles className="w-4 h-4 mr-2 -ml-1"/>
               Powered by Generative AI
             </Badge>
-            <h2 className="text-4xl font-bold tracking-tight text-foreground font-headline sm:text-5xl md:text-6xl lg:text-7xl">
+            <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline sm:text-5xl md:text-6xl lg:text-7xl">
               Craft Your Future with AI
-            </h2>
+            </h1>
             <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
               Build the perfect resume, get AI-driven feedback, and find jobs that truly match your skills. CareerCraft AI is your ultimate partner in professional growth.
             </p>
@@ -49,7 +49,7 @@ function HomePageContent() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
               <p className="font-semibold text-primary">Our Features</p>
-              <h3 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">Everything you need to level up your career</h3>
+              <h2 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">Everything you need to level up your career</h2>
               <p className="mt-4 text-muted-foreground text-lg">
                 From creation to application, our intelligent tools support you at every step.
               </p>
@@ -129,7 +129,7 @@ function HomePageContent() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
                 <p className="font-semibold text-primary">Pricing</p>
-                <h3 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">The right plan for your needs</h3>
+                <h2 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">The right plan for your needs</h2>
                 <p className="mt-4 text-muted-foreground text-lg">
                     Choose the plan that’s right for you and take the next step in your career.
                 </p>

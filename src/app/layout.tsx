@@ -5,22 +5,48 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FirebaseErrorListener } from "@/components/FirebaseErrorListener";
 
+const siteUrl = "https://careercraftai.vercel.app";
 
-// Even though we're using a client component, we can still export metadata
-// See: https://nextjs.org/docs/app/building-your-application/rendering/client-components#metadata
 export const metadata: Metadata = {
-  title: "CareerCraft AI",
-  description: "Craft the perfect resume and find your dream job with AI.",
-  icons: {
-    icon: '/icon.jpg',
-    shortcut: '/icon.jpg',
-    apple: '/icon.jpg',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "CareerCraft AI: Build Resumes & Find Jobs with AI",
+    template: "%s | CareerCraft AI",
   },
-  other: {
-    "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
-    "Cross-Origin-Embedder-Policy": "unsafe-none",
-    "Permissions-Policy": "clipboard-write=*; autoplay=*",
-  }  
+  description: "Build professional resumes, get AI-driven feedback, discover job opportunities, and streamline your job search with CareerCraft AI.",
+  keywords: ["AI resume builder", "resume analysis", "job matcher", "career platform", "ATS optimization", "cover letter generator"],
+  authors: [{ name: "CHAUHAN HITARTH", url: "https://github.com/Hit246" }],
+  creator: "CHAUHAN HITARTH",
+  openGraph: {
+    title: "CareerCraft AI: An AI-Powered Career Platform",
+    description: "Build professional resumes, get AI-driven feedback, discover job opportunities, and streamline your job search with CareerCraft AI.",
+    url: siteUrl,
+    siteName: "CareerCraft AI",
+    images: [
+      {
+        url: `${siteUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "CareerCraft AI Banner",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CareerCraft AI: Build Resumes & Find Jobs with AI",
+    description: "Build professional resumes, get AI-driven feedback, discover job opportunities, and streamline your job search with CareerCraft AI.",
+    images: [`${siteUrl}/og-image.png`],
+  },
+  alternates: {
+    canonical: siteUrl,
+  },
+  icons: {
+    icon: "/logo.jpg",
+    shortcut: "/logo.jpg",
+    apple: "/logo.jpg",
+  },
 };
 
 export default function RootLayout({
