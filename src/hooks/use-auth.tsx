@@ -135,8 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 await updateDoc(userRef, {
                     plan: 'free',
                     credits: FREE_CREDITS,
-                    planUpdatedAt: null,
-                    previousPlan: null,
+                    previousPlan: userPlan, // Keep a record of what the plan was
                     requestedPlan: null,
                 });
                 // The snapshot will refire with the new data, so we can exit here
