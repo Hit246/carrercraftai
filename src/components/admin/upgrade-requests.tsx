@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -51,7 +52,7 @@ export function UpgradeRequestsPage() {
     setIsLoading(true);
     try {
         const usersCollectionRef = collection(db, 'users');
-        const q = query(usersCollectionRef, where('plan', '==', 'pending'), orderBy('planUpdatedAt', 'desc'));
+        const q = query(usersCollectionRef, where('plan', '==', 'pending'));
         const usersSnapshot = await getDocs(q);
         const usersList = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as UserData));
         setUsers(usersList);
@@ -103,7 +104,10 @@ export function UpgradeRequestsPage() {
     try {
       const updateData: any = {
         plan: revertPlan,
-        planUpdatedAt: revertPlan === 'free' ? null : user.planUpdatedAt, // Keep old update time if reverting to paid plan
+        // If reverting to free, the planUpdatedAt should be cleared.
+        // If reverting to a previous paid plan, the planUpdatedAt is ALREADY what it should be, so no need to set it.
+        // We only clear it if reverting to free.
+        planUpdatedAt: revertPlan === 'free' ? null : user.planUpdatedAt,
         requestedPlan: null,
         previousPlan: null, // Clear previousPlan on rejection
       };

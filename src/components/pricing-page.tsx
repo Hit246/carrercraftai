@@ -58,10 +58,9 @@ export function PricingPage() {
     try {
         const userRef = doc(db, 'users', user.uid);
         await updateDoc(userRef, { 
-            previousPlan: plan, // Store the current plan before changing
+            previousPlan: plan, // Store the current plan before changing to pending
             plan: 'pending',
             requestedPlan: selectedPlan,
-            planUpdatedAt: new Date(),
         });
     } catch (dbError) {
         console.error("Failed to update requestedPlan:", dbError);
