@@ -164,7 +164,7 @@ export function ProfilePage() {
                     <Hourglass/>
                     <AlertTitle>Your Upgrade is Pending</AlertTitle>
                     <AlertDescription>
-                        An administrator will review your payment soon. Your request is being processed.
+                        An administrator will review your payment soon. Your request is being processed. If you haven't already, you can submit your proof of payment on the order status page.
                     </AlertDescription>
                 </Alert>
             )}

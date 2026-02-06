@@ -4,24 +4,28 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle, XCircle, AlertCircle, Hourglass } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, AlertCircle, Hourglass, Upload, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { onSnapshot, doc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, uploadFile } from '@/lib/firebase';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
 type PaymentStatus = 'verifying' | 'success' | 'failed' | 'cancelled' | 'pending';
 
 function PaymentStatus() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, userData, updatePaymentProof } = useAuth();
   const { toast } = useToast();
   
   const [status, setStatus] = useState<PaymentStatus>('verifying');
   const [message, setMessage] = useState('Verifying your payment, please wait...');
   const [countdown, setCountdown] = useState(5);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     // This effect handles immediate feedback based on URL parameters
@@ -54,11 +58,11 @@ function PaymentStatus() {
       const userRef = doc(db, 'users', user.uid);
       const unsubscribe = onSnapshot(userRef, (userDoc) => {
         if (userDoc.exists()) {
-          const userData = userDoc.data();
+          const newUserData = userDoc.data();
           // The webhook has successfully updated the plan
-          if (userData.plan !== 'pending' && userData.plan !== 'free') {
+          if (newUserData.plan !== 'pending' && newUserData.plan !== 'free') {
             setStatus('success');
-            setMessage(`Your plan has been successfully upgraded to ${userData.plan}!`);
+            setMessage(`Your plan has been successfully upgraded to ${newUserData.plan}!`);
             unsubscribe(); // Stop listening once upgraded
           }
         }
@@ -85,6 +89,26 @@ function PaymentStatus() {
       return () => clearInterval(timer);
     }
   }, [status, router]);
+
+  const handleProofUpload = async () => {
+    if (!proofFile || !user) return;
+    setIsUploading(true);
+    try {
+        const filePath = `payment_proofs/${user.uid}/${Date.now()}-${proofFile.name}`;
+        const downloadURL = await uploadFile(proofFile, filePath);
+        await updatePaymentProof(downloadURL);
+        toast({
+            title: 'Proof Uploaded',
+            description: 'Your payment proof has been submitted for review.',
+        });
+        setProofFile(null); // Clear the file input
+    } catch (error) {
+        console.error("Proof upload failed:", error);
+        toast({ title: 'Upload Failed', description: 'Could not upload your proof. Please try again.', variant: 'destructive' });
+    } finally {
+        setIsUploading(false);
+    }
+  };
 
   const StatusIcon = () => {
     switch (status) {
@@ -161,6 +185,30 @@ function PaymentStatus() {
             )}
           </div>
         </CardContent>
+
+         {status === 'pending' && !userData?.paymentProofURL && (
+            <CardFooter className="flex-col items-start gap-4 border-t pt-6">
+                <div className="space-y-1">
+                    <h3 className="font-semibold">Manual Verification Required</h3>
+                    <p className="text-sm text-muted-foreground">To speed up the approval process, please upload a screenshot of your payment confirmation.</p>
+                </div>
+                <div className="w-full space-y-2">
+                    <Label htmlFor="payment-proof">Payment Screenshot</Label>
+                    <Input id="payment-proof" type="file" accept="image/*" onChange={(e) => setProofFile(e.target.files?.[0] || null)} disabled={isUploading} />
+                </div>
+                <Button onClick={handleProofUpload} disabled={!proofFile || isUploading} className="w-full">
+                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4" />}
+                    {isUploading ? 'Uploading...' : 'Upload Proof'}
+                </Button>
+            </CardFooter>
+        )}
+        {status === 'pending' && userData?.paymentProofURL && (
+            <CardFooter className="flex-col items-center gap-2 border-t pt-6 text-center">
+                 <CheckCircle className="w-8 h-8 text-green-500 mb-2"/>
+                 <h3 className="font-semibold">Proof Submitted</h3>
+                 <p className="text-sm text-muted-foreground">We have received your payment proof. An admin will review it shortly.</p>
+            </CardFooter>
+        )}
       </Card>
     </div>
   );

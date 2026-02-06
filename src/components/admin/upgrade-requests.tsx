@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -135,6 +136,7 @@ export function UpgradeRequestsPage() {
               <TableHead>User</TableHead>
               <TableHead>Requested Plan</TableHead>
               <TableHead>Requested On</TableHead>
+              <TableHead>Proof of Payment</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -145,6 +147,7 @@ export function UpgradeRequestsPage() {
                     <TableCell><Skeleton className="h-10 w-48" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-24" /></TableCell>
                     <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                   </TableRow>
                 ))
@@ -177,6 +180,18 @@ export function UpgradeRequestsPage() {
                       {user.planUpdatedAt
                         ? new Date(user.planUpdatedAt.seconds * 1000).toLocaleDateString()
                         : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                        {user.paymentProofURL ? (
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={user.paymentProofURL} target="_blank">
+                                    <ExternalLink className="mr-2 h-4 w-4" />
+                                    View Proof
+                                </Link>
+                            </Button>
+                        ) : (
+                            <span className="text-xs text-muted-foreground">Not provided</span>
+                        )}
                     </TableCell>
                     <TableCell className="text-right">
                       {user.requestedPlan && (
