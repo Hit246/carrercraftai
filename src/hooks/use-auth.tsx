@@ -5,6 +5,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode, useCa
 import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, onSnapshot, collectionGroup } from 'firebase/firestore';
+import { differenceInDays, addDays } from 'date-fns';
 
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
@@ -122,8 +123,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             currentData = userDoc.data() as UserData;
         }
         
-        setUserData(currentData);
         const userPlan = currentData.plan || 'free';
+        const planUpdatedAt = currentData.planUpdatedAt;
+
+        if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
+            const upgradeDate = new Date(planUpdatedAt.seconds * 1000);
+            const expirationDate = addDays(upgradeDate, 30);
+            const isExpired = differenceInDays(new Date(), expirationDate) >= 0;
+
+            if (isExpired) {
+                await updateDoc(userRef, {
+                    plan: 'free',
+                    credits: FREE_CREDITS,
+                    planUpdatedAt: null,
+                    previousPlan: null,
+                    requestedPlan: null,
+                });
+                // The snapshot will refire with the new data, so we can exit here
+                // to avoid setting state with the old, expired plan data.
+                return;
+            }
+        }
+        
+        setUserData(currentData);
         setPlan(userPlan);
 
         if (userPlan === 'pro' || userPlan === 'recruiter') {
@@ -288,5 +310,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-    
