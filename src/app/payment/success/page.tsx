@@ -10,8 +10,8 @@ import { Loader2, CheckCircle, XCircle, AlertCircle, Hourglass, Upload, External
 import { useToast } from '@/hooks/use-toast';
 import { onSnapshot, doc } from 'firebase/firestore';
 import { db, uploadFile } from '@/lib/firebase';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 type PaymentStatus = 'verifying' | 'success' | 'failed' | 'cancelled' | 'pending';
 
