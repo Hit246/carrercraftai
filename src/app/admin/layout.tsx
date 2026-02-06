@@ -1,7 +1,6 @@
-
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -39,12 +38,16 @@ import Image from 'next/image';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '../ui/toast';
 
 function AdminLayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout, isAdmin } = useAuth();
   const [pendingUpgradesCount, setPendingUpgradesCount] = useState(0);
+  const { toast } = useToast();
+  const isInitialLoad = useRef(true);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -52,10 +55,33 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
     const q = query(collection(db, 'users'), where('plan', '==', 'pending'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setPendingUpgradesCount(snapshot.size);
+      
+      if (isInitialLoad.current) {
+        isInitialLoad.current = false;
+        return;
+      }
+
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const newUser = change.doc.data();
+          toast({
+            title: "New Upgrade Request",
+            description: `${newUser.email} has requested a plan upgrade.`,
+            action: (
+              <ToastAction altText="View" onClick={() => router.push('/admin/upgrades')}>
+                View
+              </ToastAction>
+            ),
+          });
+        }
+      });
     });
 
-    return () => unsubscribe();
-  }, [isAdmin]);
+    return () => {
+      unsubscribe();
+      isInitialLoad.current = true;
+    };
+  }, [isAdmin, router, toast]);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
