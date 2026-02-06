@@ -39,7 +39,7 @@ import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ToastAction } from '../ui/toast';
+import { ToastAction } from '@/components/ui/toast';
 
 function AdminLayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
