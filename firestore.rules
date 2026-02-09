@@ -5,29 +5,23 @@ service cloud.firestore {
 
     // Helper function to check if a user is an admin
     function isAdmin() {
-      return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+      return request.auth != null && request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
 
-    // Global rule: Admins have universal read/write access to the entire database.
-    // This simplifies all subsequent rules.
+    // Global rule: Admins have universal, explicit access to all operations.
     match /{document=**} {
-      allow read, write: if isAdmin();
-    }
-
-    // Helper function for non-admin users to check ownership
-    function isOwner(userId) {
-      return request.auth.uid == userId;
+      allow get, list, create, update, delete: if isAdmin();
     }
 
     // Rules for the 'users' collection (for non-admins)
     match /users/{userId} {
       // Users can only read or write their own documents.
-      allow read, write: if isOwner(userId);
+      allow read, write: if request.auth != null && request.auth.uid == userId;
 
       // Rules for the 'resumeVersions' subcollection
       match /resumeVersions/{versionId} {
         // Only the owner can manage their resume versions.
-        allow read, write, delete: if isOwner(userId);
+        allow read, write, delete: if request.auth != null && request.auth.uid == userId;
       }
     }
     
@@ -41,13 +35,15 @@ service cloud.firestore {
         // A user can read the members list only if they belong to that team.
         allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
         // Only the team owner can create new members (invitations).
-        allow create: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+        allow create: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+        // Non-admin owner can remove members
+        allow delete: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       }
       
       // Rules for the 'candidates' subcollection
       match /candidates/{candidateId} {
         // Only the team owner can manage candidates.
-         allow read, write, delete: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+         allow read, write, delete: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       }
     }
 
@@ -60,16 +56,16 @@ service cloud.firestore {
     // Rules for the 'supportRequests' collection (for non-admins)
     match /supportRequests/{requestId} {
       // A user can only read their own support requests.
-      allow read: if isOwner(resource.data.userId);
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
       // A user can only create a support request for themselves.
-      allow create: if isOwner(request.resource.data.userId);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
 
       // Rules for the 'history' subcollection
       match /history/{messageId} {
         // A user can read their own support ticket history.
-        allow read: if isOwner(get(/databases/$(database)/documents/supportRequests/$(requestId)).data.userId);
+        allow read: if request.auth != null && get(/databases/$(database)/documents/supportRequests/$(requestId)).data.userId == request.auth.uid;
         // A user can add a message to their own support ticket.
-        allow create: if isOwner(get(/databases/$(database)/documents/supportRequests/$(requestId)).data.userId);
+        allow create: if request.auth != null && get(/databases/$(database)/documents/supportRequests/$(requestId)).data.userId == request.auth.uid;
       }
     }
   }
