@@ -157,61 +157,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 }, [user, loading, isAdmin]);
 
 
-// This effect handles checking for and applying team invitations after a user logs in.
-useEffect(() => {
-    if (!user || !user.email) return;
-
-    const checkForInvitation = async () => {
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (userSnap.exists()) {
-            const currentData = userSnap.data();
-            // If user is already in a team or has a paid plan, don't process invitations.
-            if (currentData.teamId || (currentData.plan && currentData.plan !== 'free')) {
-                return;
-            }
-        } else {
-            // User document might not be created yet if signup is in progress.
-            // This check will run again once the doc exists.
-            return;
-        }
-
-        // Check for pending invitations using a collectionGroup query.
-        // This is allowed by security rules because the user is now authenticated.
-        const membersQuery = query(collectionGroup(db, 'members'), where('email', '==', user.email));
-        const membersSnapshot = await getDocs(membersQuery);
-
-        if (!membersSnapshot.empty) {
-            const invitationDoc = membersSnapshot.docs[0];
-            const teamId = invitationDoc.ref.parent.parent?.id;
-
-            if (teamId) {
-                const batch = writeBatch(db);
-
-                // Update the user's main document to add them to the team.
-                batch.update(userRef, {
-                    plan: 'recruiter',
-                    credits: Infinity,
-                    teamId: teamId,
-                });
-
-                // Update the invitation document with the user's UID and name.
-                batch.update(invitationDoc.ref, {
-                    uid: user.uid,
-                    name: user.displayName || user.email,
-                });
-
-                await batch.commit();
-                // The main user snapshot listener will automatically update the UI state.
-            }
-        }
-    };
-
-    checkForInvitation();
-}, [user]);
-
-
   const login = (email:string, password:string) => {
     return signInWithEmailAndPassword(auth, email, password);
   }
@@ -229,8 +174,6 @@ useEffect(() => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const newUser = userCredential.user;
 
-    // Always create a standard 'free' user first.
-    // The useEffect hook for invitations will handle team logic after login.
     const initialUserData = {
         email: newUser.email,
         createdAt: new Date(),
