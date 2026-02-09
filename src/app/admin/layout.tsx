@@ -17,6 +17,7 @@ import {
   Settings,
   Bell,
   Wallet,
+  Building,
 } from 'lucide-react';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -107,6 +108,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
     if (isActive('/admin/cancellations')) return 'Cancellation Requests';
     if (isActive('/admin/support')) return 'Support Tickets';
     if (isActive('/admin/payment-history')) return 'Payment History';
+    if (isActive('/admin/teams')) return 'Teams Management';
     return 'Admin Panel';
   };
 
@@ -150,6 +152,17 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 <Link href="/admin/users">
                   <Users />
                   <span>Users</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/admin/teams')}
+              >
+                <Link href="/admin/teams">
+                  <Building />
+                  <span>Teams</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
