@@ -31,14 +31,18 @@ service cloud.firestore {
       // Allow read for any authenticated user (e.g., to find team info)
       allow read: if request.auth != null;
       // Only admins can create, update, or delete teams directly
-      allow write: if isAdmin();
+      allow create, update, delete: if isAdmin();
       
       // Rules for the 'members' subcollection
       match /members/{memberId} {
-        // Any authenticated user can read members (to see team list)
-        allow read: if request.auth != null;
-        // Only admins can add/remove members
-        allow write: if isAdmin() || get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+        // Admins or members of that team can read the member list
+        allow read: if isAdmin() || (request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId);
+        
+        // Admins or the team owner can add/update members
+        allow create, update: if isAdmin() || get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+
+        // Deleting members is part of the admin's team deletion action.
+        allow delete: if isAdmin();
       }
       
       // Rules for the 'candidates' subcollection
