@@ -4,9 +4,14 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Allow admin full access
+    // Helper function to check if a user is an admin
     function isAdmin() {
       return request.auth != null && request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+    }
+
+    // Global rule: Admins have universal read/write access to all files.
+    match /{allPaths=**} {
+      allow read, write: if isAdmin();
     }
 
     // Allow users to read, write and delete their own avatars
@@ -18,12 +23,8 @@ service firebase.storage {
     // Allow authenticated users to upload their payment proofs
     match /payment_proofs/{userId}/{allPaths=**} {
       allow create: if request.auth != null && request.auth.uid == userId;
-      allow read: if request.auth != null && request.auth.uid == userId || isAdmin();
-    }
-
-    // Allow admins to manage settings files
-    match /settings/{allPaths=**} {
-        allow read, write: if isAdmin();
+      // Admin read is covered by global rule, so we only need to specify read for the user themselves.
+      allow read: if request.auth != null && request.auth.uid == userId;
     }
 
      // Allow authenticated users to read and write resumes in their team's folder
