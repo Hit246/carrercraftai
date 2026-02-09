@@ -7,10 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, UserCheck, Building } from 'lucide-react';
+import { Loader2, UserCheck, Building, MoreVertical, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { User } from 'firebase/auth';
+import { deleteTeamAction } from '@/lib/actions';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+
 
 interface TeamMember {
   id: string;
@@ -35,6 +39,7 @@ interface Team {
 export function TeamsManagementPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchTeamsData = useCallback(async () => {
@@ -141,6 +146,19 @@ export function TeamsManagementPage() {
     }
   };
 
+  const handleDeleteTeam = async (teamId: string) => {
+    setIsDeleting(teamId);
+    const result = await deleteTeamAction(teamId);
+    if (result.success) {
+        toast({ title: 'Team Deleted', description: 'The team and all its members have been removed.' });
+        fetchTeamsData(); // re-fetch
+    } else {
+        toast({ title: 'Error', description: result.error || 'Failed to delete team.', variant: 'destructive' });
+    }
+    setIsDeleting(null);
+};
+
+
   if (isLoading) {
     return (
         <div className="space-y-6">
@@ -171,7 +189,7 @@ export function TeamsManagementPage() {
                   Teams Management
               </CardTitle>
               <CardDescription>
-                  Oversee all teams and approve pending member invitations. This is the solution to the limitation where invited users are not automatically added to a team.
+                  Oversee all teams and approve pending member invitations.
               </CardDescription>
           </CardHeader>
       </Card>
@@ -181,8 +199,43 @@ export function TeamsManagementPage() {
       {teams.map(team => (
         <Card key={team.id}>
           <CardHeader>
-            <CardTitle className="text-lg">Team Owner: {team.owner?.email || 'Unknown'}</CardTitle>
-            <CardDescription>Team ID: {team.id}</CardDescription>
+            <div className="flex justify-between items-start">
+                <div>
+                    <CardTitle className="text-lg">Team Owner: {team.owner?.email || 'Unknown'}</CardTitle>
+                    <CardDescription>Team ID: {team.id}</CardDescription>
+                </div>
+                <AlertDialog>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" disabled={isDeleting === team.id}>
+                                {isDeleting === team.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreVertical className="h-4 w-4" />}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete Team
+                                </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently delete the team, remove all its members, and downgrade their plans to 'Free'. This action cannot be undone.
+                        </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteTeam(team.id)} className="bg-destructive hover:bg-destructive/90">
+                            Confirm Deletion
+                        </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>

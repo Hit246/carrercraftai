@@ -115,13 +115,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
         let currentData;
         if (!userDoc.exists()) {
-             await setDoc(userRef, { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date(), hasCompletedOnboarding: false });
+            // Check if this user was invited to a team
+            const q = query(collectionGroup(db, 'members'), where('email', '==', user.email));
+            const invitationSnap = await getDocs(q);
+            
+            let initialPlan: Plan = 'free';
+            let initialCredits = FREE_CREDITS;
+            let teamId = null;
+
+            if (!invitationSnap.empty) {
+                const teamDoc = invitationSnap.docs[0];
+                teamId = teamDoc.ref.parent.parent?.id || null;
+                if(teamId) {
+                    initialPlan = 'recruiter';
+                    initialCredits = Infinity;
+                }
+            }
+             await setDoc(userRef, { 
+                 email: user.email, 
+                 plan: initialPlan, 
+                 credits: initialCredits, 
+                 teamId: teamId,
+                 createdAt: new Date(), 
+                 hasCompletedOnboarding: false 
+            });
              currentData = (await getDoc(userRef)).data() as UserData;
         } else {
             currentData = userDoc.data() as UserData;
         }
         
-        const userPlan = currentData.plan || 'free';
+        let userPlan = currentData.plan || 'free';
         const planUpdatedAt = currentData.planUpdatedAt;
 
         if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
@@ -136,6 +159,54 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     previousPlan: userPlan,
                     requestedPlan: null,
                 });
+                return;
+            }
+        }
+        
+        if (userPlan === 'recruiter' && currentData.teamId) {
+            const teamRef = doc(db, 'teams', currentData.teamId);
+            const teamSnap = await getDoc(teamRef);
+            if (teamSnap.exists()) {
+                const ownerId = teamSnap.data().owner;
+                // Only perform this check if the current user is NOT the owner
+                if (ownerId !== user.uid) {
+                    const ownerRef = doc(db, 'users', ownerId);
+                    const ownerSnap = await getDoc(ownerRef);
+                    if (ownerSnap.exists()) {
+                        const ownerData = ownerSnap.data();
+                        const ownerPlan = ownerData.plan || 'free';
+                        const ownerPlanUpdatedAt = ownerData.planUpdatedAt;
+                        let isOwnerPlanActive = ownerPlan === 'recruiter';
+        
+                        // Check if the owner's plan has expired
+                        if (isOwnerPlanActive && ownerPlanUpdatedAt) {
+                            const ownerUpgradeDate = new Date(ownerPlanUpdatedAt.seconds * 1000);
+                            const ownerExpirationDate = addDays(ownerUpgradeDate, 30);
+                            if (differenceInDays(new Date(), ownerExpirationDate) >= 0) {
+                                isOwnerPlanActive = false;
+                            }
+                        }
+        
+                        if (!isOwnerPlanActive) {
+                            // Owner's plan is not active, so downgrade this team member
+                            await updateDoc(userRef, {
+                                plan: 'free',
+                                credits: FREE_CREDITS,
+                                teamId: null,
+                            });
+                            // The snapshot listener will automatically re-run with the updated data,
+                            // so we can just return here to prevent setting state with stale data.
+                            return; 
+                        }
+                    } else {
+                         // Owner document doesn't exist, which is an inconsistent state. Downgrade member.
+                         await updateDoc(userRef, { plan: 'free', credits: FREE_CREDITS, teamId: null });
+                         return;
+                    }
+                }
+            } else {
+                // Team doesn't exist, user shouldn't be in it.
+                await updateDoc(userRef, { plan: 'free', credits: FREE_CREDITS, teamId: null });
                 return;
             }
         }
@@ -172,21 +243,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signup = async (email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const newUser = userCredential.user;
-
-    const initialUserData = {
-        email: newUser.email,
-        createdAt: new Date(),
-        plan: 'free' as Plan,
-        credits: FREE_CREDITS,
-        teamId: null,
-        planUpdatedAt: null,
-        paymentProofURL: null,
-        hasCompletedOnboarding: false,
-    };
-    
-    await setDoc(doc(db, "users", newUser.uid), initialUserData);
-    
+    // User document creation is now handled by the onSnapshot listener in useEffect
     return userCredential;
 }
 

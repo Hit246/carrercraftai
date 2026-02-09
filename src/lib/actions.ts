@@ -1,7 +1,7 @@
 
 'use server';
 
-import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp, writeBatch, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import {
   analyzeResume,
   AnalyzeResumeInput,
@@ -104,4 +104,59 @@ export async function summarizeCandidateAction(
   input: SummarizeCandidateInput
 ): Promise<SummarizeCandidateOutput> {
   return await summarizeCandidate(input);
+}
+
+export async function inviteTeamMemberAction(teamId: string, email: string, invitedBy: string): Promise<{success: boolean, error?: string}> {
+    try {
+        const membersRef = firestoreCollection(db, `teams/${teamId}/members`);
+        await addDoc(membersRef, {
+            email,
+            role: 'Member',
+            addedBy: invitedBy,
+        });
+        return { success: true };
+    } catch (e: any) {
+        return { success: false, error: e.message };
+    }
+}
+
+export async function deleteTeamAction(teamId: string): Promise<{success: boolean, error?: string}> {
+    try {
+        const batch = writeBatch(db);
+
+        // 1. Find all users belonging to the team
+        const usersQuery = query(firestoreCollection(db, 'users'), where('teamId', '==', teamId));
+        const usersSnap = await getDocs(usersQuery);
+
+        // 2. Downgrade all team members (including owner)
+        usersSnap.forEach(userDoc => {
+            batch.update(userDoc.ref, {
+                plan: 'free',
+                teamId: null,
+                credits: 5, // Assuming FREE_CREDITS is 5
+                planUpdatedAt: null,
+                requestedPlan: null,
+                previousPlan: 'recruiter'
+            });
+        });
+
+        // 3. Delete all documents in the 'members' subcollection
+        const membersRef = firestoreCollection(db, `teams/${teamId}/members`);
+        const membersSnap = await getDocs(membersRef);
+        membersSnap.forEach(memberDoc => {
+            batch.delete(memberDoc.ref);
+        });
+
+        // 4. Delete the main team document
+        const teamRef = doc(db, 'teams', teamId);
+        batch.delete(teamRef);
+
+        await batch.commit();
+
+        return { success: true };
+
+    } catch (error: any) {
+        console.error("Error deleting team: ", error);
+        return { success: false, error: error.message };
+    }
 }
