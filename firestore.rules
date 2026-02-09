@@ -8,79 +8,68 @@ service cloud.firestore {
       return request.auth.token.email in ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
     }
 
-    // Helper function to check if the user is the owner of a document
+    // Global rule: Admins have universal read/write access to the entire database.
+    // This simplifies all subsequent rules.
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Helper function for non-admin users to check ownership
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
 
-    // Rules for the 'users' collection
+    // Rules for the 'users' collection (for non-admins)
     match /users/{userId} {
-      // Admins can read/write any user document
-      // Authenticated users can only read/write their own document
-      allow read, write: if isAdmin() || isOwner(userId);
+      // Users can only read or write their own documents.
+      allow read, write: if isOwner(userId);
 
       // Rules for the 'resumeVersions' subcollection
       match /resumeVersions/{versionId} {
-        // Only the owner of the user document can manage their resume versions
+        // Only the owner can manage their resume versions.
         allow read, write, delete: if isOwner(userId);
       }
     }
     
-    // Rules for the 'teams' collection
+    // Rules for the 'teams' collection (for non-admins)
     match /teams/{teamId} {
-      // Allow read for any authenticated user (e.g., to find team info)
+      // Any authenticated user can read basic team info.
       allow read: if request.auth != null;
-      // Only admins can create, update, or delete teams directly
-      allow create, update, delete: if isAdmin();
       
       // Rules for the 'members' subcollection
       match /members/{memberId} {
-        // Admins or members of that team can read the member list
-        allow read: if isAdmin() || (request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId);
-        
-        // Admins or the team owner can add/update members
-        allow create, update: if isAdmin() || get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
-
-        // Deleting members is part of the admin's team deletion action.
-        allow delete: if isAdmin();
+        // A user can read the members list only if they belong to that team.
+        allow read: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.teamId == teamId;
+        // Only the team owner can create new members (invitations).
+        allow create: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       }
       
       // Rules for the 'candidates' subcollection
       match /candidates/{candidateId} {
-         // Team owner/admins can manage candidates
-        allow read, write, delete: if isAdmin() || get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+        // Only the team owner can manage candidates.
+         allow read, write, delete: if get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       }
     }
 
-    // Rules for the 'settings' collection
+    // Rules for the 'settings' collection (for non-admins)
     match /settings/{settingId} {
-      // Allow read for any authenticated user (to get payment info)
+      // Any authenticated user can read settings (e.g., to get payment info).
       allow read: if request.auth != null;
-      // Only admins can change settings
-      allow write: if isAdmin();
     }
 
-    // Rules for the 'supportRequests' collection
+    // Rules for the 'supportRequests' collection (for non-admins)
     match /supportRequests/{requestId} {
-      // Admins can read/write any support request.
-      // Users can read their own support requests.
-      allow read: if isAdmin() || isOwner(resource.data.userId);
-
-      // Authenticated users can create a support request if they are the owner.
+      // A user can only read their own support requests.
+      allow read: if isOwner(resource.data.userId);
+      // A user can only create a support request for themselves.
       allow create: if isOwner(request.resource.data.userId);
-      
-      // Only admins can update or delete support requests.
-      allow update, delete: if isAdmin();
 
       // Rules for the 'history' subcollection
       match /history/{messageId} {
-        // Admins can read any history.
-        // The user who owns the parent request can read its history.
-        allow read: if isAdmin() || isOwner(get(/databases/$(database)/documents/supportRequests/$(requestId)).data.userId);
-
-        // A user can create a message if they own the parent request.
-        // An admin can create a message.
-        allow create: if isAdmin() || isOwner(get(/databases/$(database)/documents/supportRequests/$(requestId)).data.userId);
+        // A user can read their own support ticket history.
+        allow read: if isOwner(get(/databases/$(database)/documents/supportRequests/$(requestId)).data.userId);
+        // A user can add a message to their own support ticket.
+        allow create: if isOwner(get(/databases/$(database)/documents/supportRequests/$(requestId)).data.userId);
       }
     }
   }
