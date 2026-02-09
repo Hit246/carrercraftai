@@ -115,8 +115,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
         let currentData;
         if (!userDoc.exists()) {
-             // This case is primarily handled by the signup function now
-             // but as a fallback, we create a free user record.
              await setDoc(userRef, { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date(), hasCompletedOnboarding: false });
              currentData = (await getDoc(userRef)).data() as UserData;
         } else {
@@ -135,11 +133,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 await updateDoc(userRef, {
                     plan: 'free',
                     credits: FREE_CREDITS,
-                    previousPlan: userPlan, // Keep a record of what the plan was
+                    previousPlan: userPlan,
                     requestedPlan: null,
                 });
-                // The snapshot will refire with the new data, so we can exit here
-                // to avoid setting state with the old, expired plan data.
                 return;
             }
         }
@@ -161,6 +157,61 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 }, [user, loading, isAdmin]);
 
 
+// This effect handles checking for and applying team invitations after a user logs in.
+useEffect(() => {
+    if (!user || !user.email) return;
+
+    const checkForInvitation = async () => {
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (userSnap.exists()) {
+            const currentData = userSnap.data();
+            // If user is already in a team or has a paid plan, don't process invitations.
+            if (currentData.teamId || (currentData.plan && currentData.plan !== 'free')) {
+                return;
+            }
+        } else {
+            // User document might not be created yet if signup is in progress.
+            // This check will run again once the doc exists.
+            return;
+        }
+
+        // Check for pending invitations using a collectionGroup query.
+        // This is allowed by security rules because the user is now authenticated.
+        const membersQuery = query(collectionGroup(db, 'members'), where('email', '==', user.email));
+        const membersSnapshot = await getDocs(membersQuery);
+
+        if (!membersSnapshot.empty) {
+            const invitationDoc = membersSnapshot.docs[0];
+            const teamId = invitationDoc.ref.parent.parent?.id;
+
+            if (teamId) {
+                const batch = writeBatch(db);
+
+                // Update the user's main document to add them to the team.
+                batch.update(userRef, {
+                    plan: 'recruiter',
+                    credits: Infinity,
+                    teamId: teamId,
+                });
+
+                // Update the invitation document with the user's UID and name.
+                batch.update(invitationDoc.ref, {
+                    uid: user.uid,
+                    name: user.displayName || user.email,
+                });
+
+                await batch.commit();
+                // The main user snapshot listener will automatically update the UI state.
+            }
+        }
+    };
+
+    checkForInvitation();
+}, [user]);
+
+
   const login = (email:string, password:string) => {
     return signInWithEmailAndPassword(auth, email, password);
   }
@@ -170,7 +221,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
       console.error('Error sending password reset email: ', error);
-      // Re-throw the error so the UI can catch it and display a message
       throw error;
     }
   };
@@ -179,47 +229,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const newUser = userCredential.user;
 
-    const initialUserData: any = {
+    // Always create a standard 'free' user first.
+    // The useEffect hook for invitations will handle team logic after login.
+    const initialUserData = {
         email: newUser.email,
         createdAt: new Date(),
+        plan: 'free' as Plan,
+        credits: FREE_CREDITS,
+        teamId: null,
         planUpdatedAt: null,
         paymentProofURL: null,
         hasCompletedOnboarding: false,
     };
     
-    // Check if there is an invitation for this email
-    const membersQuery = query(collectionGroup(db, 'members'), where('email', '==', email));
-    const membersSnapshot = await getDocs(membersQuery);
-
-    if (!membersSnapshot.empty) {
-        const invitationDoc = membersSnapshot.docs[0];
-        const teamId = invitationDoc.ref.parent.parent?.id;
-
-        if (teamId) {
-            // A user invited to a team should always get the 'recruiter' plan benefits.
-            initialUserData.plan = 'recruiter' as Plan;
-            initialUserData.credits = Infinity;
-            initialUserData.teamId = teamId;
-
-            const batch = writeBatch(db);
-            const userRef = doc(db, 'users', newUser.uid);
-            batch.set(userRef, initialUserData);
-            
-            // Update the member doc with the new user's UID
-            batch.update(invitationDoc.ref, { 
-                uid: newUser.uid,
-                name: newUser.displayName || newUser.email
-            });
-
-            await batch.commit();
-        }
-    } else {
-        // Standard signup for a user not invited to a team
-        initialUserData.plan = 'free' as Plan;
-        initialUserData.credits = FREE_CREDITS;
-        initialUserData.teamId = null;
-        await setDoc(doc(db, "users", newUser.uid), initialUserData);
-    }
+    await setDoc(doc(db, "users", newUser.uid), initialUserData);
     
     return userCredential;
 }
@@ -252,14 +275,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error("Not authenticated");
   
-    // Prepare the data for Firebase Auth and Firestore, ensuring no undefined values
     const authProfile: { displayName?: string, photoURL?: string } = {};
     if (profile.displayName !== undefined) authProfile.displayName = profile.displayName;
     if (profile.photoURL !== undefined) authProfile.photoURL = profile.photoURL;
   
     await updateProfile(currentUser, authProfile);
   
-    // Also update the user's document in Firestore
     const userRef = doc(db, 'users', currentUser.uid);
     const firestoreData: { [key: string]: any } = {};
     if (profile.displayName !== undefined) firestoreData.displayName = profile.displayName ?? null;
@@ -270,9 +291,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await updateDoc(userRef, firestoreData);
     }
   
-    // The onSnapshot listener will automatically update the `user` and `userData` state.
-    // To give immediate feedback, we can manually update the local `user` state if needed,
-    // but it's often better to rely on the real-time listener for consistency.
   };
   
 

@@ -38,6 +38,7 @@ export function TeamPage() {
   const [teamOwner, setTeamOwner] = useState<TeamMember | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingTeam, setIsCreatingTeam] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -192,10 +193,10 @@ export function TeamPage() {
         });
         return;
     }
-
+    
+    setIsInviting(true);
     try {
-        const newMemberRef = doc(collection(db, `teams/${userData.teamId}/members`));
-        await setDoc(newMemberRef, {
+        await addDoc(collection(db, `teams/${userData.teamId}/members`), {
             email: values.email,
             role: 'Member',
             addedBy: user.email,
@@ -203,7 +204,7 @@ export function TeamPage() {
 
         toast({
         title: "Invitation Sent!",
-        description: `An invitation has been sent to ${values.email}. They will have access once they sign up with this email.`,
+        description: `${values.email} has been invited. They will be added to the team upon their next login or signup.`,
         });
         form.reset();
     } catch (error) {
@@ -213,6 +214,8 @@ export function TeamPage() {
             description: "There was a problem inviting the new member. Please try again.",
             variant: "destructive"
           });
+    } finally {
+        setIsInviting(false);
     }
   }
 
@@ -315,14 +318,14 @@ export function TeamPage() {
                                     <FormItem>
                                     <FormLabel>Email Address</FormLabel>
                                     <FormControl>
-                                        <Input type="email" placeholder="new.member@example.com" {...field} disabled={isLoading || !teamOwner || user?.uid !== teamOwner?.uid} />
+                                        <Input type="email" placeholder="new.member@example.com" {...field} disabled={isLoading || isInviting || !teamOwner || user?.uid !== teamOwner?.uid} />
                                     </FormControl>
                                     <FormMessage />
                                     </FormItem>
                                 )}
                                 />
-                                <Button type="submit" className="w-full" disabled={isLoading || !teamOwner || user?.uid !== teamOwner?.uid}>
-                                    {isLoading ? <Loader2 className="animate-spin" /> : 'Send Invitation'}
+                                <Button type="submit" className="w-full" disabled={isLoading || isInviting || !teamOwner || user?.uid !== teamOwner?.uid}>
+                                    {isInviting ? <Loader2 className="animate-spin" /> : 'Send Invitation'}
                                 </Button>
                             </form>
                         </Form>
