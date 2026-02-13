@@ -1,8 +1,18 @@
 
+import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Mail, LifeBuoy } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Contact CareerCraft AI Support",
+  description:
+    "Get in touch with the CareerCraft AI team for support, partnerships, or general questions.",
+  alternates: {
+    canonical: "https://carrercraftai.vercel.app/contact",
+  },
+};
 
 export default function ContactPage() {
   return (
@@ -27,20 +37,20 @@ export default function ContactPage() {
           </CardHeader>
           <CardContent className="space-y-8">
             <div className="flex flex-col sm:flex-row gap-8">
-                <div className="flex-1 p-6 border rounded-lg text-center">
-                    <Mail className="h-10 w-10 mx-auto text-primary mb-4"/>
-                    <h3 className="text-lg font-semibold">General Inquiries</h3>
-                    <p className="text-muted-foreground text-sm mb-4">For general questions, partnerships, or media inquiries.</p>
-                    <a href="mailto:hitarth0236@gmail.com" className="text-primary font-medium hover:underline">hitarth0236@gmail.com</a>
-                </div>
-                 <div className="flex-1 p-6 border rounded-lg text-center">
-                    <LifeBuoy className="h-10 w-10 mx-auto text-primary mb-4"/>
-                    <h3 className="text-lg font-semibold">Technical & Billing Support</h3>
-                    <p className="text-muted-foreground text-sm mb-4">For the fastest support, please use our dedicated support page.</p>
-                    <Button asChild>
-                      <Link href="/support">Go to Support Page</Link>
-                    </Button>
-                </div>
+              <div className="flex-1 p-6 border rounded-lg text-center">
+                <Mail className="h-10 w-10 mx-auto text-primary mb-4" />
+                <h3 className="text-lg font-semibold">General Inquiries</h3>
+                <p className="text-muted-foreground text-sm mb-4">For general questions, partnerships, or media inquiries.</p>
+                <a href="mailto:hitarth0236@gmail.com" className="text-primary font-medium hover:underline">hitarth0236@gmail.com</a>
+              </div>
+              <div className="flex-1 p-6 border rounded-lg text-center">
+                <LifeBuoy className="h-10 w-10 mx-auto text-primary mb-4" />
+                <h3 className="text-lg font-semibold">Technical & Billing Support</h3>
+                <p className="text-muted-foreground text-sm mb-4">For the fastest support, please use our dedicated support page.</p>
+                <Button asChild>
+                  <Link href="/support">Go to Support Page</Link>
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
