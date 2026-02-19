@@ -16,6 +16,7 @@ import {
   CheckCircle,
   Settings,
   Bell,
+  CreditCard,
 } from 'lucide-react';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -59,6 +60,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
   const getPageTitle = () => {
     if (isActive('/admin/dashboard')) return 'Admin Dashboard';
     if (isActive('/admin/users')) return 'User Management';
+    if (isActive('/admin/subscriptions')) return 'Subscription Management';
     if (isActive('/admin/upgrades')) return 'Upgrade Requests';
     if (isActive('/admin/cancellations')) return 'Cancellation Requests';
     if (isActive('/admin/support')) return 'Support Tickets';
@@ -106,6 +108,17 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 <Link href="/admin/users">
                   <Users />
                   <span>Users</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/admin/subscriptions')}
+              >
+                <Link href="/admin/subscriptions">
+                  <CreditCard />
+                  <span>Subscriptions</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
