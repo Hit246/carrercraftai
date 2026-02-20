@@ -235,7 +235,7 @@
                     <h2>Preface</h2>
                 </div>
                 <p>The current hiring market is highly competitive and heavily mediated by Applicant Tracking Systems (ATS), making resume optimization difficult for candidates and shortlisting inefficient for recruiters. Manual review at scale introduces bias and delay. CareerCraft AI was developed to solve this with AI-driven automation and decision support.</p>
-                <p>The platform replaces static resume builders with real-time resume scoring, ATS optimization, and AI-assisted content generation. For recruiters, it provides bulk candidate matching and visual analytics dashboards to track the quality of their talent pipeline. The system is built using a modern serverless full-stack architecture: Next.js (frontend), Firebase (backend), and Google Genkit (AI orchestration).</p>
+                <p>The platform replaces static resume builders with real-time resume scoring, ATS optimization, and AI-assisted content generation. For recruiters, it provides bulk candidate matching and a visual analytics dashboard to track the quality of their talent pipeline and manage shortlisted candidates. The system is built using a modern serverless full-stack architecture: Next.js (frontend), Firebase (backend), and Google Genkit (AI orchestration).</p>
                 <div class="info-box">
                     <p><strong>Note:</strong> CareerCraft AI is a functional MVP demonstrating the impact of generative AI on recruitment efficiency and career development workflows.</p>
                 </div>
@@ -304,9 +304,9 @@
                 <p>CareerCraft AI is a unified platform serving two primary user groups:</p>
                 <ul>
                     <li><strong>Candidates:</strong> Access tools like the AI Resume Builder, ATS Optimizer, and Job Matcher to improve their hiring chances.</li>
-                    <li><strong>Recruiters:</strong> Utilize the AI Candidate Matcher to rank resumes and the Recruiter Analytics Dashboard to visualize candidate quality and role distributions.</li>
+                    <li><strong>Recruiters:</strong> Utilize the AI Candidate Matcher to rank resumes, manage a persistent shortlist of talent, and access a Recruitment Analytics Dashboard to visualize candidate quality.</li>
                 </ul>
-                <p>The system features a tiered subscription model (Free, Essentials, Pro, Recruiter) with automated plan activation via Razorpay webhooks.</p>
+                <p>The system features a tiered subscription model (Free, Essentials, Pro, Recruiter) with automated plan activation via Razorpay webhooks and a comprehensive admin panel for subscription oversight.</p>
             </div>
         </div>
 
@@ -326,14 +326,14 @@
                 </ul>
                 <h4>For Recruiters</h4>
                 <ul>
-                    <li>Rank multiple candidates against a job description instantly.</li>
-                    <li><strong>Persistent Shortlisting:</strong> Save top candidates to a private dashboard.</li>
-                    <li><strong>Recruitment Analytics:</strong> View visual charts of candidate match scores and role breakdowns.</li>
+                    <li>Rank multiple candidates against a job description instantly using AI.</li>
+                    <li><strong>Persistent Shortlisting:</strong> Save top candidates to a private recruiter dashboard.</li>
+                    <li><strong>Recruitment Analytics:</strong> View visual charts of match score distributions and role breakdowns using <code>recharts</code>.</li>
                 </ul>
                 <h4>For Administrators</h4>
                 <ul>
                     <li>Manage user plans and approve/reject subscription requests.</li>
-                    <li><strong>Subscription Management:</strong> Monitor billing cycles and track expiry dates.</li>
+                    <li><strong>Subscription Management:</strong> Monitor billing cycles, track expiry dates (30-day logic), and override user roles.</li>
                 </ul>
             </div>
         </div>
@@ -347,26 +347,26 @@
             <div class="section">
                 <h3>4.2 DFD (Data Flow Diagrams)</h3>
                 <h4>Recruiter Workflow (Level 2)</h4>
-                <p>This flow describes how a recruiter interacts with the matcher and analytics tools.</p>
+                <p>This flow describes how a recruiter interacts with the matching and analytics engine.</p>
                 <ul>
                     <li>1. Recruiter uploads multiple resumes and a JD.</li>
-                    <li>2. AI Flow ranks candidates and returns scores.</li>
-                    <li>3. Recruiter clicks "Shortlist" to save a candidate.</li>
-                    <li>4. System writes to <code>shortlistedCandidates</code> subcollection.</li>
-                    <li>5. Analytics Dashboard reads this subcollection to render charts.</li>
+                    <li>2. AI Flow ranks candidates and returns scores + justification.</li>
+                    <li>3. Recruiter clicks "Shortlist" to persist a candidate to Firestore.</li>
+                    <li>4. System writes to the <code>shortlistedCandidates</code> subcollection under the recruiter's user document.</li>
+                    <li>5. Analytics Dashboard performs real-time aggregation of this subcollection to render charts.</li>
                 </ul>
             </div>
             
             <div class="section">
                 <h3>4.4 Data Dictionary</h3>
                 <h4>1. users Collection</h4>
-                <p>The root user document, now including manual plan management fields.</p>
+                <p>The root user document, managing profile and subscription state.</p>
                 <table class="data-table">
                     <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td>plan</td><td>string</td><td>Current plan (free, pro, recruiter, pending)</td></tr>
-                        <tr><td>planUpdatedAt</td><td>timestamp</td><td>Date of last purchase (used for expiry)</td></tr>
-                        <tr><td>credits</td><td>number</td><td>Remaining AI credits</td></tr>
+                        <tr><td>plan</td><td>string</td><td>Current plan (free, essentials, pro, recruiter, pending)</td></tr>
+                        <tr><td>planUpdatedAt</td><td>timestamp</td><td>Date of last purchase (used for 30-day expiry)</td></tr>
+                        <tr><td>credits</td><td>number</td><td>Remaining AI credits for credit-based plans</td></tr>
                     </tbody>
                 </table>
 
@@ -375,11 +375,11 @@
                 <table class="data-table">
                     <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td>name</td><td>string</td><td>Candidate's filename or name</td></tr>
+                        <tr><td>name</td><td>string</td><td>Candidate's filename or identified name</td></tr>
                         <tr><td>matchScore</td><td>number</td><td>AI match percentage (0-100)</td></tr>
                         <tr><td>jobTitle</td><td>string</td><td>Role they were matched for</td></tr>
                         <tr><td>justification</td><td>string</td><td>AI summary of why they match</td></tr>
-                        <tr><td>shortlistedAt</td><td>timestamp</td><td>Date saved</td></tr>
+                        <tr><td>shortlistedAt</td><td>timestamp</td><td>Date/time candidate was saved</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -393,16 +393,16 @@
             </div>
             <div class="section">
                 <h3>5.1 Implementation Details</h3>
-                <h4>Recruiter Analytics Dashboard</h4>
+                <h4>Recruiter Analytics Engine</h4>
                 <p>Implemented using the <code>recharts</code> library. It performs real-time aggregation of the recruiter's shortlisted candidates to display:</p>
                 <ul>
-                    <li><strong>Average Match Score:</strong> Calculated via <code>useMemo</code> from the candidate list.</li>
-                    <li><strong>Score Distribution:</strong> A <code>BarChart</code> grouping candidates into High, Mid, and Low match categories.</li>
-                    <li><strong>Role Breakdown:</strong> A <code>PieChart</code> showing distribution of talent across different job titles.</li>
+                    <li><strong>Average Match Score:</strong> Calculated via <code>useMemo</code> from the active shortlist.</li>
+                    <li><strong>Score Distribution:</strong> A <code>BarChart</code> grouping candidates into High (76%+), Mid (51-75%), and Low (0-50%) match categories.</li>
+                    <li><strong>Role Analysis:</strong> A <code>PieChart</code> showing the distribution of talent across different job titles the recruiter has screened for.</li>
                 </ul>
 
                 <h4>Admin Subscription Management</h4>
-                <p>A new administrative module that calculates subscription expiry dates (30 days from <code>planUpdatedAt</code>) and provides a UI for manual plan overrides, ensuring seamless support for billing queries.</p>
+                <p>A new administrative module that calculates subscription expiry dates (30 days from <code>planUpdatedAt</code>) and provides a UI for manual plan overrides, ensuring seamless support for billing queries and manual activations.</p>
             </div>
         </div>
 
@@ -411,21 +411,21 @@
                 <h3>5.2 UI/UX Screenshots</h3>
                 
                 <h4>Recruiter Dashboard - Shortlist View</h4>
-                <p>Shows the persistent list of saved candidates with their AI scores and justification.</p>
+                <p>Displays the persistent list of candidates with AI justifications and scores.</p>
                 <div class="info-box">
-                    <p>[Screenshot Placeholder: Recruiter Dashboard Shortlist Table]</p>
+                    <p>[Screenshot Placeholder: Recruiter Shortlist Table with "Info" tooltips for AI justification]</p>
                 </div>
 
                 <h4>Recruiter Dashboard - Analytics Tab</h4>
-                <p>Visual representation of the recruitment pipeline using dynamic charts.</p>
+                <p>Visual representation of the candidate pool using dynamic charts.</p>
                 <div class="info-box">
-                    <p>[Screenshot Placeholder: Analytics Charts showing match distribution and roles]</p>
+                    <p>[Screenshot Placeholder: Bar chart for scores and Pie chart for role distribution]</p>
                 </div>
 
                 <h4>Admin - Subscription Management</h4>
-                <p>Table view for admins to monitor user plans and expiry dates.</p>
+                <p>Table view for admins to monitor user plans, track expiry dates, and manually update roles.</p>
                 <div class="info-box">
-                    <p>[Screenshot Placeholder: Admin Subscriptions Table]</p>
+                    <p>[Screenshot Placeholder: Admin Subscription table with "Expires Soon" and "Expired" badges]</p>
                 </div>
             </div>
         </div>
@@ -438,13 +438,13 @@
             </div>
             <div class="section">
                 <h3>6.1 Conclusion</h3>
-                <p>CareerCraft AI successfully demonstrates how Generative AI can be integrated into a full-stack SaaS application to automate complex career and recruitment workflows. By focusing on data-driven shortlisting and visual analytics, the platform provides recruiters with actionable insights that manual processes cannot match.</p>
+                <p>CareerCraft AI successfully demonstrates how Generative AI can be integrated into a full-stack SaaS application to automate complex career and recruitment workflows. By focusing on data-driven shortlisting and visual analytics, the platform provides recruiters with actionable insights that manual processes cannot match, while simplifying administration through a robust subscription management system.</p>
                 
                 <h3>6.2 Future Scope</h3>
                 <ul>
                     <li><strong>AI Mock Interviews:</strong> Interactive voice-based interview prep for candidates.</li>
-                    <li><strong>Bulk Outreach:</strong> Automated email sequences for shortlisted candidates.</li>
-                    <li><strong>External API Integrations:</strong> Pulling real job listings from LinkedIn or Indeed.</li>
+                    <li><strong>Bulk Outreach:</strong> Automated email sequences for shortlisted candidates directly from the dashboard.</li>
+                    <li><strong>Job Board API Integration:</strong> Connecting with platforms like LinkedIn to pull real job listings for the ATS Optimizer.</li>
                 </ul>
             </div>
         </div>
