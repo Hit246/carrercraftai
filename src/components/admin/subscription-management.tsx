@@ -230,7 +230,7 @@ export function SubscriptionManagement() {
                       </TableCell>
                       <TableCell className="text-right">
                         {!isUserAdmin && (
-                          <DropdownMenu>
+                          <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon">
                                 <MoreHorizontal className="h-4 w-4" />

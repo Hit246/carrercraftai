@@ -83,7 +83,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
             setPlan('recruiter');
             setCredits(Infinity);
-            setUserData((await getDoc(userRef)).data() as UserData);
+            const updatedSnap = await getDoc(userRef);
+            setUserData(updatedSnap.data() as UserData);
             setLoading(false);
         }
       } else {
@@ -112,7 +113,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         let currentData;
         if (!userDoc.exists()) {
              await setDoc(userRef, { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date(), hasCompletedOnboarding: false });
-             currentData = (await getDoc(userRef)).data() as UserData;
+             const freshSnap = await getDoc(userRef);
+             currentData = freshSnap.data() as UserData;
         } else {
             currentData = userDoc.data() as UserData;
         }
@@ -125,16 +127,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (!val) return null;
             if (val.seconds) return new Date(val.seconds * 1000);
             if (val instanceof Date) return val;
-            return new Date(val);
+            const parsed = new Date(val);
+            return isNaN(parsed.getTime()) ? null : parsed;
         };
 
         const planUpdatedAt = getPlanDate(planUpdatedAtRaw);
 
-        if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
+        // Expiration check logic: only for paid plans that are NOT currently pending an upgrade
+        if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan) && userPlan !== 'pending') {
             const expirationDate = addDays(planUpdatedAt, 30);
             const isExpired = differenceInDays(new Date(), expirationDate) >= 0;
 
-            if (isExpired) {
+            if (isExpired && planUpdatedAt.getTime() > 0) {
+                console.log(`Plan ${userPlan} expired. Reverting to free.`);
                 await updateDoc(userRef, {
                     plan: 'free',
                     credits: FREE_CREDITS,

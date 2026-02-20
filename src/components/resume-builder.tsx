@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { errorEmitter } from '@/lib/error-emitter';
+import { FirestorePermissionError } from '@/lib/errors';
 
 interface Experience {
     id: number;
@@ -120,7 +123,8 @@ export const ResumeBuilder = () => {
         if (authLoading || !user) return;
 
         setIsLoading(true);
-        const versionsQuery = query(collection(db, `users/${user.uid}/resumeVersions`), orderBy('updatedAt', 'desc'));
+        const resumeVersionsRef = collection(db, `users/${user.uid}/resumeVersions`);
+        const versionsQuery = query(resumeVersionsRef, orderBy('updatedAt', 'desc'));
 
         const unsubscribe = onSnapshot(versionsQuery, async (snapshot) => {
             if (snapshot.empty) {
@@ -131,7 +135,7 @@ export const ResumeBuilder = () => {
                     updatedAt: serverTimestamp(),
                     resumeData: { ...initialResumeData, email: user.email || '' }
                 };
-                const newVersionRef = await addDoc(collection(db, `users/${user.uid}/resumeVersions`), firstVersionData);
+                const newVersionRef = await addDoc(resumeVersionsRef, firstVersionData);
                 
                 const newVersion: ResumeVersion = { id: newVersionRef.id, ...firstVersionData };
                 setVersions([newVersion]);
@@ -148,8 +152,12 @@ export const ResumeBuilder = () => {
                 }
             }
             setIsLoading(false);
-        }, (error) => {
-            console.error("Error fetching resume versions: ", error);
+        }, async (error) => {
+            const permissionError = new FirestorePermissionError({
+                path: resumeVersionsRef.path,
+                operation: 'list',
+            }, error);
+            errorEmitter.emit('permission-error', permissionError);
             toast({ title: "Error", description: "Could not load resume versions.", variant: "destructive" });
             setIsLoading(false);
         });
@@ -690,7 +698,7 @@ export const ResumeBuilder = () => {
                                     </AlertDialogContent>
                                 }
                             </AlertDialog>
-                            <DropdownMenu>
+                            <DropdownMenu modal={false}>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon">
                                         <MoreVertical className="h-4 w-4" />

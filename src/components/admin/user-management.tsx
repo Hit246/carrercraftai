@@ -191,7 +191,7 @@ export function UserManagementPage() {
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {!isUserAdmin && (
-                                        <DropdownMenu>
+                                        <DropdownMenu modal={false}>
                                             <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
