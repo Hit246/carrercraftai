@@ -45,7 +45,7 @@ import { db } from '@/lib/firebase';
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logout, plan, isAdmin, userData } = useAuth();
+  const { user, loading, logout, plan, isAdmin, userData, credits } = useAuth();
   const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {

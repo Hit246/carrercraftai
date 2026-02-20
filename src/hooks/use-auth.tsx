@@ -100,9 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (!user || isAdmin) {
-        return;
-    }
+    if (!user || isAdmin) return;
 
     const userRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
@@ -116,7 +114,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         
         const userPlan = currentData.plan || 'free';
-        const planUpdatedAtRaw = currentData.planUpdatedAt;
+        const rawDate = currentData.planUpdatedAt;
 
         const getPlanDate = (val: any) => {
             if (!val) return null;
@@ -126,9 +124,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             return isNaN(parsed.getTime()) ? null : parsed;
         };
 
-        const planUpdatedAt = getPlanDate(planUpdatedAtRaw);
+        const planUpdatedAt = getPlanDate(rawDate);
 
-        // Expiry logic: Only for paid plans NOT in pending state
+        // Expiry logic: Only for confirmed paid plans
         if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
             const expirationDate = addDays(planUpdatedAt, 30);
             if (differenceInDays(new Date(), expirationDate) >= 0) {
@@ -136,7 +134,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     plan: 'free',
                     credits: FREE_CREDITS,
                     planUpdatedAt: null,
-                    previousPlan: null,
                     requestedPlan: null,
                 });
                 return;
@@ -146,9 +143,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUserData(currentData);
         setPlan(userPlan);
 
-        // DETERMINISTIC FEATURE ACCESS
-        // If plan is 'pending', you only get the 'previousPlan' benefits.
-        // You only get the new plan benefits once 'plan' is updated to the actual role string.
+        // DETERMINISTIC FEATURE ACCESS:
+        // Use 'previousPlan' benefits if current status is 'pending'
         const effectivePlan = userPlan === 'pending' ? (currentData.previousPlan || 'free') : userPlan;
 
         if (effectivePlan === 'pro' || effectivePlan === 'recruiter') {
@@ -210,7 +206,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const useCredit = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
-    // Use effective plan check
     const effectivePlan = plan === 'pending' ? (userData?.previousPlan || 'free') : plan;
     if ((effectivePlan === 'free' || effectivePlan === 'essentials') && credits > 0) {
         const newCredits = credits - 1;

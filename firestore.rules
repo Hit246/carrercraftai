@@ -26,13 +26,9 @@ service cloud.firestore {
     }
 
     // User documents and ALL subcollections (resumeVersions, shortlistedCandidates, etc.)
-    // Explicitly allow access to the user's own branch
-    match /users/{userId} {
+    // Scoped recursive wildcard is the most robust way to handle nested user data
+    match /users/{userId}/{allPaths=**} {
       allow read, write: if isSignedIn() && request.auth.uid == userId;
-      
-      match /{allSubcollections=**} {
-        allow read, write: if isSignedIn() && request.auth.uid == userId;
-      }
     }
 
     // Support Requests
