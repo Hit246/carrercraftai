@@ -4,8 +4,20 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { FirebaseErrorListener } from "@/components/FirebaseErrorListener";
+import { Inter, Space_Grotesk } from "next/font/google";
+import { cn } from "@/lib/utils";
 
 const siteUrl = "https://careercraftai.vercel.app";
+
+const fontBody = Inter({ 
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const fontHeadline = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -43,9 +55,9 @@ export const metadata: Metadata = {
     canonical: siteUrl,
   },
   icons: {
-    icon: "/logo.jpg",
-    shortcut: "/logo.jpg",
-    apple: "/logo.jpg",
+    icon: "/logo.jpg?v=1",
+    shortcut: "/logo.jpg?v=1",
+    apple: "/logo.jpg?v=1",
   },
 };
 
@@ -56,19 +68,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="font-body antialiased">
+      <head/>
+      <body className={cn(
+          "font-body antialiased",
+          fontBody.variable,
+          fontHeadline.variable
+      )}>
          <ThemeProvider
             attribute="class"
             defaultTheme="system"

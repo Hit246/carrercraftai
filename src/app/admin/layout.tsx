@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -16,7 +16,7 @@ import {
   CheckCircle,
   Settings,
   Bell,
-  CreditCard,
+  Wallet,
 } from 'lucide-react';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -35,11 +35,53 @@ import {
 } from '@/components/ui/sidebar';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import Image from 'next/image';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 
 function AdminLayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout, isAdmin } = useAuth();
+  const [pendingUpgradesCount, setPendingUpgradesCount] = useState(0);
+  const { toast } = useToast();
+  const isInitialLoad = useRef(true);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const q = query(collection(db, 'users'), where('plan', '==', 'pending'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setPendingUpgradesCount(snapshot.size);
+      
+      if (isInitialLoad.current) {
+        isInitialLoad.current = false;
+        return;
+      }
+
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const newUser = change.doc.data();
+          toast({
+            title: "New Upgrade Request",
+            description: `${newUser.email} has requested a plan upgrade.`,
+            action: (
+              <ToastAction altText="View" onClick={() => router.push('/admin/upgrades')}>
+                View
+              </ToastAction>
+            ),
+          });
+        }
+      });
+    });
+
+    return () => {
+      unsubscribe();
+      isInitialLoad.current = true;
+    };
+  }, [isAdmin, router, toast]);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -117,7 +159,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 isActive={isActive('/admin/subscriptions')}
               >
                 <Link href="/admin/subscriptions">
-                  <CreditCard />
+                  <Wallet />
                   <span>Subscriptions</span>
                 </Link>
               </SidebarMenuButton>
@@ -127,9 +169,14 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 asChild
                 isActive={isActive('/admin/upgrades')}
               >
-                <Link href="/admin/upgrades">
+                <Link href="/admin/upgrades" className="flex items-center gap-2">
                   <Bell />
                   <span>Upgrade Requests</span>
+                  {pendingUpgradesCount > 0 && (
+                    <Badge className="ml-auto h-5 w-5 justify-center p-0 animate-pulse">
+                      {pendingUpgradesCount}
+                    </Badge>
+                  )}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

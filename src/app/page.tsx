@@ -1,17 +1,20 @@
-'use client';
 
-import React from 'react';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key, MoveRight, Bot } from 'lucide-react';
+import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { HomeHeader } from '@/components/home-header';
+import React from 'react';
+
+'use client';
+
 
 function HomePageContent() {
-  const { user } = useAuth();
-  
+  const { user, loading } = useAuth();
+
   const getStartedLink = user ? '/dashboard' : '/signup';
   const pricingLink = user ? '/pricing' : '/signup';
 
@@ -19,11 +22,37 @@ function HomePageContent() {
     <div className="flex flex-col min-h-dvh bg-background">
       <HomeHeader />
       <main className="flex-1">
+        <script
+          type="application/ld+json"
+          // JSON-LD for better Google understanding of your brand & product
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              name: "CareerCraft AI",
+              url: "https://carrercraftai.vercel.app",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web",
+              description:
+                "AI-powered platform to build resumes, analyze ATS fit, generate cover letters, and match jobs.",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "INR",
+              },
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: "4.8",
+                reviewCount: "120",
+              },
+            }),
+          }}
+        />
         <section className="relative py-24 md:py-32 lg:py-40">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent -z-10"/>
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent -z-10" />
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-             <Badge variant="outline" className="mb-4 py-1 px-3 rounded-full text-primary border-primary/50">
-              <Sparkles className="w-4 h-4 mr-2 -ml-1"/>
+            <Badge variant="outline" className="mb-4 py-1 px-3 rounded-full text-primary border-primary/50">
+              <Sparkles className="w-4 h-4 mr-2 -ml-1" />
               Powered by Generative AI
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline sm:text-5xl md:text-6xl lg:text-7xl">
@@ -55,9 +84,9 @@ function HomePageContent() {
             <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader>
-                    <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <FileText className="w-6 h-6"/>
-                    </div>
+                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <FileText className="w-6 h-6" />
+                  </div>
                   <CardTitle>Intuitive Resume Builder</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -66,9 +95,9 @@ function HomePageContent() {
               </Card>
               <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader>
-                    <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <Sparkles className="w-6 h-6"/>
-                    </div>
+                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <Sparkles className="w-6 h-6" />
+                  </div>
                   <CardTitle>AI Resume Analyzer</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -77,9 +106,9 @@ function HomePageContent() {
               </Card>
               <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader>
-                    <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <Target className="w-6 h-6"/>
-                    </div>
+                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <Target className="w-6 h-6" />
+                  </div>
                   <CardTitle>ATS Optimizer</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -88,20 +117,20 @@ function HomePageContent() {
               </Card>
               <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader>
-                    <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <Briefcase className="w-6 h-6"/>
-                    </div>
+                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <Briefcase className="w-6 h-6" />
+                  </div>
                   <CardTitle>Smart Job Matching</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">Discover job opportunities that perfectly align with your unique skills, experience, and career aspirations.</p>
                 </CardContent>
               </Card>
-               <Card className="border-0 shadow-none bg-transparent">
+              <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader>
-                    <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <FileText className="w-6 h-6"/>
-                    </div>
+                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <FileText className="w-6 h-6" />
+                  </div>
                   <CardTitle>Cover Letter Generator</CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -110,13 +139,13 @@ function HomePageContent() {
               </Card>
               <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader>
-                     <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <Users className="w-6 h-6"/>
-                    </div>
-                  <CardTitle>Recruiter Workspace</CardTitle>
+                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <CardTitle>Candidate Matching</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Find the best candidates with AI ranking, manage persistent shortlists, and track hiring trends with advanced analytics.</p>
+                  <p className="text-muted-foreground">For recruiters: efficiently find the best candidates for your roles from a diverse pool of qualified resumes.</p>
                 </CardContent>
               </Card>
             </div>
@@ -126,116 +155,116 @@ function HomePageContent() {
         <section id="pricing" className="py-24 md:py-32">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-                <p className="font-semibold text-primary">Pricing</p>
-                <h2 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">The right plan for your needs</h2>
-                <p className="mt-4 text-muted-foreground text-lg">
-                    Choose the plan that’s right for you and take the next step in your career.
-                </p>
+              <p className="font-semibold text-primary">Pricing</p>
+              <h2 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">The right plan for your needs</h2>
+              <p className="mt-4 text-muted-foreground text-lg">
+                Choose the plan that’s right for you and take the next step in your career.
+              </p>
             </div>
 
             <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl w-full mx-auto">
-                <Card className="flex flex-col">
-                  <CardHeader>
-                      <CardTitle className="font-headline flex items-center gap-2"><Star className="text-yellow-500" /> Free</CardTitle>
-                      <CardDescription>For students & freshers exploring jobs.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4 flex-1">
-                      <p className="text-4xl font-bold font-headline">₹0<span className="text-lg font-normal text-muted-foreground">/month</span></p>
-                      <ul className="space-y-2 text-left text-sm">
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 5 AI credits per month</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Basic templates</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 2 resume drafts</li>
-                      </ul>
-                  </CardContent>
-                  <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Key className="w-4 h-4"/>
-                        <span>Good for beginners.</span>
-                      </div>
-                      <Button asChild variant="outline" className="w-full mt-2">
-                          <Link href={getStartedLink}>Get Started</Link>
-                      </Button>
-                  </CardFooter>
-                </Card>
+              <Card className="flex flex-col">
+                <CardHeader>
+                  <CardTitle className="font-headline flex items-center gap-2"><Star className="text-yellow-500" /> Free</CardTitle>
+                  <CardDescription>For students & freshers exploring jobs.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 flex-1">
+                  <p className="text-4xl font-bold font-headline">₹0<span className="text-lg font-normal text-muted-foreground">/month</span></p>
+                  <ul className="space-y-2 text-left text-sm">
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 5 AI credits per month</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Basic templates</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 2 resume drafts</li>
+                  </ul>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Key className="w-4 h-4" />
+                    <span>Good for beginners.</span>
+                  </div>
+                  <Button asChild variant="outline" className="w-full mt-2">
+                    <Link href={getStartedLink}>Get Started</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
 
-                <Card className="flex flex-col">
-                  <CardHeader>
-                      <CardTitle className="font-headline flex items-center gap-2"><Trophy className="text-gray-400" /> Essentials</CardTitle>
-                      <CardDescription>For active job seekers.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4 flex-1">
-                      <p className="text-4xl font-bold font-headline">₹199<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
-                      <ul className="space-y-2 text-left text-sm">
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 50 AI credits</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> ATS keyword suggestions</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Cover letter generator</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Portfolio showcase</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 10 resumes</li>
-                      </ul>
-                  </CardContent>
-                  <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Key className="w-4 h-4"/>
-                        <span>Great for people applying regularly.</span>
-                      </div>
-                      <Button asChild className="w-full mt-2">
-                         <Link href={pricingLink}>Choose Essentials</Link>
-                      </Button>
-                  </CardFooter>
-                </Card>
+              <Card className="flex flex-col">
+                <CardHeader>
+                  <CardTitle className="font-headline flex items-center gap-2"><Trophy className="text-gray-400" /> Essentials</CardTitle>
+                  <CardDescription>For active job seekers.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 flex-1">
+                  <p className="text-4xl font-bold font-headline">₹199<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                  <ul className="space-y-2 text-left text-sm">
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 50 AI credits</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> ATS keyword suggestions</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Cover letter generator</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Portfolio showcase</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 10 resumes</li>
+                  </ul>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Key className="w-4 h-4" />
+                    <span>Great for people applying regularly.</span>
+                  </div>
+                  <Button asChild className="w-full mt-2">
+                    <Link href={pricingLink}>Choose Essentials</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
 
-                <Card className="border-primary border-2 relative flex flex-col">
-                     <Badge className="absolute top-4 right-4" variant="secondary">Most Popular</Badge>
-                  <CardHeader>
-                      <CardTitle className="font-headline flex items-center gap-2"><Crown className="text-amber-500" /> Pro</CardTitle>
-                      <CardDescription>For professionals aiming for top jobs.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4 flex-1">
-                      <p className="text-4xl font-bold font-headline">₹399<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
-                      <ul className="space-y-2 text-left text-sm">
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited AI generation</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Advanced ATS optimization</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Skill gap analysis</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Resume performance analytics</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited resumes</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Priority support</li>
-                      </ul>
-                  </CardContent>
-                  <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Key className="w-4 h-4"/>
-                        <span>Perfect for experienced professionals.</span>
-                      </div>
-                      <Button asChild className="w-full mt-2">
-                         <Link href={pricingLink}>Choose Pro</Link>
-                      </Button>
-                  </CardFooter>
-                </Card>
+              <Card className="border-primary border-2 relative flex flex-col">
+                <Badge className="absolute top-4 right-4" variant="secondary">Most Popular</Badge>
+                <CardHeader>
+                  <CardTitle className="font-headline flex items-center gap-2"><Crown className="text-amber-500" /> Pro</CardTitle>
+                  <CardDescription>For professionals aiming for top jobs.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 flex-1">
+                  <p className="text-4xl font-bold font-headline">₹399<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                  <ul className="space-y-2 text-left text-sm">
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited AI generation</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Advanced ATS optimization</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Skill gap analysis</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Resume performance analytics</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited resumes</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Priority support</li>
+                  </ul>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Key className="w-4 h-4" />
+                    <span>Perfect for experienced professionals.</span>
+                  </div>
+                  <Button asChild className="w-full mt-2">
+                    <Link href={pricingLink}>Choose Pro</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
 
-                <Card className="flex flex-col">
-                  <CardHeader>
-                      <CardTitle className="font-headline flex items-center gap-2"><Diamond className="text-blue-500" /> Recruiter</CardTitle>
-                      <CardDescription>For recruiters & HR professionals.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4 flex-1">
-                      <p className="text-4xl font-bold font-headline">₹999<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
-                      <ul className="space-y-2 text-left text-sm">
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking & Summaries</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Shortlist Management Dashboard</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Hiring Analytics Dashboard</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Bulk Resume Processing</li>
-                      </ul>
-                  </CardContent>
-                  <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Key className="w-4 h-4"/>
-                        <span>Best for freelance recruiters.</span>
-                      </div>
-                      <Button asChild variant="secondary" className="w-full mt-2">
-                         <Link href={pricingLink}>Contact Sales</Link>
-                      </Button>
-                  </CardFooter>
-                </Card>
+              <Card className="flex flex-col">
+                <CardHeader>
+                  <CardTitle className="font-headline flex items-center gap-2"><Diamond className="text-blue-500" /> Recruiter</CardTitle>
+                  <CardDescription>For recruiters & HR teams.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 flex-1">
+                  <p className="text-4xl font-bold font-headline">₹999<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                  <ul className="space-y-2 text-left text-sm">
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking & Summaries</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Candidate Management Dashboard</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Team Management</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter analytics dashboard</li>
+                  </ul>
+                </CardContent>
+                <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Key className="w-4 h-4" />
+                    <span>Best for freelance recruiters.</span>
+                  </div>
+                  <Button asChild variant="secondary" className="w-full mt-2">
+                    <Link href={pricingLink}>Contact Sales</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
             </div>
           </div>
         </section>
@@ -256,9 +285,9 @@ function HomePageContent() {
 }
 
 export default function Home() {
-    return (
-        <AuthProvider>
-            <HomePageContent />
-        </AuthProvider>
-    )
+  return (
+    <AuthProvider>
+      <HomePageContent />
+    </AuthProvider>
+  )
 }

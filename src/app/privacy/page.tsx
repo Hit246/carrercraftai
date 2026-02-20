@@ -1,23 +1,33 @@
 
+import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+export const metadata: Metadata = {
+  title: "Privacy Policy | CareerCraft AI",
+  description:
+    "Learn how CareerCraft AI collects, uses, and protects your personal and resume data when you use our AI-powered career tools.",
+  alternates: {
+    canonical: "https://carrercraftai.vercel.app/privacy",
+  },
+};
+
 export default function PrivacyPolicyPage() {
   return (
     <div className="bg-background min-h-screen">
-       <header className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex h-20 items-center justify-between">
-                <Link href="/" className="flex items-center gap-2">
-                    <h1 className="text-2xl font-bold font-headline text-foreground">
-                    CareerCraft AI
-                    </h1>
-                </Link>
-                <Button asChild>
-                    <Link href="/dashboard">Back to App</Link>
-                </Button>
-            </div>
-        </header>
+      <header className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-20 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold font-headline text-foreground">
+              CareerCraft AI
+            </h1>
+          </Link>
+          <Button asChild>
+            <Link href="/dashboard">Back to App</Link>
+          </Button>
+        </div>
+      </header>
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Card className="max-w-4xl mx-auto">
           <CardHeader>
@@ -41,11 +51,11 @@ export default function PrivacyPolicyPage() {
                 <li><strong>Resume Data:</strong> Any resume files or data you provide for analysis or building are processed by our AI models to provide you with the service. We do not store this data long-term for any purpose other than providing the immediate service requested.</li>
               </ul>
             </section>
-            
+
             <section>
               <h2 className="text-xl font-semibold font-headline">2. Use of Data</h2>
               <p>CareerCraft AI uses the collected data for various purposes:</p>
-               <ul className="list-disc pl-5 space-y-2">
+              <ul className="list-disc pl-5 space-y-2">
                 <li>To provide and maintain the Service</li>
                 <li>To notify you about changes to our Service</li>
                 <li>To allow you to participate in interactive features of our Service when you choose to do so</li>
@@ -63,16 +73,16 @@ export default function PrivacyPolicyPage() {
               </p>
             </section>
 
-             <section>
+            <section>
               <h2 className="text-xl font-semibold font-headline">4. Service Providers</h2>
               <p>
                 We may employ third party companies and individuals to facilitate our Service ("Service Providers"), to provide the Service on our behalf, to perform Service-related services or to assist us in analyzing how our Service is used. These third parties have access to your Personal Data only to perform these tasks on our behalf and are obligated not to disclose or use it for any other purpose. This includes Google AI for our AI features and Razorpay for payment processing.
               </p>
             </section>
-            
+
             <section>
-                <h2 className="text-xl font-semibold font-headline">5. Changes to This Privacy Policy</h2>
-                <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.</p>
+              <h2 className="text-xl font-semibold font-headline">5. Changes to This Privacy Policy</h2>
+              <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes.</p>
             </section>
           </CardContent>
         </Card>

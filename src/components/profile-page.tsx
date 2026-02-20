@@ -257,7 +257,7 @@ export function ProfilePage() {
                             <Label>AI Credits</Label>
                             <Badge variant="outline">
                                 <BotIcon className="mr-2 h-4 w-4"/>
-                                {plan === 'free' || plan === 'essentials' ? `${credits} remaining` : 'Unlimited'}
+                                {plan === 'pro' || plan === 'recruiter' ? 'Unlimited' : `${credits} remaining`}
                             </Badge>
                          </div>
                     </div>

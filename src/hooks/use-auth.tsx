@@ -1,10 +1,12 @@
+
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, onSnapshot, collectionGroup } from 'firebase/firestore';
 import { differenceInDays, addDays } from 'date-fns';
+
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
@@ -21,7 +23,7 @@ interface UserData {
     paymentProofURL?: string | null;
     paymentId?: string | null;
     requestedPlan?: 'essentials' | 'pro' | 'recruiter';
-    previousPlan?: Plan;
+    teamId?: string;
     hasCompletedOnboarding?: boolean;
     displayName?: string | null;
     photoURL?: string | null;
@@ -51,6 +53,7 @@ const FREE_CREDITS = 5;
 const ESSENTIALS_CREDITS = 50;
 const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
 
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,8 +62,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userData, setUserData] = useState<UserData| null>(null);
 
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setLoading(true);
       if (currentUser) {
         setUser(currentUser);
         const userIsAdmin = currentUser.email && ADMIN_EMAILS.includes(currentUser.email);
@@ -81,10 +86,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
             setPlan('recruiter');
             setCredits(Infinity);
-            const updatedSnap = await getDoc(userRef);
-            setUserData(updatedSnap.data() as UserData);
+            setUserData((await getDoc(userRef)).data() as UserData);
             setLoading(false);
         }
+
       } else {
         setUser(null);
         setIsAdmin(false);
@@ -99,42 +104,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    if (!user || isAdmin) return;
+    if (!user || isAdmin) {
+        if (!loading) {
+            setLoading(false);
+        }
+        return;
+    }
 
     const userRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
         let currentData;
         if (!userDoc.exists()) {
-             const initData = { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date(), hasCompletedOnboarding: false };
-             await setDoc(userRef, initData);
-             currentData = initData as UserData;
+             // This case is primarily handled by the signup function now
+             // but as a fallback, we create a free user record.
+             await setDoc(userRef, { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date(), hasCompletedOnboarding: false });
+             currentData = (await getDoc(userRef)).data() as UserData;
         } else {
             currentData = userDoc.data() as UserData;
         }
         
         const userPlan = currentData.plan || 'free';
-        const rawDate = currentData.planUpdatedAt;
+        const planUpdatedAt = currentData.planUpdatedAt;
 
-        const getPlanDate = (val: any) => {
-            if (!val) return null;
-            if (val.seconds) return new Date(val.seconds * 1000);
-            if (val instanceof Date) return val;
-            const parsed = new Date(val);
-            return isNaN(parsed.getTime()) ? null : parsed;
-        };
-
-        const planUpdatedAt = getPlanDate(rawDate);
-
-        // Expiry logic: Only for confirmed paid plans
         if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
-            const expirationDate = addDays(planUpdatedAt, 30);
-            if (differenceInDays(new Date(), expirationDate) >= 0) {
+            const upgradeDate = new Date(planUpdatedAt.seconds * 1000);
+            const expirationDate = addDays(upgradeDate, 30);
+            const isExpired = differenceInDays(new Date(), expirationDate) >= 0;
+
+            if (isExpired) {
                 await updateDoc(userRef, {
                     plan: 'free',
                     credits: FREE_CREDITS,
-                    planUpdatedAt: null,
+                    previousPlan: userPlan, // Keep a record of what the plan was
                     requestedPlan: null,
                 });
+                // The snapshot will refire with the new data, so we can exit here
+                // to avoid setting state with the old, expired plan data.
                 return;
             }
         }
@@ -142,14 +147,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUserData(currentData);
         setPlan(userPlan);
 
-        // DETERMINISTIC FEATURE ACCESS:
-        // Use 'previousPlan' benefits if current status is 'pending'
-        // This prevents "Essentials" from unlocking "Pro" features while payment is pending.
-        const effectivePlan = userPlan === 'pending' ? (currentData.previousPlan || 'free') : userPlan;
-
-        if (effectivePlan === 'pro' || effectivePlan === 'recruiter') {
+        if (userPlan === 'pro' || userPlan === 'recruiter') {
             setCredits(Infinity);
-        } else if (effectivePlan === 'essentials') {
+        } else if (userPlan === 'essentials') {
             setCredits(currentData.credits ?? ESSENTIALS_CREDITS);
         } else {
             setCredits(currentData.credits ?? FREE_CREDITS);
@@ -158,7 +158,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-}, [user, isAdmin]);
+}, [user, loading, isAdmin]);
+
 
   const login = (email:string, password:string) => {
     return signInWithEmailAndPassword(auth, email, password);
@@ -169,6 +170,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
       console.error('Error sending password reset email: ', error);
+      // Re-throw the error so the UI can catch it and display a message
       throw error;
     }
   };
@@ -183,13 +185,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         planUpdatedAt: null,
         paymentProofURL: null,
         hasCompletedOnboarding: false,
-        plan: 'free',
-        credits: FREE_CREDITS,
     };
     
-    await setDoc(doc(db, "users", newUser.uid), initialUserData);
+    // Check if there is an invitation for this email
+    const membersQuery = query(collectionGroup(db, 'members'), where('email', '==', email));
+    const membersSnapshot = await getDocs(membersQuery);
+
+    if (!membersSnapshot.empty) {
+        const invitationDoc = membersSnapshot.docs[0];
+        const teamId = invitationDoc.ref.parent.parent?.id;
+
+        if (teamId) {
+            // A user invited to a team should always get the 'recruiter' plan benefits.
+            initialUserData.plan = 'recruiter' as Plan;
+            initialUserData.credits = Infinity;
+            initialUserData.teamId = teamId;
+
+            const batch = writeBatch(db);
+            const userRef = doc(db, 'users', newUser.uid);
+            batch.set(userRef, initialUserData);
+            
+            // Update the member doc with the new user's UID
+            batch.update(invitationDoc.ref, { 
+                uid: newUser.uid,
+                name: newUser.displayName || newUser.email
+            });
+
+            await batch.commit();
+        }
+    } else {
+        // Standard signup for a user not invited to a team
+        initialUserData.plan = 'free' as Plan;
+        initialUserData.credits = FREE_CREDITS;
+        initialUserData.teamId = null;
+        await setDoc(doc(db, "users", newUser.uid), initialUserData);
+    }
+    
     return userCredential;
 }
+
 
   const logout = () => {
     setPlan('free');
@@ -201,13 +235,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const requestCancellation = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
-    await updateDoc(userRef, { plan: 'cancellation_requested', planUpdatedAt: new Date() });
+    const newPlanData = { plan: 'cancellation_requested' as Plan, planUpdatedAt: new Date() };
+    await updateDoc(userRef, newPlanData);
   }
 
   const useCredit = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
-    const effectivePlan = plan === 'pending' ? (userData?.previousPlan || 'free') : plan;
-    if ((effectivePlan === 'free' || effectivePlan === 'essentials') && credits > 0) {
+    if ((plan === 'free' || plan === 'essentials') && credits > 0) {
         const newCredits = credits - 1;
         const userRef = doc(db, 'users', user.uid);
         await updateDoc(userRef, { credits: newCredits });
@@ -218,12 +252,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error("Not authenticated");
   
+    // Prepare the data for Firebase Auth and Firestore, ensuring no undefined values
     const authProfile: { displayName?: string, photoURL?: string } = {};
-    if (profile.displayName !== undefined) authProfile.displayName = profile.displayName!;
-    if (profile.photoURL !== undefined) authProfile.photoURL = profile.photoURL!;
+    if (profile.displayName !== undefined) authProfile.displayName = profile.displayName;
+    if (profile.photoURL !== undefined) authProfile.photoURL = profile.photoURL;
   
     await updateProfile(currentUser, authProfile);
   
+    // Also update the user's document in Firestore
     const userRef = doc(db, 'users', currentUser.uid);
     const firestoreData: { [key: string]: any } = {};
     if (profile.displayName !== undefined) firestoreData.displayName = profile.displayName ?? null;
@@ -233,7 +269,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (Object.keys(firestoreData).length > 0) {
         await updateDoc(userRef, firestoreData);
     }
+  
+    // The onSnapshot listener will automatically update the `user` and `userData` state.
+    // To give immediate feedback, we can manually update the local `user` state if needed,
+    // but it's often better to rely on the real-time listener for consistency.
   };
+  
 
   const updatePaymentProof = async (url: string) => {
     if (!user) throw new Error("Not authenticated");

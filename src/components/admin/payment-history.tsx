@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -15,10 +15,8 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ExternalLink, Shield, History, IndianRupee } from 'lucide-react';
+import { Shield, History } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
-import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
@@ -33,16 +31,9 @@ interface UserData {
   webhookVerified?: boolean;
 }
 
-const planPrices: Record<Exclude<Plan, 'free' | 'pending' | 'cancellation_requested'>, number> = {
-    essentials: 199,
-    pro: 399,
-    recruiter: 999,
-};
-
 export function PaymentHistory() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [totalRevenue, setTotalRevenue] = useState(0);
   const { toast } = useToast();
 
   const fetchUsers = async () => {
@@ -51,21 +42,13 @@ export function PaymentHistory() {
         const usersCollectionRef = collection(db, 'users');
         const q = query(
             usersCollectionRef, 
-            where('plan', 'in', ['essentials', 'pro', 'recruiter']),
+            where('planUpdatedAt', '!=', null),
             orderBy('planUpdatedAt', 'desc')
         );
         const usersSnapshot = await getDocs(q);
         const usersList = usersSnapshot.docs
           .map((doc) => ({ id: doc.id, ...doc.data() } as UserData));
         setUsers(usersList);
-
-        const revenue = usersList.reduce((acc, user) => {
-            if (user.plan !== 'free' && user.plan !== 'pending' && user.plan !== 'cancellation_requested') {
-                return acc + (planPrices[user.plan] || 0);
-            }
-            return acc;
-        }, 0);
-        setTotalRevenue(revenue);
 
     } catch(e) {
         console.error(e);
@@ -91,6 +74,8 @@ export function PaymentHistory() {
         return 'secondary';
       case 'recruiter':
         return 'default';
+      case 'free':
+          return 'outline';
       default:
         return 'outline';
     }
@@ -98,33 +83,19 @@ export function PaymentHistory() {
 
   return (
     <div className="space-y-6">
-        <Card className="max-w-sm">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                <IndianRupee className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                {isLoading ? (
-                    <Skeleton className="h-8 w-1/2" />
-                ) : (
-                    <div className="text-2xl font-bold">₹{totalRevenue.toLocaleString('en-IN')}</div>
-                )}
-                <p className="text-xs text-muted-foreground">From all successful plan upgrades.</p>
-            </CardContent>
-        </Card>
         <Card>
         <CardHeader>
             <CardTitle className="flex items-center gap-2"><History /> Payment History</CardTitle>
-            <CardDescription>Review historical payment and subscription data.</CardDescription>
+            <CardDescription>Review all historical subscription payments. This includes active and expired plans.</CardDescription>
         </CardHeader>
         <CardContent>
             <Table>
             <TableHeader>
                 <TableRow>
                 <TableHead>User</TableHead>
-                <TableHead>Subscription Plan</TableHead>
+                <TableHead>Current Plan</TableHead>
                 <TableHead>Verification</TableHead>
-                <TableHead>Upgrade Date</TableHead>
+                <TableHead>Last Upgrade Date</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>

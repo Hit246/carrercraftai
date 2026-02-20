@@ -1,23 +1,33 @@
 
+import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+
+export const metadata: Metadata = {
+  title: "Terms of Service | CareerCraft AI",
+  description:
+    "Read the Terms of Service for using CareerCraft AI, including account usage, subscriptions, and governing law.",
+  alternates: {
+    canonical: "https://carrercraftai.vercel.app/terms",
+  },
+};
 
 export default function TermsOfServicePage() {
   return (
     <div className="bg-background min-h-screen">
       <header className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex h-20 items-center justify-between">
-                <Link href="/" className="flex items-center gap-2">
-                    <h1 className="text-2xl font-bold font-headline text-foreground">
-                    CareerCraft AI
-                    </h1>
-                </Link>
-                <Button asChild>
-                    <Link href="/dashboard">Back to App</Link>
-                </Button>
-            </div>
-        </header>
+        <div className="flex h-20 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold font-headline text-foreground">
+              CareerCraft AI
+            </h1>
+          </Link>
+          <Button asChild>
+            <Link href="/dashboard">Back to App</Link>
+          </Button>
+        </div>
+      </header>
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Card className="max-w-4xl mx-auto">
           <CardHeader>
@@ -46,7 +56,7 @@ export default function TermsOfServicePage() {
                 <li>Redistribute content from CareerCraft AI</li>
               </ul>
             </section>
-            
+
             <section>
               <h2 className="text-xl font-semibold font-headline">2. User Accounts</h2>
               <p>
@@ -56,7 +66,7 @@ export default function TermsOfServicePage() {
                 You are responsible for safeguarding the password that you use to access the Service and for any activities or actions under your password, whether your password is with our Service or a third-party service.
               </p>
             </section>
-            
+
             <section>
               <h2 className="text-xl font-semibold font-headline">3. Subscription and AI Credits</h2>
               <p>
@@ -70,10 +80,10 @@ export default function TermsOfServicePage() {
                 In no event shall CareerCraft AI, nor any of its officers, directors and employees, be held liable for anything arising out of or in any way connected with your use of this Website whether such liability is under contract. CareerCraft AI, including its officers, directors and employees shall not be held liable for any indirect, consequential or special liability arising out of or in any way related to your use of this Website.
               </p>
             </section>
-            
+
             <section>
-                <h2 className="text-xl font-semibold font-headline">5. Governing Law</h2>
-                <p>These Terms will be governed by and interpreted in accordance with the laws of the State of Gujarat, India, and you submit to the non-exclusive jurisdiction of the state and federal courts located in Gujarat for the resolution of any disputes.</p>
+              <h2 className="text-xl font-semibold font-headline">5. Governing Law</h2>
+              <p>These Terms will be governed by and interpreted in accordance with the laws of the State of Gujarat, India, and you submit to the non-exclusive jurisdiction of the state and federal courts located in Gujarat for the resolution of any disputes.</p>
             </section>
           </CardContent>
         </Card>

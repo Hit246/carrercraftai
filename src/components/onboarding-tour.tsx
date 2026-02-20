@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -24,25 +25,25 @@ const tourSteps = [
     title: 'Welcome to CareerCraft AI!',
     description: "Let's take a quick tour to see how you can build a stand-out resume.",
     icon: Rocket,
-    image: '/tour/step1.png',
+    image: 'https://placehold.co/1200x700/6d28d9/ffffff?text=Welcome!',
   },
   {
     title: 'Step 1: Edit Your Resume',
     description: 'This is the resume builder. You can edit all the fields on the left, and the live preview on the right will update instantly. Start by filling in your information.',
     icon: Edit,
-    image: '/tour/step2.png',
+    image: 'https://placehold.co/1200x700/6d28d9/ffffff?text=1.+Edit+Your+Resume',
   },
   {
     title: 'Step 2: Get AI Feedback',
     description: 'Once you are happy with your resume, click the "AI Analyze" button. Our AI will provide detailed feedback on strengths, weaknesses, and suggestions for improvement.',
     icon: Bot,
-    image: '/tour/step3.png',
+    image: 'https://placehold.co/1200x700/6d28d9/ffffff?text=2.+Get+AI+Feedback',
   },
   {
     title: 'Step 3: Download & Apply',
     description: 'After making improvements based on the AI feedback, click the "Export" button to download your professional resume as a PDF. You are now ready to apply for jobs!',
     icon: Download,
-    image: '/tour/step4.png',
+    image: 'https://placehold.co/1200x700/6d28d9/ffffff?text=3.+Download+%26+Apply',
   },
 ];
 
@@ -102,5 +103,4 @@ export function OnboardingTour({ isOpen, onClose }: OnboardingTourProps) {
     </Dialog>
   );
 }
-
     

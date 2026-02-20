@@ -1,5 +1,5 @@
-import { SubscriptionManagement } from "@/components/admin/subscription-management";
+import { SubscriptionsManagementPage } from "@/components/admin/subscriptions-management";
 
 export default function AdminSubscriptionsPage() {
-    return <SubscriptionManagement />;
+    return <SubscriptionsManagementPage />;
 }
