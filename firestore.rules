@@ -1,3 +1,4 @@
+
 rules_version = '2';
 
 service cloud.firestore {
@@ -19,7 +20,7 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
-    // Public settings (Pricing, etc.)
+    // Public settings
     match /settings/{settingId} {
       allow read: if true;
     }
