@@ -133,7 +133,6 @@ export const ResumeBuilder = () => {
         const unsubscribe = onSnapshot(versionsQuery, (snapshot) => {
             if (snapshot.empty) {
                 setVersions([]);
-                // User's request: Start with an empty builder
                 if (!currentVersion) {
                     setResumeData({ ...emptyResumeData, email: user.email || '' });
                 }
@@ -141,7 +140,6 @@ export const ResumeBuilder = () => {
                 const fetchedVersions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ResumeVersion));
                 setVersions(fetchedVersions);
 
-                // If we haven't selected a version yet, load the most recent one
                 if (!currentVersion) {
                     const latest = fetchedVersions[0];
                     setCurrentVersion(latest);
@@ -151,8 +149,6 @@ export const ResumeBuilder = () => {
             setIsLoading(false);
         }, (error) => {
             console.error("Error fetching resume versions: ", error);
-            // Don't show a destructive toast if it's just a "starting out" scenario
-            // But we keep it informative.
             setIsLoading(false);
         });
 
@@ -170,6 +166,20 @@ export const ResumeBuilder = () => {
         setResumeData(prev => ({
             ...prev,
             experience: prev.experience.filter(exp => exp.id !== id)
+        }));
+    };
+
+    const handleAddEducation = () => {
+        setResumeData(prev => ({
+            ...prev,
+            education: [...prev.education, { id: Date.now(), school: '', degree: '', dates: '', cgpa: '' }]
+        }));
+    };
+
+    const handleRemoveEducation = (id: number) => {
+        setResumeData(prev => ({
+            ...prev,
+            education: prev.education.filter(edu => edu.id !== id)
         }));
     };
 
@@ -383,12 +393,10 @@ export const ResumeBuilder = () => {
         setIsSaving(true);
         try {
             if (currentVersion) {
-                // Update existing
                 const versionRef = doc(db, `users/${user.uid}/resumeVersions`, currentVersion.id);
                 await setDoc(versionRef, { resumeData, updatedAt: serverTimestamp() }, { merge: true });
                 toast({ title: "Resume Saved!" });
             } else {
-                // Create first version
                 const { versionName } = await suggestResumeVersionNameAction({ resumeData });
                 const name = versionName || "My First Resume";
                 const newRef = await addDoc(collection(db, `users/${user.uid}/resumeVersions`), {
@@ -535,10 +543,14 @@ export const ResumeBuilder = () => {
                 </Card>
 
                  <Card>
-                    <CardHeader><CardTitle>Education</CardTitle></CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                        <CardTitle>Education</CardTitle>
+                        <Button variant="ghost" size="sm" onClick={handleAddEducation}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
+                    </CardHeader>
                     <CardContent className="space-y-4">
                          {resumeData.education.map((edu) => (
                             <div key={edu.id} className="p-4 border rounded-lg relative space-y-2">
+                                <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveEducation(edu.id)}><Trash2 className="h-4 w-4" /></Button>
                                 <Input name="school" placeholder="School" value={edu.school} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
                                 <Input name="degree" placeholder="Degree" value={edu.degree} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
                                 <div className="grid grid-cols-2 gap-4">
@@ -650,6 +662,36 @@ export const ResumeBuilder = () => {
                                         <ul className="mt-2 list-disc list-inside text-xs sm:text-sm">
                                             {exp.description.split('\n').filter(Boolean).map((line, i) => <li key={i}>{line.replace(/^-/, '').trim()}</li>)}
                                         </ul>
+                                    </div>
+                                ))}
+                            </div>
+                            )}
+                            {resumeData.projects?.length > 0 && (
+                            <div className="mb-6">
+                                <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Projects</h3>
+                                {resumeData.projects.map(proj => (proj.name) && (
+                                    <div key={proj.id} className="mb-4">
+                                        <div className="flex justify-between">
+                                            <h4 className="font-semibold text-gray-800">{proj.name}</h4>
+                                            <p className="text-xs text-gray-600">{proj.url}</p>
+                                        </div>
+                                        <ul className="mt-2 list-disc list-inside text-xs sm:text-sm">
+                                            {proj.description.split('\n').filter(Boolean).map((line, i) => <li key={i}>{line.replace(/^-/, '').trim()}</li>)}
+                                        </ul>
+                                    </div>
+                                ))}
+                            </div>
+                            )}
+                            {resumeData.education?.length > 0 && (
+                            <div className="mb-6">
+                                <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Education</h3>
+                                {resumeData.education.map(edu => (edu.school) && (
+                                    <div key={edu.id} className="mb-4">
+                                        <div className="flex justify-between">
+                                            <h4 className="font-semibold text-gray-800">{edu.school}</h4>
+                                            <p className="text-xs text-gray-600">{edu.dates}</p>
+                                        </div>
+                                        <p className="text-sm font-medium text-gray-700">{edu.degree} {edu.cgpa ? `(CGPA: ${edu.cgpa})` : ''}</p>
                                     </div>
                                 ))}
                             </div>
