@@ -101,7 +101,9 @@ const sampleResumeData: ResumeData = {
     ],
     education: [{ id: 1, school: 'University of Tech', degree: 'B.S. CS', dates: '2014 - 2018', cgpa: '3.8/4.0' }],
     skills: 'React, Node.js, TypeScript',
-    projects: []
+    projects: [
+        { id: 1, name: 'Portfolio Site', description: 'Personal portfolio built with Next.js and Tailwind.', url: 'github.com/johndoe/portfolio', technologies: 'Next.js, Tailwind' }
+    ]
 };
 
 export const ResumeBuilder = () => {
@@ -315,6 +317,10 @@ export const ResumeBuilder = () => {
                 if (!proj.name) return;
                 doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
                 doc.text(proj.name, margin, y);
+                if (proj.url) {
+                    doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(primaryColor);
+                    doc.text(proj.url, pageW - margin, y, { align: 'right' });
+                }
                 y += 14 * lineSpacing;
                 const bulletPoints = proj.description.split('\n').filter(Boolean);
                 bulletPoints.forEach(point => {
@@ -536,6 +542,7 @@ export const ResumeBuilder = () => {
                             <div key={proj.id} className="p-4 border rounded-lg relative space-y-2">
                                 <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveProject(proj.id)}><Trash2 className="h-4 w-4" /></Button>
                                 <Input name="name" placeholder="Project Name" value={proj.name} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
+                                <Input name="url" placeholder="Project URL (e.g. github.com/user/repo)" value={proj.url} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
                                 <Textarea name="description" placeholder="Project description..." value={proj.description} onChange={(e) => handleNestedChange('projects', proj.id, e)} rows={3} />
                             </div>
                         ))}
@@ -671,9 +678,9 @@ export const ResumeBuilder = () => {
                                 <h3 className="text-sm font-bold font-headline uppercase tracking-wider text-primary border-b-2 border-gray-200 pb-1 mb-3">Projects</h3>
                                 {resumeData.projects.map(proj => (proj.name) && (
                                     <div key={proj.id} className="mb-4">
-                                        <div className="flex justify-between">
+                                        <div className="flex justify-between items-start">
                                             <h4 className="font-semibold text-gray-800">{proj.name}</h4>
-                                            <p className="text-xs text-gray-600">{proj.url}</p>
+                                            {proj.url && <p className="text-xs text-primary font-medium">{proj.url}</p>}
                                         </div>
                                         <ul className="mt-2 list-disc list-inside text-xs sm:text-sm">
                                             {proj.description.split('\n').filter(Boolean).map((line, i) => <li key={i}>{line.replace(/^-/, '').trim()}</li>)}
