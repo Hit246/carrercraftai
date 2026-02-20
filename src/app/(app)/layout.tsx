@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -45,7 +44,7 @@ import { db } from '@/lib/firebase';
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logout, plan, isAdmin, userData, credits } = useAuth();
+  const { user, loading, logout, plan, isAdmin, userData } = useAuth();
   const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
@@ -68,6 +67,9 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path);
 
+  // Effective plan logic for the UI badges
+  const effectivePlan = plan === 'pending' ? (userData?.previousPlan || 'free') : plan;
+
   const getPlanBadge = () => {
     if (plan === 'recruiter') return <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500">Recruiter</Badge>
     if (plan === 'pro') return <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500">Pro</Badge>
@@ -89,17 +91,17 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         <SidebarContent>
           <SidebarMenu>
              <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/dashboard')}><Link href="/dashboard"><Home /><span>Home</span></Link></SidebarMenuButton></SidebarMenuItem>
-             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/resume-analyzer')}><Link href="/resume-analyzer"><Sparkles /><span>Resume Analyzer</span>{plan === 'free' && <Badge variant="secondary" className="ml-auto">Pro</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
-             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/ats-optimizer')}><Link href="/ats-optimizer"><Target /><span>ATS Optimizer</span>{plan === 'free' && <Badge variant="secondary" className="ml-auto">Pro</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
-             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/job-matcher')}><Link href="/job-matcher"><Briefcase /><span>Job Matcher</span>{plan === 'free' && <Badge variant="secondary" className="ml-auto">Pro</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
-             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/cover-letter-generator')}><Link href="/cover-letter-generator"><FileText /><span>Cover Letter</span>{plan === 'free' && <Badge variant="secondary" className="ml-auto">Essentials</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
+             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/resume-analyzer')}><Link href="/resume-analyzer"><Sparkles /><span>Resume Analyzer</span>{effectivePlan === 'free' && <Badge variant="secondary" className="ml-auto">Pro</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
+             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/ats-optimizer')}><Link href="/ats-optimizer"><Target /><span>ATS Optimizer</span>{effectivePlan === 'free' && <Badge variant="secondary" className="ml-auto">Pro</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
+             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/job-matcher')}><Link href="/job-matcher"><Briefcase /><span>Job Matcher</span>{effectivePlan === 'free' && <Badge variant="secondary" className="ml-auto">Pro</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
+             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/cover-letter-generator')}><Link href="/cover-letter-generator"><FileText /><span>Cover Letter</span>{effectivePlan === 'free' && <Badge variant="secondary" className="ml-auto">Essentials</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
              
-             {plan === 'recruiter' && (
+             {effectivePlan === 'recruiter' && (
                <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/recruiter-dashboard')}><Link href="/recruiter-dashboard"><LayoutDashboard /><span>Recruiter Panel</span></Link></SidebarMenuButton></SidebarMenuItem>
              )}
 
-             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/candidate-matcher')}><Link href="/candidate-matcher"><Users /><span>Candidate Matcher</span>{plan !== 'recruiter' && <Badge variant="secondary" className="ml-auto">Recruiter</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
-             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/candidate-summarizer')}><Link href="/candidate-summarizer"><NotebookPen /><span>Summarizer</span>{plan !== 'recruiter' && <Badge variant="secondary" className="ml-auto">Recruiter</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
+             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/candidate-matcher')}><Link href="/candidate-matcher"><Users /><span>Candidate Matcher</span>{effectivePlan !== 'recruiter' && <Badge variant="secondary" className="ml-auto">Recruiter</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
+             <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/candidate-summarizer')}><Link href="/candidate-summarizer"><NotebookPen /><span>Summarizer</span>{effectivePlan !== 'recruiter' && <Badge variant="secondary" className="ml-auto">Recruiter</Badge>}</Link></SidebarMenuButton></SidebarMenuItem>
              <SidebarMenuItem><SidebarMenuButton asChild isActive={isActive('/support')}><Link href="/support"><LifeBuoy /><span>Support</span></Link></SidebarMenuButton></SidebarMenuItem>
              {isAdmin && <SidebarMenuItem><SidebarMenuButton asChild isActive={pathname.startsWith('/admin')}><Link href="/admin/dashboard"><Shield /><span>Admin Panel</span></Link></SidebarMenuButton></SidebarMenuItem>}
           </SidebarMenu>

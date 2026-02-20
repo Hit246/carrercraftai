@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle, XCircle, AlertCircle, Hourglass, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
