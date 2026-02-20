@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -15,12 +14,8 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import {
-  LayoutDashboard,
   Sparkles,
   Briefcase,
   Users,
@@ -30,12 +25,10 @@ import {
   Loader2,
   Crown,
   LifeBuoy,
-  Users2,
   Home,
   Shield,
   Target,
   NotebookPen,
-  Contact,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -43,7 +36,6 @@ import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import Image from 'next/image';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { OnboardingTour } from '@/components/onboarding-tour';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -70,7 +62,6 @@ function AppLayoutContent({
     }
   }, [userData]);
 
-
   if (loading) {
     return (
         <div className="flex h-screen w-full items-center justify-center">
@@ -91,7 +82,6 @@ function AppLayoutContent({
     setShowTour(false);
   }
 
-
   const isActive = (path: string) => {
     if (path === '/dashboard') return pathname === path;
     return pathname.startsWith(path);
@@ -105,7 +95,6 @@ function AppLayoutContent({
     if (isActive('/cover-letter-generator')) return 'Cover Letter Generator';
     if (isActive('/candidate-matcher')) return 'Candidate Matcher';
     if (isActive('/candidate-summarizer')) return 'Candidate Summarizer';
-    if (isActive('/team/members')) return 'Team Members';
     if (isActive('/support')) return 'Support';
     if (isActive('/pricing')) return 'Upgrade to Pro';
     if (isActive('/profile')) return 'Profile Settings';
@@ -219,16 +208,6 @@ function AppLayoutContent({
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
-            {plan === 'recruiter' && (
-                <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/team/members')}>
-                        <Link href="/team/members">
-                            <Users2 />
-                            <span>Team Management</span>
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            )}
              <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive('/support')}>
                     <Link href="/support">
@@ -252,7 +231,7 @@ function AppLayoutContent({
         <SidebarFooter className="p-4 mt-auto border-t">
           <div className="flex items-center gap-3">
              <Avatar className="h-9 w-9">
-              <AvatarImage src={userData?.photoURL || user.photoURL || `https://placehold.co/100x100.png?text=${user.email?.[0].toUpperCase()}`} alt={user.displayName || user.email || "user"} data-ai-hint="profile picture" />
+              <AvatarImage src={userData?.photoURL || user.photoURL || `https://placehold.co/100x100.png?text=${user.email?.[0].toUpperCase()}`} alt={user.displayName || user.email || "user"} />
               <AvatarFallback>{user.displayName?.[0] || user.email?.[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col truncate">
@@ -301,5 +280,3 @@ export default function AppLayout({
           </AuthProvider>
       )
   }
-
-    

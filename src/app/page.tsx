@@ -1,18 +1,16 @@
-
-
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key } from 'lucide-react';
+import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key, MoveRight, Bot } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { HomeHeader } from '@/components/home-header';
 
-
 function HomePageContent() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   
   const getStartedLink = user ? '/dashboard' : '/signup';
   const pricingLink = user ? '/pricing' : '/signup';
@@ -118,7 +116,7 @@ function HomePageContent() {
                   <CardTitle>Candidate Matching</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">For recruiters: efficiently find the best candidates for your roles from a diverse pool of qualified resumes.</p>
+                  <p className="text-muted-foreground">For recruiters: efficiently find the best candidates for your roles from a pool of qualified resumes.</p>
                 </CardContent>
               </Card>
             </div>
@@ -217,14 +215,14 @@ function HomePageContent() {
                 <Card className="flex flex-col">
                   <CardHeader>
                       <CardTitle className="font-headline flex items-center gap-2"><Diamond className="text-blue-500" /> Recruiter</CardTitle>
-                      <CardDescription>For recruiters & HR teams.</CardDescription>
+                      <CardDescription>For recruiters & HR professionals.</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4 flex-1">
                       <p className="text-4xl font-bold font-headline">₹999<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
                       <ul className="space-y-2 text-left text-sm">
                         <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking & Summaries</li>
                         <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Candidate Management Dashboard</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Team Management</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Bulk Resume Processing</li>
                         <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter analytics dashboard</li>
                       </ul>
                   </CardContent>

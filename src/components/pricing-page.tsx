@@ -1,5 +1,3 @@
-
-
 'use client'
 
 import { useState } from "react"
@@ -54,11 +52,10 @@ export function PricingPage() {
     setIsProcessing(selectedPlan);
     const planInfo = planDetails[selectedPlan];
 
-     // Before creating the payment link, set the `requestedPlan` and `previousPlan` in Firestore
     try {
         const userRef = doc(db, 'users', user.uid);
         await updateDoc(userRef, { 
-            previousPlan: plan, // Store the current plan before changing to pending
+            previousPlan: plan,
             plan: 'pending',
             requestedPlan: selectedPlan,
         });
@@ -74,7 +71,6 @@ export function PricingPage() {
     }
   
     try {
-      // Pass customer information to the payment link
       const res = await createPaymentLink(
         planInfo.amount, 
         selectedPlan,
@@ -106,7 +102,6 @@ export function PricingPage() {
         return;
       }
   
-      // Redirect to Razorpay payment page
       window.location.href = res.url;
   
     } catch (err) {
@@ -133,11 +128,10 @@ export function PricingPage() {
       </div>
 
       <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl w-full mx-auto">
-        {/* Free Plan */}
         <Card className="flex flex-col">
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
-              <Star className="text-yellow-500" /> Free – Starter
+              <Star className="text-yellow-500" /> Free
             </CardTitle>
             <CardDescription>For students & freshers exploring jobs.</CardDescription>
           </CardHeader>
@@ -168,7 +162,6 @@ export function PricingPage() {
           </CardFooter>
         </Card>
 
-        {/* Essentials */}
         <Card className="flex flex-col">
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
@@ -214,14 +207,13 @@ export function PricingPage() {
           </CardFooter>
         </Card>
 
-        {/* Pro */}
         <Card className="border-primary border-2 relative flex flex-col">
           <Badge className="absolute top-4 right-4" variant="secondary">
             Most Popular
           </Badge>
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
-              <Crown className="text-amber-500" /> Pro – Advanced
+              <Crown className="text-amber-500" /> Pro
             </CardTitle>
             <CardDescription>For professionals aiming for top jobs.</CardDescription>
           </CardHeader>
@@ -255,30 +247,23 @@ export function PricingPage() {
               <Key className="w-4 h-4" />
               <span>Perfect for experienced professionals.</span>
             </div>
-            {plan === "pro" ? (
-              <Button className="w-full mt-2" disabled>
-                Your Current Plan
-              </Button>
-            ) : (
-              <Button
+            <Button
               className="w-full mt-2"
               onClick={() => handlePayment("pro")}
               variant="default"
               disabled={isProcessing !== null || plan === "recruiter" || plan === "pro"}
-              >
-                {isProcessing === "pro" ? <Loader2 className="animate-spin"/> : plan === "pro" ? "Your Current Plan" : "Upgrade to Pro"}
-              </Button>
-            )}
+            >
+              {isProcessing === "pro" ? <Loader2 className="animate-spin"/> : plan === "pro" ? "Your Current Plan" : "Upgrade to Pro"}
+            </Button>
           </CardFooter>
         </Card>
 
-        {/* Recruiter */}
         <Card className="flex flex-col">
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
-              <Diamond className="text-blue-500" /> Recruiter Plan
+              <Diamond className="text-blue-500" /> Recruiter
             </CardTitle>
-            <CardDescription>For recruiters & HR teams.</CardDescription>
+            <CardDescription>For recruiters & HR professionals.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <p className="text-4xl font-bold font-headline">
@@ -292,10 +277,7 @@ export function PricingPage() {
                 <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Candidate Management Dashboard
               </li>
               <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Team Management
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 25 job postings / month
+                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Bulk Resume Processing
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter analytics dashboard
@@ -307,20 +289,14 @@ export function PricingPage() {
               <Key className="w-4 h-4" />
               <span>Best for freelance recruiters.</span>
             </div>
-            {plan === "recruiter" ? (
-              <Button className="w-full mt-2" disabled>
-                Your Current Plan
-              </Button>
-            ) : (
-              <Button
+            <Button
               className="w-full mt-2"
               onClick={() => handlePayment("recruiter")}
               variant="default"
               disabled={isProcessing !== null || plan === "recruiter"}
-              >
+            >
               {isProcessing === "recruiter" ? <Loader2 className="animate-spin"/> : plan === "recruiter" ? "Your Current Plan" : "Upgrade to Recruiter"}
-              </Button>
-            )}
+            </Button>
           </CardFooter>
         </Card>
       </div>

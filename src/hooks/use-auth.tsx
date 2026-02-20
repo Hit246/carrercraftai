@@ -1,12 +1,10 @@
-
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch, onSnapshot, collectionGroup } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { differenceInDays, addDays } from 'date-fns';
-
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
@@ -23,7 +21,6 @@ interface UserData {
     paymentProofURL?: string | null;
     paymentId?: string | null;
     requestedPlan?: 'essentials' | 'pro' | 'recruiter';
-    teamId?: string;
     hasCompletedOnboarding?: boolean;
     displayName?: string | null;
     photoURL?: string | null;
@@ -53,7 +50,6 @@ const FREE_CREDITS = 5;
 const ESSENTIALS_CREDITS = 50;
 const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
 
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,7 +57,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [credits, setCredits] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userData, setUserData] = useState<UserData| null>(null);
-
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -89,7 +84,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUserData((await getDoc(userRef)).data() as UserData);
             setLoading(false);
         }
-
       } else {
         setUser(null);
         setIsAdmin(false);
@@ -115,8 +109,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
         let currentData;
         if (!userDoc.exists()) {
-             // This case is primarily handled by the signup function now
-             // but as a fallback, we create a free user record.
              await setDoc(userRef, { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date(), hasCompletedOnboarding: false });
              currentData = (await getDoc(userRef)).data() as UserData;
         } else {
@@ -139,8 +131,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     previousPlan: null,
                     requestedPlan: null,
                 });
-                // The snapshot will refire with the new data, so we can exit here
-                // to avoid setting state with the old, expired plan data.
                 return;
             }
         }
@@ -161,7 +151,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
 }, [user, loading, isAdmin]);
 
-
   const login = (email:string, password:string) => {
     return signInWithEmailAndPassword(auth, email, password);
   }
@@ -171,7 +160,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await sendPasswordResetEmail(auth, email);
     } catch (error) {
       console.error('Error sending password reset email: ', error);
-      // Re-throw the error so the UI can catch it and display a message
       throw error;
     }
   };
@@ -186,45 +174,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         planUpdatedAt: null,
         paymentProofURL: null,
         hasCompletedOnboarding: false,
+        plan: 'free',
+        credits: FREE_CREDITS,
     };
     
-    // Check if there is an invitation for this email
-    const membersQuery = query(collectionGroup(db, 'members'), where('email', '==', email));
-    const membersSnapshot = await getDocs(membersQuery);
-
-    if (!membersSnapshot.empty) {
-        const invitationDoc = membersSnapshot.docs[0];
-        const teamId = invitationDoc.ref.parent.parent?.id;
-
-        if (teamId) {
-            // A user invited to a team should always get the 'recruiter' plan benefits.
-            initialUserData.plan = 'recruiter' as Plan;
-            initialUserData.credits = Infinity;
-            initialUserData.teamId = teamId;
-
-            const batch = writeBatch(db);
-            const userRef = doc(db, 'users', newUser.uid);
-            batch.set(userRef, initialUserData);
-            
-            // Update the member doc with the new user's UID
-            batch.update(invitationDoc.ref, { 
-                uid: newUser.uid,
-                name: newUser.displayName || newUser.email
-            });
-
-            await batch.commit();
-        }
-    } else {
-        // Standard signup for a user not invited to a team
-        initialUserData.plan = 'free' as Plan;
-        initialUserData.credits = FREE_CREDITS;
-        initialUserData.teamId = null;
-        await setDoc(doc(db, "users", newUser.uid), initialUserData);
-    }
-    
+    await setDoc(doc(db, "users", newUser.uid), initialUserData);
     return userCredential;
 }
-
 
   const logout = () => {
     setPlan('free');
@@ -253,14 +209,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error("Not authenticated");
   
-    // Prepare the data for Firebase Auth and Firestore, ensuring no undefined values
     const authProfile: { displayName?: string, photoURL?: string } = {};
-    if (profile.displayName !== undefined) authProfile.displayName = profile.displayName;
-    if (profile.photoURL !== undefined) authProfile.photoURL = profile.photoURL;
+    if (profile.displayName !== undefined) authProfile.displayName = profile.displayName!;
+    if (profile.photoURL !== undefined) authProfile.photoURL = profile.photoURL!;
   
     await updateProfile(currentUser, authProfile);
   
-    // Also update the user's document in Firestore
     const userRef = doc(db, 'users', currentUser.uid);
     const firestoreData: { [key: string]: any } = {};
     if (profile.displayName !== undefined) firestoreData.displayName = profile.displayName ?? null;
@@ -270,12 +224,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (Object.keys(firestoreData).length > 0) {
         await updateDoc(userRef, firestoreData);
     }
-  
-    // The onSnapshot listener will automatically update the `user` and `userData` state.
-    // To give immediate feedback, we can manually update the local `user` state if needed,
-    // but it's often better to rely on the real-time listener for consistency.
   };
-  
 
   const updatePaymentProof = async (url: string) => {
     if (!user) throw new Error("Not authenticated");
