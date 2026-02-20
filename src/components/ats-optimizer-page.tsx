@@ -17,7 +17,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Badge } from './ui/badge';
-import { Progress } from './ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 const formSchema = z.object({
@@ -45,7 +44,7 @@ export function AtsOptimizerPage() {
   const [analysisResult, setAnalysisResult] = useState<AtsOptimizerOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { plan, user, credits, useCredit } = useAuth();
+  const { effectivePlan, credits, useCredit } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -55,7 +54,7 @@ export function AtsOptimizerPage() {
     }
   });
   
-  const canUseFeature = plan !== 'free' || credits > 0;
+  const canUseFeature = effectivePlan !== 'free' || credits > 0;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!canUseFeature) {
@@ -72,7 +71,7 @@ export function AtsOptimizerPage() {
     setAnalysisResult(null);
 
     try {
-        if (plan === 'free') {
+        if (effectivePlan === 'free') {
             await useCredit();
         }
         const resumeDataUri = await fileToDataUri(values.resumeFile);
@@ -95,7 +94,7 @@ export function AtsOptimizerPage() {
 
   return (
     <div className="space-y-8">
-        {plan === 'free' && (
+        {effectivePlan === 'free' && (
              <Alert variant="pro">
                 <Crown />
                 <AlertTitle>This is a Pro Feature</AlertTitle>

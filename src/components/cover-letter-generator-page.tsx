@@ -42,7 +42,7 @@ export function CoverLetterGeneratorPage() {
   const [coverLetter, setCoverLetter] = useState<GenerateCoverLetterOutput['coverLetter'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { plan, user, credits, useCredit } = useAuth();
+  const { user, effectivePlan, credits, useCredit } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,12 +52,12 @@ export function CoverLetterGeneratorPage() {
     }
   });
   
-  const canUseFeature = plan !== 'free' || credits > 0;
+  const canUseFeature = effectivePlan !== 'free' || credits > 0;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!canUseFeature) {
         toast({
-          title: "Upgrade to Pro",
+          title: "Upgrade Plan",
           description: "You've used all your free credits. Please upgrade to continue.",
           variant: "destructive",
         })
@@ -69,7 +69,7 @@ export function CoverLetterGeneratorPage() {
     setCoverLetter(null);
 
     try {
-        if (plan === 'free') {
+        if (effectivePlan === 'free') {
             await useCredit();
         }
         const resumeDataUri = await fileToDataUri(values.resumeFile);
@@ -93,10 +93,10 @@ export function CoverLetterGeneratorPage() {
 
   return (
     <div className="space-y-8">
-        {plan === 'free' && (
+        {effectivePlan === 'free' && (
              <Alert variant="pro">
                 <Crown />
-                <AlertTitle>This is a Pro Feature</AlertTitle>
+                <AlertTitle>This is a Premium Feature</AlertTitle>
                 <AlertDescription className="flex justify-between items-center">
                     <span>You have {credits} free credits remaining. Upgrade for unlimited use.</span>
                     <Button onClick={() => router.push('/pricing')} size="sm">Upgrade Now</Button>

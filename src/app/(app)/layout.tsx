@@ -49,7 +49,7 @@ function AppLayoutContent({
   }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logout, plan, isAdmin, userData } = useAuth();
+  const { user, loading, logout, plan, effectivePlan, isAdmin, userData } = useAuth();
   const [showTour, setShowTour] = useState(false);
 
   useEffect(() => {
@@ -114,17 +114,17 @@ function AppLayoutContent({
   }
 
   const getPlanBadge = () => {
-    if (plan === 'recruiter') {
+    if (effectivePlan === 'recruiter') {
         return <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>
     }
-    if (plan === 'pro') {
+    if (effectivePlan === 'pro') {
         return <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>
     }
-    if (plan === 'essentials') {
+    if (effectivePlan === 'essentials') {
       return <Badge variant="secondary" className="ml-auto bg-gray-400/20 text-gray-500 border-gray-400/30">Essentials</Badge>
     }
     if (plan === 'pending') {
-      return <Badge variant="secondary" className="ml-auto bg-yellow-400/20 text-yellow-500 border-yellow-400/30">Pending</Badge>
+      return <Badge variant="secondary" className="ml-auto bg-yellow-400/20 text-yellow-500 border-yellow-400/30 animate-pulse">Pending</Badge>
     }
     return (
         <Button variant="ghost" size="sm" className="ml-auto" asChild>
@@ -173,7 +173,7 @@ function AppLayoutContent({
                     <Link href="/resume-analyzer">
                     <Sparkles />
                     <span>Resume Analyzer</span>
-                    {(plan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    {(effectivePlan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -182,7 +182,7 @@ function AppLayoutContent({
                     <Link href="/ats-optimizer">
                     <Target />
                     <span>ATS Optimizer</span>
-                    {(plan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    {(effectivePlan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -191,7 +191,7 @@ function AppLayoutContent({
                     <Link href="/job-matcher">
                     <Briefcase />
                     <span>Job Matcher</span>
-                    {(plan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    {(effectivePlan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -200,7 +200,7 @@ function AppLayoutContent({
                     <Link href="/cover-letter-generator">
                     <FileText />
                     <span>Cover Letter Generator</span>
-                    {(plan === 'free') && <Badge variant="secondary" className="ml-auto bg-gray-400/20 text-gray-500 border-gray-400/30">Essentials</Badge>}
+                    {(effectivePlan === 'free') && <Badge variant="secondary" className="ml-auto bg-gray-400/20 text-gray-500 border-gray-400/30">Essentials</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -209,11 +209,11 @@ function AppLayoutContent({
                     <Link href="/candidate-matcher">
                     <Users />
                     <span>Candidate Matcher</span>
-                    {plan !== 'recruiter' && <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>}
+                    {effectivePlan !== 'recruiter' && <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
-            {plan === 'recruiter' && (
+            {effectivePlan === 'recruiter' && (
                 <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive('/recruiter-dashboard')}>
                         <Link href="/recruiter-dashboard">
@@ -228,7 +228,7 @@ function AppLayoutContent({
                     <Link href="/candidate-summarizer">
                     <NotebookPen />
                     <span>Candidate Summarizer</span>
-                    {plan !== 'recruiter' && <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>}
+                    {effectivePlan !== 'recruiter' && <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
