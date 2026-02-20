@@ -1,17 +1,18 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { candidateMatcherAction, summarizeCandidateAction } from '@/lib/actions';
+import { candidateMatcherAction, summarizeCandidateAction, saveCandidateAction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Users, FileSearch, Upload, Crown, TextIcon, NotebookPen } from 'lucide-react';
+import { Loader2, Users, FileSearch, Upload, Crown, TextIcon, NotebookPen, BookmarkPlus, CheckCircle2 } from 'lucide-react';
 import type { CandidateMatcherOutput } from '@/ai/flows/candidate-matcher';
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +47,7 @@ const formSchema = z.object({
     )
 });
 
-type Match = CandidateMatcherOutput['candidateMatches'][0] & { resumeDataUri: string, fileName: string };
+type Match = CandidateMatcherOutput['candidateMatches'][0] & { resumeDataUri: string, fileName: string, isShortlisted?: boolean };
 
 const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -63,6 +64,7 @@ export function CandidateMatcherPage() {
   const [candidateMatches, setCandidateMatches] = useState<Match[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
+  const [isShortlistingId, setIsShortlistingId] = useState<string | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -146,6 +148,29 @@ export function CandidateMatcherPage() {
     }
   }
 
+  const handleShortlist = async (match: Match) => {
+    if (!userData?.teamId) {
+        toast({ title: "Workspace Needed", description: "Please initialize your workspace in the Recruiter Dashboard first.", variant: "destructive" });
+        return;
+    }
+    setIsShortlistingId(match.resumeId);
+    try {
+        await saveCandidateAction({
+            name: match.fileName.replace('.pdf', ''),
+            matchScore: match.matchScore,
+            jobTitle: form.getValues('jobTitle'),
+            justification: match.justification,
+        }, userData.teamId);
+
+        setCandidateMatches(prev => prev ? prev.map(m => m.resumeId === match.resumeId ? { ...m, isShortlisted: true } : m) : null);
+        toast({ title: "Candidate Shortlisted", description: "View them in your Recruiter Dashboard." });
+    } catch (e) {
+        toast({ title: "Error", description: "Failed to shortlist candidate.", variant: "destructive" });
+    } finally {
+        setIsShortlistingId(null);
+    }
+  }
+
   return (
     <div className="space-y-8">
       <Dialog open={isSummaryDialogOpen} onOpenChange={setIsSummaryDialogOpen}>
@@ -181,7 +206,7 @@ export function CandidateMatcherPage() {
             <Users className="text-primary"/> AI Candidate Matcher
           </CardTitle>
           <CardDescription>
-            Find the best-fit candidates for a role. The results will be displayed below without saving them.
+            Find the best-fit candidates for a role. You can shortlist top matches to your dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -273,7 +298,7 @@ export function CandidateMatcherPage() {
                         <TableHead className="w-[200px]">Resume</TableHead>
                         <TableHead className="w-[150px]">Match Score</TableHead>
                         <TableHead>Justification</TableHead>
-                        <TableHead className="text-right w-[120px]">Summary</TableHead>
+                        <TableHead className="text-right w-[200px]">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -289,8 +314,8 @@ export function CandidateMatcherPage() {
                     )}
                     {!isLoading && (!candidateMatches || candidateMatches.length === 0) && (
                         <TableRow>
-                            <TableCell colSpan={4} className="h-24 text-center">
-                                <FileSearch className="mx-auto h-8 w-8 text-muted-foreground mb-2"/>
+                            <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                <FileSearch className="mx-auto h-8 w-8 mb-2 opacity-20"/>
                                {canUseFeature ? "No candidates found yet. Results will appear here." : "Upgrade to the Recruiter plan to find candidates."}
                             </TableCell>
                         </TableRow>
@@ -305,15 +330,31 @@ export function CandidateMatcherPage() {
                             </TableCell>
                             <TableCell className="text-sm text-muted-foreground">{match.justification}</TableCell>
                             <TableCell className="text-right">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleSummarize(match.resumeDataUri)}
-                                    disabled={isSummarizing}
-                                >
-                                    <TextIcon className="mr-2 h-4 w-4" />
-                                    Summarize
-                                </Button>
+                                <div className="flex justify-end gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleSummarize(match.resumeDataUri)}
+                                        disabled={isSummarizing}
+                                    >
+                                        <TextIcon className="mr-2 h-4 w-4" />
+                                        Summary
+                                    </Button>
+                                    <Button
+                                        variant={match.isShortlisted ? "secondary" : "default"}
+                                        size="sm"
+                                        onClick={() => handleShortlist(match)}
+                                        disabled={isShortlistingId === match.resumeId || match.isShortlisted}
+                                    >
+                                        {isShortlistingId === match.resumeId ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : match.isShortlisted ? (
+                                            <><CheckCircle2 className="mr-2 h-4 w-4 text-green-500" /> Saved</>
+                                        ) : (
+                                            <><BookmarkPlus className="mr-2 h-4 w-4" /> Shortlist</>
+                                        )}
+                                    </Button>
+                                </div>
                             </TableCell>
                         </TableRow>
                     ))}

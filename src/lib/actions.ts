@@ -105,3 +105,24 @@ export async function summarizeCandidateAction(
 ): Promise<SummarizeCandidateOutput> {
   return await summarizeCandidate(input);
 }
+
+export async function saveCandidateAction(candidateData: {
+    name: string;
+    matchScore: number;
+    jobTitle: string;
+    justification: string;
+    resumeURL?: string;
+}, teamId: string) {
+    try {
+        const candidateRef = firestoreCollection(db, `teams/${teamId}/candidates`);
+        await addDoc(candidateRef, {
+            ...candidateData,
+            addedAt: serverTimestamp(),
+            status: 'New'
+        });
+        return { success: true };
+    } catch (error) {
+        console.error("Error saving candidate:", error);
+        throw new Error("Failed to shortlist candidate.");
+    }
+}
