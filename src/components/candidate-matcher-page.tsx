@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Users, FileSearch, Upload, Crown, TextIcon, NotebookPen } from 'lucide-react';
+import { Loader2, Users, FileSearch, Upload, Crown, TextIcon, NotebookPen, UserPlus } from 'lucide-react';
 import type { CandidateMatcherOutput } from '@/ai/flows/candidate-matcher';
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { db } from '@/lib/firebase';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 const MAX_FILES = 10;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -63,10 +65,11 @@ export function CandidateMatcherPage() {
   const [candidateMatches, setCandidateMatches] = useState<Match[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
+  const [isShortlisting, setIsShortlisting] = useState<string | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { plan, userData } = useAuth();
+  const { plan, user } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -143,6 +146,34 @@ export function CandidateMatcherPage() {
         setSummary("Failed to generate summary. Please try again.");
     } finally {
         setIsSummarizing(false);
+    }
+  }
+
+  const handleShortlist = async (match: Match) => {
+    if (!user) return;
+    setIsShortlisting(match.resumeId);
+    try {
+        const shortlistRef = collection(db, `users/${user.uid}/shortlistedCandidates`);
+        await addDoc(shortlistRef, {
+            name: match.fileName,
+            matchScore: match.matchScore,
+            justification: match.justification,
+            jobTitle: form.getValues('jobTitle'),
+            shortlistedAt: serverTimestamp(),
+        });
+        toast({
+            title: "Candidate Shortlisted",
+            description: `${match.fileName} has been added to your Recruiter Dashboard.`,
+        });
+    } catch (error) {
+        console.error(error);
+        toast({
+            title: "Error",
+            description: "Failed to shortlist candidate.",
+            variant: "destructive",
+        });
+    } finally {
+        setIsShortlisting(null);
     }
   }
 
@@ -273,7 +304,7 @@ export function CandidateMatcherPage() {
                         <TableHead className="w-[200px]">Resume</TableHead>
                         <TableHead className="w-[150px]">Match Score</TableHead>
                         <TableHead>Justification</TableHead>
-                        <TableHead className="text-right w-[120px]">Summary</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -305,15 +336,25 @@ export function CandidateMatcherPage() {
                             </TableCell>
                             <TableCell className="text-sm text-muted-foreground">{match.justification}</TableCell>
                             <TableCell className="text-right">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleSummarize(match.resumeDataUri)}
-                                    disabled={isSummarizing}
-                                >
-                                    <TextIcon className="mr-2 h-4 w-4" />
-                                    Summarize
-                                </Button>
+                                <div className="flex justify-end gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleSummarize(match.resumeDataUri)}
+                                        disabled={isSummarizing}
+                                    >
+                                        <TextIcon className="mr-2 h-4 w-4" />
+                                        Summarize
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        onClick={() => handleShortlist(match)}
+                                        disabled={isShortlisting === match.resumeId}
+                                    >
+                                        {isShortlisting === match.resumeId ? <Loader2 className="h-4 w-4 animate-spin"/> : <UserPlus className="mr-2 h-4 w-4" />}
+                                        Shortlist
+                                    </Button>
+                                </div>
                             </TableCell>
                         </TableRow>
                     ))}

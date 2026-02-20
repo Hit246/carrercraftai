@@ -29,6 +29,7 @@ import {
   Shield,
   Target,
   NotebookPen,
+  LayoutDashboard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -95,6 +96,7 @@ function AppLayoutContent({
     if (isActive('/cover-letter-generator')) return 'Cover Letter Generator';
     if (isActive('/candidate-matcher')) return 'Candidate Matcher';
     if (isActive('/candidate-summarizer')) return 'Candidate Summarizer';
+    if (isActive('/recruiter-dashboard')) return 'Recruiter Dashboard';
     if (isActive('/support')) return 'Support';
     if (isActive('/pricing')) return 'Upgrade to Pro';
     if (isActive('/profile')) return 'Profile Settings';
@@ -190,6 +192,19 @@ function AppLayoutContent({
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
+            
+            {/* Recruiter specific menu items */}
+            {plan === 'recruiter' && (
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive('/recruiter-dashboard')}>
+                    <Link href="/recruiter-dashboard">
+                    <LayoutDashboard />
+                    <span>Recruiter Dashboard</span>
+                    </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
+
             <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive('/candidate-matcher')}>
                     <Link href="/candidate-matcher">
