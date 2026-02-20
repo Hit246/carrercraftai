@@ -1,4 +1,4 @@
-
+'use client';
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -8,9 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { HomeHeader } from '@/components/home-header';
 import React from 'react';
-
-'use client';
-
 
 function HomePageContent() {
   const { user, loading } = useAuth();
