@@ -113,10 +113,10 @@ function HomePageContent() {
                      <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                         <Users className="w-6 h-6"/>
                     </div>
-                  <CardTitle>Candidate Matching</CardTitle>
+                  <CardTitle>Recruiter Tools</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">For recruiters: efficiently find the best candidates for your roles from a pool of qualified resumes.</p>
+                  <p className="text-muted-foreground">Find the best candidates with AI ranking, manage shortlists, and track hiring trends with advanced analytics.</p>
                 </CardContent>
               </Card>
             </div>
@@ -221,9 +221,9 @@ function HomePageContent() {
                       <p className="text-4xl font-bold font-headline">₹999<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
                       <ul className="space-y-2 text-left text-sm">
                         <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking & Summaries</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter Dashboard (Shortlist Management)</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Shortlist Management Dashboard</li>
+                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Hiring Analytics Dashboard</li>
                         <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Bulk Resume Processing</li>
-                        <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter analytics dashboard</li>
                       </ul>
                   </CardContent>
                   <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
