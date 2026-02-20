@@ -954,11 +954,10 @@
                 <h3>4.4 UML Diagrams</h3>
 
                 <h4>Introduction</h4>
-                <p style="line-height: 25px;">Key Unified Modeling Language (UML) diagrams providing Standard insights
-                    into application behavior and structure.</p>
+                <p style="line-height: 25px;">Key Unified Modeling Language (UML) diagrams updated to reflect the new **Recruiter Analytics** and **Shortlisting** logic.</p>
 
                 <h4>Use Case Diagram</h4>
-                <p style="line-height: 25px;">Illustrates the main services provided to actors (Job Seeker, Recruiter, Admin).</p>
+                <p style="line-height: 25px;">Illustrates the main services provided to actors. Note the removal of Team Management in favor of persistent shortlisting.</p>
                 <img src="use case diagram.png" alt="Use Case Diagram" style="width: 70%; height: 50%;">
             </div>
         </div>
@@ -969,7 +968,7 @@
                     <h4>Explanation of Shapes</h4>
                     <ul>
                         <li><code>actor</code>: User or system (e.g., Job Seeker, Admin).</li>
-                        <li><code>usecase</code>: Specific service (e.g., "Analyze Resume").</li>
+                        <li><code>usecase</code>: Specific service (e.g., "Manage Shortlist").</li>
                         <li><code>rectangle</code>: System boundary.</li>
                     </ul>
                 </div>
@@ -978,8 +977,8 @@
 
         <div class="page page-break">
             <div class="section">
-                <h4>Sequence Diagram: AI Candidate Matching</h4>
-                <p>Chronological flow of matching multiple candidates and shortlisting them to the recruiter's dashboard.</p>
+                <h4>Sequence Diagram: AI Candidate Shortlisting</h4>
+                <p>Chronological flow of matching candidates and persisting them to the recruiter's private dashboard.</p>
                 <img src="Sequence Diagram AI Resume Analysis.png" alt="Sequence Diagram"
                     style="width: 100%; height: auto;">
             </div>

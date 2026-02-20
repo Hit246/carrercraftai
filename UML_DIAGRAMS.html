@@ -68,12 +68,12 @@
     
     <h2><strong>Introduction</strong></h2>
     <p>
-        This document contains key Unified Modeling Language (UML) diagrams for the CareerCraft AI system. These diagrams provide a standardized way to visualize the design, structure, and behavior of the application, offering insights into its architecture and core workflows. The diagrams below are represented using PlantUML syntax, a tool for creating diagrams from plain text.
+        This document contains key Unified Modeling Language (UML) diagrams for the CareerCraft AI system. These diagrams provide a standardized way to visualize the design, structure, and behavior of the application, offering insights into its architecture and core workflows. The diagrams below are represented using PlantUML syntax.
     </p>
 
     <h2 id="use-case">1. Use Case Diagram</h2>
     <p>
-        This diagram provides a high-level view of the system's functionality from the perspective of different users (actors). It illustrates the main services the system provides and which actors interact with them.
+        This diagram illustrates the main services provided to the different actors. We have removed "Team Management" to focus on the unified recruiter workflow.
     </p>
     <pre><code>
 @startuml
@@ -84,170 +84,87 @@ actor "Recruiter"
 actor "Admin"
 
 rectangle "CareerCraft AI System" {
-  usecase "Manage Account" as UC1
+  usecase "Manage Account & Profile" as UC1
   usecase "Build & Manage Resumes" as UC2
-  usecase "Use AI Job Seeker Tools" as UC3
-  usecase "Manage Subscriptions" as UC4
-  usecase "Manage Support Tickets" as UC5
+  usecase "Analyze Resume & ATS Optimization" as UC3
+  usecase "Job Matching & Cover Letter" as UC4
   
-  usecase "Use AI Recruiter Tools" as UC6
-  usecase "Manage Team" as UC7
+  usecase "Match & Rank Candidates" as UC5
+  usecase "Manage Shortlist & View Analytics" as UC6
 
-  usecase "Manage Users" as UC8
-  usecase "Manage All Subscriptions" as UC9
-  usecase "Manage All Support" as UC10
-  usecase "Manage Platform Settings" as UC11
+  usecase "Manage All Users" as UC7
+  usecase "Track Subscriptions & Expiry" as UC8
+  usecase "Handle Support Tickets" as UC9
   
   JobSeeker -- UC1
   JobSeeker -- UC2
   JobSeeker -- UC3
   JobSeeker -- UC4
-  JobSeeker -- UC5
   
   Recruiter -- UC1
+  Recruiter -- UC5
   Recruiter -- UC6
-  Recruiter -- UC7
   
+  Admin -- UC7
   Admin -- UC8
   Admin -- UC9
-  Admin -- UC10
-  Admin -- UC11
   
   UC3 ..> UC2 : "<<extends>>"
-  UC6 ..> UC7 : "<<extends>>"
+  UC5 ..> UC6 : "<<extends>>"
 }
 @enduml
     </code></pre>
     <div class="explanation">
         <h3>Explanation of Shapes</h3>
         <ul>
-            <li><code>actor</code> (stick figure): Represents a user or external system that interacts with the system (e.g., Job Seeker, Admin).</li>
-            <li><code>usecase</code> (oval): Represents a specific function or service the system provides (e.g., "Manage Account").</li>
-            <li><code>rectangle</code>: Represents the boundary of the system, separating internal functions from external actors.</li>
-            <li><code>--</code> (solid line): A line connecting an actor to a use case, indicating an interaction.</li>
+            <li><code>actor</code>: Job Seeker, Recruiter, and Admin.</li>
+            <li><code>usecase</code>: Represents specific functionalities like "Manage Shortlist".</li>
+            <li><code>rectangle</code>: System boundary.</li>
         </ul>
     </div>
 
-    <h2 id="sequence">2. Sequence Diagram: AI Resume Analysis</h2>
+    <h2 id="sequence">2. Sequence Diagram: AI Candidate Matching & Shortlisting</h2>
     <p>
-        This diagram shows the sequence of interactions that occur when a user performs an AI-powered resume analysis. It details the messages passed between the UI, the server, the AI flow, and the database in chronological order.
+        Shows the flow of a recruiter matching resumes and persisting a top candidate to their private dashboard.
     </p>
     <pre><code>
 @startuml
-actor User
-participant "Resume Analyzer Page (UI)" as UI
-participant "Next.js Server Action" as ServerAction
-participant "Genkit AI Flow" as GenkitFlow
-participant "Google AI (Gemini)" as GoogleAI
+actor Recruiter
+participant "Candidate Matcher (UI)" as UI
+participant "Next.js Server Action" as Server
+participant "Genkit AI Flow" as Genkit
 participant "Firestore DB" as DB
 
-User -> UI : Uploads Resume PDF
+Recruiter -> UI : Upload Resumes & JD
 activate UI
 
-UI -> ServerAction : analyzeResumeAction(resumeDataUri)
-activate ServerAction
+UI -> Server : candidateMatcherAction(uris, jd)
+activate Server
 
-ServerAction -> DB : Read User Credits
+Server -> Genkit : candidateMatcherFlow(input)
+activate Genkit
+Genkit --> Server : Return Scores & Justification
+deactivate Genkit
+
+Server --> UI : Display Ranked List
+deactivate Server
+
+Recruiter -> UI : Click "Shortlist"
+UI -> Server : saveCandidateAction(candidateData)
+activate Server
+Server -> DB : Write to /users/{uid}/shortlistedCandidates
 activate DB
-DB --> ServerAction : Return Credits
+DB --> Server : Success
 deactivate DB
-
-alt User has credits
-    ServerAction -> GenkitFlow : analyzeResume(input)
-    activate GenkitFlow
-    GenkitFlow -> GoogleAI : generateContent(prompt)
-    activate GoogleAI
-    GoogleAI --> GenkitFlow : Return Analysis JSON
-    deactivate GoogleAI
-    GenkitFlow --> ServerAction : Return AnalysisResult
-    deactivate GenkitFlow
-
-    ServerAction -> DB : Decrement User Credits
-    activate DB
-    DB --> ServerAction : Success
-    deactivate DB
-
-    ServerAction --> UI : Return AnalysisResult
-    deactivate ServerAction
-    UI -> User : Display Strengths, Weaknesses, Suggestions
-    deactivate UI
-else User has no credits
-    ServerAction --> UI : Return Error (Upgrade needed)
-    deactivate ServerAction
-    UI -> User : Display "Upgrade to Pro" message
-    deactivate UI
-end
+Server --> UI : Toast "Shortlisted"
+deactivate Server
+deactivate UI
 @enduml
     </code></pre>
-    <div class="explanation">
-        <h3>Explanation of Shapes</h3>
-        <ul>
-            <li><code>actor</code>: The user initiating the action.</li>
-            <li><code>participant</code> (rectangle): Represents a component or object in the system (e.g., UI, Server). The dashed line below it is its "lifeline".</li>
-            <li><code>-></code> (solid arrow): A message or function call sent from one participant to another.</li>
-            <li><code>--></code> (dashed arrow): A return message or response.</li>
-            <li><code>activate/deactivate</code> (thin rectangle on lifeline): Shows the period when a participant is active or processing a task.</li>
-            <li><code>alt</code> (box with sections): Represents alternative flows, like an if/else condition (e.g., if the user has credits vs. if they don't).</li>
-        </ul>
-    </div>
 
-    <h2 id="activity">3. Activity Diagram: Subscription Upgrade Process</h2>
+    <h2 id="class">3. Class Diagram</h2>
     <p>
-        This diagram illustrates the flow of activities for the subscription upgrade process. It shows the different paths the system can take, including the primary automated webhook-based flow and the manual fallback flow for admin verification.
-    </p>
-    <pre><code>
-@startuml
-|User|
-start
-:Selects a new plan;
-:Fills profile (name, phone);
-:Is redirected to Razorpay;
-:Completes payment;
-
-|Razorpay|
-:Processes payment;
-:Sends webhook notification;
-
-|System|
-:Receives webhook;
-:Verifies webhook signature;
-if (Signature is valid?) then (yes)
-  :Updates user plan in Firestore;
-  :Sets plan to 'pro'/'recruiter';
-  :Logs transaction ID;
-  |User|
-  :Sees "Success" page;
-  stop
-else (no)
-  :Logs verification failure;
-  |Admin|
-  :Sees user in "Pending Upgrades";
-  :Manually verifies payment;
-  if (Payment is valid?) then (yes)
-    |System|
-    :Admin updates plan to 'pro'/'recruiter';
-  else (no)
-    :Admin reverts plan to 'free';
-  endif
-  |User|
-  :Receives plan update;
-  stop
-endif
-@enduml
-    </code></pre>
-     <div class="explanation">
-        <h3>Explanation of Shapes</h3>
-        <ul>
-            <li><code>start/stop</code> (filled circle/circled dot): The beginning and end points of the workflow.</li>
-            <li><code>|Actor|</code> (swimlane): A vertical lane that groups activities performed by a specific actor or system (e.g., User, System, Admin).</li>
-            <li><code>:Action;</code> (rounded rectangle): Represents a single action or task in the workflow (e.g., "Selects a new plan").</li>
-            <li><code>if/else</code> (diamond shape, implicitly shown by arrows): A decision point where the flow can branch into different paths based on a condition.</li>
-        </ul>
-    </div>
-    
-    <h2 id="class">4. Class Diagram</h2>
-    <p>
-        This diagram models the main data entities of the system as classes, showing their attributes (fields), operations (methods), and the relationships between them. It provides a static blueprint of the system's structure.
+        Models the main data entities. The "Team" and "Member" classes have been removed, replaced by a direct relationship between Users and their private Shortlisted Candidates.
     </p>
     <pre><code>
 @startuml
@@ -258,11 +175,11 @@ class User {
   +email: string
   +plan: Plan
   +credits: number
-  +teamId: string
+  +planUpdatedAt: Timestamp
+  +requestedPlan: Plan
   --
   +updateProfile()
   +useCredit()
-  +requestCancellation()
 }
 
 class ResumeVersion {
@@ -271,97 +188,52 @@ class ResumeVersion {
   +resumeData: Map
 }
 
-class Team {
-  +owner: string (User UID)
-  +createdAt: Timestamp
-  --
-  +addMember()
-  +removeMember()
-}
-
-class TeamMember {
-  +uid: string
-  +email: string
-  +role: string
+class ShortlistedCandidate {
+  +name: string
+  +matchScore: number
+  +jobTitle: string
+  +justification: string
+  +shortlistedAt: Timestamp
 }
 
 class SupportRequest {
   +userId: string
   +subject: string
   +status: string
-  --
-  +addMessage()
-  +updateStatus()
+  +lastMessageAt: Timestamp
 }
 
-class SupportMessage {
-  +message: string
-  +sender: string
-  +timestamp: Timestamp
-}
-
-User "1" *-- "0..*" ResumeVersion : has
-User "1" -- "0..1" Team : owns
-Team "1" *-- "1..*" TeamMember : has
+User "1" *-- "0..*" ResumeVersion : owns
+User "1" *-- "0..*" ShortlistedCandidate : manages
 User "1" -- "0..*" SupportRequest : submits
-SupportRequest "1" *-- "1..*" SupportMessage : contains
 @enduml
     </code></pre>
-    <div class="explanation">
-        <h3>Explanation of Shapes & Symbols</h3>
-        <ul>
-            <li><code>class</code> (rectangle): Represents a data entity or object (e.g., User, Team). The top part is the name, the middle lists attributes, and the bottom lists operations (methods).</li>
-            <li><code>+</code> / <code>-</code>: Represents public (+) or private (-) visibility of attributes/methods.</li>
-            <li><code>*--</code> (Composition): A "has-a" relationship where the child object (e.g., ResumeVersion) cannot exist without the parent (User). Represented by a filled diamond.</li>
-            <li><code>--</code> (Association): A general relationship between two classes. The numbers ("1", "0..*") indicate multiplicity (e.g., one User can have zero or many Support Requests).</li>
-        </ul>
-    </div>
-
-    <h2 id="component">5. Component Diagram</h2>
+    
+    <h2 id="component">4. Component Diagram</h2>
     <p>
-        This diagram shows the high-level organization of the system's major software components and their dependencies. It illustrates how the frontend, backend, and external services are connected.
+        High-level organization showing the connection between the Next.js frontend, Firebase, and Genkit AI.
     </p>
     <pre><code>
 @startuml
-package "Browser" {
+package "Client (Browser)" {
   [Frontend (Next.js)] as Frontend
 }
 
-package "Google Cloud" {
-  [Genkit AI Flows] as Genkit
-  [Firebase Services] as Firebase
+package "Cloud Services" {
+  [Genkit AI Engine] as Genkit
+  [Firebase Auth/DB/Storage] as Firebase
 }
 
-[Google AI (Gemini)] as GeminiAPI
-[Razorpay API] as RazorpayAPI
+[Google AI (Gemini)] as Gemini
+[Razorpay API] as Razorpay
 
-Frontend ..> Genkit : (HTTP/S)
-Frontend ..> Firebase : (SDK)
-Genkit ..> GeminiAPI : (API Call)
-Genkit ..> Firebase : (Server SDK)
-Frontend ..> RazorpayAPI : (Redirect)
-RazorpayAPI ..> Frontend : (Redirect)
-
-[CareerCraft AI System] as SystemBoundary
-
-SystemBoundary -[hidden]down- Frontend
-SystemBoundary -[hidden]down- Genkit
-SystemBoundary -[hidden]down- Firebase
-SystemBoundary -[hidden]down- GeminiAPI
-SystemBoundary -[hidden]down- RazorpayAPI
-
+Frontend ..> Firebase : SDK Interaction
+Frontend ..> Razorpay : Payment Link
+Genkit ..> Gemini : LLM Calls
+Genkit ..> Firebase : Admin Writes
+Frontend ..> Genkit : Server Actions
 @enduml
     </code></pre>
-    <div class="explanation">
-        <h3>Explanation of Shapes & Symbols</h3>
-        <ul>
-            <li><code>package</code> (folder icon): Groups related components together (e.g., everything running in the Browser or on Google Cloud).</li>
-            <li><code>[Component]</code> (rectangle with two small rectangles): Represents a major modular part of the system (e.g., Frontend, Firebase Services).</li>
-            <li><code>..></code> (dashed arrow): Represents a dependency. The arrow points from the dependent component to the one it depends on (e.g., the Frontend depends on Genkit AI Flows).</li>
-        </ul>
-    </div>
-
-
 </div>
 
 </body>
