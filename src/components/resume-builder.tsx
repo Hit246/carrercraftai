@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { PlusCircle, Trash2, Download, Bot, Save, Loader2, Link as LinkIcon, History, ChevronsUpDown, Crown, MoreVertical } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
-import { doc, getDoc, setDoc, collection, addDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from './ui/skeleton';
 import jsPDF from 'jspdf';
@@ -31,10 +31,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { errorEmitter } from '@/lib/error-emitter';
-import { FirestorePermissionError } from '@/lib/errors';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/lib/errors';
 
 interface Experience {
     id: number;
@@ -126,44 +125,40 @@ export const ResumeBuilder = () => {
         const resumeVersionsRef = collection(db, `users/${user.uid}/resumeVersions`);
         const versionsQuery = query(resumeVersionsRef, orderBy('updatedAt', 'desc'));
 
-        const unsubscribe = onSnapshot(versionsQuery, async (snapshot) => {
-            if (snapshot.empty) {
-                // Create the first version if none exist
-                const firstVersionName = "Initial Resume";
-                const firstVersionData = {
-                    versionName: firstVersionName,
-                    updatedAt: serverTimestamp(),
-                    resumeData: { ...initialResumeData, email: user.email || '' }
-                };
-                const newVersionRef = await addDoc(resumeVersionsRef, firstVersionData);
-                
-                const newVersion: ResumeVersion = { id: newVersionRef.id, ...firstVersionData };
-                setVersions([newVersion]);
-                setCurrentVersion(newVersion);
-                setResumeData(newVersion.resumeData);
-            } else {
-                const fetchedVersions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ResumeVersion));
-                setVersions(fetchedVersions);
+        const unsubscribe = onSnapshot(versionsQuery, 
+            (snapshot) => {
+                if (snapshot.empty) {
+                    const firstVersionName = "Initial Resume";
+                    const firstVersionData = {
+                        versionName: firstVersionName,
+                        updatedAt: serverTimestamp(),
+                        resumeData: { ...initialResumeData, email: user.email || '' }
+                    };
+                    addDoc(resumeVersionsRef, firstVersionData);
+                } else {
+                    const fetchedVersions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ResumeVersion));
+                    setVersions(fetchedVersions);
 
-                if (!currentVersion || !fetchedVersions.some(v => v.id === currentVersion.id)) {
-                    const latestVersion = fetchedVersions[0];
-                    setCurrentVersion(latestVersion);
-                    setResumeData(latestVersion.resumeData);
+                    if (!currentVersion || !fetchedVersions.some(v => v.id === currentVersion.id)) {
+                        const latestVersion = fetchedVersions[0];
+                        setCurrentVersion(latestVersion);
+                        setResumeData(latestVersion.resumeData);
+                    }
                 }
+                setIsLoading(false);
+            }, 
+            async (serverError) => {
+                const permissionError = new FirestorePermissionError({
+                    path: resumeVersionsRef.path,
+                    operation: 'list',
+                } satisfies SecurityRuleContext, serverError);
+                errorEmitter.emit('permission-error', permissionError);
+                setIsLoading(false);
             }
-            setIsLoading(false);
-        }, async (error) => {
-            const permissionError = new FirestorePermissionError({
-                path: resumeVersionsRef.path,
-                operation: 'list',
-            }, error);
-            errorEmitter.emit('permission-error', permissionError);
-            toast({ title: "Error", description: "Could not load resume versions.", variant: "destructive" });
-            setIsLoading(false);
-        });
+        );
 
         return () => unsubscribe();
-    }, [user, authLoading, toast, currentVersion]);
+    }, [user, authLoading, currentVersion?.id]);
 
     const handleAddExperience = () => {
         if (!resumeData) return;
@@ -197,7 +192,9 @@ export const ResumeBuilder = () => {
         });
     };
     
-    const canUseFeature = plan !== 'free' || credits > 0;
+    // Feature check: Don't allow pending plans to unlock features yet
+    const effectivePlan = plan === 'pending' ? 'free' : plan; 
+    const canUseFeature = effectivePlan !== 'free' || credits > 0;
 
      const generatePdfFromData = useCallback(async () => {
         if (!resumeData) return null;
@@ -213,7 +210,7 @@ export const ResumeBuilder = () => {
         let y = margin;
         const lineSpacing = 1.25;
 
-        const primaryColor = '#6d28d9'; // A purple color similar to the theme
+        const primaryColor = '#6d28d9'; 
         const textColor = '#374151';
         const lightTextColor = '#6b7280';
         
@@ -262,7 +259,7 @@ export const ResumeBuilder = () => {
 
 
         // --- BORDER ---
-        doc.setDrawColor(229, 231, 235); // gray-200
+        doc.setDrawColor(229, 231, 235);
         doc.setLineWidth(1.5);
         doc.line(margin, y, pageW - margin, y);
         y += 25;
@@ -386,7 +383,7 @@ export const ResumeBuilder = () => {
                     currentX = margin;
                 }
                 
-                doc.setFillColor(239, 246, 255); // A light blue color, similar to bg-primary/10
+                doc.setFillColor(239, 246, 255); 
                 doc.setTextColor(primaryColor);
                 doc.roundedRect(currentX, y, skillWidth, skillHeight, 5, 5, 'F');
                 doc.text(skill, currentX + skillWidth / 2, y + skillHeight / 2, { align: 'center', baseline: 'middle' });
@@ -400,11 +397,10 @@ export const ResumeBuilder = () => {
 
 
     const handleExport = async () => {
-        toast({ title: "Generating PDF...", description: "Please wait." });
         const pdf = await generatePdfFromData();
         if (pdf) {
             pdf.save(`${resumeData?.name || 'resume'}.pdf`);
-            toast({ title: "Download Complete!", description: "Your resume has been downloaded." });
+            toast({ title: "Download Complete!" });
         } else {
             toast({ title: "Export Failed", variant: "destructive" });
         }
@@ -412,18 +408,12 @@ export const ResumeBuilder = () => {
     
     const handleAnalyze = async () => {
         if(!canUseFeature) {
-            toast({
-              title: "Upgrade to Pro",
-              description: "You've used all your free credits. Please upgrade to continue.",
-              variant: "destructive",
-            })
+            toast({ title: "Upgrade Required", description: "You've used all free credits.", variant: "destructive" });
             router.push('/pricing');
             return;
         }
 
         setIsAnalyzing(true);
-        toast({ title: "Analyzing Resume...", description: "Generating a snapshot and sending it to the AI." });
-
         try {
             if (plan === 'free' || plan === 'essentials') {
                 await useCredit();
@@ -431,15 +421,13 @@ export const ResumeBuilder = () => {
             const pdf = await generatePdfFromData();
             if (pdf) {
                 const dataUri = pdf.output('datauristring');
-                // Store in session storage to pass to the next page
                 sessionStorage.setItem('resumeDataUriForAnalysis', dataUri);
                 router.push('/resume-analyzer');
             } else {
-                 throw new Error("Failed to generate PDF for analysis.");
+                 throw new Error("Failed to generate PDF.");
             }
         } catch (error) {
-            console.error(error);
-            toast({ title: "Analysis Failed", description: "Could not prepare your resume for analysis.", variant: "destructive" });
+            toast({ title: "Analysis Failed", variant: "destructive" });
             setIsAnalyzing(false);
         }
     }
@@ -447,51 +435,37 @@ export const ResumeBuilder = () => {
     const handleSave = async () => {
         if (!user || !resumeData || !currentVersion) return;
         setIsSaving(true);
-        try {
-            const versionRef = doc(db, `users/${user.uid}/resumeVersions`, currentVersion.id);
-            await setDoc(versionRef, { resumeData, updatedAt: serverTimestamp() }, { merge: true });
-            toast({
-                title: "Resume Saved!",
-                description: `Version "${currentVersion.versionName}" has been updated.`,
+        const versionRef = doc(db, `users/${user.uid}/resumeVersions`, currentVersion.id);
+        setDoc(versionRef, { resumeData, updatedAt: serverTimestamp() }, { merge: true })
+            .then(() => {
+                toast({ title: "Saved!", description: currentVersion.versionName });
+                setIsSaving(false);
+            })
+            .catch(async (error) => {
+                const permissionError = new FirestorePermissionError({
+                    path: versionRef.path,
+                    operation: 'update',
+                    requestResourceData: resumeData,
+                } satisfies SecurityRuleContext, error);
+                errorEmitter.emit('permission-error', permissionError);
+                setIsSaving(false);
             });
-        } catch (error) {
-            console.error("Error saving resume: ", error);
-            toast({
-                title: "Error",
-                description: "Could not save your resume. Please try again.",
-                variant: "destructive"
-            });
-        } finally {
-            setIsSaving(false);
-        }
     }
     
     const handleSaveAsNew = async () => {
         if (!user || !resumeData || versions.length >= draftLimit) return;
         setIsSaving(true);
         try {
-            // Suggest a name via AI
             const { versionName } = await suggestResumeVersionNameAction({ resumeData });
-
             const newVersionData = {
                 versionName: versionName || `Version ${versions.length + 1}`,
                 updatedAt: serverTimestamp(),
                 resumeData,
             };
-            const newVersionRef = await addDoc(collection(db, `users/${user.uid}/resumeVersions`), newVersionData);
-
-            toast({
-                title: "New Version Saved!",
-                description: `Saved as "${newVersionData.versionName}".`,
-            });
-
-            // Set this new version as the current one
-            const newVersion = { id: newVersionRef.id, ...newVersionData };
-            setCurrentVersion(newVersion);
-
+            await addDoc(collection(db, `users/${user.uid}/resumeVersions`), newVersionData);
+            toast({ title: "Version Created!" });
         } catch (error) {
-            console.error("Error saving new version: ", error);
-            toast({ title: "Error", description: "Could not save new version.", variant: "destructive" });
+            toast({ title: "Error", variant: "destructive" });
         } finally {
             setIsSaving(false);
         }
@@ -530,7 +504,6 @@ export const ResumeBuilder = () => {
                 <div className="space-y-6">
                     <Card><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
                     <Card><CardHeader><Skeleton className="h-6 w-1/3" /></CardHeader><CardContent><Skeleton className="h-32 w-full" /></CardContent></Card>
-                     <Card><CardHeader><Skeleton className="h-6 w-1/3" /></CardHeader><CardContent><Skeleton className="h-40 w-full" /></CardContent></Card>
                 </div>
                 <div className="flex flex-col gap-4">
                      <Skeleton className="h-10 w-full" />

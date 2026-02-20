@@ -25,15 +25,14 @@ service cloud.firestore {
       allow read: if true;
     }
 
-    // User documents and all subcollections
-    // Using a more robust recursive pattern to ensure subcollection access
-    match /users/{userId}/{allPaths=**} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
-    }
-    
-    // Explicit match for the user document itself
+    // User documents and ALL subcollections (resumeVersions, shortlistedCandidates, etc.)
+    // Explicitly allow access to the user's own branch
     match /users/{userId} {
       allow read, write: if isSignedIn() && request.auth.uid == userId;
+      
+      match /{allSubcollections=**} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
     }
 
     // Support Requests

@@ -27,7 +27,7 @@ import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Trash2, Crown, User, Shield, Trophy, AlertTriangle, Handshake } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { differenceInDays, addDays, format } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
@@ -171,9 +171,9 @@ export function UserManagementPage() {
                                             <AvatarImage src={`https://placehold.co/100x100.png?text=${user.email[0].toUpperCase()}`} />
                                             <AvatarFallback>{user.email[0].toUpperCase()}</AvatarFallback>
                                         </Avatar>
-                                        <div>
-                                            <p className="font-medium flex items-center gap-2 text-sm">{user.email}{isUserAdmin && <Shield className="h-3 w-3 text-primary" />}</p>
-                                            <p className="text-[10px] text-muted-foreground font-mono">{user.id}</p>
+                                        <div className="max-w-[150px] md:max-w-none">
+                                            <p className="font-medium flex items-center gap-2 text-sm truncate">{user.email}{isUserAdmin && <Shield className="h-3 w-3 text-primary shrink-0" />}</p>
+                                            <p className="text-[10px] text-muted-foreground font-mono truncate">{user.id}</p>
                                         </div>
                                     </div>
                                 </TableCell>

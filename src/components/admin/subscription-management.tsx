@@ -175,12 +175,12 @@ export function SubscriptionManagement() {
                             <AvatarImage src={`https://placehold.co/100x100.png?text=${user.email[0].toUpperCase()}`} />
                             <AvatarFallback>{user.email[0].toUpperCase()}</AvatarFallback>
                           </Avatar>
-                          <div className="flex flex-col">
-                            <span className="font-medium text-sm flex items-center gap-1">
+                          <div className="flex flex-col truncate max-w-[150px]">
+                            <span className="font-medium text-sm flex items-center gap-1 truncate">
                               {user.email}
-                              {isUserAdmin && <Shield className="w-3 h-3 text-primary" />}
+                              {isUserAdmin && <Shield className="w-3 h-3 text-primary shrink-0" />}
                             </span>
-                            <span className="text-xs text-muted-foreground">{user.displayName || 'No name'}</span>
+                            <span className="text-xs text-muted-foreground truncate">{user.displayName || 'No name'}</span>
                           </div>
                         </div>
                       </TableCell>

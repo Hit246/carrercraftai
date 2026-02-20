@@ -62,7 +62,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setLoading(true);
       if (currentUser) {
         setUser(currentUser);
         const userIsAdmin = currentUser.email && ADMIN_EMAILS.includes(currentUser.email);
@@ -102,9 +101,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!user || isAdmin) {
-        if (!loading) {
-            setLoading(false);
-        }
         return;
     }
 
@@ -112,9 +108,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
         let currentData;
         if (!userDoc.exists()) {
-             await setDoc(userRef, { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date(), hasCompletedOnboarding: false });
-             const freshSnap = await getDoc(userRef);
-             currentData = freshSnap.data() as UserData;
+             const initData = { email: user.email, plan: 'free', credits: FREE_CREDITS, createdAt: new Date(), hasCompletedOnboarding: false };
+             await setDoc(userRef, initData);
+             currentData = initData as UserData;
         } else {
             currentData = userDoc.data() as UserData;
         }
@@ -122,7 +118,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userPlan = currentData.plan || 'free';
         const planUpdatedAtRaw = currentData.planUpdatedAt;
 
-        // Robust date conversion helper
         const getPlanDate = (val: any) => {
             if (!val) return null;
             if (val.seconds) return new Date(val.seconds * 1000);
@@ -133,13 +128,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const planUpdatedAt = getPlanDate(planUpdatedAtRaw);
 
-        // Expiration check logic: only for paid plans that are NOT currently pending an upgrade
-        if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan) && userPlan !== 'pending') {
+        // Expiry logic: Only for paid plans NOT in pending state
+        if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
             const expirationDate = addDays(planUpdatedAt, 30);
-            const isExpired = differenceInDays(new Date(), expirationDate) >= 0;
-
-            if (isExpired && planUpdatedAt.getTime() > 0) {
-                console.log(`Plan ${userPlan} expired. Reverting to free.`);
+            if (differenceInDays(new Date(), expirationDate) >= 0) {
                 await updateDoc(userRef, {
                     plan: 'free',
                     credits: FREE_CREDITS,
@@ -154,10 +146,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUserData(currentData);
         setPlan(userPlan);
 
-        // Determine effective plan for credits (even if pending)
-        const effectivePlan = (userPlan === 'pending' && currentData.previousPlan) 
-            ? currentData.previousPlan 
-            : userPlan;
+        // DETERMINISTIC FEATURE ACCESS
+        // If plan is 'pending', you only get the 'previousPlan' benefits.
+        // You only get the new plan benefits once 'plan' is updated to the actual role string.
+        const effectivePlan = userPlan === 'pending' ? (currentData.previousPlan || 'free') : userPlan;
 
         if (effectivePlan === 'pro' || effectivePlan === 'recruiter') {
             setCredits(Infinity);
@@ -170,7 +162,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-}, [user, loading, isAdmin]);
+}, [user, isAdmin]);
 
   const login = (email:string, password:string) => {
     return signInWithEmailAndPassword(auth, email, password);
@@ -213,13 +205,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const requestCancellation = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
     const userRef = doc(db, 'users', user.uid);
-    const newPlanData = { plan: 'cancellation_requested' as Plan, planUpdatedAt: new Date() };
-    await updateDoc(userRef, newPlanData);
+    await updateDoc(userRef, { plan: 'cancellation_requested', planUpdatedAt: new Date() });
   }
 
   const useCredit = async () => {
     if (!user || (user.email && ADMIN_EMAILS.includes(user.email))) return;
-    if ((plan === 'free' || plan === 'essentials') && credits > 0) {
+    // Use effective plan check
+    const effectivePlan = plan === 'pending' ? (userData?.previousPlan || 'free') : plan;
+    if ((effectivePlan === 'free' || effectivePlan === 'essentials') && credits > 0) {
         const newCredits = credits - 1;
         const userRef = doc(db, 'users', user.uid);
         await updateDoc(userRef, { credits: newCredits });
