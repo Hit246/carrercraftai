@@ -716,7 +716,7 @@
             <div class="section">
                 <h3>2.2 Existing System</h3>
                 <p>Current career tools include job portals (LinkedIn, Indeed, Naukri), resume builders (Zety, Zety-like
-                    tools), and ATS platforms (Greenhouse, Lever) operating separately.</p>
+                    tools), and ATS platforms (Greenhouse, Level) operating separately.</p>
 
                 <h4>Limitations for Candidates</h4>
                 <ul>
@@ -1034,6 +1034,29 @@
             </div>
         </div>
 
+        <div class="page page-break">
+            <div class="section">
+                <h4>3. supportRequests Collection</h4>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>userId</td><td>string</td><td>The UID of the user who submitted the ticket</td></tr>
+                        <tr><td>userEmail</td><td>string</td><td>Email of the user at submission</td></tr>
+                        <tr><td>subject</td><td>string</td><td>Subject line of the request</td></tr>
+                        <tr><td>category</td><td>string</td><td>Category (billing, technical, etc.)</td></tr>
+                        <tr><td>status</td><td>string</td><td>Status (open, in-progress, closed)</td></tr>
+                        <tr><td>lastMessageAt</td><td>timestamp</td><td>Timestamp of latest conversation activity</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Chapter 5: Implementation -->
         <div class="page page-break">
             <div class="page-header">
@@ -1121,12 +1144,35 @@
 
         <!-- Chapter 7: Testing -->
         <div class="page page-break">
+            <div class="page-header">
+                <div class="chapter-num">Chapter 7</div>
+                <h2>Testing & Bibliography</h2>
+            </div>
+
             <div class="section">
                 <h3>7.1 Testing</h3>
                 <p>Verified all core modules (Auth, AI, Payments, Analytics) in real environments.</p>
                 <div class="info-box">
                     <p><strong>Final Verdict:</strong> The project is a working MVP for ATS scoring accuracy, visual recruitment analytics, and secure webhook-verified subscriptions.</p>
                 </div>
+            </div>
+        </div>
+
+        <div class="page page-break">
+            <div class="section">
+                <h3>7.2 Bibliography</h3>
+                <h4>Reference Books</h4>
+                <ul>
+                    <li><em>Learning React</em> – Alex Banks & Eve Porcello</li>
+                    <li><em>Programming TypeScript</em> – Boris Cherny</li>
+                </ul>
+                <h4>Online Documentation</h4>
+                <ul>
+                    <li><strong>Next.js Docs:</strong> App Router and Server Actions usage</li>
+                    <li><strong>Firebase Docs:</strong> Firestore and Security Rules documentation</li>
+                    <li><strong>Genkit Docs:</strong> AI flow orchestration and schemas</li>
+                    <li><strong>Razorpay Docs:</strong> Webhook signature verification logic</li>
+                </ul>
             </div>
         </div>
 
