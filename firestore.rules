@@ -19,8 +19,9 @@ service cloud.firestore {
       // Authenticated users can only read/write their own document
       allow read, write: if isAdmin() || isOwner(userId);
 
-      // RECURSIVE WILDCARD: This grants the owner/admin permission to ALL subcollections
-      // This permanently fixes permission errors for resumeVersions, shortlistedCandidates, etc.
+      // PERMANENT FIX: Recursive wildcard grants the owner/admin full access
+      // to ALL nested subcollections (resumeVersions, shortlistedCandidates, etc.)
+      // This resolves the "Missing or insufficient permissions" error for collection list operations.
       match /{allPaths=**} {
         allow read, write: if isAdmin() || isOwner(userId);
       }
