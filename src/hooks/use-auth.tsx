@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
@@ -21,6 +22,7 @@ interface UserData {
     paymentProofURL?: string | null;
     paymentId?: string | null;
     requestedPlan?: 'essentials' | 'pro' | 'recruiter';
+    previousPlan?: Plan;
     hasCompletedOnboarding?: boolean;
     displayName?: string | null;
     photoURL?: string | null;
@@ -116,11 +118,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         
         const userPlan = currentData.plan || 'free';
-        const planUpdatedAt = currentData.planUpdatedAt;
+        const planUpdatedAtRaw = currentData.planUpdatedAt;
+
+        // Robust date conversion helper
+        const getPlanDate = (val: any) => {
+            if (!val) return null;
+            if (val.seconds) return new Date(val.seconds * 1000);
+            if (val instanceof Date) return val;
+            return new Date(val);
+        };
+
+        const planUpdatedAt = getPlanDate(planUpdatedAtRaw);
 
         if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
-            const upgradeDate = new Date(planUpdatedAt.seconds * 1000);
-            const expirationDate = addDays(upgradeDate, 30);
+            const expirationDate = addDays(planUpdatedAt, 30);
             const isExpired = differenceInDays(new Date(), expirationDate) >= 0;
 
             if (isExpired) {
@@ -138,9 +149,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUserData(currentData);
         setPlan(userPlan);
 
-        if (userPlan === 'pro' || userPlan === 'recruiter') {
+        // Determine effective plan for credits (even if pending)
+        const effectivePlan = (userPlan === 'pending' && currentData.previousPlan) 
+            ? currentData.previousPlan 
+            : userPlan;
+
+        if (effectivePlan === 'pro' || effectivePlan === 'recruiter') {
             setCredits(Infinity);
-        } else if (userPlan === 'essentials') {
+        } else if (effectivePlan === 'essentials') {
             setCredits(currentData.credits ?? ESSENTIALS_CREDITS);
         } else {
             setCredits(currentData.credits ?? FREE_CREDITS);

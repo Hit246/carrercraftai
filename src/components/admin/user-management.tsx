@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -46,17 +47,23 @@ const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
 export function UserManagementPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchUsers = async () => {
     setIsLoading(true);
-    const usersCollectionRef = collection(db, 'users');
-    const usersSnapshot = await getDocs(usersCollectionRef);
-    const usersList = usersSnapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() } as UserData))
-      .sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-    setUsers(usersList);
-    setIsLoading(false);
+    try {
+      const usersCollectionRef = collection(db, 'users');
+      const usersSnapshot = await getDocs(usersCollectionRef);
+      const usersList = usersSnapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() } as UserData))
+        .sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      setUsers(usersList);
+    } catch (e) {
+      toast({ title: 'Error', description: 'Failed to load users.', variant: 'destructive' });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -76,88 +83,60 @@ export function UserManagementPage() {
       }
 
       await updateDoc(userRef, updateData);
-      toast({
-        title: 'Plan Updated',
-        description: `User's plan has been changed to ${newPlan}.`,
-      });
-      fetchUsers(); // Refresh users list
+      toast({ title: 'Plan Updated', description: `User changed to ${newPlan}.` });
+      fetchUsers();
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update user plan.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Update failed.', variant: 'destructive' });
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    const userRef = doc(db, 'users', userId);
+  const handleDeleteUser = async () => {
+    if (!deleteId) return;
+    const userRef = doc(db, 'users', deleteId);
     try {
       await deleteDoc(userRef);
-      toast({
-        title: 'User Deleted',
-        description: 'User has been removed from Firestore.',
-      });
+      toast({ title: 'User Deleted' });
+      setDeleteId(null);
       fetchUsers(); 
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete user.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Delete failed.', variant: 'destructive' });
     }
   };
 
   const getPlanBadgeVariant = (plan: Plan) => {
     switch (plan) {
       case 'essentials':
-        return 'secondary';
-      case 'pro':
-        return 'secondary';
-      case 'recruiter':
-        return 'default';
+      case 'pro': return 'secondary';
+      case 'recruiter': return 'default';
       case 'pending':
-      case 'cancellation_requested':
-          return 'destructive';
-      default:
-        return 'outline';
+      case 'cancellation_requested': return 'destructive';
+      default: return 'outline';
     }
   };
   
   const getPlanDisplayName = (user: UserData) => {
     switch (user.plan) {
-      case 'pending':
-        return `Pending (${user.requestedPlan})`;
-      case 'cancellation_requested':
-        return `Cancellation Requested`;
-      default:
-        return user.plan;
+      case 'pending': return `Pending (${user.requestedPlan})`;
+      case 'cancellation_requested': return `Cancellation Requested`;
+      default: return user.plan;
     }
-  }
+  };
 
   const getExpirationInfo = (user: UserData) => {
-    if (!user.planUpdatedAt || ['free', 'pending', 'cancellation_requested'].includes(user.plan)) {
-      return null;
-    }
+    if (!user.planUpdatedAt || ['free', 'pending', 'cancellation_requested'].includes(user.plan)) return null;
     const upgradeDate = new Date(user.planUpdatedAt.seconds * 1000);
     const expirationDate = addDays(upgradeDate, 30);
     const daysRemaining = differenceInDays(expirationDate, new Date());
-
-    if (daysRemaining < 0) {
-      return { status: 'expired' as const, date: expirationDate };
-    }
-    if (daysRemaining <= 7) {
-      return { status: 'expires_soon' as const, date: expirationDate };
-    }
+    if (daysRemaining < 0) return { status: 'expired' as const, date: expirationDate };
+    if (daysRemaining <= 7) return { status: 'expires_soon' as const, date: expirationDate };
     return null;
-  }
-
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>User Management</CardTitle>
-        <CardDescription>View, manage, and edit all user profiles and permissions.</CardDescription>
+        <CardDescription>View and manage all user profiles and permissions.</CardDescription>
       </CardHeader>
       <CardContent>
         <TooltipProvider>
@@ -171,130 +150,83 @@ export function UserManagementPage() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {isLoading
-                ? [...Array(5)].map((_, i) => (
-                    <TableRow key={i}>
-                        <TableCell><Skeleton className="h-10 w-48" /></TableCell>
-                        <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
-                    </TableRow>
+                {isLoading ? (
+                    [...Array(5)].map((_, i) => (
+                        <TableRow key={i}>
+                            <TableCell><Skeleton className="h-10 w-48" /></TableCell>
+                            <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                            <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                        </TableRow>
                     ))
-                : users.map((user) => {
-                    const isUserAdmin = ADMIN_EMAILS.includes(user.email);
-                    const expirationInfo = getExpirationInfo(user);
-                    return (
-                    <TableRow key={user.id}>
-                        <TableCell>
-                        <div className="flex items-center gap-3">
-                            <Avatar>
-                            <AvatarImage src={`https://placehold.co/100x100.png?text=${user.email[0].toUpperCase()}`} />
-                            <AvatarFallback>{user.email[0].toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                            <p className="font-medium flex items-center gap-2">
-                                {user.email}
-                                {isUserAdmin && <Shield className="h-4 w-4 text-primary" />}
-                            </p>
-                            <p className="text-sm text-muted-foreground">{user.id}</p>
-                            </div>
-                        </div>
-                        </TableCell>
-                        <TableCell>
-                            <div className="flex items-center gap-2">
-                                {isUserAdmin ? (
-                                    <Badge>Admin</Badge>
-                                ) : (
-                                    <Badge variant={getPlanBadgeVariant(user.plan)}>
-                                    {getPlanDisplayName(user)}
-                                    </Badge>
-                                )}
-                                {expirationInfo?.status === 'expires_soon' && (
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <Badge variant="destructive" className="bg-yellow-500 hover:bg-yellow-500/80">Expires Soon</Badge>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Expires on {format(expirationInfo.date, 'MMM d, yyyy')}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                )}
-                                 {expirationInfo?.status === 'expired' && (
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                             <Badge variant="destructive">Expired</Badge>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Expired on {format(expirationInfo.date, 'MMM d, yyyy')}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                )}
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                        {user.createdAt
-                            ? new Date(user.createdAt.seconds * 1000).toLocaleDateString()
-                            : 'N/A'}
-                        </TableCell>
-                        <TableCell className="text-right">
-                        {!isUserAdmin && (
-                            <AlertDialog>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')}>
-                                    <User className="mr-2 h-4 w-4" />
-                                    Set to Free
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'essentials')}>
-                                    <Trophy className="mr-2 h-4 w-4" />
-                                    Set to Essentials
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pro')}>
-                                    <Crown className="mr-2 h-4 w-4" />
-                                    Set to Pro
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'recruiter')}>
-                                    <Handshake className="mr-2 h-4 w-4" />
-                                    Set to Recruiter
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem className="text-destructive focus:text-destructive">
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete User
-                                    </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete the user's
-                                    data from Firestore. To fully remove them, you must also delete them from the Firebase Authentication console.
-                                </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                            </AlertDialog>
-                        )}
-                        </TableCell>
-                    </TableRow>
-                    )})}
+                ) : (
+                    users.map((user) => {
+                        const isUserAdmin = ADMIN_EMAILS.includes(user.email);
+                        const expirationInfo = getExpirationInfo(user);
+                        return (
+                            <TableRow key={user.id}>
+                                <TableCell>
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarImage src={`https://placehold.co/100x100.png?text=${user.email[0].toUpperCase()}`} />
+                                            <AvatarFallback>{user.email[0].toUpperCase()}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-medium flex items-center gap-2 text-sm">{user.email}{isUserAdmin && <Shield className="h-3 w-3 text-primary" />}</p>
+                                            <p className="text-[10px] text-muted-foreground font-mono">{user.id}</p>
+                                        </div>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex items-center gap-2">
+                                        {isUserAdmin ? <Badge>Admin</Badge> : <Badge variant={getPlanBadgeVariant(user.plan)}>{getPlanDisplayName(user)}</Badge>}
+                                        {expirationInfo?.status === 'expires_soon' && (
+                                            <Tooltip><TooltipTrigger><Badge variant="destructive" className="bg-yellow-500">Soon</Badge></TooltipTrigger><TooltipContent><p>Expires {format(expirationInfo.date, 'MMM d')}</p></TooltipContent></Tooltip>
+                                        )}
+                                        {expirationInfo?.status === 'expired' && <Badge variant="destructive">Expired</Badge>}
+                                    </div>
+                                </TableCell>
+                                <TableCell className="text-xs">
+                                    {user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    {!isUserAdmin && (
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')}><User className="mr-2 h-4 w-4" /> Set Free</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'essentials')}><Trophy className="mr-2 h-4 w-4" /> Set Essentials</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pro')}><Crown className="mr-2 h-4 w-4" /> Set Pro</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'recruiter')}><Handshake className="mr-2 h-4 w-4" /> Set Recruiter</DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem className="text-destructive" onClick={() => setDeleteId(user.id)}><Trash2 className="mr-2 h-4 w-4" /> Delete</DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        )
+                    })
+                )}
             </TableBody>
             </Table>
         </TooltipProvider>
       </CardContent>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Delete User?</AlertDialogTitle>
+                <AlertDialogDescription>This action is permanent and will remove all their resume data.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive hover:bg-destructive/90">Confirm Delete</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

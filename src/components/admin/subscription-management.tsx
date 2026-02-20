@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -23,11 +24,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, CreditCard, Calendar, User, Crown, Trophy, Handshake, Shield, AlertTriangle } from 'lucide-react';
+import { MoreHorizontal, CreditCard, Calendar, User, Crown, Trophy, Handshake, Shield, AlertTriangle, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import Link from 'next/link';
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
@@ -38,6 +40,7 @@ interface UserData {
   plan: Plan;
   planUpdatedAt?: { seconds: number };
   createdAt?: { seconds: number };
+  paymentProofURL?: string;
 }
 
 const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
@@ -54,9 +57,6 @@ export function SubscriptionManagement() {
       const q = query(usersCollectionRef, orderBy('planUpdatedAt', 'desc'));
       const usersSnapshot = await getDocs(q);
       const usersList = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as UserData));
-      
-      // Separate paid vs non-paid for better organization if needed, 
-      // but here we just show everyone with subscription info
       setUsers(usersList);
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
@@ -144,9 +144,9 @@ export function SubscriptionManagement() {
               <TableRow>
                 <TableHead>User</TableHead>
                 <TableHead>Current Plan</TableHead>
-                <TableHead>Purchase Date</TableHead>
-                <TableHead>Expiry Date</TableHead>
+                <TableHead>Billing Details</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Payment Proof</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -156,9 +156,9 @@ export function SubscriptionManagement() {
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-10 w-48" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-10 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-8 w-24" /></TableCell>
                     <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                   </TableRow>
                 ))
@@ -185,11 +185,13 @@ export function SubscriptionManagement() {
                         </div>
                       </TableCell>
                       <TableCell>{getPlanBadge(user.plan)}</TableCell>
-                      <TableCell className="text-sm">
-                        {expiryInfo ? format(expiryInfo.purchaseDate, 'MMM d, yyyy') : '-'}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {expiryInfo ? format(expiryInfo.expiryDate, 'MMM d, yyyy') : '-'}
+                      <TableCell>
+                        {expiryInfo ? (
+                          <div className="text-xs space-y-1">
+                            <div className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Paid: {format(expiryInfo.purchaseDate, 'MMM d, yyyy')}</div>
+                            <div className="flex items-center gap-1 text-muted-foreground"><AlertTriangle className="w-3 h-3" /> Ends: {format(expiryInfo.expiryDate, 'MMM d, yyyy')}</div>
+                          </div>
+                        ) : '-'}
                       </TableCell>
                       <TableCell>
                         {expiryInfo ? (
@@ -213,6 +215,17 @@ export function SubscriptionManagement() {
                           </div>
                         ) : (
                           <span className="text-xs text-muted-foreground">N/A</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {user.paymentProofURL ? (
+                          <Button asChild variant="outline" size="sm" className="h-8">
+                            <Link href={user.paymentProofURL} target="_blank">
+                              <ExternalLink className="w-3 h-3 mr-2" /> View Proof
+                            </Link>
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">None</span>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
