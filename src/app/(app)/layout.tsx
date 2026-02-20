@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -31,6 +30,7 @@ import {
   Target,
   NotebookPen,
   LayoutDashboard,
+  SquarePen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -93,6 +93,7 @@ function AppLayoutContent({
 
   const getPageTitle = () => {
     if (isActive('/dashboard')) return 'Home';
+    if (isActive('/resume-builder')) return 'Resume Builder';
     if (isActive('/resume-analyzer')) return 'Resume Analyzer';
     if (isActive('/ats-optimizer')) return 'ATS Optimizer';
     if (isActive('/job-matcher')) return 'Job Matcher';
@@ -101,7 +102,7 @@ function AppLayoutContent({
     if (isActive('/recruiter-dashboard')) return 'Recruiter Dashboard';
     if (isActive('/candidate-summarizer')) return 'Candidate Summarizer';
     if (isActive('/support')) return 'Support';
-    if (isActive('/pricing')) return 'Upgrade to Pro';
+    if (isActive('/pricing')) return 'Upgrade Plan';
     if (isActive('/profile')) return 'Profile Settings';
     if (isActive('/order-status')) return 'Order Status';
     return 'CareerCraft AI';
@@ -160,6 +161,14 @@ function AppLayoutContent({
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive('/resume-builder')}>
+                <Link href="/resume-builder">
+                  <SquarePen />
+                  <span>Resume Builder</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive('/resume-analyzer')}>
                     <Link href="/resume-analyzer">
                     <Sparkles />
@@ -191,7 +200,7 @@ function AppLayoutContent({
                     <Link href="/cover-letter-generator">
                     <FileText />
                     <span>Cover Letter Generator</span>
-                    {(plan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    {(plan === 'free') && <Badge variant="secondary" className="ml-auto bg-gray-400/20 text-gray-500 border-gray-400/30">Essentials</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
