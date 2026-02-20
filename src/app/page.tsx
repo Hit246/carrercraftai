@@ -113,10 +113,10 @@ function HomePageContent() {
                      <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                         <Users className="w-6 h-6"/>
                     </div>
-                  <CardTitle>Recruiter Tools</CardTitle>
+                  <CardTitle>Recruiter Workspace</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Find the best candidates with AI ranking, manage shortlists, and track hiring trends with advanced analytics.</p>
+                  <p className="text-muted-foreground">Find the best candidates with AI ranking, manage persistent shortlists, and track hiring trends with advanced analytics.</p>
                 </CardContent>
               </Card>
             </div>

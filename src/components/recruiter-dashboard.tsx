@@ -89,14 +89,14 @@ export function RecruiterDashboard() {
 
         const avgScore = candidates.reduce((acc, c) => acc + c.matchScore, 0) / candidates.length;
         
-        // Match Score Distribution
+        // Match Score Distribution Bins
         const distribution = [
-            { range: '0-50', count: 0, fill: '#ef4444' },
-            { range: '51-75', count: 0, fill: '#f59e0b' },
-            { range: '76-100', count: 0, fill: '#10b981' },
+            { range: 'Low (0-50)', count: 0, fill: '#ef4444' },
+            { range: 'Mid (51-75)', count: 0, fill: '#f59e0b' },
+            { range: 'High (76-100)', count: 0, fill: '#10b981' },
         ];
         
-        // Role Distribution
+        // Role Distribution Map
         const rolesMap: Record<string, number> = {};
 
         candidates.forEach(c => {
