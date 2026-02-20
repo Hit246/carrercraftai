@@ -106,11 +106,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const planUpdatedAt = currentData.planUpdatedAt;
 
         // Determine Effective Plan (What the user ACTUALLY has access to)
+        // If plan is 'pending', they keep their previous benefits.
         const effPlan = userPlan === 'pending' ? (currentData.previousPlan || 'free') : userPlan;
 
-        // Expiration Logic
+        // Expiration Logic - Hardened to handle both Firestore Timestamps and Javascript Dates
         if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
-            const upgradeDate = planUpdatedAt.toDate ? planUpdatedAt.toDate() : new Date(planUpdatedAt.seconds * 1000);
+            let upgradeDate: Date;
+            if (planUpdatedAt.toDate) {
+                upgradeDate = planUpdatedAt.toDate();
+            } else if (planUpdatedAt.seconds) {
+                upgradeDate = new Date(planUpdatedAt.seconds * 1000);
+            } else {
+                upgradeDate = new Date(planUpdatedAt);
+            }
+
             const expirationDate = addDays(upgradeDate, 30);
             if (differenceInDays(new Date(), expirationDate) >= 0) {
                 await updateDoc(userRef, { plan: 'free', credits: FREE_CREDITS, previousPlan: null });

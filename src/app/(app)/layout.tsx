@@ -136,6 +136,9 @@ function AppLayoutContent({
     )
   }
 
+  const isProAccess = effectivePlan === 'pro' || effectivePlan === 'recruiter';
+  const isEssentialsAccess = effectivePlan === 'essentials' || isProAccess;
+
   return (
     <>
     <OnboardingTour
@@ -173,7 +176,7 @@ function AppLayoutContent({
                     <Link href="/resume-analyzer">
                     <Sparkles />
                     <span>Resume Analyzer</span>
-                    {(effectivePlan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    {!isProAccess && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -182,7 +185,7 @@ function AppLayoutContent({
                     <Link href="/ats-optimizer">
                     <Target />
                     <span>ATS Optimizer</span>
-                    {(effectivePlan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    {!isProAccess && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -191,7 +194,7 @@ function AppLayoutContent({
                     <Link href="/job-matcher">
                     <Briefcase />
                     <span>Job Matcher</span>
-                    {(effectivePlan === 'free') && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    {!isProAccess && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
@@ -200,7 +203,7 @@ function AppLayoutContent({
                     <Link href="/cover-letter-generator">
                     <FileText />
                     <span>Cover Letter Generator</span>
-                    {(effectivePlan === 'free') && <Badge variant="secondary" className="ml-auto bg-gray-400/20 text-gray-500 border-gray-400/30">Essentials</Badge>}
+                    {!isEssentialsAccess && <Badge variant="secondary" className="ml-auto bg-gray-400/20 text-gray-500 border-gray-400/30">Essentials</Badge>}
                     </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>

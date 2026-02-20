@@ -18,12 +18,12 @@ service cloud.firestore {
     }
 
     // Rules for the 'users' collection and all subcollections
+    // Recursive wildcard ensures owner has full access (read, write, list) to all nested data
     match /users/{userId} {
       allow read, write: if isAdmin() || isOwner(userId);
       
-      // Recursive wildcard ensures owner has full access to all nested data
       match /{allPaths=**} {
-        allow read, write, list: if isAdmin() || isOwner(userId);
+        allow read, write: if isAdmin() || isOwner(userId);
       }
     }
     
@@ -33,7 +33,7 @@ service cloud.firestore {
       allow write: if isAdmin() || get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       
       match /{allPaths=**} {
-        allow read, write, list: if isAdmin() || get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
+        allow read, write: if isAdmin() || get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
       }
     }
 
@@ -50,7 +50,7 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
 
       match /{allPaths=**} {
-        allow read, write, list: if isAdmin() || isOwner(get(/databases/$(database)/documents/supportRequests/$(requestId)).data.userId);
+        allow read, write: if isAdmin() || isOwner(get(/databases/$(database)/documents/supportRequests/$(requestId)).data.userId);
       }
     }
   }
