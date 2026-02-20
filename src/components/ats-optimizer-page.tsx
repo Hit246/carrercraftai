@@ -44,7 +44,7 @@ export function AtsOptimizerPage() {
   const [analysisResult, setAnalysisResult] = useState<AtsOptimizerOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { effectivePlan, credits, useCredit } = useAuth();
+  const { effectivePlan, credits, useCredit, isAdmin } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,13 +54,14 @@ export function AtsOptimizerPage() {
     }
   });
   
-  const canUseFeature = effectivePlan !== 'free' || credits > 0;
+  const isProAccess = effectivePlan === 'pro' || effectivePlan === 'recruiter' || isAdmin;
+  const canUseFeature = isProAccess || credits > 0;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!canUseFeature) {
         toast({
           title: "Upgrade to Pro",
-          description: "You've used all your free credits. Please upgrade to continue.",
+          description: "This is a Pro feature. Please upgrade or get more credits to continue.",
           variant: "destructive",
         })
         router.push('/pricing');
@@ -71,7 +72,7 @@ export function AtsOptimizerPage() {
     setAnalysisResult(null);
 
     try {
-        if (effectivePlan === 'free') {
+        if (!isProAccess) {
             await useCredit();
         }
         const resumeDataUri = await fileToDataUri(values.resumeFile);
@@ -94,12 +95,12 @@ export function AtsOptimizerPage() {
 
   return (
     <div className="space-y-8">
-        {effectivePlan === 'free' && (
+        {!isProAccess && (
              <Alert variant="pro">
                 <Crown />
                 <AlertTitle>This is a Pro Feature</AlertTitle>
                 <AlertDescription className="flex justify-between items-center">
-                    <span>You have {credits} free credits remaining. Upgrade for unlimited use.</span>
+                    <span>You have {credits} credits remaining. Upgrade to Pro for advanced ATS optimization.</span>
                     <Button onClick={() => router.push('/pricing')} size="sm">Upgrade Now</Button>
                 </AlertDescription>
             </Alert>

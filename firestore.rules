@@ -17,8 +17,7 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Rules for the 'users' collection and all subcollections
-    // Recursive wildcard ensures owner has full access (read, write, list) to all nested data
+    // Definitive recursive rules for users and all sub-data
     match /users/{userId} {
       allow read, write: if isAdmin() || isOwner(userId);
       
@@ -27,7 +26,6 @@ service cloud.firestore {
       }
     }
     
-    // Rules for the 'teams' collection
     match /teams/{teamId} {
       allow read: if isSignedIn();
       allow write: if isAdmin() || get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
@@ -37,13 +35,11 @@ service cloud.firestore {
       }
     }
 
-    // Rules for the 'settings' collection
     match /settings/{settingId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
-    // Rules for the 'supportRequests' collection
     match /supportRequests/{requestId} {
       allow read: if isAdmin() || isOwner(resource.data.userId);
       allow create: if isSignedIn() && isOwner(request.resource.data.userId);

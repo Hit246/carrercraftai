@@ -34,7 +34,7 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   plan: Plan;
-  effectivePlan: Plan; // The plan used for feature gating (ignores 'pending')
+  effectivePlan: Plan;
   credits: number;
   userData: UserData | null;
   useCredit: () => Promise<void>;
@@ -105,25 +105,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userPlan = currentData.plan || 'free';
         const planUpdatedAt = currentData.planUpdatedAt;
 
-        // Determine Effective Plan (What the user ACTUALLY has access to)
-        // If plan is 'pending', they keep their previous benefits.
+        // Determine Effective Plan: If status is 'pending', they keep their old benefits
         const effPlan = userPlan === 'pending' ? (currentData.previousPlan || 'free') : userPlan;
 
-        // Expiration Logic - Hardened to handle both Firestore Timestamps and Javascript Dates
+        // Expiration Logic with safe date handling
         if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
             let upgradeDate: Date;
-            if (planUpdatedAt.toDate) {
+            if (planUpdatedAt?.toDate) {
                 upgradeDate = planUpdatedAt.toDate();
-            } else if (planUpdatedAt.seconds) {
+            } else if (planUpdatedAt?.seconds) {
                 upgradeDate = new Date(planUpdatedAt.seconds * 1000);
             } else {
                 upgradeDate = new Date(planUpdatedAt);
             }
 
-            const expirationDate = addDays(upgradeDate, 30);
-            if (differenceInDays(new Date(), expirationDate) >= 0) {
-                await updateDoc(userRef, { plan: 'free', credits: FREE_CREDITS, previousPlan: null });
-                return;
+            if (!isNaN(upgradeDate.getTime())) {
+                const expirationDate = addDays(upgradeDate, 30);
+                if (differenceInDays(new Date(), expirationDate) >= 0) {
+                    await updateDoc(userRef, { plan: 'free', credits: FREE_CREDITS, previousPlan: null });
+                    return;
+                }
             }
         }
         
@@ -131,6 +132,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setPlan(userPlan);
         setEffectivePlan(effPlan);
 
+        // Deterministic Credit Assignment
         if (effPlan === 'pro' || effPlan === 'recruiter') {
             setCredits(Infinity);
         } else if (effPlan === 'essentials') {

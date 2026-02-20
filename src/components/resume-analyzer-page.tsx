@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -44,7 +43,7 @@ export function ResumeAnalyzerPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialAnalysis, setIsInitialAnalysis] = useState(true);
   const { toast } = useToast();
-  const { plan, credits, useCredit } = useAuth();
+  const { effectivePlan, credits, useCredit, isAdmin } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,14 +53,15 @@ export function ResumeAnalyzerPage() {
     }
   });
 
-  const canUseFeature = plan !== 'free' || credits > 0;
+  const isProAccess = effectivePlan === 'pro' || effectivePlan === 'recruiter' || isAdmin;
+  const canUseFeature = isProAccess || credits > 0;
   
   const performAnalysis = useCallback(async (resumeDataUri: string, desiredRole?: string) => {
     setIsLoading(true);
     setAnalysisResult(null);
 
     try {
-        if (plan === 'free' || plan === 'essentials') {
+        if (!isProAccess) {
             await useCredit();
         }
         const result = await analyzeResumeAction({ resumeDataUri, desiredRole });
@@ -77,24 +77,29 @@ export function ResumeAnalyzerPage() {
         setIsLoading(false);
         setIsInitialAnalysis(false);
     }
-  }, [plan, useCredit, toast]);
+  }, [isProAccess, useCredit, toast]);
 
   useEffect(() => {
     const dataUri = sessionStorage.getItem('resumeDataUriForAnalysis');
     if (dataUri) {
+        if (!canUseFeature) {
+            toast({ title: "Upgrade Required", description: "You need Pro or credits to analyze resumes.", variant: "destructive" });
+            sessionStorage.removeItem('resumeDataUriForAnalysis');
+            setIsInitialAnalysis(false);
+            return;
+        }
         performAnalysis(dataUri);
-        // Clean up session storage after use
         sessionStorage.removeItem('resumeDataUriForAnalysis');
     } else {
       setIsInitialAnalysis(false);
     }
-  }, [performAnalysis]);
+  }, [performAnalysis, canUseFeature, toast]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!canUseFeature) {
         toast({
           title: "Upgrade to Pro",
-          description: "You've used all your free credits. Please upgrade to continue.",
+          description: "This is a Pro feature. Please upgrade or get more credits to continue.",
           variant: "destructive",
         })
         router.push('/pricing');
@@ -117,12 +122,12 @@ export function ResumeAnalyzerPage() {
 
   return (
     <div className="space-y-8">
-        {plan === 'free' && (
+        {!isProAccess && (
              <Alert variant="pro">
                 <Crown />
                 <AlertTitle>This is a Pro Feature</AlertTitle>
                 <AlertDescription className="flex justify-between items-center">
-                    <span>You have {credits} free credits remaining. Upgrade for unlimited use.</span>
+                    <span>You have {credits} credits remaining. Upgrade to Pro for unlimited AI analysis.</span>
                     <Button onClick={() => router.push('/pricing')} size="sm">Upgrade Now</Button>
                 </AlertDescription>
             </Alert>

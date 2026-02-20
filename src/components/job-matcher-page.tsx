@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -11,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Briefcase, ExternalLink, Upload, Crown } from 'lucide-react';
+import { Loader2, Briefcase, Upload, Crown } from 'lucide-react';
 import type { JobMatcherOutput } from '@/ai/flows/job-matcher';
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
@@ -45,7 +44,7 @@ export function JobMatcherPage() {
   const [jobSuggestions, setJobSuggestions] = useState<JobMatcherOutput['jobSuggestions'] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { plan, credits, useCredit } = useAuth();
+  const { effectivePlan, credits, useCredit, isAdmin } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -55,13 +54,14 @@ export function JobMatcherPage() {
     }
   });
 
-  const canUseFeature = plan !== 'free' || credits > 0;
+  const isProAccess = effectivePlan === 'pro' || effectivePlan === 'recruiter' || isAdmin;
+  const canUseFeature = isProAccess || credits > 0;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!canUseFeature) {
         toast({
           title: "Upgrade to Pro",
-          description: "You've used all your free credits. Please upgrade to continue.",
+          description: "Job Matching is a Pro feature. Please upgrade or get more credits to continue.",
           variant: "destructive",
         })
         router.push('/pricing');
@@ -72,7 +72,7 @@ export function JobMatcherPage() {
     setJobSuggestions(null);
 
     try {
-        if (plan === 'free') {
+        if (!isProAccess) {
             await useCredit();
         }
         const resumeDataUri = await fileToDataUri(values.resumeFile);
@@ -96,12 +96,12 @@ export function JobMatcherPage() {
   return (
     <div className="grid lg:grid-cols-12 gap-8">
       <div className="lg:col-span-4 xl:col-span-3 space-y-4">
-        {plan === 'free' && (
+        {!isProAccess && (
              <Alert variant="pro" className="mb-4">
                 <Crown />
                 <AlertTitle>This is a Pro Feature</AlertTitle>
                 <AlertDescription>
-                     You have {credits} free credits remaining. Upgrade for unlimited use.
+                     You have {credits} credits remaining. Upgrade to Pro for unlimited matching.
                 </AlertDescription>
             </Alert>
         )}
