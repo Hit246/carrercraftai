@@ -19,7 +19,7 @@ service cloud.firestore {
       // Authenticated users can only read/write their own document
       allow read, write: if isAdmin() || isOwner(userId);
 
-      // RECURSIVE WILDCARD: This grants the owner permission to ALL subcollections
+      // RECURSIVE WILDCARD: This grants the owner/admin permission to ALL subcollections
       // This permanently fixes permission errors for resumeVersions, shortlistedCandidates, etc.
       match /{allPaths=**} {
         allow read, write: if isAdmin() || isOwner(userId);

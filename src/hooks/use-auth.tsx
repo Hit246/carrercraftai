@@ -144,6 +144,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // DETERMINISTIC FEATURE ACCESS:
         // Use 'previousPlan' benefits if current status is 'pending'
+        // This prevents "Essentials" from unlocking "Pro" features while payment is pending.
         const effectivePlan = userPlan === 'pending' ? (currentData.previousPlan || 'free') : userPlan;
 
         if (effectivePlan === 'pro' || effectivePlan === 'recruiter') {
