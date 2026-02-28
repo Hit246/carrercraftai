@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -54,20 +53,26 @@ export function RecruiterDashboard() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!userData?.teamId) {
+    
+    // If we have a teamId, ensure we show loading while the dashboard content loads
+    if (userData?.teamId) {
+      setIsLoading(true);
+      const candidatesRef = collection(db, `teams/${userData.teamId}/candidates`);
+      const unsubscribe = onSnapshot(candidatesRef, (snapshot) => {
+        const candidatesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Candidate));
+        setCandidates(candidatesData.sort((a,b) => b.addedAt.seconds - a.addedAt.seconds));
+        setIsLoading(false);
+      }, (error) => {
+        console.error("Error fetching candidates:", error);
+        setIsLoading(false);
+      });
+
+      return () => unsubscribe();
+    } else {
+      // If no teamId, we are not loading anything from Firestore
       setIsLoading(false);
-      return;
     }
-
-    const candidatesRef = collection(db, `teams/${userData.teamId}/candidates`);
-    const unsubscribe = onSnapshot(candidatesRef, (snapshot) => {
-      const candidatesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Candidate));
-      setCandidates(candidatesData.sort((a,b) => b.addedAt.seconds - a.addedAt.seconds));
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [userData, authLoading]);
+  }, [userData?.teamId, authLoading]);
 
   const handleStatusChange = async (candidateId: string, newStatus: CandidateStatus) => {
     if (!userData?.teamId) return;
@@ -88,6 +93,7 @@ export function RecruiterDashboard() {
   const handleInitializeWorkspace = async () => {
     if (!user) return;
     setIsCreatingTeam(true);
+    setIsLoading(true); // Keep loading while context updates
     try {
         const teamRef = await addDoc(collection(db, 'teams'), {
             owner: user.uid,
@@ -97,6 +103,7 @@ export function RecruiterDashboard() {
         toast({ title: "Workspace Ready!", description: "You can now shortlist candidates from the Matcher."});
     } catch (error) {
         toast({ title: "Error", description: "Failed to initialize workspace.", variant: "destructive"});
+        setIsLoading(false);
     } finally {
         setIsCreatingTeam(false);
     }
@@ -126,7 +133,15 @@ export function RecruiterDashboard() {
     return jobMatch && statusMatch;
   });
 
-  if (!userData?.teamId && !isLoading) {
+  if (isLoading || authLoading) {
+    return (
+        <div className="flex h-[400px] w-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
+
+  if (!userData?.teamId) {
     return (
         <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6">
             <div className="bg-primary/10 p-6 rounded-full">
@@ -210,13 +225,7 @@ export function RecruiterDashboard() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {isLoading ? (
-                        <TableRow>
-                            <TableCell colSpan={6} className="h-24 text-center">
-                                <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
-                            </TableCell>
-                        </TableRow>
-                    ) : filteredCandidates.length === 0 ? (
+                    {filteredCandidates.length === 0 ? (
                         <TableRow>
                             <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                                 <Contact className="mx-auto h-8 w-8 mb-2 opacity-20"/>

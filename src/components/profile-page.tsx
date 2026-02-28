@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -315,5 +314,3 @@ export function ProfilePage() {
         </div>
     );
 }
-
-    
