@@ -27,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from './ui/dropdown-menu';
 
 interface Experience {
@@ -1082,6 +1082,10 @@ export const ResumeBuilder = () => {
                                 }
                             </AlertDialog>
                             
+                            <Button onClick={handleExport} className="hidden md:flex">
+                                <Download className="mr-2 h-4 w-4" /> Export
+                            </Button>
+
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
@@ -1091,7 +1095,9 @@ export const ResumeBuilder = () => {
                                         {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Bot className="mr-2 h-4 w-4" />}
                                         AI Analyze
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={handleExport}><Download className="mr-2 h-4 w-4" /> Export as PDF</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleExport} className="md:hidden">
+                                        <Download className="mr-2 h-4 w-4" /> Export as PDF
+                                    </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
