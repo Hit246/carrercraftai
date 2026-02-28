@@ -43,7 +43,7 @@ export function ProfilePage() {
 
     const handleLogout = async () => {
         await logout();
-        router.push('/');
+        window.location.href = '/';
     }
     
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {

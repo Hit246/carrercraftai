@@ -110,7 +110,7 @@ function AppLayoutContent({
 
   const handleLogout = async () => {
     await logout();
-    router.push('/');
+    window.location.href = '/';
   }
 
   const getPlanBadge = () => {

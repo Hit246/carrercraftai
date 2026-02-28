@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, Contact, ExternalLink, Filter, Trash2, LayoutDashboard, BarChart3, PieChart as PieChartIcon, TrendingUp, Building } from 'lucide-react';
+import { Loader2, Contact, ExternalLink, Filter, Trash2, LayoutDashboard, BarChart3, PieChart as PieChartIcon, TrendingUp, Building, AlertCircle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,7 @@ import Link from 'next/link';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, PieChart, Pie, Tooltip as ChartTooltip } from 'recharts';
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 type CandidateStatus = 'New' | 'Shortlisted' | 'Interview' | 'Hired' | 'Rejected';
 
@@ -48,28 +49,30 @@ export function RecruiterDashboard() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitializing, setIsCreatingTeam] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [jobTitleFilter, setJobTitleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<CandidateStatus | 'All'>('All');
 
   useEffect(() => {
     if (authLoading) return;
     
-    // If we have a teamId, ensure we show loading while the dashboard content loads
     if (userData?.teamId) {
       setIsLoading(true);
+      setError(null);
       const candidatesRef = collection(db, `teams/${userData.teamId}/candidates`);
+      
       const unsubscribe = onSnapshot(candidatesRef, (snapshot) => {
         const candidatesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Candidate));
         setCandidates(candidatesData.sort((a,b) => b.addedAt.seconds - a.addedAt.seconds));
         setIsLoading(false);
-      }, (error) => {
-        console.error("Error fetching candidates:", error);
+      }, (err) => {
+        console.error("Error fetching candidates:", err);
+        setError("Failed to load candidates. This may be due to a permission issue or a missing collection.");
         setIsLoading(false);
       });
 
       return () => unsubscribe();
     } else {
-      // If no teamId, we are not loading anything from Firestore
       setIsLoading(false);
     }
   }, [userData?.teamId, authLoading]);
@@ -93,7 +96,7 @@ export function RecruiterDashboard() {
   const handleInitializeWorkspace = async () => {
     if (!user) return;
     setIsCreatingTeam(true);
-    setIsLoading(true); // Keep loading while context updates
+    setIsLoading(true); 
     try {
         const teamRef = await addDoc(collection(db, 'teams'), {
             owner: user.uid,
@@ -112,7 +115,7 @@ export function RecruiterDashboard() {
   const analyticsData = useMemo(() => {
     if (candidates.length === 0) return null;
 
-    const avgScore = candidates.reduce((acc, c) => acc + c.matchScore, 0) / candidates.length;
+    const avgScore = candidates.reduce((acc, c) => acc + (c.matchScore || 0), 0) / candidates.length;
     
     const scoreRanges = [
       { name: '76-100%', count: candidates.filter(c => c.matchScore > 75).length, fill: 'hsl(var(--chart-2))' },
@@ -121,14 +124,18 @@ export function RecruiterDashboard() {
     ];
 
     const rolesMap: Record<string, number> = {};
-    candidates.forEach(c => rolesMap[c.jobTitle] = (rolesMap[c.jobTitle] || 0) + 1);
+    candidates.forEach(c => {
+        if(c.jobTitle) {
+            rolesMap[c.jobTitle] = (rolesMap[c.jobTitle] || 0) + 1;
+        }
+    });
     const roleDistribution = Object.entries(rolesMap).map(([name, value]) => ({ name, value }));
 
     return { avgScore, scoreRanges, roleDistribution };
   }, [candidates]);
 
   const filteredCandidates = candidates.filter(c => {
-    const jobMatch = jobTitleFilter ? c.jobTitle.toLowerCase().includes(jobTitleFilter.toLowerCase()) : true;
+    const jobMatch = jobTitleFilter ? (c.jobTitle || '').toLowerCase().includes(jobTitleFilter.toLowerCase()) : true;
     const statusMatch = statusFilter !== 'All' ? c.status === statusFilter : true;
     return jobMatch && statusMatch;
   });
@@ -136,9 +143,29 @@ export function RecruiterDashboard() {
   if (isLoading || authLoading) {
     return (
         <div className="flex h-[400px] w-full items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+                <p className="text-sm text-muted-foreground">Loading your workspace...</p>
+            </div>
         </div>
     )
+  }
+
+  if (error) {
+      return (
+          <div className="p-8">
+              <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Dashboard Error</AlertTitle>
+                  <AlertDescription>
+                      {error}
+                      <Button variant="outline" size="sm" className="mt-4 block" onClick={() => window.location.reload()}>
+                          Retry Loading
+                      </Button>
+                  </AlertDescription>
+              </Alert>
+          </div>
+      )
   }
 
   if (!userData?.teamId) {
@@ -244,7 +271,7 @@ export function RecruiterDashboard() {
                             <TableCell>{candidate.jobTitle}</TableCell>
                             <TableCell>
                                 <Badge variant={candidate.matchScore > 75 ? 'default' : candidate.matchScore > 50 ? 'secondary' : 'outline'}>
-                                    {candidate.matchScore.toFixed(0)}%
+                                    {(candidate.matchScore || 0).toFixed(0)}%
                                 </Badge>
                             </TableCell>
                             <TableCell>
@@ -266,7 +293,7 @@ export function RecruiterDashboard() {
                                 </DropdownMenu>
                             </TableCell>
                             <TableCell className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(candidate.addedAt.seconds * 1000), { addSuffix: true })}
+                                {candidate.addedAt ? formatDistanceToNow(new Date(candidate.addedAt.seconds * 1000), { addSuffix: true }) : 'N/A'}
                             </TableCell>
                             <TableCell className="text-right">
                                 <div className="flex justify-end gap-2">

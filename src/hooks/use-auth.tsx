@@ -99,7 +99,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const userRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
-        if (!userDoc.exists()) return;
+        if (!userDoc.exists()) {
+            setLoading(false);
+            return;
+        }
         
         const currentData = userDoc.data() as UserData;
         const userPlan = currentData.plan || 'free';
@@ -140,6 +143,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
             setCredits(currentData.credits ?? FREE_CREDITS);
         }
+        setLoading(false);
+    }, (error) => {
+        console.error("Auth observer error:", error);
         setLoading(false);
     });
 
