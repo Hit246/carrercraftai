@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Download, Bot, Save, Loader2, History, ChevronsUpDown, Crown, MoreVertical, FileJson, Layout } from 'lucide-react';
+import { PlusCircle, Trash2, Download, Bot, Save, Loader2, History, ChevronsUpDown, Crown, MoreVertical, FileJson, Layout, Check, ExternalLink } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { doc, setDoc, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from 'firebase/firestore';
@@ -16,7 +16,6 @@ import { useRouter } from 'next/navigation';
 import { suggestResumeVersionNameAction } from '@/lib/actions';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from './ui/command';
-import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -94,18 +93,18 @@ const emptyResumeData: ResumeData = {
 
 const sampleResumeData: ResumeData = {
     name: 'John Doe',
-    title: 'Software Engineer',
+    title: 'Senior Software Engineer',
     phone: '123-456-7890',
     email: 'john.doe@email.com',
     linkedin: 'linkedin.com/in/johndoe',
-    summary: 'A passionate software engineer with 5+ years of experience in building scalable web applications.',
+    summary: 'Innovative software engineer with 5+ years of experience in full-stack development. Proven track record of optimizing system performance and leading cross-functional teams to deliver high-quality software solutions.',
     experience: [
-        { id: 1, title: 'Senior Developer', company: 'Tech Corp', dates: '2020 - Present', description: 'Led development of cloud platforms.\nImproved performance by 30%.' }
+        { id: 1, title: 'Senior Developer', company: 'Tech Solutions Inc.', dates: '2020 - Present', description: '• Developed and maintained scalable web applications using React and Node.js.\n• Mentored junior developers and improved code review processes.\n• Reduced application load time by 40% through optimization.' }
     ],
-    education: [{ id: 1, school: 'University of Tech', degree: 'B.S. CS', dates: '2014 - 2018', cgpa: '3.8/4.0' }],
-    skills: 'React, Node.js, TypeScript, PostgreSQL, AWS',
+    education: [{ id: 1, school: 'State University', degree: 'B.S. Computer Science', dates: '2014 - 2018', cgpa: '3.9/4.0' }],
+    skills: 'React, Node.js, TypeScript, PostgreSQL, AWS, Docker, GraphQL',
     projects: [
-        { id: 1, name: 'Portfolio Site', description: 'Personal portfolio built with Next.js and Tailwind.', url: 'github.com/johndoe/portfolio', technologies: 'Next.js, Tailwind' }
+        { id: 1, name: 'AI Resume Parser', description: 'Built an automated system to extract structured data from PDF resumes using NLP techniques.', url: 'github.com/johndoe/parser', technologies: 'Python, FastAPI' }
     ],
     template: 'classic'
 };
@@ -147,9 +146,6 @@ export const ResumeBuilder = () => {
                 setResumeData(prev => ({ ...prev, email: user.email || '' }));
             }
             
-            setIsLoading(false);
-        }, (error) => {
-            console.error("Error fetching resume versions: ", error);
             setIsLoading(false);
         });
 
@@ -221,47 +217,36 @@ export const ResumeBuilder = () => {
         
         doc.setFont('helvetica', 'normal');
 
-        // Drawing Header
         if (resumeData.template === 'modern') {
-            // Modern Header: Left Aligned with bold style
-            doc.setFontSize(24).setFont('helvetica', 'bold');
-            doc.setTextColor(textColor);
+            doc.setFontSize(24).setFont('helvetica', 'bold').setTextColor(textColor);
             doc.text(resumeData.name || 'Your Name', margin, y);
             y += 25;
-            doc.setFontSize(12).setFont('helvetica', 'normal');
-            doc.setTextColor(primaryColor);
+            doc.setFontSize(12).setFont('helvetica', 'normal').setTextColor(primaryColor);
             doc.text(resumeData.title || 'Professional Title', margin, y);
             y += 20;
             doc.setFontSize(9).setTextColor(lightTextColor);
             const contact = [resumeData.phone, resumeData.email, resumeData.linkedin].filter(Boolean).join('  |  ');
             doc.text(contact, margin, y);
             y += 15;
-            doc.setDrawColor(primaryColor);
-            doc.setLineWidth(2);
+            doc.setDrawColor(primaryColor).setLineWidth(2);
             doc.line(margin, y, pageW - margin, y);
             y += 25;
         } else if (resumeData.template === 'minimalist') {
-            // Minimalist Header: High efficiency, clean
-            doc.setFontSize(20).setFont('helvetica', 'bold');
-            doc.setTextColor('#000000');
+            doc.setFontSize(20).setFont('helvetica', 'bold').setTextColor('#000000');
             doc.text(resumeData.name || 'Your Name', margin, y);
             y += 20;
             doc.setFontSize(10).setFont('helvetica', 'normal');
-            const contact = [resumeData.title, resumeData.phone, resumeData.email, resumeData.linkedin].filter(Boolean).join(' \u2022 ');
+            const contact = [resumeData.title, resumeData.phone, resumeData.email, resumeData.linkedin].filter(Boolean).join(' • ');
             doc.text(contact, margin, y);
             y += 10;
-            doc.setDrawColor(0);
-            doc.setLineWidth(0.5);
+            doc.setDrawColor(0).setLineWidth(0.5);
             doc.line(margin, y, pageW - margin, y);
             y += 20;
         } else {
-            // Classic Header: Centered
-            doc.setFontSize(28).setFont('helvetica', 'bold');
-            doc.setTextColor(textColor);
+            doc.setFontSize(28).setFont('helvetica', 'bold').setTextColor(textColor);
             doc.text(resumeData.name || 'Your Name', pageW / 2, y, { align: 'center' });
             y += 30;
-            doc.setFontSize(14).setFont('helvetica', 'normal');
-            doc.setTextColor(primaryColor);
+            doc.setFontSize(14).setFont('helvetica', 'normal').setTextColor(primaryColor);
             doc.text(resumeData.title || 'Professional Title', pageW / 2, y, { align: 'center' });
             y += 20;
             doc.setFontSize(9).setTextColor(lightTextColor);
@@ -278,24 +263,16 @@ export const ResumeBuilder = () => {
                 doc.addPage();
                 y = margin;
             }
-            doc.setFontSize(11).setFont('helvetica', 'bold');
-            doc.setTextColor(primaryColor);
+            doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(primaryColor);
             doc.text(title.toUpperCase(), margin, y);
             y += 6;
-            if (resumeData.template === 'minimalist') {
-                doc.setDrawColor(0);
-                doc.setLineWidth(0.5);
-            } else {
-                doc.setDrawColor(primaryColor);
-                doc.setLineWidth(1);
-            }
+            doc.setDrawColor(resumeData.template === 'minimalist' ? 0 : primaryColor).setLineWidth(resumeData.template === 'minimalist' ? 0.5 : 1);
             doc.line(margin, y, pageW - margin, y);
             y += 15;
         };
         
         const addWrappedText = (text: string, x: number, startY: number, options: { maxWidth: number, fontSize: number, style?: 'normal' | 'bold', color?: string }) => {
-            doc.setFontSize(options.fontSize).setFont('helvetica', options.style || 'normal');
-            doc.setTextColor(options.color || textColor);
+            doc.setFontSize(options.fontSize).setFont('helvetica', options.style || 'normal').setTextColor(options.color || textColor);
             const lines = doc.splitTextToSize(text, options.maxWidth);
             doc.text(lines, x, startY, {lineHeightFactor: lineSpacing});
             return startY + (lines.length * options.fontSize * lineSpacing);
@@ -365,7 +342,7 @@ export const ResumeBuilder = () => {
             addSection('Skills');
             const skills = resumeData.skills.split(',').map(s => s.trim()).filter(Boolean);
             if (resumeData.template === 'minimalist') {
-                y = addWrappedText(skills.join(' \u2022 '), margin, y, { maxWidth: pageW - margin * 2, fontSize: 10 });
+                y = addWrappedText(skills.join(' • '), margin, y, { maxWidth: pageW - margin * 2, fontSize: 10 });
             } else {
                 let currentX = margin;
                 skills.forEach(skill => {
@@ -499,14 +476,8 @@ export const ResumeBuilder = () => {
     if (isLoading || authLoading) {
         return (
              <div className="grid lg:grid-cols-2 gap-8 h-full">
-                <div className="space-y-6">
-                    <Card><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
-                    <Card><CardHeader><Skeleton className="h-6 w-1/3" /></CardHeader><CardContent><Skeleton className="h-32 w-full" /></CardContent></Card>
-                </div>
-                <div className="flex flex-col gap-4">
-                    <Skeleton className="h-10 w-full" />
-                    <Card className="flex-1"><CardContent className="p-6"><Skeleton className="h-full w-full" /></CardContent></Card>
-                </div>
+                <div className="space-y-6"><Card><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card></div>
+                <div className="flex flex-col gap-4"><Skeleton className="h-10 w-full" /><Card className="flex-1"><CardContent className="p-6"><Skeleton className="h-full w-full" /></CardContent></Card></div>
             </div>
         )
     }
@@ -538,25 +509,21 @@ export const ResumeBuilder = () => {
                                 <p className="text-xs font-medium text-gray-500">{exp.dates}</p>
                             </div>
                             <p className="text-sm font-bold text-gray-600 mb-2">{exp.company}</p>
-                            <ul className="list-disc list-outside ml-4 space-y-1 text-gray-700">
-                                {exp.description.split('\n').filter(Boolean).map((line, i) => <li key={i}>{line.replace(/^-/, '').trim()}</li>)}
-                            </ul>
+                            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{exp.description}</div>
                         </div>
                     ))}
                 </div>
             )}
             {resumeData.projects?.length > 0 && (
                 <div className="mb-8">
-                    <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Selected Projects</h3>
+                    <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Projects</h3>
                     {resumeData.projects.map(proj => (proj.name) && (
                         <div key={proj.id} className="mb-6">
                             <div className="flex justify-between items-center mb-1">
                                 <h4 className="font-bold text-gray-900">{proj.name}</h4>
                                 {proj.url && <p className="text-xs text-primary font-bold">{proj.url}</p>}
                             </div>
-                            <ul className="list-disc list-outside ml-4 space-y-1 text-gray-700">
-                                {proj.description.split('\n').filter(Boolean).map((line, i) => <li key={i}>{line.replace(/^-/, '').trim()}</li>)}
-                            </ul>
+                            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{proj.description}</div>
                         </div>
                     ))}
                 </div>
@@ -570,7 +537,7 @@ export const ResumeBuilder = () => {
                                 <h4 className="font-bold text-gray-900">{edu.school}</h4>
                                 <p className="text-xs text-gray-500 font-medium">{edu.dates}</p>
                             </div>
-                            <p className="text-sm text-gray-700">{edu.degree} {edu.cgpa ? `\u2022 CGPA: ${edu.cgpa}` : ''}</p>
+                            <p className="text-sm text-gray-700">{edu.degree} {edu.cgpa ? `• CGPA: ${edu.cgpa}` : ''}</p>
                         </div>
                     ))}
                 </div>
@@ -594,14 +561,14 @@ export const ResumeBuilder = () => {
                 <h2 className="text-4xl font-bold font-headline text-gray-900 tracking-tight">{resumeData.name || 'Your Name'}</h2>
                 <p className="text-xl text-primary font-bold mt-1">{resumeData.title || 'Professional Title'}</p>
                 <div className="flex flex-wrap gap-4 text-xs font-medium text-gray-500 mt-4">
-                    {resumeData.phone && <span className="flex items-center gap-1">{resumeData.phone}</span>}
-                    {resumeData.email && <span className="flex items-center gap-1">{resumeData.email}</span>}
-                    {resumeData.linkedin && <span className="flex items-center gap-1 text-primary">{resumeData.linkedin}</span>}
+                    {resumeData.phone && <span>{resumeData.phone}</span>}
+                    {resumeData.email && <span>{resumeData.email}</span>}
+                    {resumeData.linkedin && <span className="text-primary">{resumeData.linkedin}</span>}
                 </div>
                 <div className="h-1 w-20 bg-primary mt-6 rounded-full" />
             </div>
 
-            <div className="grid grid-cols-1 gap-10">
+            <div className="space-y-8">
                 {resumeData.summary && (
                     <section>
                         <h3 className="text-lg font-bold font-headline text-gray-900 mb-3 flex items-center gap-2">
@@ -625,29 +592,33 @@ export const ResumeBuilder = () => {
                                         <span className="text-xs font-bold text-primary uppercase">{exp.dates}</span>
                                     </div>
                                     <p className="text-sm font-bold text-gray-500 italic mb-3">{exp.company}</p>
-                                    <ul className="list-disc list-outside ml-4 space-y-1.5 text-gray-600">
-                                        {exp.description.split('\n').filter(Boolean).map((line, i) => <li key={i}>{line.replace(/^-/, '').trim()}</li>)}
-                                    </ul>
+                                    <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">{exp.description}</div>
                                 </div>
                             ))}
                         </div>
                     </section>
                 )}
 
-                {resumeData.skills && (
+                {resumeData.projects?.length > 0 && (
                     <section>
-                        <h3 className="text-lg font-bold font-headline text-gray-900 mb-4 flex items-center gap-2">
-                            <span className="w-1.5 h-6 bg-primary rounded-full" /> Expertise
+                        <h3 className="text-lg font-bold font-headline text-gray-900 mb-6 flex items-center gap-2">
+                            <span className="w-1.5 h-6 bg-primary rounded-full" /> Projects
                         </h3>
-                        <div className="flex flex-wrap gap-3">
-                            {resumeData.skills.split(',').map(skill => skill.trim() && (
-                                <span key={skill} className="bg-gray-900 text-white text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-sm font-bold">{skill.trim()}</span>
+                        <div className="space-y-6">
+                            {resumeData.projects.map(proj => (proj.name) && (
+                                <div key={proj.id} className="relative pl-6 border-l-2 border-gray-100">
+                                    <div className="absolute -left-[9px] top-0 w-4 h-4 bg-white border-2 border-primary rounded-full" />
+                                    <div className="flex justify-between items-baseline mb-1">
+                                        <h4 className="font-bold text-gray-900">{proj.name}</h4>
+                                        {proj.url && <span className="text-xs text-primary font-bold">{proj.url}</span>}
+                                    </div>
+                                    <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">{proj.description}</div>
+                                </div>
                             ))}
                         </div>
                     </section>
                 )}
-                
-                {/* Simplified remaining sections for modern preview */}
+
                 <div className="grid sm:grid-cols-2 gap-10">
                     {resumeData.education?.length > 0 && (
                         <section>
@@ -656,20 +627,19 @@ export const ResumeBuilder = () => {
                                 <div key={edu.id} className="mb-4">
                                     <h4 className="font-bold text-gray-800">{edu.school}</h4>
                                     <p className="text-xs text-primary font-bold">{edu.dates}</p>
-                                    <p className="text-sm text-gray-600">{edu.degree}</p>
+                                    <p className="text-sm text-gray-600">{edu.degree} {edu.cgpa && `| CGPA: ${edu.cgpa}`}</p>
                                 </div>
                             ))}
                         </section>
                     )}
-                    {resumeData.projects?.length > 0 && (
+                    {resumeData.skills && (
                         <section>
-                            <h3 className="text-lg font-bold font-headline text-gray-900 mb-4">Projects</h3>
-                            {resumeData.projects.map(proj => (proj.name) && (
-                                <div key={proj.id} className="mb-4">
-                                    <h4 className="font-bold text-gray-800">{proj.name}</h4>
-                                    <p className="text-xs text-primary font-bold truncate">{proj.url}</p>
-                                </div>
-                            ))}
+                            <h3 className="text-lg font-bold font-headline text-gray-900 mb-4">Skills</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {resumeData.skills.split(',').map(skill => skill.trim() && (
+                                    <span key={skill} className="bg-gray-100 text-gray-800 text-[10px] uppercase font-bold px-2 py-1 rounded">{skill.trim()}</span>
+                                ))}
+                            </div>
                         </section>
                     )}
                 </div>
@@ -695,7 +665,7 @@ export const ResumeBuilder = () => {
                 {resumeData.summary && (
                     <section>
                         <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-3 pb-1">Profile</h3>
-                        <p className="text-gray-800 leading-normal">{resumeData.summary}</p>
+                        <p className="text-gray-800 leading-normal whitespace-pre-wrap">{resumeData.summary}</p>
                     </section>
                 )}
 
@@ -709,14 +679,22 @@ export const ResumeBuilder = () => {
                                     <span>{exp.dates}</span>
                                 </div>
                                 <div className="italic text-xs mb-2">{exp.title}</div>
-                                <ul className="space-y-1">
-                                    {exp.description.split('\n').filter(Boolean).map((line, i) => (
-                                        <li key={i} className="flex gap-2 text-xs text-gray-800">
-                                            <span className="mt-1.5 w-1 h-1 bg-black shrink-0" />
-                                            <span>{line.replace(/^-/, '').trim()}</span>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap">{exp.description}</div>
+                            </div>
+                        ))}
+                    </section>
+                )}
+
+                {resumeData.projects?.length > 0 && (
+                    <section>
+                        <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-4 pb-1">Projects</h3>
+                        {resumeData.projects.map(proj => (proj.name) && (
+                            <div key={proj.id} className="mb-6">
+                                <div className="flex justify-between font-bold text-sm">
+                                    <span>{proj.name?.toUpperCase()}</span>
+                                    {proj.url && <span className="text-[10px] font-normal">{proj.url}</span>}
+                                </div>
+                                <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap">{proj.description}</div>
                             </div>
                         ))}
                     </section>
@@ -729,7 +707,7 @@ export const ResumeBuilder = () => {
                             {resumeData.education.map(edu => (edu.school) && (
                                 <div key={edu.id} className="mb-3">
                                     <div className="font-bold text-xs">{edu.school}</div>
-                                    <div className="text-[11px] text-gray-600">{edu.degree} \u2022 {edu.dates}</div>
+                                    <div className="text-[11px] text-gray-600">{edu.degree} • {edu.dates} {edu.cgpa && `• ${edu.cgpa}`}</div>
                                 </div>
                             ))}
                         </section>
@@ -739,7 +717,7 @@ export const ResumeBuilder = () => {
                             <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-3 pb-1">Skills</h3>
                             <p className="text-xs leading-relaxed">
                                 {resumeData.skills.split(',').map((s, i, arr) => (
-                                    <span key={i}>{s.trim()}{i < arr.length - 1 ? ' \u2022 ' : ''}</span>
+                                    <span key={i}>{s.trim()}{i < arr.length - 1 ? ' • ' : ''}</span>
                                 ))}
                             </p>
                         </section>
