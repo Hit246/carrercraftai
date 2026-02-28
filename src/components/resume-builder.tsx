@@ -109,6 +109,13 @@ const sampleResumeData: ResumeData = {
     template: 'classic'
 };
 
+// Helper to ensure URLs are clickable
+const formatUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `https://${url}`;
+};
+
 export const ResumeBuilder = () => {
     const { toast } = useToast();
     const router = useRouter();
@@ -217,6 +224,15 @@ export const ResumeBuilder = () => {
         
         doc.setFont('helvetica', 'normal');
 
+        const addLink = (text: string, x: number, currentY: number, url: string, align: 'left' | 'center' | 'right' = 'left') => {
+            const width = doc.getTextWidth(text);
+            let startX = x;
+            if (align === 'center') startX = x - width / 2;
+            if (align === 'right') startX = x - width;
+            
+            doc.link(startX, currentY - 10, width, 12, { url });
+        };
+
         if (resumeData.template === 'modern') {
             doc.setFontSize(24).setFont('helvetica', 'bold').setTextColor(textColor);
             doc.text(resumeData.name || 'Your Name', margin, y);
@@ -225,8 +241,29 @@ export const ResumeBuilder = () => {
             doc.text(resumeData.title || 'Professional Title', margin, y);
             y += 20;
             doc.setFontSize(9).setTextColor(lightTextColor);
-            const contact = [resumeData.phone, resumeData.email, resumeData.linkedin].filter(Boolean).join('  |  ');
-            doc.text(contact, margin, y);
+            
+            let contactX = margin;
+            if (resumeData.phone) {
+                doc.text(resumeData.phone, contactX, y);
+                addLink(resumeData.phone, contactX, y, `tel:${resumeData.phone}`);
+                contactX += doc.getTextWidth(resumeData.phone) + 10;
+                doc.text('|', contactX, y);
+                contactX += 10;
+            }
+            if (resumeData.email) {
+                doc.text(resumeData.email, contactX, y);
+                addLink(resumeData.email, contactX, y, `mailto:${resumeData.email}`);
+                contactX += doc.getTextWidth(resumeData.email) + 10;
+                if (resumeData.linkedin) {
+                    doc.text('|', contactX, y);
+                    contactX += 10;
+                }
+            }
+            if (resumeData.linkedin) {
+                doc.text(resumeData.linkedin, contactX, y);
+                addLink(resumeData.linkedin, contactX, y, formatUrl(resumeData.linkedin));
+            }
+
             y += 15;
             doc.setDrawColor(primaryColor).setLineWidth(2);
             doc.line(margin, y, pageW - margin, y);
@@ -236,8 +273,22 @@ export const ResumeBuilder = () => {
             doc.text(resumeData.name || 'Your Name', margin, y);
             y += 20;
             doc.setFontSize(10).setFont('helvetica', 'normal');
-            const contact = [resumeData.title, resumeData.phone, resumeData.email, resumeData.linkedin].filter(Boolean).join(' • ');
-            doc.text(contact, margin, y);
+            
+            let headerX = margin;
+            const parts = [resumeData.title, resumeData.phone, resumeData.email, resumeData.linkedin].filter(Boolean);
+            parts.forEach((part, i) => {
+                doc.text(part, headerX, y);
+                if (part === resumeData.email) addLink(part, headerX, y, `mailto:${part}`);
+                else if (part === resumeData.phone) addLink(part, headerX, y, `tel:${part}`);
+                else if (part === resumeData.linkedin) addLink(part, headerX, y, formatUrl(part));
+                
+                headerX += doc.getTextWidth(part);
+                if (i < parts.length - 1) {
+                    doc.text(' • ', headerX, y);
+                    headerX += doc.getTextWidth(' • ');
+                }
+            });
+
             y += 10;
             doc.setDrawColor(0).setLineWidth(0.5);
             doc.line(margin, y, pageW - margin, y);
@@ -250,8 +301,24 @@ export const ResumeBuilder = () => {
             doc.text(resumeData.title || 'Professional Title', pageW / 2, y, { align: 'center' });
             y += 20;
             doc.setFontSize(9).setTextColor(lightTextColor);
-            const contact = [resumeData.phone, resumeData.email, resumeData.linkedin].filter(Boolean).join('  |  ');
-            doc.text(contact, pageW / 2, y, { align: 'center' });
+            
+            const contactItems = [];
+            if (resumeData.phone) contactItems.push({ text: resumeData.phone, link: `tel:${resumeData.phone}` });
+            if (resumeData.email) contactItems.push({ text: resumeData.email, link: `mailto:${resumeData.email}` });
+            if (resumeData.linkedin) contactItems.push({ text: resumeData.linkedin, link: formatUrl(resumeData.linkedin) });
+
+            let currentX = pageW / 2 - (contactItems.reduce((acc, item) => acc + doc.getTextWidth(item.text), 0) + (contactItems.length - 1) * 20) / 2;
+            
+            contactItems.forEach((item, i) => {
+                doc.text(item.text, currentX, y);
+                addLink(item.text, currentX, y, item.link);
+                currentX += doc.getTextWidth(item.text);
+                if (i < contactItems.length - 1) {
+                    doc.text('  |  ', currentX, y);
+                    currentX += doc.getTextWidth('  |  ');
+                }
+            });
+
             y += 15;
             doc.setDrawColor(229, 231, 235);
             doc.line(margin, y, pageW - margin, y);
@@ -313,6 +380,7 @@ export const ResumeBuilder = () => {
                 if (proj.url) {
                     doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(primaryColor);
                     doc.text(proj.url, pageW - margin, y, { align: 'right' });
+                    addLink(proj.url, pageW - margin, y, formatUrl(proj.url), 'right');
                 }
                 y += 12;
                 const points = proj.description.split('\n').filter(Boolean);
@@ -488,9 +556,9 @@ export const ResumeBuilder = () => {
                 <h2 className="text-3xl md:text-5xl font-bold font-headline text-gray-900">{resumeData.name || 'Your Name'}</h2>
                 <p className="text-lg md:text-xl text-primary font-semibold mt-2">{resumeData.title || 'Professional Title'}</p>
                 <div className="flex flex-wrap justify-center gap-x-4 text-xs text-gray-500 mt-4">
-                    {resumeData.phone && <span>{resumeData.phone}</span>}
-                    {resumeData.email && <span>{resumeData.email}</span>}
-                    {resumeData.linkedin && <span className="text-primary">{resumeData.linkedin}</span>}
+                    {resumeData.phone && <a href={`tel:${resumeData.phone}`} className="hover:text-primary transition-colors">{resumeData.phone}</a>}
+                    {resumeData.email && <a href={`mailto:${resumeData.email}`} className="hover:text-primary transition-colors">{resumeData.email}</a>}
+                    {resumeData.linkedin && <a href={formatUrl(resumeData.linkedin)} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{resumeData.linkedin}</a>}
                 </div>
             </div>
             {resumeData.summary && (
@@ -521,7 +589,7 @@ export const ResumeBuilder = () => {
                         <div key={proj.id} className="mb-6">
                             <div className="flex justify-between items-center mb-1">
                                 <h4 className="font-bold text-gray-900">{proj.name}</h4>
-                                {proj.url && <p className="text-xs text-primary font-bold">{proj.url}</p>}
+                                {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-bold hover:underline">{proj.url}</a>}
                             </div>
                             <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{proj.description}</div>
                         </div>
@@ -561,9 +629,9 @@ export const ResumeBuilder = () => {
                 <h2 className="text-4xl font-bold font-headline text-gray-900 tracking-tight">{resumeData.name || 'Your Name'}</h2>
                 <p className="text-xl text-primary font-bold mt-1">{resumeData.title || 'Professional Title'}</p>
                 <div className="flex flex-wrap gap-4 text-xs font-medium text-gray-500 mt-4">
-                    {resumeData.phone && <span>{resumeData.phone}</span>}
-                    {resumeData.email && <span>{resumeData.email}</span>}
-                    {resumeData.linkedin && <span className="text-primary">{resumeData.linkedin}</span>}
+                    {resumeData.phone && <a href={`tel:${resumeData.phone}`} className="hover:text-primary transition-colors">{resumeData.phone}</a>}
+                    {resumeData.email && <a href={`mailto:${resumeData.email}`} className="hover:text-primary transition-colors">{resumeData.email}</a>}
+                    {resumeData.linkedin && <a href={formatUrl(resumeData.linkedin)} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{resumeData.linkedin}</a>}
                 </div>
                 <div className="h-1 w-20 bg-primary mt-6 rounded-full" />
             </div>
@@ -610,7 +678,7 @@ export const ResumeBuilder = () => {
                                     <div className="absolute -left-[9px] top-0 w-4 h-4 bg-white border-2 border-primary rounded-full" />
                                     <div className="flex justify-between items-baseline mb-1">
                                         <h4 className="font-bold text-gray-900">{proj.name}</h4>
-                                        {proj.url && <span className="text-xs text-primary font-bold">{proj.url}</span>}
+                                        {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-bold hover:underline">{proj.url}</a>}
                                     </div>
                                     <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">{proj.description}</div>
                                 </div>
@@ -655,9 +723,9 @@ export const ResumeBuilder = () => {
                     {resumeData.title && <span className="uppercase tracking-widest">{resumeData.title}</span>}
                 </div>
                 <div className="text-xs mt-3 flex justify-center flex-wrap gap-x-3 gap-y-1">
-                    {resumeData.phone && <span>{resumeData.phone}</span>}
-                    {resumeData.email && <span className="font-bold">{resumeData.email}</span>}
-                    {resumeData.linkedin && <span>{resumeData.linkedin}</span>}
+                    {resumeData.phone && <a href={`tel:${resumeData.phone}`} className="hover:font-bold">{resumeData.phone}</a>}
+                    {resumeData.email && <a href={`mailto:${resumeData.email}`} className="font-bold hover:underline">{resumeData.email}</a>}
+                    {resumeData.linkedin && <a href={formatUrl(resumeData.linkedin)} target="_blank" rel="noopener noreferrer" className="hover:underline">{resumeData.linkedin}</a>}
                 </div>
             </div>
 
@@ -692,7 +760,7 @@ export const ResumeBuilder = () => {
                             <div key={proj.id} className="mb-6">
                                 <div className="flex justify-between font-bold text-sm">
                                     <span>{proj.name?.toUpperCase()}</span>
-                                    {proj.url && <span className="text-[10px] font-normal">{proj.url}</span>}
+                                    {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-[10px] font-normal hover:underline">{proj.url}</a>}
                                 </div>
                                 <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap">{proj.description}</div>
                             </div>
