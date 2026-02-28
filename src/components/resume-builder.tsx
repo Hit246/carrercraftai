@@ -109,7 +109,6 @@ const sampleResumeData: ResumeData = {
     template: 'classic'
 };
 
-// Helper to ensure URLs are clickable
 const formatUrl = (url: string) => {
     if (!url) return '';
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
@@ -153,6 +152,9 @@ export const ResumeBuilder = () => {
                 setResumeData(prev => ({ ...prev, email: user.email || '' }));
             }
             
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Version listener error:", error);
             setIsLoading(false);
         });
 
@@ -233,49 +235,83 @@ export const ResumeBuilder = () => {
             doc.link(startX, currentY - 10, width, 12, { url });
         };
 
+        const addWrappedText = (text: string, x: number, startY: number, options: { maxWidth: number, fontSize: number, style?: 'normal' | 'bold', color?: string }) => {
+            doc.setFontSize(options.fontSize).setFont('helvetica', options.style || 'normal').setTextColor(options.color || textColor);
+            const lines = doc.splitTextToSize(text, options.maxWidth);
+            doc.text(lines, x, startY, {lineHeightFactor: lineSpacing});
+            return startY + (lines.length * options.fontSize * lineSpacing);
+        };
+
+        const addSectionHeader = (title: string) => {
+            if (y > pageH - margin - 40) {
+                doc.addPage();
+                y = margin;
+            }
+            
+            if (resumeData.template === 'modern') {
+                doc.setFontSize(13).setFont('helvetica', 'bold').setTextColor(textColor);
+                doc.text(title, margin, y);
+                const titleW = doc.getTextWidth(title);
+                doc.setDrawColor(primaryColor).setLineWidth(1.5);
+                doc.line(margin, y + 4, margin + 20, y + 4);
+                y += 20;
+            } else if (resumeData.template === 'minimalist') {
+                doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor('#000000');
+                doc.text(title.toUpperCase(), margin, y);
+                y += 4;
+                doc.setDrawColor(0).setLineWidth(0.5);
+                doc.line(margin, y, pageW - margin, y);
+                y += 15;
+            } else {
+                doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(primaryColor);
+                doc.text(title.toUpperCase(), margin, y);
+                y += 6;
+                doc.setDrawColor(229, 231, 235).setLineWidth(1);
+                doc.line(margin, y, pageW - margin, y);
+                y += 15;
+            }
+        };
+
+        // Header Rendering
         if (resumeData.template === 'modern') {
-            doc.setFontSize(24).setFont('helvetica', 'bold').setTextColor(textColor);
+            doc.setFontSize(26).setFont('helvetica', 'bold').setTextColor(textColor);
             doc.text(resumeData.name || 'Your Name', margin, y);
-            y += 25;
-            doc.setFontSize(12).setFont('helvetica', 'normal').setTextColor(primaryColor);
+            y += 28;
+            doc.setFontSize(13).setFont('helvetica', 'bold').setTextColor(primaryColor);
             doc.text(resumeData.title || 'Professional Title', margin, y);
-            y += 20;
-            doc.setFontSize(9).setTextColor(lightTextColor);
+            y += 22;
+            doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
             
             let contactX = margin;
             if (resumeData.phone) {
                 doc.text(resumeData.phone, contactX, y);
                 addLink(resumeData.phone, contactX, y, `tel:${resumeData.phone}`);
-                contactX += doc.getTextWidth(resumeData.phone) + 10;
-                doc.text('|', contactX, y);
-                contactX += 10;
+                contactX += doc.getTextWidth(resumeData.phone) + 12;
             }
             if (resumeData.email) {
                 doc.text(resumeData.email, contactX, y);
                 addLink(resumeData.email, contactX, y, `mailto:${resumeData.email}`);
-                contactX += doc.getTextWidth(resumeData.email) + 10;
-                if (resumeData.linkedin) {
-                    doc.text('|', contactX, y);
-                    contactX += 10;
-                }
+                contactX += doc.getTextWidth(resumeData.email) + 12;
             }
             if (resumeData.linkedin) {
                 doc.text(resumeData.linkedin, contactX, y);
                 addLink(resumeData.linkedin, contactX, y, formatUrl(resumeData.linkedin));
             }
-
             y += 15;
-            doc.setDrawColor(primaryColor).setLineWidth(2);
-            doc.line(margin, y, pageW - margin, y);
-            y += 25;
+            doc.setDrawColor(primaryColor).setLineWidth(2.5);
+            doc.line(margin, y, margin + 40, y);
+            y += 35;
         } else if (resumeData.template === 'minimalist') {
-            doc.setFontSize(20).setFont('helvetica', 'bold').setTextColor('#000000');
-            doc.text(resumeData.name || 'Your Name', margin, y);
-            y += 20;
-            doc.setFontSize(10).setFont('helvetica', 'normal');
+            doc.setFontSize(22).setFont('helvetica', 'bold').setTextColor('#000000');
+            doc.text(resumeData.name || 'YOUR NAME', margin, y);
+            y += 24;
+            doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor('#333333');
+            doc.text((resumeData.title || 'PROFESSIONAL TITLE').toUpperCase(), margin, y);
+            y += 18;
             
+            doc.setFontSize(8).setTextColor('#666666');
             let headerX = margin;
-            const parts = [resumeData.title, resumeData.phone, resumeData.email, resumeData.linkedin].filter(Boolean);
+            const parts = [resumeData.phone, resumeData.email, resumeData.linkedin].filter(Boolean);
             parts.forEach((part, i) => {
                 doc.text(part, headerX, y);
                 if (part === resumeData.email) addLink(part, headerX, y, `mailto:${part}`);
@@ -284,22 +320,21 @@ export const ResumeBuilder = () => {
                 
                 headerX += doc.getTextWidth(part);
                 if (i < parts.length - 1) {
-                    doc.text(' • ', headerX, y);
-                    headerX += doc.getTextWidth(' • ');
+                    doc.text('  |  ', headerX, y);
+                    headerX += doc.getTextWidth('  |  ');
                 }
             });
-
-            y += 10;
-            doc.setDrawColor(0).setLineWidth(0.5);
+            y += 15;
+            doc.setDrawColor(0).setLineWidth(0.75);
             doc.line(margin, y, pageW - margin, y);
-            y += 20;
+            y += 25;
         } else {
-            doc.setFontSize(28).setFont('helvetica', 'bold').setTextColor(textColor);
+            doc.setFontSize(30).setFont('helvetica', 'bold').setTextColor(textColor);
             doc.text(resumeData.name || 'Your Name', pageW / 2, y, { align: 'center' });
-            y += 30;
+            y += 35;
             doc.setFontSize(14).setFont('helvetica', 'normal').setTextColor(primaryColor);
             doc.text(resumeData.title || 'Professional Title', pageW / 2, y, { align: 'center' });
-            y += 20;
+            y += 25;
             doc.setFontSize(9).setTextColor(lightTextColor);
             
             const contactItems = [];
@@ -318,112 +353,187 @@ export const ResumeBuilder = () => {
                     currentX += doc.getTextWidth('  |  ');
                 }
             });
-
             y += 15;
-            doc.setDrawColor(229, 231, 235);
+            doc.setDrawColor(229, 231, 235).setLineWidth(1);
             doc.line(margin, y, pageW - margin, y);
-            y += 25;
+            y += 30;
         }
 
-        const addSection = (title: string) => {
-            if (y > pageH - margin - 40) {
-                doc.addPage();
-                y = margin;
-            }
-            doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(primaryColor);
-            doc.text(title.toUpperCase(), margin, y);
-            y += 6;
-            doc.setDrawColor(resumeData.template === 'minimalist' ? 0 : primaryColor).setLineWidth(resumeData.template === 'minimalist' ? 0.5 : 1);
-            doc.line(margin, y, pageW - margin, y);
-            y += 15;
-        };
-        
-        const addWrappedText = (text: string, x: number, startY: number, options: { maxWidth: number, fontSize: number, style?: 'normal' | 'bold', color?: string }) => {
-            doc.setFontSize(options.fontSize).setFont('helvetica', options.style || 'normal').setTextColor(options.color || textColor);
-            const lines = doc.splitTextToSize(text, options.maxWidth);
-            doc.text(lines, x, startY, {lineHeightFactor: lineSpacing});
-            return startY + (lines.length * options.fontSize * lineSpacing);
-        };
-
+        // Summary
         if (resumeData.summary) {
-            addSection('Summary');
-            y = addWrappedText(resumeData.summary, margin, y, { maxWidth: pageW - margin * 2, fontSize: 10 });
-            y += 15;
+            addSectionHeader(resumeData.template === 'minimalist' ? 'Profile' : 'Summary');
+            y = addWrappedText(resumeData.summary, margin + (resumeData.template === 'modern' ? 10 : 0), y, { 
+                maxWidth: pageW - margin * 2 - (resumeData.template === 'modern' ? 10 : 0), 
+                fontSize: 10,
+                color: resumeData.template === 'minimalist' ? '#000000' : textColor
+            });
+            y += 20;
         }
 
+        // Experience
         if (resumeData.experience?.length > 0) {
-            addSection('Experience');
+            addSectionHeader('Experience');
             resumeData.experience.forEach(exp => {
                 if (!exp.title && !exp.company) return;
-                doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
-                doc.text(exp.title, margin, y);
-                doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
-                doc.text(exp.dates, pageW - margin, y, { align: 'right'});
-                y += 12;
-                doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor(lightTextColor);
-                doc.text(exp.company, margin, y);
-                y += 12;
-                const points = exp.description.split('\n').filter(Boolean);
-                points.forEach(point => {
-                    y = addWrappedText(`• ${point.trim()}`, margin + 10, y, { maxWidth: pageW - margin * 2 - 10, fontSize: 9, color: lightTextColor });
-                });
-                y += 10;
+                
+                if (resumeData.template === 'modern') {
+                    doc.setDrawColor(229, 231, 235).setLineWidth(1);
+                    doc.line(margin + 5, y - 5, margin + 5, y + 40); // Timeline line
+                    doc.setFillColor(255, 255, 255).setDrawColor(primaryColor).setLineWidth(1.5);
+                    doc.circle(margin + 5, y, 4, 'FD'); // Timeline marker
+                    
+                    doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
+                    doc.text(exp.title, margin + 20, y);
+                    doc.setFontSize(9).setFont('helvetica', 'bold').setTextColor(primaryColor);
+                    doc.text(exp.dates.toUpperCase(), pageW - margin, y, { align: 'right'});
+                    y += 14;
+                    doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor(lightTextColor);
+                    doc.text(exp.company, margin + 20, y);
+                    y += 14;
+                    const points = exp.description.split('\n').filter(Boolean);
+                    points.forEach(point => {
+                        y = addWrappedText(`${point.trim()}`, margin + 20, y, { maxWidth: pageW - margin * 2 - 20, fontSize: 9, color: lightTextColor });
+                    });
+                    y += 12;
+                } else if (resumeData.template === 'minimalist') {
+                    doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor('#000000');
+                    doc.text(exp.company.toUpperCase(), margin, y);
+                    doc.text(exp.dates, pageW - margin, y, { align: 'right'});
+                    y += 12;
+                    doc.setFontSize(9).setFont('helvetica', 'italic').setTextColor('#333333');
+                    doc.text(exp.title, margin, y);
+                    y += 14;
+                    const points = exp.description.split('\n').filter(Boolean);
+                    points.forEach(point => {
+                        y = addWrappedText(`${point.trim()}`, margin, y, { maxWidth: pageW - margin * 2, fontSize: 9, color: '#333333' });
+                    });
+                    y += 10;
+                } else {
+                    doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
+                    doc.text(exp.title, margin, y);
+                    doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
+                    doc.text(exp.dates, pageW - margin, y, { align: 'right'});
+                    y += 12;
+                    doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor(lightTextColor);
+                    doc.text(exp.company, margin, y);
+                    y += 14;
+                    const points = exp.description.split('\n').filter(Boolean);
+                    points.forEach(point => {
+                        y = addWrappedText(`• ${point.trim()}`, margin + 10, y, { maxWidth: pageW - margin * 2 - 10, fontSize: 9, color: lightTextColor });
+                    });
+                    y += 12;
+                }
             });
+            y += 10;
         }
 
+        // Projects
         if(resumeData.projects?.length > 0) {
-            addSection('Projects');
+            addSectionHeader('Projects');
             resumeData.projects.forEach(proj => {
                 if (!proj.name) return;
-                doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
-                doc.text(proj.name, margin, y);
-                if (proj.url) {
-                    doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(primaryColor);
-                    doc.text(proj.url, pageW - margin, y, { align: 'right' });
-                    addLink(proj.url, pageW - margin, y, formatUrl(proj.url), 'right');
+                
+                if (resumeData.template === 'modern') {
+                    doc.setDrawColor(229, 231, 235).setLineWidth(1);
+                    doc.line(margin + 5, y - 5, margin + 5, y + 30);
+                    doc.setFillColor(255, 255, 255).setDrawColor(primaryColor).setLineWidth(1.5);
+                    doc.circle(margin + 5, y, 4, 'FD');
+
+                    doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
+                    doc.text(proj.name, margin + 20, y);
+                    if (proj.url) {
+                        doc.setFontSize(9).setFont('helvetica', 'bold').setTextColor(primaryColor);
+                        doc.text(proj.url, pageW - margin, y, { align: 'right' });
+                        addLink(proj.url, pageW - margin, y, formatUrl(proj.url), 'right');
+                    }
+                    y += 14;
+                    const points = proj.description.split('\n').filter(Boolean);
+                    points.forEach(point => {
+                        y = addWrappedText(`${point.trim()}`, margin + 20, y, { maxWidth: pageW - margin * 2 - 20, fontSize: 9, color: lightTextColor });
+                    });
+                    y += 12;
+                } else if (resumeData.template === 'minimalist') {
+                    doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor('#000000');
+                    doc.text(proj.name.toUpperCase(), margin, y);
+                    if (proj.url) {
+                        doc.setFontSize(8).setFont('helvetica', 'normal').setTextColor('#666666');
+                        doc.text(proj.url, pageW - margin, y, { align: 'right'});
+                        addLink(proj.url, pageW - margin, y, formatUrl(proj.url), 'right');
+                    }
+                    y += 14;
+                    const points = proj.description.split('\n').filter(Boolean);
+                    points.forEach(point => {
+                        y = addWrappedText(`${point.trim()}`, margin, y, { maxWidth: pageW - margin * 2, fontSize: 9, color: '#333333' });
+                    });
+                    y += 10;
+                } else {
+                    doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
+                    doc.text(proj.name, margin, y);
+                    if (proj.url) {
+                        doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(primaryColor);
+                        doc.text(proj.url, pageW - margin, y, { align: 'right' });
+                        addLink(proj.url, pageW - margin, y, formatUrl(proj.url), 'right');
+                    }
+                    y += 14;
+                    const points = proj.description.split('\n').filter(Boolean);
+                    points.forEach(point => {
+                        y = addWrappedText(`• ${point.trim()}`, margin + 10, y, { maxWidth: pageW - margin * 2 - 10, fontSize: 9, color: lightTextColor });
+                    });
+                    y += 12;
                 }
-                y += 12;
-                const points = proj.description.split('\n').filter(Boolean);
-                points.forEach(point => {
-                    y = addWrappedText(`• ${point.trim()}`, margin + 10, y, { maxWidth: pageW - margin * 2 - 10, fontSize: 9, color: lightTextColor });
-                });
-                y += 10;
             });
+            y += 10;
         }
 
+        // Education
         if (resumeData.education?.length > 0) {
-            addSection('Education');
+            addSectionHeader('Education');
             resumeData.education.forEach(edu => {
                 if (!edu.school) return;
-                doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
-                doc.text(edu.school, margin, y);
-                doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
-                doc.text(edu.dates, pageW - margin, y, { align: 'right'});
-                y += 12;
-                doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
-                doc.text(`${edu.degree} ${edu.cgpa ? `| CGPA: ${edu.cgpa}` : ''}`, margin, y);
-                y += 15;
+                
+                if (resumeData.template === 'minimalist') {
+                    doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor('#000000');
+                    doc.text(edu.school, margin, y);
+                    y += 12;
+                    doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor('#333333');
+                    doc.text(`${edu.degree} | ${edu.dates} ${edu.cgpa ? `| ${edu.cgpa}` : ''}`, margin, y);
+                    y += 18;
+                } else {
+                    doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
+                    doc.text(edu.school, margin, y);
+                    doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
+                    doc.text(edu.dates, pageW - margin, y, { align: 'right'});
+                    y += 12;
+                    doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
+                    doc.text(`${edu.degree} ${edu.cgpa ? `| CGPA: ${edu.cgpa}` : ''}`, margin, y);
+                    y += 18;
+                }
             });
+            y += 10;
         }
         
+        // Skills
         if (resumeData.skills) {
-            addSection('Skills');
+            addSectionHeader('Skills');
             const skills = resumeData.skills.split(',').map(s => s.trim()).filter(Boolean);
+            
             if (resumeData.template === 'minimalist') {
-                y = addWrappedText(skills.join(' • '), margin, y, { maxWidth: pageW - margin * 2, fontSize: 10 });
+                y = addWrappedText(skills.join(' • '), margin, y, { maxWidth: pageW - margin * 2, fontSize: 9, color: '#333333' });
+            } else if (resumeData.template === 'modern') {
+                y = addWrappedText(skills.join(', '), margin + 10, y, { maxWidth: pageW - margin * 2 - 10, fontSize: 9, color: lightTextColor });
             } else {
                 let currentX = margin;
                 skills.forEach(skill => {
                     const skillWidth = doc.getTextWidth(skill) + 20;
                     if (currentX + skillWidth > pageW - margin) {
-                        y += 25;
+                        y += 22;
                         currentX = margin;
                     }
                     doc.setFillColor(243, 244, 246);
-                    doc.roundedRect(currentX, y, skillWidth, 18, 3, 3, 'F');
-                    doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(primaryColor);
-                    doc.text(skill, currentX + 10, y + 12);
-                    currentX += skillWidth + 5;
+                    doc.roundedRect(currentX, y, skillWidth, 16, 2, 2, 'F');
+                    doc.setFontSize(8.5).setFont('helvetica', 'normal').setTextColor(primaryColor);
+                    doc.text(skill, currentX + 10, y + 11);
+                    currentX += skillWidth + 6;
                 });
             }
         }
@@ -434,7 +544,7 @@ export const ResumeBuilder = () => {
     const handleExport = async () => {
         const pdf = await generatePdfFromData();
         if (pdf) {
-            pdf.save(`${resumeData.name || 'resume'}.pdf`);
+            pdf.save(`${resumeData.name.replace(/\s+/g, '_') || 'resume'}.pdf`);
             toast({ title: "Download Complete!" });
         }
     }
@@ -487,7 +597,11 @@ export const ResumeBuilder = () => {
     }
     
     const handleSaveAsNew = async () => {
-        if (!user || !resumeData || versions.length >= draftLimit) return;
+        if (!user || !resumeData) return;
+        if (versions.length >= draftLimit) {
+            toast({ title: "Draft Limit Reached", description: `You can only save ${draftLimit} resumes on your current plan.`, variant: "destructive" });
+            return;
+        }
         setIsSaving(true);
         try {
             const { versionName } = await suggestResumeVersionNameAction({ resumeData });
@@ -938,7 +1052,7 @@ export const ResumeBuilder = () => {
                             
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant="outline" disabled={isSaving || versions.length >= draftLimit}>
+                                    <Button variant="outline" disabled={isSaving}>
                                         <PlusCircle className="mr-2 h-4 w-4" /> Save as New
                                     </Button>
                                 </AlertDialogTrigger>
@@ -951,6 +1065,18 @@ export const ResumeBuilder = () => {
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                                             <AlertDialogAction onClick={() => router.push('/pricing')}><Crown className="mr-2 h-4 w-4" /> Upgrade</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                }
+                                {versions.length < draftLimit && 
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Save as New Version?</AlertDialogTitle>
+                                            <AlertDialogDescription>This will create a duplicate of your current work as a new version.</AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleSaveAsNew}>Save New Version</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 }
