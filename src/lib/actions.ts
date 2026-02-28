@@ -1,4 +1,3 @@
-
 'use server';
 
 import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
@@ -39,7 +38,6 @@ export async function analyzeResumeAction(
 export async function jobMatcherAction(
   input: JobMatcherInput
 ): Promise<JobMatcherOutput> {
-  // In a real app, you would check the user's subscription tier here.
   return await jobMatcher(input);
 }
 
@@ -47,13 +45,10 @@ export async function jobMatcherAction(
 export async function candidateMatcherAction(
     input: CandidateMatcherInput
   ): Promise<CandidateMatcherOutput> {
-    
-    // 1. Get AI matching results
     const matchResult = await candidateMatcher({
         jobDescription: input.jobDescription,
         resumeDataUris: input.resumeDataUris
     });
-    
     return matchResult;
 }
 
@@ -61,7 +56,6 @@ export async function candidateMatcherAction(
 export async function generateCoverLetterAction(
   input: GenerateCoverLetterInput
 ): Promise<GenerateCoverLetterOutput> {
-  // In a real app, you would check the user's subscription tier here.
   return await generateCoverLetter(input);
 }
 
@@ -77,7 +71,6 @@ export async function getPaymentSettings() {
     if (settingsSnap.exists()) {
         return settingsSnap.data();
     }
-    // Return a default object if no settings are found in Firestore.
     return { upiId: 'admin@careercraft.ai', qrCodeImageUrl: 'https://i.imgur.com/2O0s4Jm.png' };
 }
 
@@ -112,9 +105,9 @@ export async function saveCandidateAction(candidateData: {
     jobTitle: string;
     justification: string;
     resumeURL?: string;
-}, teamId: string) {
+}, userId: string) {
     try {
-        const candidateRef = firestoreCollection(db, `teams/${teamId}/candidates`);
+        const candidateRef = firestoreCollection(db, `users/${userId}/shortlistedCandidates`);
         await addDoc(candidateRef, {
             ...candidateData,
             addedAt: serverTimestamp(),

@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, updateDoc, deleteDoc, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, Contact, ExternalLink, Filter, Trash2, LayoutDashboard, BarChart3, PieChart as PieChartIcon, TrendingUp, Building, AlertCircle } from 'lucide-react';
+import { Loader2, Contact, ExternalLink, Filter, Trash2, LayoutDashboard, BarChart3, PieChart as PieChartIcon, TrendingUp, AlertCircle, Crown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +24,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, 
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { useRouter } from 'next/navigation';
 
 type CandidateStatus = 'New' | 'Shortlisted' | 'Interview' | 'Hired' | 'Rejected';
 
@@ -44,30 +45,28 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function RecruiterDashboard() {
-  const { user, userData, loading: authLoading } = useAuth();
+  const { user, effectivePlan, loading: authLoading } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInitializing, setIsCreatingTeam] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [jobTitleFilter, setJobTitleFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<CandidateStatus | 'All'>('All');
 
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading || !user) return;
     
-    if (userData?.teamId) {
+    if (effectivePlan === 'recruiter') {
       setIsLoading(true);
-      setError(null);
-      const candidatesRef = collection(db, `teams/${userData.teamId}/candidates`);
+      const candidatesRef = collection(db, `users/${user.uid}/shortlistedCandidates`);
+      const q = query(candidatesRef, orderBy('addedAt', 'desc'));
       
-      const unsubscribe = onSnapshot(candidatesRef, (snapshot) => {
+      const unsubscribe = onSnapshot(q, (snapshot) => {
         const candidatesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Candidate));
-        setCandidates(candidatesData.sort((a,b) => b.addedAt.seconds - a.addedAt.seconds));
+        setCandidates(candidatesData);
         setIsLoading(false);
       }, (err) => {
         console.error("Error fetching candidates:", err);
-        setError("Failed to load candidates. This may be due to a permission issue.");
         setIsLoading(false);
       });
 
@@ -75,43 +74,23 @@ export function RecruiterDashboard() {
     } else {
       setIsLoading(false);
     }
-  }, [userData?.teamId, authLoading]);
+  }, [user, authLoading, effectivePlan]);
 
   const handleStatusChange = async (candidateId: string, newStatus: CandidateStatus) => {
-    if (!userData?.teamId) return;
-    const candidateRef = doc(db, `teams/${userData.teamId}/candidates`, candidateId);
+    if (!user) return;
+    const candidateRef = doc(db, `users/${user.uid}/shortlistedCandidates`, candidateId);
     await updateDoc(candidateRef, { status: newStatus });
   };
 
   const handleRemove = async (candidateId: string) => {
-    if (!userData?.teamId) return;
+    if (!user) return;
     try {
-        await deleteDoc(doc(db, `teams/${userData.teamId}/candidates`, candidateId));
+        await deleteDoc(doc(db, `users/${user.uid}/shortlistedCandidates`, candidateId));
         toast({ title: 'Candidate Removed', description: 'The candidate has been removed from your shortlist.' });
     } catch (e) {
         toast({ title: 'Error', description: 'Failed to remove candidate.', variant: 'destructive' });
     }
   };
-
-  const handleInitializeWorkspace = async () => {
-    if (!user) return;
-    setIsCreatingTeam(true);
-    setIsLoading(true); 
-    try {
-        const teamRef = await addDoc(collection(db, 'teams'), {
-            owner: user.uid,
-            createdAt: serverTimestamp(),
-        });
-        await updateDoc(doc(db, 'users', user.uid), { teamId: teamRef.id });
-        toast({ title: "Workspace Ready!", description: "You can now shortlist candidates from the Matcher."});
-        // Loading state will be set to false by the useEffect when userData is updated
-    } catch (error) {
-        toast({ title: "Error", description: "Failed to initialize workspace.", variant: "destructive"});
-        setIsLoading(false);
-    } finally {
-        setIsCreatingTeam(false);
-    }
-  }
 
   const analyticsData = useMemo(() => {
     if (candidates.length === 0) return null;
@@ -141,59 +120,34 @@ export function RecruiterDashboard() {
     return jobMatch && statusMatch;
   });
 
-  if (isLoading || authLoading) {
+  if (authLoading || isLoading) {
     return (
         <div className="flex h-[400px] w-full items-center justify-center">
-            <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">Loading your workspace...</p>
-            </div>
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
     )
   }
 
-  if (error) {
-      return (
-          <div className="p-8">
-              <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Dashboard Error</AlertTitle>
-                  <AlertDescription>
-                      {error}
-                      <Button variant="outline" size="sm" className="mt-4 block" onClick={() => window.location.reload()}>
-                          Retry Loading
-                      </Button>
-                  </AlertDescription>
-              </Alert>
-          </div>
-      )
-  }
-
-  if (!userData?.teamId) {
+  if (effectivePlan !== 'recruiter') {
     return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6">
-            <div className="bg-primary/10 p-6 rounded-full">
-                <Building className="w-12 h-12 text-primary" />
-            </div>
-            <div className="max-w-md">
-                <h2 className="text-2xl font-bold font-headline">Recruiter Workspace</h2>
-                <p className="text-muted-foreground mt-2">Initialize your personal workspace to start shortlisting candidates and viewing analytics.</p>
-            </div>
-            <Button onClick={handleInitializeWorkspace} disabled={isInitializing} size="lg">
-                {isInitializing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Contact className="mr-2 h-4 w-4" />}
-                Initialize Recruiter Workspace
-            </Button>
-        </div>
-    )
+      <div className="flex h-full items-center justify-center pt-12">
+         <Alert variant="pro" className="max-w-lg">
+            <Crown />
+            <AlertTitle>Recruiter Plan Required</AlertTitle>
+            <AlertDescription className="flex flex-col gap-4 mt-2">
+                <span>The Recruiter Dashboard is exclusive to the Recruiter plan. Upgrade now to manage your candidate pipeline and view talent analytics.</span>
+                <Button onClick={() => router.push('/pricing')} className="w-fit">View Pricing Plans</Button>
+            </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-            <h1 className="text-3xl font-bold font-headline">Recruiter Dashboard</h1>
-            <p className="text-muted-foreground">Manage your talent pool and hiring metrics.</p>
-        </div>
+      <div>
+          <h1 className="text-3xl font-bold font-headline">Recruiter Dashboard</h1>
+          <p className="text-muted-foreground">Manage your talent pool and hiring metrics.</p>
       </div>
 
       <Tabs defaultValue="shortlist" className="space-y-6">
@@ -257,7 +211,7 @@ export function RecruiterDashboard() {
                         <TableRow>
                             <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                                 <Contact className="mx-auto h-8 w-8 mb-2 opacity-20"/>
-                                No candidates shortlisted yet.
+                                No candidates shortlisted yet. Start by using the Candidate Matcher.
                             </TableCell>
                         </TableRow>
                     ) : (
@@ -298,13 +252,6 @@ export function RecruiterDashboard() {
                             </TableCell>
                             <TableCell className="text-right">
                                 <div className="flex justify-end gap-2">
-                                    {candidate.resumeURL && (
-                                        <Button variant="ghost" size="icon" asChild>
-                                            <Link href={candidate.resumeURL} target="_blank">
-                                                <ExternalLink className="h-4 w-4" />
-                                            </Link>
-                                        </Button>
-                                    )}
                                     <Button variant="ghost" size="icon" onClick={() => handleRemove(candidate.id)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -353,9 +300,9 @@ export function RecruiterDashboard() {
                         <CardContent>
                             <div className="text-2xl font-bold flex items-center gap-2">
                                 <TrendingUp className="text-green-500 w-5 h-5"/>
-                                High
+                                Stable
                             </div>
-                            <p className="text-xs text-muted-foreground">Based on recent additions</p>
+                            <p className="text-xs text-muted-foreground">Recent pipeline additions</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -386,7 +333,7 @@ export function RecruiterDashboard() {
                             <CardTitle className="flex items-center gap-2">
                                 <PieChartIcon className="w-4 h-4 text-primary"/> Pipeline by Role
                             </CardTitle>
-                            <CardDescription>Volume of candidates per open position.</CardDescription>
+                            <CardDescription>Volume of candidates per position.</CardDescription>
                         </CardHeader>
                         <CardContent className="h-[300px]">
                             <ResponsiveContainer width="100%" height="100%">

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -68,7 +67,7 @@ export function CandidateMatcherPage() {
   const [summary, setSummary] = useState<string | null>(null);
   const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { plan, userData } = useAuth();
+  const { effectivePlan, user } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -79,7 +78,7 @@ export function CandidateMatcherPage() {
     },
   });
 
-  const canUseFeature = plan === 'recruiter';
+  const canUseFeature = effectivePlan === 'recruiter';
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!canUseFeature) {
@@ -149,10 +148,7 @@ export function CandidateMatcherPage() {
   }
 
   const handleShortlist = async (match: Match) => {
-    if (!userData?.teamId) {
-        toast({ title: "Workspace Needed", description: "Please initialize your workspace in the Recruiter Dashboard first.", variant: "destructive" });
-        return;
-    }
+    if (!user) return;
     setIsShortlistingId(match.resumeId);
     try {
         await saveCandidateAction({
@@ -160,7 +156,7 @@ export function CandidateMatcherPage() {
             matchScore: match.matchScore,
             jobTitle: form.getValues('jobTitle'),
             justification: match.justification,
-        }, userData.teamId);
+        }, user.uid);
 
         setCandidateMatches(prev => prev ? prev.map(m => m.resumeId === match.resumeId ? { ...m, isShortlisted: true } : m) : null);
         toast({ title: "Candidate Shortlisted", description: "View them in your Recruiter Dashboard." });
