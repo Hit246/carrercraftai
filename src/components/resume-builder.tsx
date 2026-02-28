@@ -135,7 +135,7 @@ export const ResumeBuilder = () => {
             const fetchedVersions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ResumeVersion));
             setVersions(fetchedVersions);
 
-            // Only set resume data automatically if we don't have a version selected yet
+            // Only set initial data if none is currently selected/being edited
             if (fetchedVersions.length > 0 && !currentVersion) {
                 const latest = fetchedVersions[0];
                 setCurrentVersion(latest);
@@ -151,7 +151,7 @@ export const ResumeBuilder = () => {
         });
 
         return () => unsubscribe();
-    }, [user?.uid, authLoading]); // currentVersion removed from dependencies to fix infinite loop
+    }, [user?.uid, authLoading]); // REMOVED currentVersion from deps to fix loop
 
     const handleAddExperience = () => {
         setResumeData(prev => ({

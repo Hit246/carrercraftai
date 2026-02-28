@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { candidateMatcherAction, summarizeCandidateAction, saveCandidateAction } from '@/lib/actions';
+import { candidateMatcherAction, summarizeCandidateAction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,6 +26,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const MAX_FILES = 10;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -151,17 +153,22 @@ export function CandidateMatcherPage() {
     if (!user) return;
     setIsShortlistingId(match.resumeId);
     try {
-        await saveCandidateAction({
+        // PERFORM WRITE ON CLIENT to satisfy owner permissions
+        const candidateRef = collection(db, `users/${user.uid}/shortlistedCandidates`);
+        await addDoc(candidateRef, {
             name: match.fileName.replace('.pdf', ''),
             matchScore: match.matchScore,
             jobTitle: form.getValues('jobTitle'),
             justification: match.justification,
-        }, user.uid);
+            addedAt: serverTimestamp(),
+            status: 'New'
+        });
 
         setCandidateMatches(prev => prev ? prev.map(m => m.resumeId === match.resumeId ? { ...m, isShortlisted: true } : m) : null);
         toast({ title: "Candidate Shortlisted", description: "View them in your Recruiter Dashboard." });
     } catch (e) {
-        toast({ title: "Error", description: "Failed to shortlist candidate.", variant: "destructive" });
+        console.error("Shortlist Error:", e);
+        toast({ title: "Error", description: "Failed to shortlist candidate. Check your connection or permissions.", variant: "destructive" });
     } finally {
         setIsShortlistingId(null);
     }
