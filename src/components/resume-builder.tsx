@@ -114,7 +114,6 @@ export const ResumeBuilder = () => {
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
     const [isAnalyzing, setIsAnalyzing] = React.useState(false);
-    const resumePreviewRef = React.useRef<HTMLDivElement>(null);
     const [versions, setVersions] = React.useState<ResumeVersion[]>([]);
     const [currentVersion, setCurrentVersion] = React.useState<ResumeVersion | null>(null);
     const [versionManagerOpen, setVersionManagerOpen] = React.useState(false);
@@ -133,21 +132,18 @@ export const ResumeBuilder = () => {
         const versionsQuery = query(collection(db, `users/${user.uid}/resumeVersions`), orderBy('updatedAt', 'desc'));
 
         const unsubscribe = onSnapshot(versionsQuery, (snapshot) => {
-            if (snapshot.empty) {
-                setVersions([]);
-                if (!currentVersion) {
-                    setResumeData({ ...emptyResumeData, email: user.email || '' });
-                }
-            } else {
-                const fetchedVersions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ResumeVersion));
-                setVersions(fetchedVersions);
+            const fetchedVersions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ResumeVersion));
+            setVersions(fetchedVersions);
 
-                if (!currentVersion) {
-                    const latest = fetchedVersions[0];
-                    setCurrentVersion(latest);
-                    setResumeData(latest.resumeData);
-                }
+            // Only set resume data automatically if we don't have a version selected yet
+            if (fetchedVersions.length > 0 && !currentVersion) {
+                const latest = fetchedVersions[0];
+                setCurrentVersion(latest);
+                setResumeData(latest.resumeData);
+            } else if (fetchedVersions.length === 0) {
+                setResumeData(prev => ({ ...prev, email: user.email || '' }));
             }
+            
             setIsLoading(false);
         }, (error) => {
             console.error("Error fetching resume versions: ", error);
@@ -155,7 +151,7 @@ export const ResumeBuilder = () => {
         });
 
         return () => unsubscribe();
-    }, [user, authLoading, currentVersion]);
+    }, [user?.uid, authLoading]); // currentVersion removed from dependencies to fix infinite loop
 
     const handleAddExperience = () => {
         setResumeData(prev => ({
@@ -640,7 +636,7 @@ export const ResumeBuilder = () => {
                 </Card>
                 <Card className="flex-1 overflow-hidden">
                     <CardContent className="p-0 h-full overflow-y-auto">
-                        <div ref={resumePreviewRef} className="p-4 sm:p-8 font-body text-sm bg-white text-gray-800 shadow-lg h-full">
+                        <div className="p-4 sm:p-8 font-body text-sm bg-white text-gray-800 shadow-lg h-full">
                             <div className="text-center border-b-2 border-gray-200 pb-4 mb-6">
                                 <h2 className="text-2xl md:text-4xl font-bold font-headline text-gray-900">{resumeData.name || 'Your Name'}</h2>
                                 <p className="text-base md:text-lg text-primary font-semibold mt-1">{resumeData.title || 'Professional Title'}</p>

@@ -17,7 +17,7 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Definitive recursive rules for users and all sub-data
+    // Definitive owner-based rules using recursive wildcards
     match /users/{userId} {
       allow read, write: if isAdmin() || isOwner(userId);
       

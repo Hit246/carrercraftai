@@ -67,7 +67,7 @@ export function RecruiterDashboard() {
         setIsLoading(false);
       }, (err) => {
         console.error("Error fetching candidates:", err);
-        setError("Failed to load candidates. This may be due to a permission issue or a missing collection.");
+        setError("Failed to load candidates. This may be due to a permission issue.");
         setIsLoading(false);
       });
 
@@ -104,6 +104,7 @@ export function RecruiterDashboard() {
         });
         await updateDoc(doc(db, 'users', user.uid), { teamId: teamRef.id });
         toast({ title: "Workspace Ready!", description: "You can now shortlist candidates from the Matcher."});
+        // Loading state will be set to false by the useEffect when userData is updated
     } catch (error) {
         toast({ title: "Error", description: "Failed to initialize workspace.", variant: "destructive"});
         setIsLoading(false);
