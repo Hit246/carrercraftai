@@ -22,7 +22,7 @@ const fontHeadline = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   verification: {
-    google:'googlebd18ee77e8b1f39f'
+    google:'m9NCKssWohWHN-B-t5wf3XhwCqQmitLh_apuVQep9sc'
   },
   title: {
     default: "CareerCraft AI: Build Resumes & Find Jobs with AI",
