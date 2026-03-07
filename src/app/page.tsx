@@ -3,14 +3,57 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key } from 'lucide-react';
+import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key, PartyPopper, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { HomeHeader } from '@/components/home-header';
 import React from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+interface PricingSettings {
+  essentials: number;
+  pro: number;
+  recruiter: number;
+  festiveDiscount: number;
+  festiveName: string;
+}
 
 function HomePageContent() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
+  const [pricing, setPricing] = React.useState<PricingSettings>({
+    essentials: 199,
+    pro: 399,
+    recruiter: 999,
+    festiveDiscount: 0,
+    festiveName: '',
+  });
+  const [isLoadingPricing, setIsLoadingPricing] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        const docRef = doc(db, 'settings', 'pricing');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setPricing(docSnap.data() as PricingSettings);
+        }
+      } catch (e) {
+        console.error("Error fetching home pricing:", e);
+      } finally {
+        setIsLoadingPricing(false);
+      }
+    };
+    fetchPricing();
+  }, []);
+
+  const calculatePrice = (base: number) => {
+    let final = base;
+    if (pricing.festiveDiscount > 0) {
+      final = final * (1 - pricing.festiveDiscount / 100);
+    }
+    return Math.floor(final);
+  };
 
   const getStartedLink = user ? '/dashboard' : '/signup';
   const pricingLink = user ? '/pricing' : '/signup';
@@ -21,7 +64,6 @@ function HomePageContent() {
       <main className="flex-1">
         <script
           type="application/ld+json"
-          // JSON-LD for better Google understanding of your brand & product
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -155,7 +197,12 @@ function HomePageContent() {
               <p className="font-semibold text-primary">Pricing</p>
               <h2 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">The right plan for your needs</h2>
               <p className="mt-4 text-muted-foreground text-lg">
-                Choose the plan that’s right for you and take the next step in your career.
+                {pricing.festiveDiscount > 0 ? (
+                  <span className="flex items-center justify-center gap-2 text-primary font-semibold">
+                    <PartyPopper className="h-5 w-5" /> 
+                    {pricing.festiveName}: Extra {pricing.festiveDiscount}% Off All Plans!
+                  </span>
+                ) : 'Choose the plan that’s right for you and take the next step in your career.'}
               </p>
             </div>
 
@@ -184,18 +231,22 @@ function HomePageContent() {
                 </CardFooter>
               </Card>
 
-              <Card className="flex flex-col">
+              <Card className="flex flex-col relative overflow-hidden">
+                {pricing.festiveDiscount > 0 && <Badge className="absolute top-2 right-2 bg-green-500">Sale</Badge>}
                 <CardHeader>
                   <CardTitle className="font-headline flex items-center gap-2"><Trophy className="text-gray-400" /> Essentials</CardTitle>
                   <CardDescription>For active job seekers.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1">
-                  <p className="text-4xl font-bold font-headline">₹199<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                  <div className="flex flex-col">
+                    {pricing.festiveDiscount > 0 && (
+                      <span className="text-sm text-muted-foreground line-through">₹{pricing.essentials}</span>
+                    )}
+                    <p className="text-4xl font-bold font-headline">₹{calculatePrice(pricing.essentials)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                  </div>
                   <ul className="space-y-2 text-left text-sm">
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 50 AI credits</li>
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> ATS keyword suggestions</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Cover letter generator</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Portfolio showcase</li>
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 10 resumes</li>
                   </ul>
                 </CardContent>
@@ -210,21 +261,23 @@ function HomePageContent() {
                 </CardFooter>
               </Card>
 
-              <Card className="border-primary border-2 relative flex flex-col">
+              <Card className="border-primary border-2 relative flex flex-col overflow-hidden">
                 <Badge className="absolute top-4 right-4" variant="secondary">Most Popular</Badge>
                 <CardHeader>
                   <CardTitle className="font-headline flex items-center gap-2"><Crown className="text-amber-500" /> Pro</CardTitle>
                   <CardDescription>For professionals aiming for top jobs.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1">
-                  <p className="text-4xl font-bold font-headline">₹399<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                  <div className="flex flex-col">
+                    {pricing.festiveDiscount > 0 && (
+                      <span className="text-sm text-muted-foreground line-through">₹{pricing.pro}</span>
+                    )}
+                    <p className="text-4xl font-bold font-headline">₹{calculatePrice(pricing.pro)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                  </div>
                   <ul className="space-y-2 text-left text-sm">
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited AI generation</li>
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Advanced ATS optimization</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Skill gap analysis</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Resume performance analytics</li>
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited resumes</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Priority support</li>
                   </ul>
                 </CardContent>
                 <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
@@ -238,18 +291,22 @@ function HomePageContent() {
                 </CardFooter>
               </Card>
 
-              <Card className="flex flex-col">
+              <Card className="flex flex-col relative overflow-hidden">
                 <CardHeader>
                   <CardTitle className="font-headline flex items-center gap-2"><Diamond className="text-blue-500" /> Recruiter</CardTitle>
                   <CardDescription>For recruiters & HR teams.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1">
-                  <p className="text-4xl font-bold font-headline">₹999<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                  <div className="flex flex-col">
+                    {pricing.festiveDiscount > 0 && (
+                      <span className="text-sm text-muted-foreground line-through">₹{pricing.recruiter}</span>
+                    )}
+                    <p className="text-4xl font-bold font-headline">₹{calculatePrice(pricing.recruiter)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                  </div>
                   <ul className="space-y-2 text-left text-sm">
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking & Summaries</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Candidate Management Dashboard</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking</li>
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Team Management</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter analytics dashboard</li>
+                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter analytics</li>
                   </ul>
                 </CardContent>
                 <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
