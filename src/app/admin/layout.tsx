@@ -17,6 +17,7 @@ import {
   Settings,
   Bell,
   Wallet,
+  Tag,
 } from 'lucide-react';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -102,6 +103,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
   const getPageTitle = () => {
     if (isActive('/admin/dashboard')) return 'Admin Dashboard';
     if (isActive('/admin/users')) return 'User Management';
+    if (isActive('/admin/pricing')) return 'Pricing & Promos';
     if (isActive('/admin/subscriptions')) return 'Subscription Management';
     if (isActive('/admin/upgrades')) return 'Upgrade Requests';
     if (isActive('/admin/cancellations')) return 'Cancellation Requests';
@@ -150,6 +152,14 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 <Link href="/admin/users">
                   <Users />
                   <span>Users</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive('/admin/pricing')}>
+                <Link href="/admin/pricing">
+                  <Tag />
+                  <span>Pricing & Promos</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

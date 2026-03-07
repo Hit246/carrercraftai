@@ -17,7 +17,7 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Definitive owner-based rules using recursive wildcards
+    // User data and subcollections
     match /users/{userId} {
       allow read, write: if isAdmin() || isOwner(userId);
       
@@ -26,18 +26,17 @@ service cloud.firestore {
       }
     }
     
-    match /teams/{teamId} {
-      allow read: if isSignedIn();
-      allow write: if isAdmin() || get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
-      
-      match /{allPaths=**} {
-        allow read, write: if isAdmin() || get(/databases/$(database)/documents/teams/$(teamId)).data.owner == request.auth.uid;
-      }
-    }
-
+    // Global Settings
     match /settings/{settingId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
+    }
+
+    // Promo Codes
+    match /promoCodes/{code} {
+      // Users can only 'get' a specific code to verify it exists
+      allow get: if isSignedIn();
+      allow list, write: if isAdmin();
     }
 
     match /supportRequests/{requestId} {
