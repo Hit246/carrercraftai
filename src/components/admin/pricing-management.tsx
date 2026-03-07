@@ -47,10 +47,21 @@ export function PricingManagement() {
 
   useEffect(() => {
     const fetchPricing = async () => {
-      const docRef = doc(db, 'settings', 'pricing');
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setSettings(docSnap.data() as PricingSettings);
+      try {
+        const docRef = doc(db, 'settings', 'pricing');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data() as PricingSettings;
+          setSettings({
+            essentials: data.essentials ?? 199,
+            pro: data.pro ?? 399,
+            recruiter: data.recruiter ?? 999,
+            festiveDiscount: data.festiveDiscount ?? 0,
+            festiveName: data.festiveName ?? '',
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching pricing:", error);
       }
     };
 
@@ -117,15 +128,15 @@ export function PricingManagement() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Essentials Plan (₹)</Label>
-              <Input type="number" value={settings.essentials} onChange={e => setSettings({...settings, essentials: parseInt(e.target.value)})} />
+              <Input type="number" value={settings.essentials ?? 0} onChange={e => setSettings({...settings, essentials: parseInt(e.target.value) || 0})} />
             </div>
             <div className="space-y-2">
               <Label>Pro Plan (₹)</Label>
-              <Input type="number" value={settings.pro} onChange={e => setSettings({...settings, pro: parseInt(e.target.value)})} />
+              <Input type="number" value={settings.pro ?? 0} onChange={e => setSettings({...settings, pro: parseInt(e.target.value) || 0})} />
             </div>
             <div className="space-y-2">
               <Label>Recruiter Plan (₹)</Label>
-              <Input type="number" value={settings.recruiter} onChange={e => setSettings({...settings, recruiter: parseInt(e.target.value)})} />
+              <Input type="number" value={settings.recruiter ?? 0} onChange={e => setSettings({...settings, recruiter: parseInt(e.target.value) || 0})} />
             </div>
             <Button onClick={handleSavePricing} disabled={isSaving} className="w-full">
               {isSaving ? <Loader2 className="animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
@@ -143,11 +154,11 @@ export function PricingManagement() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Discount Name (e.g., Diwali Sale)</Label>
-              <Input placeholder="Enter occasion name" value={settings.festiveName} onChange={e => setSettings({...settings, festiveName: e.target.value})} />
+              <Input placeholder="Enter occasion name" value={settings.festiveName || ''} onChange={e => setSettings({...settings, festiveName: e.target.value})} />
             </div>
             <div className="space-y-2">
               <Label>Discount Percentage (%)</Label>
-              <Input type="number" min="0" max="100" value={settings.festiveDiscount} onChange={e => setSettings({...settings, festiveDiscount: parseInt(e.target.value)})} />
+              <Input type="number" min="0" max="100" value={settings.festiveDiscount ?? 0} onChange={e => setSettings({...settings, festiveDiscount: parseInt(e.target.value) || 0})} />
             </div>
             <p className="text-xs text-muted-foreground italic">Note: Set to 0 to disable global discounts.</p>
             <Button onClick={handleSavePricing} variant="outline" className="w-full border-primary text-primary hover:bg-primary/10">
@@ -171,7 +182,7 @@ export function PricingManagement() {
             </div>
             <div className="space-y-2 w-[150px]">
               <Label>Discount (%)</Label>
-              <Input type="number" value={newDiscount} onChange={e => setNewDiscount(parseInt(e.target.value))} />
+              <Input type="number" value={newDiscount ?? 0} onChange={e => setNewDiscount(parseInt(e.target.value) || 0)} />
             </div>
             <Button onClick={handleAddPromo} className="shrink-0"><Plus className="mr-2 h-4 w-4" /> Create Code</Button>
           </div>
