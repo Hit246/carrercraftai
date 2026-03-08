@@ -32,9 +32,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Promo Codes - Robust Public GET for verification
-    match /promoCodes/{code} {
-      allow get: if true;
+    // Promo Codes
+    match /promoCodes/{promoId} {
+      // Allow any authenticated user to verify a specific code
+      allow get: if isSignedIn();
+      // Only admins can see all codes or manage them
       allow list, write: if isAdmin();
     }
 
