@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "./ui/badge"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
@@ -14,9 +14,8 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast" 
 import { createPaymentLink } from "@/lib/razorpay"
 import { db } from "@/lib/firebase";
-import { verifyPromoCodeAction } from "@/lib/actions";
 
-import { Check, Crown, Trophy, Diamond, Key, Loader2, Star, PartyPopper, Tag } from "lucide-react"
+import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag } from "lucide-react"
 
 type Plan = "free" | "essentials" | "pro" | "recruiter"
 
@@ -69,15 +68,20 @@ export function PricingPage() {
     if (!promoCode) return;
     setIsVerifyingPromo(true);
     try {
-      const result = await verifyPromoCodeAction(promoCode);
-      if (result.success && result.data) {
-        setAppliedPromo(result.data);
-        toast({ title: 'Promo Applied!', description: `${result.data.discount}% discount has been added.` });
+      const code = promoCode.toUpperCase().trim();
+      const docRef = doc(db, 'promoCodes', code);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data() as { code: string, discount: number };
+        setAppliedPromo(data);
+        toast({ title: 'Promo Applied!', description: `${data.discount}% discount has been added.` });
       } else {
         toast({ title: 'Invalid Code', description: 'The promo code you entered is not valid or has expired.', variant: 'destructive' });
         setAppliedPromo(null);
       }
     } catch (e) {
+      console.error("Promo verification error:", e);
       toast({ title: 'Error', description: 'Could not verify promo code. Please try again later.', variant: 'destructive' });
     } finally {
       setIsVerifyingPromo(false);
@@ -174,7 +178,6 @@ export function PricingPage() {
         </p>
       </div>
 
-      {/* Promo Code Input */}
       <div className="mt-8 w-full max-w-sm flex items-end gap-2 text-left mx-auto">
         <div className="space-y-1.5 flex-1">
           <Label htmlFor="promo" className="text-xs uppercase text-muted-foreground">Have a Promo Code?</Label>
@@ -195,21 +198,18 @@ export function PricingPage() {
       </div>
 
       <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl w-full mx-auto">
-        {/* Free Plan */}
         <Card className="flex flex-col">
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
-              <Star className="text-yellow-500" /> Free – Starter
+              <Star className="text-yellow-500" /> Free
             </CardTitle>
-            <CardDescription>For students & freshers exploring jobs.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <p className="text-4xl font-bold font-headline">
-              ₹0<span className="text-lg font-normal text-muted-foreground">/month</span>
+              ₹0<span className="text-lg font-normal text-muted-foreground">/mo</span>
             </p>
             <ul className="space-y-2 text-left text-sm">
-              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 5 AI credits per month</li>
-              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Basic templates</li>
+              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 5 AI credits</li>
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 2 resume drafts</li>
             </ul>
           </CardContent>
@@ -220,14 +220,12 @@ export function PricingPage() {
           </CardFooter>
         </Card>
 
-        {/* Essentials */}
         <Card className="flex flex-col relative overflow-hidden">
           {(settings.festiveDiscount > 0 || appliedPromo) && <Badge className="absolute top-2 right-2 bg-green-500">Discount Applied</Badge>}
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
               <Trophy className="text-gray-400" /> Essentials
             </CardTitle>
-            <CardDescription>For active job seekers.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="flex flex-col">
@@ -238,7 +236,6 @@ export function PricingPage() {
             </div>
             <ul className="space-y-2 text-left text-sm">
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 50 AI credits</li>
-              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> ATS keyword suggestions</li>
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 10 resumes</li>
             </ul>
           </CardContent>
@@ -249,12 +246,10 @@ export function PricingPage() {
           </CardFooter>
         </Card>
 
-        {/* Pro */}
         <Card className="border-primary border-2 relative flex flex-col overflow-hidden">
           <Badge className="absolute top-4 right-4" variant="secondary">Popular</Badge>
           <CardHeader>
-            <CardTitle className="font-headline flex items-center gap-2"><Crown className="text-amber-500" /> Pro – Advanced</CardTitle>
-            <CardDescription>For experienced professionals.</CardDescription>
+            <CardTitle className="font-headline flex items-center gap-2"><Crown className="text-amber-500" /> Pro</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="flex flex-col">
@@ -265,8 +260,7 @@ export function PricingPage() {
             </div>
             <ul className="space-y-2 text-left text-sm">
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited AI generation</li>
-              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Advanced ATS optimization</li>
-              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Priority support</li>
+              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited resumes</li>
             </ul>
           </CardContent>
           <CardFooter className="pt-4 border-t">
@@ -276,11 +270,9 @@ export function PricingPage() {
           </CardFooter>
         </Card>
 
-        {/* Recruiter */}
         <Card className="flex flex-col relative overflow-hidden">
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2"><Diamond className="text-blue-500" /> Recruiter</CardTitle>
-            <CardDescription>For hiring teams.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="flex flex-col">
@@ -292,7 +284,6 @@ export function PricingPage() {
             <ul className="space-y-2 text-left text-sm">
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking</li>
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Team Management</li>
-              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter Analytics</li>
             </ul>
           </CardContent>
           <CardFooter className="pt-4 border-t">
