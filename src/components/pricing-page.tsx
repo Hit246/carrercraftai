@@ -69,19 +69,23 @@ export function PricingPage() {
     if (!codeToVerify) return;
     
     setIsVerifyingPromo(true);
+    console.log(`DEBUG: Attempting to verify promo code: [${codeToVerify}]`);
+
     try {
-      // Direct client-side Firestore access for maximum reliability
+      // Direct client-side Firestore access
       const docRef = doc(db, 'promoCodes', codeToVerify);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
         const data = docSnap.data();
+        console.log("DEBUG: Promo code found:", data);
         setAppliedPromo({ code: data.code, discount: data.discount });
         toast({ 
           title: 'Promo Applied!', 
           description: `${data.discount}% discount has been added to your checkout.` 
         });
       } else {
+        console.warn(`DEBUG: Promo code [${codeToVerify}] does not exist in Firestore.`);
         toast({ 
             title: 'Invalid Code', 
             description: 'The promo code you entered is not valid or has expired.', 
@@ -90,10 +94,11 @@ export function PricingPage() {
         setAppliedPromo(null);
       }
     } catch (e: any) {
-      console.error("Promo verification error:", e);
+      console.error("CRITICAL DEBUG: Firestore Promo Fetch Error:", e);
+      // Surface the exact Firebase error message to the user for debugging
       toast({ 
           title: 'Verification Failed', 
-          description: 'Could not connect to verification server. Please try again.', 
+          description: `Error: ${e.message || 'Unknown network error'}. Please check your connection or console for details.`, 
           variant: 'destructive' 
       });
       setAppliedPromo(null);
@@ -286,7 +291,9 @@ export function PricingPage() {
 
         <Card className="flex flex-col relative overflow-hidden">
           <CardHeader>
-            <CardTitle className="font-headline flex items-center gap-2"><Diamond className="text-blue-500" /> Recruiter</CardTitle>
+            <CardTitle className="font-headline flex items-center gap-2">
+              <Diamond className="text-blue-500" /> Recruiter
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="flex flex-col">
