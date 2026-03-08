@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast"
 import { createPaymentLink } from "@/lib/razorpay"
 import { db } from "@/lib/firebase";
 
-import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag } from "lucide-react"
+import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag, AlertCircle } from "lucide-react"
 
 type Plan = "free" | "essentials" | "pro" | "recruiter"
 
@@ -69,36 +69,33 @@ export function PricingPage() {
     if (!codeToVerify) return;
     
     setIsVerifyingPromo(true);
-    console.log(`DEBUG: Attempting to verify promo code: [${codeToVerify}]`);
+    console.log(`DEBUG: Verifying code: [${codeToVerify}]`);
 
     try {
-      // Direct client-side Firestore access
+      // Direct client-side fetch. Rules are now 'allow read: if true' for this collection.
       const docRef = doc(db, 'promoCodes', codeToVerify);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
         const data = docSnap.data();
-        console.log("DEBUG: Promo code found:", data);
         setAppliedPromo({ code: data.code, discount: data.discount });
         toast({ 
           title: 'Promo Applied!', 
-          description: `${data.discount}% discount has been added to your checkout.` 
+          description: `${data.discount}% discount has been added.` 
         });
       } else {
-        console.warn(`DEBUG: Promo code [${codeToVerify}] does not exist in Firestore.`);
         toast({ 
             title: 'Invalid Code', 
-            description: 'The promo code you entered is not valid or has expired.', 
+            description: 'The promo code you entered was not found.', 
             variant: 'destructive' 
         });
         setAppliedPromo(null);
       }
     } catch (e: any) {
-      console.error("CRITICAL DEBUG: Firestore Promo Fetch Error:", e);
-      // Surface the exact Firebase error message to the user for debugging
+      console.error("CRITICAL: Verification Error:", e);
       toast({ 
           title: 'Verification Failed', 
-          description: `Error: ${e.message || 'Unknown network error'}. Please check your connection or console for details.`, 
+          description: `Database error: ${e.message}. Please try again later.`, 
           variant: 'destructive' 
       });
       setAppliedPromo(null);
@@ -148,7 +145,7 @@ export function PricingPage() {
             requestedPlan: selectedPlan,
         });
     } catch (dbError) {
-        toast({ title: "Error", description: "Could not initiate upgrade request. Please try again.", variant: "destructive" });
+        toast({ title: "Error", description: "Could not initiate upgrade. check your permissions.", variant: "destructive" });
         setIsProcessing(null);
         return;
     }
@@ -168,11 +165,11 @@ export function PricingPage() {
       if (res.success && res.url) {
         window.location.href = res.url;
       } else {
-        toast({ title: "Payment Error", description: res.error ?? "Failed to create payment link.", variant: "destructive" });
+        toast({ title: "Payment Error", description: res.error ?? "Failed to create link.", variant: "destructive" });
         setIsProcessing(null);
       }
     } catch (err) {
-      toast({ title: "Critical Error", description: "An unexpected error occurred during payment.", variant: "destructive" });
+      toast({ title: "Critical Error", description: "Unexpected error during checkout.", variant: "destructive" });
       setIsProcessing(null);
     }
   };
@@ -185,27 +182,27 @@ export function PricingPage() {
     <div className="flex flex-col items-center text-center">
       <div className="max-w-2xl">
         <h1 className="text-4xl font-bold font-headline tracking-tight lg:text-5xl">
-          Unlock Your Full Potential
+          Choose Your Plan
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
           {settings.festiveDiscount > 0 ? (
             <span className="flex items-center justify-center gap-2 text-primary font-semibold">
               <PartyPopper className="h-5 w-5" /> 
-              {settings.festiveName}: Extra {settings.festiveDiscount}% Off All Plans!
+              {settings.festiveName}: {settings.festiveDiscount}% Off Storewide!
             </span>
-          ) : 'Choose the plan that’s right for you and take the next step in your career.'}
+          ) : 'Upgrade to unlock AI-powered career tools and unlimited features.'}
         </p>
       </div>
 
       <div className="mt-8 w-full max-w-sm flex items-end gap-2 text-left mx-auto">
         <div className="space-y-1.5 flex-1">
-          <Label htmlFor="promo" className="text-xs uppercase text-muted-foreground">Have a Promo Code?</Label>
+          <Label htmlFor="promo" className="text-xs uppercase text-muted-foreground">Promo Code</Label>
           <div className="relative">
             <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
               id="promo" 
               className="pl-9" 
-              placeholder="e.g. SAVE20" 
+              placeholder="e.g. SAVE50" 
               value={promoCodeInput} 
               onChange={e => setPromoCodeInput(e.target.value.toUpperCase())} 
             />
@@ -229,18 +226,18 @@ export function PricingPage() {
             </p>
             <ul className="space-y-2 text-left text-sm">
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 5 AI credits</li>
-              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 2 resume drafts</li>
+              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 2 resumes</li>
             </ul>
           </CardContent>
           <CardFooter className="pt-4 border-t">
             <Button asChild variant="outline" className="w-full" disabled={plan === "free"}>
-              <span>{plan === "free" ? "Current Plan" : "Get Started"}</span>
+              <span>{plan === "free" ? "Current Plan" : "Active"}</span>
             </Button>
           </CardFooter>
         </Card>
 
         <Card className="flex flex-col relative overflow-hidden">
-          {(settings.festiveDiscount > 0 || appliedPromo) && <Badge className="absolute top-2 right-2 bg-green-500">Discount Applied</Badge>}
+          {(settings.festiveDiscount > 0 || appliedPromo) && <Badge className="absolute top-2 right-2 bg-green-500">Sale</Badge>}
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
               <Trophy className="text-gray-400" /> Essentials
@@ -278,7 +275,7 @@ export function PricingPage() {
               <p className="text-4xl font-bold font-headline">₹{calculatePrice(settings.pro)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
             </div>
             <ul className="space-y-2 text-left text-sm">
-              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited AI generation</li>
+              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited AI analysis</li>
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited resumes</li>
             </ul>
           </CardContent>
@@ -304,7 +301,7 @@ export function PricingPage() {
             </div>
             <ul className="space-y-2 text-left text-sm">
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking</li>
-              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Team Management</li>
+              <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter Dashboard</li>
             </ul>
           </CardContent>
           <CardFooter className="pt-4 border-t">

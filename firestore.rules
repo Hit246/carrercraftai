@@ -17,6 +17,12 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    // Promo Codes - Allow public read for verification (essential for server actions & client checks)
+    match /promoCodes/{promoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // User data and subcollections
     match /users/{userId} {
       allow read, write: if isAdmin() || isOwner(userId);
@@ -30,15 +36,6 @@ service cloud.firestore {
     match /settings/{settingId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
-    }
-
-    // Promo Codes
-    match /promoCodes/{promoId} {
-      // Allow anyone to verify a specific code (Document ID)
-      // This is safe as it doesn't allow 'list' (browsing all codes)
-      allow get: if true;
-      // Only admins can see all codes or manage them
-      allow list, write: if isAdmin();
     }
 
     match /supportRequests/{requestId} {
