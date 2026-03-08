@@ -14,9 +14,8 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast" 
 import { createPaymentLink } from "@/lib/razorpay"
 import { db } from "@/lib/firebase";
-import { verifyPromoCodeAction } from "@/lib/actions";
 
-import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag, AlertCircle } from "lucide-react"
+import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag } from "lucide-react"
 
 type Plan = "free" | "essentials" | "pro" | "recruiter"
 
@@ -44,7 +43,7 @@ export function PricingPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Promo Code State
-  const [promoCode, setPromoCode] = useState('');
+  const [promoCodeInput, setPromoCodeInput] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<{ code: string, discount: number } | null>(null);
   const [isVerifyingPromo, setIsVerifyingPromo] = useState(false);
 
@@ -66,21 +65,23 @@ export function PricingPage() {
   }, []);
 
   const handleApplyPromo = async () => {
-    const codeToVerify = promoCode.toUpperCase().trim();
+    const codeToVerify = promoCodeInput.toUpperCase().trim();
     if (!codeToVerify) return;
     
     setIsVerifyingPromo(true);
     try {
-      // Use Server Action for reliable Firestore access
-      const result = await verifyPromoCodeAction(codeToVerify);
+      // Direct Client-Side Verification for absolute reliability
+      const docRef = doc(db, 'promoCodes', codeToVerify);
+      const docSnap = await getDoc(docRef);
       
-      if (result.success && result.data) {
-        setAppliedPromo({ code: result.data.code, discount: result.data.discount });
-        toast({ title: 'Promo Applied!', description: `${result.data.discount}% discount has been added.` });
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setAppliedPromo({ code: data.code, discount: data.discount });
+        toast({ title: 'Promo Applied!', description: `${data.discount}% discount has been added to your checkout.` });
       } else {
         toast({ 
             title: 'Invalid Code', 
-            description: result.error || 'The promo code you entered is not valid or has expired.', 
+            description: 'The promo code you entered is not valid or has expired.', 
             variant: 'destructive' 
         });
         setAppliedPromo(null);
@@ -89,7 +90,7 @@ export function PricingPage() {
       console.error("Promo verification error:", e.message);
       toast({ 
           title: 'Verification Failed', 
-          description: 'An unexpected error occurred. Please try again.', 
+          description: 'Could not connect to verification server. Please check your internet and try again.', 
           variant: 'destructive' 
       });
       setAppliedPromo(null);
@@ -139,7 +140,7 @@ export function PricingPage() {
             requestedPlan: selectedPlan,
         });
     } catch (dbError) {
-        toast({ title: "Error", description: "Could not set your requested plan.", variant: "destructive" });
+        toast({ title: "Error", description: "Could not initiate upgrade request. Please try again.", variant: "destructive" });
         setIsProcessing(null);
         return;
     }
@@ -163,7 +164,7 @@ export function PricingPage() {
         setIsProcessing(null);
       }
     } catch (err) {
-      toast({ title: "Critical Error", description: "Payment flow failed.", variant: "destructive" });
+      toast({ title: "Critical Error", description: "An unexpected error occurred during payment.", variant: "destructive" });
       setIsProcessing(null);
     }
   };
@@ -197,12 +198,12 @@ export function PricingPage() {
               id="promo" 
               className="pl-9" 
               placeholder="e.g. SAVE20" 
-              value={promoCode} 
-              onChange={e => setPromoCode(e.target.value.toUpperCase())} 
+              value={promoCodeInput} 
+              onChange={e => setPromoCodeInput(e.target.value.toUpperCase())} 
             />
           </div>
         </div>
-        <Button variant="secondary" onClick={handleApplyPromo} disabled={isVerifyingPromo || !promoCode}>
+        <Button variant="secondary" onClick={handleApplyPromo} disabled={isVerifyingPromo || !promoCodeInput}>
           {isVerifyingPromo ? <Loader2 className="animate-spin" /> : 'Apply'}
         </Button>
       </div>
@@ -225,7 +226,7 @@ export function PricingPage() {
           </CardContent>
           <CardFooter className="pt-4 border-t">
             <Button asChild variant="outline" className="w-full" disabled={plan === "free"}>
-              {plan === "free" ? "Current Plan" : "Get Started"}
+              <span>{plan === "free" ? "Current Plan" : "Get Started"}</span>
             </Button>
           </CardFooter>
         </Card>
