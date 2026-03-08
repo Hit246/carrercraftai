@@ -14,8 +14,9 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast" 
 import { createPaymentLink } from "@/lib/razorpay"
 import { db } from "@/lib/firebase";
+import { verifyPromoCodeAction } from "@/lib/actions";
 
-import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag } from "lucide-react"
+import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag, AlertCircle } from "lucide-react"
 
 type Plan = "free" | "essentials" | "pro" | "recruiter"
 
@@ -70,18 +71,16 @@ export function PricingPage() {
     
     setIsVerifyingPromo(true);
     try {
-      // Perform verification CLIENT-SIDE for better compatibility with rules and session
-      const promoRef = doc(db, 'promoCodes', codeToVerify);
-      const promoSnap = await getDoc(promoRef);
+      // Use Server Action for reliable Firestore access
+      const result = await verifyPromoCodeAction(codeToVerify);
       
-      if (promoSnap.exists()) {
-        const data = promoSnap.data();
-        setAppliedPromo({ code: data.code, discount: data.discount });
-        toast({ title: 'Promo Applied!', description: `${data.discount}% discount has been added.` });
+      if (result.success && result.data) {
+        setAppliedPromo({ code: result.data.code, discount: result.data.discount });
+        toast({ title: 'Promo Applied!', description: `${result.data.discount}% discount has been added.` });
       } else {
         toast({ 
             title: 'Invalid Code', 
-            description: 'The promo code you entered is not valid or has expired.', 
+            description: result.error || 'The promo code you entered is not valid or has expired.', 
             variant: 'destructive' 
         });
         setAppliedPromo(null);
@@ -90,7 +89,7 @@ export function PricingPage() {
       console.error("Promo verification error:", e.message);
       toast({ 
           title: 'Verification Failed', 
-          description: 'Could not verify code. Please try again.', 
+          description: 'An unexpected error occurred. Please try again.', 
           variant: 'destructive' 
       });
       setAppliedPromo(null);
