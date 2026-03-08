@@ -34,8 +34,8 @@ service cloud.firestore {
 
     // Promo Codes
     match /promoCodes/{code} {
-      // Users can only 'get' a specific code to verify it exists
-      allow get: if isSignedIn();
+      // Allow any user to 'get' a specific code to verify it (needed for server actions)
+      allow get: if true;
       allow list, write: if isAdmin();
     }
 

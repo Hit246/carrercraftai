@@ -25,7 +25,7 @@ import { atsOptimizer, AtsOptimizerInput, AtsOptimizerOutput } from '@/ai/flows/
 import { submitSupportRequest, replyToSupportRequest } from '@/ai/flows/support-request';
 import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeVersionNameOutput } from '@/ai/flows/resume-version-namer';
 import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput } from '@/ai/flows/candidate-summarizer';
-import { db, uploadFile } from './firebase';
+import { db } from './firebase';
 import type { SupportRequestInput, ReplySupportRequestInput } from './types';
 
 
@@ -102,15 +102,24 @@ export async function summarizeCandidateAction(
 export async function verifyPromoCodeAction(code: string) {
     try {
         const cleanCode = code.toUpperCase().trim();
+        if (!cleanCode) return { success: false, error: 'Empty code' };
+        
         const docRef = doc(db, 'promoCodes', cleanCode);
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
-            return { success: true, data: docSnap.data() as { code: string, discount: number } };
+            const data = docSnap.data();
+            return { 
+                success: true, 
+                data: {
+                    code: data.code,
+                    discount: data.discount
+                }
+            };
         }
         return { success: false, error: 'Invalid code' };
-    } catch (e) {
-        console.error("Promo verification error:", e);
+    } catch (e: any) {
+        console.error("Promo verification error:", e.message);
         return { success: false, error: 'Verification failed' };
     }
 }
