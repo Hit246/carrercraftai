@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast" 
 import { createPaymentLink } from "@/lib/razorpay"
 import { db } from "@/lib/firebase";
+import { verifyPromoCodeAction } from "@/lib/actions";
 
 import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag } from "lucide-react"
 
@@ -70,18 +71,19 @@ export function PricingPage() {
     
     setIsVerifyingPromo(true);
     try {
-      // Direct Client-Side Verification for absolute reliability
-      const docRef = doc(db, 'promoCodes', codeToVerify);
-      const docSnap = await getDoc(docRef);
+      // Use Server Action for reliable Firestore access
+      const res = await verifyPromoCodeAction(codeToVerify);
       
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setAppliedPromo({ code: data.code, discount: data.discount });
-        toast({ title: 'Promo Applied!', description: `${data.discount}% discount has been added to your checkout.` });
+      if (res.success && res.data) {
+        setAppliedPromo({ code: res.data.code, discount: res.data.discount });
+        toast({ 
+          title: 'Promo Applied!', 
+          description: `${res.data.discount}% discount has been added to your checkout.` 
+        });
       } else {
         toast({ 
             title: 'Invalid Code', 
-            description: 'The promo code you entered is not valid or has expired.', 
+            description: res.error || 'The promo code you entered is not valid or has expired.', 
             variant: 'destructive' 
         });
         setAppliedPromo(null);
@@ -90,7 +92,7 @@ export function PricingPage() {
       console.error("Promo verification error:", e.message);
       toast({ 
           title: 'Verification Failed', 
-          description: 'Could not connect to verification server. Please check your internet and try again.', 
+          description: e.message || 'Could not connect to verification server. Please try again.', 
           variant: 'destructive' 
       });
       setAppliedPromo(null);
