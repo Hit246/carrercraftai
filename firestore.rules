@@ -17,9 +17,10 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Promo Codes - Allow public read for verification (essential for server actions & client checks)
+    // Promo Codes - Allow public LOOKUP (get) for verification, but prevent LISTING
     match /promoCodes/{promoId} {
-      allow read: if true;
+      allow get: if true;
+      allow list: if isAdmin();
       allow write: if isAdmin();
     }
 

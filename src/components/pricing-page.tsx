@@ -14,8 +14,9 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast" 
 import { createPaymentLink } from "@/lib/razorpay"
 import { db } from "@/lib/firebase";
+import { verifyPromoCodeAction } from "@/lib/actions";
 
-import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag, AlertCircle } from "lucide-react"
+import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag } from "lucide-react"
 
 type Plan = "free" | "essentials" | "pro" | "recruiter"
 
@@ -69,33 +70,30 @@ export function PricingPage() {
     if (!codeToVerify) return;
     
     setIsVerifyingPromo(true);
-    console.log(`DEBUG: Verifying code: [${codeToVerify}]`);
 
     try {
-      // Direct client-side fetch. Rules are now 'allow read: if true' for this collection.
-      const docRef = doc(db, 'promoCodes', codeToVerify);
-      const docSnap = await getDoc(docRef);
+      // Use Server Action for robust verification
+      const res = await verifyPromoCodeAction(codeToVerify);
       
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setAppliedPromo({ code: data.code, discount: data.discount });
+      if (res.success && res.data) {
+        setAppliedPromo({ code: res.data.code, discount: res.data.discount });
         toast({ 
           title: 'Promo Applied!', 
-          description: `${data.discount}% discount has been added.` 
+          description: `${res.data.discount}% discount has been added.` 
         });
       } else {
         toast({ 
             title: 'Invalid Code', 
-            description: 'The promo code you entered was not found.', 
+            description: res.error || 'The promo code you entered was not found.', 
             variant: 'destructive' 
         });
         setAppliedPromo(null);
       }
     } catch (e: any) {
-      console.error("CRITICAL: Verification Error:", e);
+      console.error("Promo error:", e);
       toast({ 
           title: 'Verification Failed', 
-          description: `Database error: ${e.message}. Please try again later.`, 
+          description: 'Network error. Please check your connection and try again.', 
           variant: 'destructive' 
       });
       setAppliedPromo(null);

@@ -29,7 +29,7 @@ const nextConfig = {
       }
     ],
   },
-  // Removed restrictive COOP/COEP headers that were blocking Firestore and Images
+  // Use a relaxed COOP header to allow popups and Firebase/Image resources
   async headers() {
     return [
       {
