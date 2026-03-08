@@ -99,6 +99,22 @@ export async function summarizeCandidateAction(
   return await summarizeCandidate(input);
 }
 
+export async function verifyPromoCodeAction(code: string) {
+    try {
+        const cleanCode = code.toUpperCase().trim();
+        const docRef = doc(db, 'promoCodes', cleanCode);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            return { success: true, data: docSnap.data() as { code: string, discount: number } };
+        }
+        return { success: false, error: 'Invalid code' };
+    } catch (e) {
+        console.error("Promo verification error:", e);
+        return { success: false, error: 'Verification failed' };
+    }
+}
+
 export async function saveCandidateAction(candidateData: {
     name: string;
     matchScore: number;

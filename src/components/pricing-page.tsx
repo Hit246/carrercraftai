@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast" 
 import { createPaymentLink } from "@/lib/razorpay"
 import { db } from "@/lib/firebase";
+import { verifyPromoCodeAction } from "@/lib/actions";
 
 import { Check, Crown, Trophy, Diamond, Key, Loader2, Star, PartyPopper, Tag } from "lucide-react"
 
@@ -68,17 +69,16 @@ export function PricingPage() {
     if (!promoCode) return;
     setIsVerifyingPromo(true);
     try {
-      const docRef = doc(db, 'promoCodes', promoCode.toUpperCase().trim());
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setAppliedPromo(docSnap.data() as { code: string, discount: number });
-        toast({ title: 'Promo Applied!', description: `${docSnap.data().discount}% discount has been added.` });
+      const result = await verifyPromoCodeAction(promoCode);
+      if (result.success && result.data) {
+        setAppliedPromo(result.data);
+        toast({ title: 'Promo Applied!', description: `${result.data.discount}% discount has been added.` });
       } else {
-        toast({ title: 'Invalid Code', description: 'The promo code you entered is not valid.', variant: 'destructive' });
+        toast({ title: 'Invalid Code', description: 'The promo code you entered is not valid or has expired.', variant: 'destructive' });
         setAppliedPromo(null);
       }
     } catch (e) {
-      toast({ title: 'Error', description: 'Could not verify promo code.', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Could not verify promo code. Please try again later.', variant: 'destructive' });
     } finally {
       setIsVerifyingPromo(false);
     }
