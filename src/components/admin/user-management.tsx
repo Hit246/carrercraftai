@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -36,7 +37,7 @@ interface UserData {
   id: string;
   email: string;
   plan: Plan;
-  photoURL: String;
+  photoURL?: string;
   requestedPlan?: 'essentials' | 'pro' | 'recruiter';
   createdAt?: { seconds: number };
   planUpdatedAt?: { seconds: number };
@@ -294,13 +295,15 @@ export function UserManagementPage() {
                             <AlertDialogContent>
                                 <AlertDialogHeader>
                                 <AlertDialogTitle>Delete user document?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This removes the user's Firestore document. 
-                                    <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900 rounded-md flex items-start gap-2 text-amber-800 dark:text-amber-200">
-                                        <AlertCircle className="h-5 w-5 shrink-0" />
-                                        <p className="text-xs">
-                                            <strong>Note:</strong> This does not delete their Authentication account. You must also remove them from the <strong>Firebase Auth Console</strong> to permanently revoke their access.
-                                        </p>
+                                <AlertDialogDescription asChild>
+                                    <div className="text-sm text-muted-foreground">
+                                        This removes the user's Firestore document. 
+                                        <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900 rounded-md flex items-start gap-2 text-amber-800 dark:text-amber-200">
+                                            <AlertCircle className="h-5 w-5 shrink-0" />
+                                            <div className="text-xs">
+                                                <strong>Note:</strong> This does not delete their Authentication account. You must also remove them from the <strong>Firebase Auth Console</strong> to permanently revoke their access.
+                                            </div>
+                                        </div>
                                     </div>
                                 </AlertDialogDescription>
                                 </AlertDialogHeader>

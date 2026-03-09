@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
@@ -125,7 +126,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
         if (!userDoc.exists()) {
-            // This case is handled by the self-healing ensureUserDocument call above
             return;
         }
         
@@ -250,7 +250,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (profile.photoURL !== undefined) firestoreData.photoURL = profile.photoURL;
     if (profile.phoneNumber !== undefined) firestoreData.phoneNumber = profile.phoneNumber;
     
-    // Use setDoc with merge: true for "Self-Healing"
     await setDoc(userRef, firestoreData, { merge: true });
   };
 
