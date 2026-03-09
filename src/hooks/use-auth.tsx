@@ -63,6 +63,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userData, setUserData] = useState<UserData| null>(null);
 
+  // Helper to ensure user document exists (Self-Healing)
+  const ensureUserDocument = async (authUser: User) => {
+    const userRef = doc(db, 'users', authUser.uid);
+    try {
+        const userDoc = await getDoc(userRef);
+        if (!userDoc.exists()) {
+            console.log("Self-Healing: User document missing. Creating now...");
+            const userIsAdmin = authUser.email && ADMIN_EMAILS.includes(authUser.email);
+            
+            await setDoc(userRef, { 
+                email: authUser.email, 
+                plan: userIsAdmin ? 'recruiter' : 'free', 
+                credits: userIsAdmin ? Infinity : FREE_CREDITS, 
+                createdAt: serverTimestamp(),
+                displayName: authUser.displayName || authUser.email?.split('@')[0] || 'User',
+                photoURL: authUser.photoURL || null,
+                hasCompletedOnboarding: false
+            });
+        }
+    } catch (e) {
+        console.error("Self-healing failed:", e);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -70,12 +94,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userIsAdmin = currentUser.email && ADMIN_EMAILS.includes(currentUser.email);
         setIsAdmin(!!userIsAdmin);
 
+        // Proactively heal missing user document
+        await ensureUserDocument(currentUser);
+
         if (userIsAdmin) {
-            const userRef = doc(db, 'users', currentUser.uid);
-            const userDoc = await getDoc(userRef);
-            if (!userDoc.exists()) {
-                await setDoc(userRef, { email: currentUser.email, plan: 'recruiter', credits: Infinity, createdAt: serverTimestamp() });
-            }
             setPlan('recruiter');
             setEffectivePlan('recruiter');
             setCredits(Infinity);
@@ -101,9 +123,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
         if (!userDoc.exists()) {
-            // Document might be missing if signup failed to write to Firestore
-            // We'll keep loading true for a moment, but if it never appears, 
-            // the user will see an empty profile. We handle this in self-healing profile updates.
+            // This case should be handled by the self-healing ensureUserDocument call above
             setLoading(false);
             return;
         }
@@ -114,6 +134,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const effPlan = userPlan === 'pending' ? (currentData.previousPlan || 'free') : userPlan;
 
+        // Auto-expiry logic (30 days)
         if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
             let upgradeDate: Date;
             if (planUpdatedAt?.toDate) {
@@ -199,8 +220,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     } catch (firestoreError) {
         console.error("Error creating Firestore user doc during signup:", firestoreError);
-        // We don't throw here to avoid blocking the auth success, 
-        // but the record will be missing until self-healing kicks in.
     }
     
     return userCredential;
@@ -212,17 +231,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error("Not authenticated");
     
-    // 1. Update Firebase Auth Profile
     await updateProfile(currentUser, { 
         displayName: profile.displayName, 
         photoURL: profile.photoURL 
     });
 
-    // 2. Self-Healing Firestore Update: Use setDoc with merge: true 
-    // This creates the document if it's missing (e.g. from a failed signup write)
     const userRef = doc(db, 'users', currentUser.uid);
     const firestoreData: any = {
-        email: currentUser.email, // Ensure email is present
+        email: currentUser.email,
     };
     
     if (profile.displayName !== undefined) firestoreData.displayName = profile.displayName;

@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Crown, User, Shield, Trophy, AlertTriangle, Handshake } from 'lucide-react';
+import { MoreHorizontal, Trash2, Crown, User, Shield, Trophy, AlertTriangle, Handshake, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
@@ -68,7 +68,6 @@ export function UserManagementPage() {
     const userRef = doc(db, 'users', userId);
     try {
       let amountPaid = 0;
-      // If manually upgrading to a paid plan, try to fetch the current price to record it
       if (['essentials', 'pro', 'recruiter'].includes(newPlan)) {
           const pricingSnap = await getDoc(doc(db, 'settings', 'pricing'));
           if (pricingSnap.exists()) {
@@ -84,16 +83,12 @@ export function UserManagementPage() {
         plan: newPlan,
       };
 
-      // Only set a new timestamp and price if moving TO a paid plan
       if (['essentials', 'pro', 'recruiter'].includes(newPlan)) {
           updateData.planUpdatedAt = new Date();
           updateData.amountPaid = amountPaid;
           updateData.webhookVerified = false;
       }
       
-      // CRITICAL: We NO LONGER set planUpdatedAt to null if newPlan is 'free'.
-      // This preserves the last payment record in the Payment History dashboard.
-
       if (newPlan !== 'pending') {
         updateData.requestedPlan = null;
       }
@@ -103,7 +98,7 @@ export function UserManagementPage() {
         title: 'Plan Updated',
         description: `User's plan has been changed to ${newPlan}.`,
       });
-      fetchUsers(); // Refresh users list
+      fetchUsers();
     } catch (error) {
       toast({
         title: 'Error',
@@ -118,14 +113,14 @@ export function UserManagementPage() {
     try {
       await deleteDoc(userRef);
       toast({
-        title: 'User Deleted',
-        description: 'User has been removed from Firestore.',
+        title: 'User Document Deleted',
+        description: 'The Firestore data has been removed. Access will be revoked if they log out.',
       });
       fetchUsers(); 
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to delete user.',
+        description: 'Failed to delete user document.',
         variant: 'destructive',
       });
     }
@@ -298,15 +293,20 @@ export function UserManagementPage() {
                             </DropdownMenu>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogTitle>Delete user document?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete the user's
-                                    data from Firestore. To fully remove them, you must also delete them from the Firebase Authentication console.
+                                    This removes the user's Firestore document. 
+                                    <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900 rounded-md flex items-start gap-2 text-amber-800 dark:text-amber-200">
+                                        <AlertCircle className="h-5 w-5 shrink-0" />
+                                        <p className="text-xs">
+                                            <strong>Note:</strong> This does not delete their Authentication account. You must also remove them from the <strong>Firebase Auth Console</strong> to permanently revoke their access.
+                                        </p>
+                                    </div>
                                 </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-destructive hover:bg-destructive/90">Confirm Delete</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                             </AlertDialog>

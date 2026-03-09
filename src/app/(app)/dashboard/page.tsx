@@ -12,7 +12,9 @@ import {
   Bot, 
   CheckCircle2, 
   Clock,
-  LayoutDashboard
+  LayoutDashboard,
+  Search,
+  Users2
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -63,7 +65,7 @@ export default function DashboardPage() {
         <p className="text-muted-foreground">Here is an overview of your career workspace.</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Active Plan</CardTitle>
@@ -90,33 +92,33 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Completed Profiles</CardTitle>
+            <CardTitle className="text-sm font-medium">Profiles</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1</div>
-            <p className="text-xs text-muted-foreground mt-1">Professional master resume</p>
+            <div className="text-2xl font-bold">Active</div>
+            <p className="text-xs text-muted-foreground mt-1">Version control enabled</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
+            <CardTitle className="text-sm font-medium">Status</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Today</div>
-            <p className="text-xs text-muted-foreground mt-1">Last edited 2 hours ago</p>
+            <div className="text-2xl font-bold">Online</div>
+            <p className="text-xs text-muted-foreground mt-1">Synced with cloud</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className={cn("grid gap-6", effectivePlan === 'recruiter' ? "md:grid-cols-2" : "md:grid-cols-1 lg:grid-cols-2")}>
-        <Card className="col-span-1 h-fit">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+        <Card className="h-fit">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Launch your career tools instantly.</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4">
+          <CardContent className="grid gap-3">
             {quickActions.map((action) => (
               <Button key={action.title} variant="outline" className="h-auto py-4 justify-between whitespace-normal text-left" asChild>
                 <Link href={action.href}>
@@ -124,7 +126,7 @@ export default function DashboardPage() {
                     <div className={cn("p-2 rounded-md bg-muted shrink-0", action.color)}>
                       <action.icon className="h-5 w-5" />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="font-medium flex items-center gap-2">
                         {action.title}
                         {action.badge && (
@@ -144,29 +146,38 @@ export default function DashboardPage() {
         </Card>
 
         {effectivePlan === 'recruiter' && (
-          <Card className="col-span-1 border-primary/20 bg-primary/5 h-fit">
+          <Card className="border-primary/20 bg-primary/5 h-fit">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="text-primary" /> Recruiter Insights
               </CardTitle>
-              <CardDescription>Manage your hiring pipeline.</CardDescription>
+              <CardDescription>Manage your hiring pipeline efficiently.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 rounded-lg bg-card border flex items-center justify-between">
+            <CardContent className="grid gap-4 sm:grid-cols-1">
+              <div className="p-5 rounded-lg bg-card border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium">Talent Pool</p>
-                  <p className="text-2xl font-bold truncate">Manage Shortlist</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Users2 className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold text-primary uppercase tracking-wider">Talent Pool</p>
+                  </div>
+                  <p className="text-xl font-bold">Shortlisted Talent</p>
+                  <p className="text-xs text-muted-foreground mt-1">Review your saved candidates</p>
                 </div>
-                <Button size="sm" asChild className="shrink-0 ml-4">
+                <Button asChild size="sm" className="w-full sm:w-auto shrink-0 shadow-lg shadow-primary/20">
                   <Link href="/recruiter-dashboard">Open Dashboard</Link>
                 </Button>
               </div>
-              <div className="p-4 rounded-lg bg-card border flex items-center justify-between">
+              
+              <div className="p-5 rounded-lg bg-card border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium">AI Matching</p>
-                  <p className="text-2xl font-bold truncate">Find Candidates</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Search className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold text-primary uppercase tracking-wider">AI Matching</p>
+                  </div>
+                  <p className="text-xl font-bold">Find New Matches</p>
+                  <p className="text-xs text-muted-foreground mt-1">Upload resumes & job description</p>
                 </div>
-                <Button size="sm" variant="outline" asChild className="shrink-0 ml-4">
+                <Button size="sm" variant="outline" asChild className="w-full sm:w-auto shrink-0">
                   <Link href="/candidate-matcher">Start Search</Link>
                 </Button>
               </div>
