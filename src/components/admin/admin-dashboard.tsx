@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, orderBy, query, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, UserPlus, Crown, Handshake, Trophy } from "lucide-react";
+import { Users, UserPlus, Crown, Handshake, Trophy, IndianRupee } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
@@ -19,6 +19,7 @@ interface UserData {
     email: string;
     plan: 'free' | 'essentials' | 'pro' | 'recruiter';
     createdAt?: { seconds: number, nanoseconds: number };
+    amountPaid?: number;
 }
 
 interface PlanCount {
@@ -55,6 +56,7 @@ export function AdminDashboard() {
     const [userCount, setUserCount] = useState<number | null>(null);
     const [planDistribution, setPlanDistribution] = useState<PlanCount | null>(null);
     const [recentUsers, setRecentUsers] = useState<UserData[]>([]);
+    const [totalRevenue, setTotalRevenue] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
     
@@ -69,14 +71,20 @@ export function AdminDashboard() {
                 setUserCount(usersList.length);
 
                 const plans: PlanCount = { free: 0, essentials: 0, pro: 0, recruiter: 0 };
+                let revenue = 0;
+                
                 usersList.forEach(user => {
                     if (user.plan && (user.plan === 'free' || user.plan === 'essentials' || user.plan === 'pro' || user.plan === 'recruiter')) {
                         plans[user.plan]++;
                     } else {
                         plans['free']++;
                     }
+                    if (user.amountPaid) {
+                        revenue += user.amountPaid;
+                    }
                 });
                 setPlanDistribution(plans);
+                setTotalRevenue(revenue);
 
                 const recentUsersQuery = query(usersCollectionRef, orderBy('createdAt', 'desc'), limit(5));
                 const recentUsersSnapshot = await getDocs(recentUsersQuery);
@@ -107,7 +115,7 @@ export function AdminDashboard() {
 
     return (
         <div className="space-y-8">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -117,9 +125,18 @@ export function AdminDashboard() {
                         {isLoading ? <Skeleton className="h-8 w-1/4 mt-1" /> : <div className="text-2xl font-bold">{userCount}</div>}
                     </CardContent>
                 </Card>
+                <Card className="border-green-500/20 bg-green-500/5">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-green-600 dark:text-green-400">Total Revenue</CardTitle>
+                        <IndianRupee className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    </CardHeader>
+                    <CardContent>
+                        {isLoading ? <Skeleton className="h-8 w-1/2 mt-1" /> : <div className="text-2xl font-bold text-green-600 dark:text-green-400">₹{totalRevenue.toLocaleString()}</div>}
+                    </CardContent>
+                </Card>
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Essentials Users</CardTitle>
+                        <CardTitle className="text-sm font-medium">Essentials</CardTitle>
                         <Trophy className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -137,7 +154,7 @@ export function AdminDashboard() {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Recruiter Users</CardTitle>
+                        <CardTitle className="text-sm font-medium">Recruiters</CardTitle>
                         <Handshake className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
