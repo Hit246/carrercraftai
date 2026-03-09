@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -64,10 +64,29 @@ export function SubscriptionsManagementPage() {
   const handlePlanChange = async (userId: string, newPlan: Plan) => {
     const userRef = doc(db, 'users', userId);
     try {
+      let amountPaid = 0;
+      // If manually upgrading, try to record the price
+      if (['essentials', 'pro', 'recruiter'].includes(newPlan)) {
+          const pricingSnap = await getDoc(doc(db, 'settings', 'pricing'));
+          if (pricingSnap.exists()) {
+              const pricing = pricingSnap.data();
+              amountPaid = pricing[newPlan] || 0;
+              if (pricing.festiveDiscount > 0) {
+                  amountPaid = Math.floor(amountPaid * (1 - pricing.festiveDiscount / 100));
+              }
+          }
+      }
+
       const updateData: any = { 
         plan: newPlan, 
-        planUpdatedAt: newPlan !== 'free' ? new Date() : null,
       };
+
+      // Only update timestamp and price when moving TO a paid plan
+      if (['essentials', 'pro', 'recruiter'].includes(newPlan)) {
+          updateData.planUpdatedAt = new Date();
+          updateData.amountPaid = amountPaid;
+          updateData.webhookVerified = false;
+      }
 
       if (newPlan !== 'pending') {
         updateData.requestedPlan = null;

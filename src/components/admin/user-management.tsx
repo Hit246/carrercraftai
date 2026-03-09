@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -67,10 +67,32 @@ export function UserManagementPage() {
   const handlePlanChange = async (userId: string, newPlan: Plan) => {
     const userRef = doc(db, 'users', userId);
     try {
+      let amountPaid = 0;
+      // If manually upgrading to a paid plan, try to fetch the current price to record it
+      if (['essentials', 'pro', 'recruiter'].includes(newPlan)) {
+          const pricingSnap = await getDoc(doc(db, 'settings', 'pricing'));
+          if (pricingSnap.exists()) {
+              const pricing = pricingSnap.data();
+              amountPaid = pricing[newPlan] || 0;
+              if (pricing.festiveDiscount > 0) {
+                  amountPaid = Math.floor(amountPaid * (1 - pricing.festiveDiscount / 100));
+              }
+          }
+      }
+
       const updateData: any = { 
-        plan: newPlan, 
-        planUpdatedAt: newPlan !== 'free' ? new Date() : null,
+        plan: newPlan,
       };
+
+      // Only set a new timestamp and price if moving TO a paid plan
+      if (['essentials', 'pro', 'recruiter'].includes(newPlan)) {
+          updateData.planUpdatedAt = new Date();
+          updateData.amountPaid = amountPaid;
+          updateData.webhookVerified = false;
+      }
+      
+      // CRITICAL: We NO LONGER set planUpdatedAt to null if newPlan is 'free'.
+      // This preserves the last payment record in the Payment History dashboard.
 
       if (newPlan !== 'pending') {
         updateData.requestedPlan = null;
