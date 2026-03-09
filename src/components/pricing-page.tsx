@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast" 
 import { createPaymentLink } from "@/lib/razorpay"
 import { db } from "@/lib/firebase";
+import { verifyPromoCodeAction } from "@/lib/actions";
 
 import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag } from "lucide-react"
 
@@ -65,37 +66,33 @@ export function PricingPage() {
   }, []);
 
   const handleApplyPromo = async () => {
-    const codeToVerify = promoCodeInput.toUpperCase().trim();
-    if (!codeToVerify) return;
+    const code = promoCodeInput.toUpperCase().trim();
+    if (!code) return;
     
     setIsVerifyingPromo(true);
 
     try {
-      // DIRECT CLIENT-SIDE FETCH for most robust verification with standard rules
-      console.log(`DEBUG: Verifying promo code: [${codeToVerify}]`);
-      const promoRef = doc(db, 'promoCodes', codeToVerify);
-      const promoSnap = await getDoc(promoRef);
+      // Using a Server Action bypasses browser-level permission/COEP blocks
+      const result = await verifyPromoCodeAction(code);
       
-      if (promoSnap.exists()) {
-        const data = promoSnap.data();
-        setAppliedPromo({ code: codeToVerify, discount: data.discount });
+      if (result.success && result.data) {
+        setAppliedPromo({ code: result.data.code, discount: result.data.discount });
         toast({ 
           title: 'Promo Applied!', 
-          description: `${data.discount}% discount has been added.` 
+          description: `${result.data.discount}% discount has been added.` 
         });
       } else {
         toast({ 
-            title: 'Invalid Code', 
-            description: 'The promo code you entered was not found or has expired.', 
+            title: 'Verification Failed', 
+            description: result.error || 'Invalid promo code.', 
             variant: 'destructive' 
         });
         setAppliedPromo(null);
       }
     } catch (e: any) {
-      console.error("CRITICAL PROMO ERROR:", e);
       toast({ 
-          title: 'Verification Failed', 
-          description: e.message || 'System error. Please check your connection and try again.', 
+          title: 'System Error', 
+          description: 'Could not connect to the verification server. Please try again.', 
           variant: 'destructive' 
       });
       setAppliedPromo(null);
@@ -145,7 +142,7 @@ export function PricingPage() {
             requestedPlan: selectedPlan,
         });
     } catch (dbError) {
-        toast({ title: "Error", description: "Could not initiate upgrade. check your permissions.", variant: "destructive" });
+        toast({ title: "Error", description: "Could not initiate upgrade. Check your connection.", variant: "destructive" });
         setIsProcessing(null);
         return;
     }

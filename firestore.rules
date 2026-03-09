@@ -17,7 +17,7 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Promo Codes - Allow public LOOKUP (get) for verification, but prevent LISTING
+    // Promo Codes - Allow public LOOKUP (get) for verification
     match /promoCodes/{promoId} {
       allow get: if true;
       allow list: if isAdmin();

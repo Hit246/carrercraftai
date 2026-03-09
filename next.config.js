@@ -25,6 +25,12 @@ const nextConfig = {
         hostname: 'i.imgur.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
@@ -35,6 +41,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cross-Origin-Opener-Policy',
+            // Setting to unsafe-none fixes ERR_BLOCKED_BY_RESPONSE for external resources like Firestore/Images
             value: 'unsafe-none',
           },
           {

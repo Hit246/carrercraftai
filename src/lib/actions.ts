@@ -102,8 +102,9 @@ export async function summarizeCandidateAction(
 export async function verifyPromoCodeAction(code: string) {
     try {
         const cleanCode = code.toUpperCase().trim();
-        if (!cleanCode) return { success: false, error: 'Empty code' };
+        if (!cleanCode) return { success: false, error: 'Promo code is required.' };
         
+        // Running this on the server avoids browser-level COEP/COOP blocking
         const docRef = doc(db, 'promoCodes', cleanCode);
         const docSnap = await getDoc(docRef);
         
@@ -117,10 +118,10 @@ export async function verifyPromoCodeAction(code: string) {
                 }
             };
         }
-        return { success: false, error: 'Invalid code' };
+        return { success: false, error: 'Invalid or expired promo code.' };
     } catch (e: any) {
-        console.error("Promo verification error:", e.message);
-        return { success: false, error: 'Verification failed' };
+        console.error("Server Promo Verification Error:", e);
+        return { success: false, error: e.message || 'System error during verification.' };
     }
 }
 
