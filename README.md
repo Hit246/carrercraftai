@@ -64,7 +64,7 @@ pnpm install
 
 This project requires a connection to a Firebase project to function.
 
-1.  **Create a Firebase Project:** Go to the [Firebase Console](https://console.firebase.google.com/) and create a new project.
+1.  **Create a Firebase Project:** Go to the [Firebase Console](https://console.firebase.goole.com/) and create a new project.
 2.  **Add a Web App:** In your project settings, add a new Web App to get your Firebase configuration keys.
 3.  **Enable Services:**
     -   Enable **Authentication** with the "Email/Password" sign-in method.
@@ -77,7 +77,9 @@ This project requires a connection to a Firebase project to function.
 5.  **Set up Environment File:**
     -   Create a `.env` file in the root of the project.
     -   Fill in the values with your Firebase project's configuration keys.
-    -   Add `FIREBASE_SERVICE_ACCOUNT_KEY='<contents_of_json_file>'` (ensure it's wrapped in single quotes).
+    -   **CRITICAL**: Add `FIREBASE_SERVICE_ACCOUNT_KEY='<ALL_CONTENTS_OF_JSON_FILE>'`.
+    -   Ensure the JSON content is on a single line and wrapped in **single quotes** (`'`).
+    -   Example: `FIREBASE_SERVICE_ACCOUNT_KEY='{"type": "service_account", "project_id": "...", ...}'`
     -   You will also need a `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/) for the AI features to work.
     -   If using Razorpay, add your `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`.
 
