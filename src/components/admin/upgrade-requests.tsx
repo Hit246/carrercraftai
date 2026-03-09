@@ -1,9 +1,7 @@
-
-
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, query, where, orderBy, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -25,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { MoreHorizontal, CheckCircle, XCircle, ExternalLink, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import Link from 'next/link';
@@ -46,6 +44,7 @@ interface UserData {
 export function UpgradeRequestsPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessingId, setIsProcessingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchUsers = async () => {
@@ -60,7 +59,7 @@ export function UpgradeRequestsPage() {
         console.error(e);
         toast({
             title: 'Error Fetching Requests',
-            description: 'Could not load upgrade requests. You may need to create a Firestore index.',
+            description: 'Could not load upgrade requests.',
             variant: 'destructive',
         });
     } finally {
@@ -74,56 +73,71 @@ export function UpgradeRequestsPage() {
 
   const handleApprove = async (user: UserData) => {
     if (!user.requestedPlan) return;
-    const userRef = doc(db, 'users', user.id);
+    setIsProcessingId(user.id);
     try {
-      const updateData: any = { 
+      // Fetch current pricing to record the amount paid
+      const pricingSnap = await getDoc(doc(db, 'settings', 'pricing'));
+      let amountPaid = 0;
+      if (pricingSnap.exists()) {
+          const pricing = pricingSnap.data();
+          amountPaid = pricing[user.requestedPlan] || 0;
+          // Apply festive discount if active
+          if (pricing.festiveDiscount > 0) {
+              amountPaid = Math.floor(amountPaid * (1 - pricing.festiveDiscount / 100));
+          }
+      }
+
+      const userRef = doc(db, 'users', user.id);
+      await updateDoc(userRef, { 
         plan: user.requestedPlan, 
         planUpdatedAt: new Date(),
         requestedPlan: null,
-        previousPlan: null, // Clear previousPlan on approval
-      };
-      await updateDoc(userRef, updateData);
+        previousPlan: null,
+        amountPaid: amountPaid, // Record the price at time of approval
+      });
+
       toast({
         title: 'Plan Approved',
         description: `User's plan has been changed to ${user.requestedPlan}.`,
       });
-      fetchUsers(); // Refresh users list
+      fetchUsers();
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to approve user plan.',
         variant: 'destructive',
       });
+    } finally {
+        setIsProcessingId(null);
     }
   };
   
   const handleReject = async (user: UserData) => {
+    setIsProcessingId(user.id);
     const userRef = doc(db, 'users', user.id);
-    // Revert to the previous plan if it exists, otherwise default to 'free'
     const revertPlan = user.previousPlan || 'free'; 
     try {
-      const updateData: any = {
+      await updateDoc(userRef, {
         plan: revertPlan,
-        // If reverting to free, the planUpdatedAt should be cleared.
-        // If reverting to a previous paid plan, the planUpdatedAt is ALREADY what it should be, so no need to set it.
-        // We only clear it if reverting to free.
-        planUpdatedAt: revertPlan === 'free' ? null : user.planUpdatedAt,
+        // We DO NOT set planUpdatedAt to null here so that if they paid previously, 
+        // that history is preserved. Rejection just stops the PENDING upgrade.
         requestedPlan: null,
-        previousPlan: null, // Clear previousPlan on rejection
-      };
-      await updateDoc(userRef, updateData);
+        previousPlan: null,
+      });
       toast({
         title: 'Request Rejected',
         description: `User's plan has been reverted to ${revertPlan}.`,
         variant: 'destructive',
       });
-      fetchUsers(); // Refresh users list
+      fetchUsers();
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to reject the request.',
         variant: 'destructive',
       });
+    } finally {
+        setIsProcessingId(null);
     }
   };
 
@@ -157,7 +171,7 @@ export function UpgradeRequestsPage() {
                 ))
               : users.length === 0 ? (
                 <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                         No pending upgrade requests.
                     </TableCell>
                 </TableRow>
@@ -180,7 +194,7 @@ export function UpgradeRequestsPage() {
                           Pending ({user.requestedPlan})
                         </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
                       {user.planUpdatedAt
                         ? new Date(user.planUpdatedAt.seconds * 1000).toLocaleDateString()
                         : 'N/A'}
@@ -200,9 +214,9 @@ export function UpgradeRequestsPage() {
                     <TableCell className="text-right">
                       {user.requestedPlan && (
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                            <DropdownMenuTrigger asChild disabled={isProcessingId === user.id}>
                               <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
+                                {isProcessingId === user.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <MoreHorizontal className="h-4 w-4" />}
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">

@@ -1,4 +1,3 @@
-
 import { db } from '@/lib/firebase';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import * as crypto from 'crypto';
@@ -30,19 +29,22 @@ export async function POST(req: Request) {
         const plan = paymentEntity.notes.plan;
         const userId = paymentEntity.notes.userId;
         const paymentId = paymentEntity.id;
+        // Razorpay amounts are in paise, convert to INR
+        const amountPaid = paymentEntity.amount / 100;
 
         if (!userId || !plan) {
             console.error('Webhook Error: Missing userId or plan in payment notes.', paymentEntity.notes);
             return new Response('Missing required data in webhook payload.', { status: 400 });
         }
 
-        console.log(`Processing webhook for user: ${userId}, plan: ${plan}`);
+        console.log(`Processing webhook for user: ${userId}, plan: ${plan}, amount: ${amountPaid}`);
 
         await updateDoc(doc(db, 'users', userId), {
             plan: plan,
             planUpdatedAt: serverTimestamp(),
             paymentId: paymentId,
-            webhookVerified: true, // Add a flag to show it was verified by a trusted source
+            webhookVerified: true,
+            amountPaid: amountPaid,
         });
 
         console.log(`Successfully upgraded user ${userId} to ${plan} via webhook.`);

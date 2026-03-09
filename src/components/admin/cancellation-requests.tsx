@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Ban } from 'lucide-react';
+import { MoreHorizontal, Ban, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
@@ -43,6 +43,7 @@ interface UserData {
 export function CancellationRequests() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
   const fetchUsers = async () => {
@@ -57,7 +58,7 @@ export function CancellationRequests() {
       console.error(e);
        toast({
         title: 'Error Fetching Requests',
-        description: 'Could not load cancellation requests. You may need to create a Firestore index.',
+        description: 'Could not load cancellation requests.',
         variant: 'destructive',
       });
     } finally {
@@ -70,24 +71,28 @@ export function CancellationRequests() {
   }, []);
 
   const handleCancellation = async (userId: string) => {
+    setIsProcessing(true);
     const userRef = doc(db, 'users', userId);
     try {
       await updateDoc(userRef, { 
         plan: 'free',
-        planUpdatedAt: null,
+        // WE DO NOT SET planUpdatedAt: null anymore. 
+        // This ensures the payment record remains in history.
         requestedPlan: null,
        });
       toast({
         title: 'Cancellation Processed',
-        description: `User's plan has been reverted to free.`,
+        description: `User's plan has been reverted to free. History preserved.`,
       });
-      fetchUsers(); // Refresh users list
+      fetchUsers();
     } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to process cancellation.',
         variant: 'destructive',
       });
+    } finally {
+        setIsProcessing(false);
     }
   };
 
@@ -119,7 +124,7 @@ export function CancellationRequests() {
                 ))
               : users.length === 0 ? (
                 <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
+                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
                         No pending cancellation requests.
                     </TableCell>
                 </TableRow>
@@ -133,14 +138,14 @@ export function CancellationRequests() {
                         </Avatar>
                         <div>
                           <p className="font-medium">{user.email}</p>
-                          <p className="text-sm text-muted-foreground">{user.id}</p>
+                          <p className="text-sm text-muted-foreground font-mono">{user.id}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="destructive">Cancellation Requested</Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
                       {user.planUpdatedAt
                         ? new Date(user.planUpdatedAt.seconds * 1000).toLocaleDateString()
                         : 'N/A'}
@@ -148,9 +153,9 @@ export function CancellationRequests() {
                     <TableCell className="text-right">
                       <AlertDialog>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                          <DropdownMenuTrigger asChild disabled={isProcessing}>
                             <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
+                              {isProcessing ? <Loader2 className="h-4 w-4 animate-spin"/> : <MoreHorizontal className="h-4 w-4" />}
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
@@ -168,7 +173,7 @@ export function CancellationRequests() {
                             <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This will revert the user's plan to "Free". This action cannot be undone, but you can manually re-assign a plan later.
+                                This will revert the user's plan to "Free". The payment history will be preserved in the dashboard.
                             </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

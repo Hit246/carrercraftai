@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -15,9 +14,11 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Shield, History } from 'lucide-react';
+import { Shield, History, ExternalLink, IndianRupee } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '../ui/button';
+import Link from 'next/link';
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
@@ -29,6 +30,7 @@ interface UserData {
   planUpdatedAt?: { seconds: number };
   paymentProofURL?: string;
   webhookVerified?: boolean;
+  amountPaid?: number;
 }
 
 export function PaymentHistory() {
@@ -40,6 +42,7 @@ export function PaymentHistory() {
     setIsLoading(true);
     try {
         const usersCollectionRef = collection(db, 'users');
+        // We fetch anyone who has ever had a plan update (payment)
         const q = query(
             usersCollectionRef, 
             where('planUpdatedAt', '!=', null),
@@ -86,16 +89,18 @@ export function PaymentHistory() {
         <Card>
         <CardHeader>
             <CardTitle className="flex items-center gap-2"><History /> Payment History</CardTitle>
-            <CardDescription>Review all historical subscription payments. This includes active and expired plans.</CardDescription>
+            <CardDescription>Review all historical subscription payments. Records remain here even if a plan is cancelled or expired.</CardDescription>
         </CardHeader>
         <CardContent>
             <Table>
             <TableHeader>
                 <TableRow>
                 <TableHead>User</TableHead>
-                <TableHead>Current Plan</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Verification</TableHead>
-                <TableHead>Last Upgrade Date</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Proof</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -105,12 +110,14 @@ export function PaymentHistory() {
                         <TableCell><Skeleton className="h-10 w-48" /></TableCell>
                         <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                         <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-16" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                     </TableRow>
                     ))
                 : users.length === 0 ? (
                     <TableRow>
-                        <TableCell colSpan={4} className="h-24 text-center">
+                        <TableCell colSpan={6} className="h-24 text-center">
                             No payment history found.
                         </TableCell>
                     </TableRow>
@@ -123,14 +130,14 @@ export function PaymentHistory() {
                             <AvatarFallback>{user.email[0].toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div>
-                            <p className="font-medium flex items-center gap-2">{user.email}</p>
-                            <p className="text-sm text-muted-foreground">{user.id}</p>
+                            <p className="font-medium flex items-center gap-2 text-sm">{user.email}</p>
+                            <p className="text-[10px] text-muted-foreground font-mono">{user.id}</p>
                             </div>
                         </div>
                         </TableCell>
                         <TableCell>
                             <Badge variant={getPlanBadgeVariant(user.plan)}>
-                            {user.plan}
+                            {user.plan === 'free' ? 'Expired/Cancelled' : user.plan}
                             </Badge>
                         </TableCell>
                         <TableCell>
@@ -143,10 +150,27 @@ export function PaymentHistory() {
                                 <Badge variant="secondary">Manual</Badge>
                             )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="font-medium">
+                            <div className="flex items-center gap-0.5 text-sm">
+                                <IndianRupee className="h-3 w-3" />
+                                {user.amountPaid || '---'}
+                            </div>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                         {user.planUpdatedAt
                             ? new Date(user.planUpdatedAt.seconds * 1000).toLocaleDateString()
                             : 'N/A'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                            {user.paymentProofURL ? (
+                                <Button asChild variant="ghost" size="icon">
+                                    <Link href={user.paymentProofURL} target="_blank">
+                                        <ExternalLink className="h-4 w-4" />
+                                    </Link>
+                                </Button>
+                            ) : (
+                                <span className="text-[10px] text-muted-foreground">None</span>
+                            )}
                         </TableCell>
                     </TableRow>
                     ))}
