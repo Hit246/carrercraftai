@@ -140,8 +140,8 @@ function AppLayoutContent({
   const isEssentialsAccess = effectivePlan === 'essentials' || isProAccess;
 
   // Hardened safety for production rendering
-  const userInitial = (user?.displayName?.[0] || user?.email?.[0] || 'U').toUpperCase();
-  const userName = user?.displayName || user?.email || 'User';
+  const userInitial = (userData?.displayName?.[0] || user?.displayName?.[0] || user?.email?.[0] || 'U').toUpperCase();
+  const userName = userData?.displayName || user?.displayName || user?.email || 'User';
 
   return (
     <>

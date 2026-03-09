@@ -45,7 +45,7 @@ import { ToastAction } from '@/components/ui/toast';
 function AdminLayoutContent({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logout, isAdmin } = useAuth();
+  const { user, loading, logout, isAdmin, userData } = useAuth();
   const [pendingUpgradesCount, setPendingUpgradesCount] = useState(0);
   const { toast } = useToast();
   const isInitialLoad = useRef(true);
@@ -116,6 +116,9 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
     await logout();
     router.push('/');
   };
+
+  const userInitial = (userData?.displayName?.[0] || user?.email?.[0] || 'A').toUpperCase();
+  const userName = userData?.displayName || user?.displayName || user?.email || 'Admin';
 
   return (
     <SidebarProvider>
@@ -233,17 +236,20 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter className="p-4 mt-auto border-t">
+        <SidebarFooter className="p-4 mt-auto border-t bg-sidebar/50 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
-              <AvatarImage src="https://placehold.co/100x100.png" alt="@user" />
+              <AvatarImage 
+                src={userData?.photoURL || user.photoURL || `https://placehold.co/100x100.png?text=${userInitial}`} 
+                alt={userName} 
+              />
               <AvatarFallback>
-                {user.email?.[0].toUpperCase()}
+                {userInitial}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col truncate">
+            <div className="flex flex-col truncate flex-1">
               <span className="text-sm font-medium truncate">
-                {user.email}
+                {userName}
               </span>
               <button
                 onClick={handleLogout}
@@ -253,13 +259,13 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 Logout
               </button>
             </div>
-            <Shield className="ml-auto h-5 w-5 text-primary" />
+            <Shield className="ml-auto h-4 w-4 text-primary shrink-0" />
           </div>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sm:px-6">
-          <SidebarTrigger className="md:hidden" />
+        <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sm:px-6 shadow-md">
+          <SidebarTrigger />
           <div className="flex-1">
             <h2 className="text-lg font-semibold font-headline">
               {getPageTitle()}
