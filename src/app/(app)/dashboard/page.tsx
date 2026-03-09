@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -15,14 +14,45 @@ import {
   Clock,
   LayoutDashboard,
   Search,
-  Users2
+  Users2,
+  AlertTriangle,
+  CalendarClock
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useMemo } from 'react';
+import { addDays, differenceInDays } from 'date-fns';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function DashboardPage() {
   const { user, plan, credits, effectivePlan, userData } = useAuth();
+
+  const expirationInfo = useMemo(() => {
+    if (!userData?.planUpdatedAt || effectivePlan === 'free' || plan === 'pending') return null;
+    
+    // Handle Firestore Timestamp or serialized object
+    let upgradeDate: Date;
+    if (userData.planUpdatedAt?.toDate) {
+        upgradeDate = userData.planUpdatedAt.toDate();
+    } else if (userData.planUpdatedAt?.seconds) {
+        upgradeDate = new Date(userData.planUpdatedAt.seconds * 1000);
+    } else {
+        upgradeDate = new Date(userData.planUpdatedAt);
+    }
+
+    const expirationDate = addDays(upgradeDate, 30);
+    const daysRemaining = differenceInDays(expirationDate, new Date());
+
+    if (daysRemaining <= 7) {
+        return {
+            daysRemaining: daysRemaining < 0 ? 0 : daysRemaining,
+            isExpired: daysRemaining < 0,
+            expirationDate
+        };
+    }
+    return null;
+  }, [userData, effectivePlan, plan]);
 
   const quickActions = [
     {
@@ -65,6 +95,22 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold font-headline">Welcome back, {userData?.displayName || user?.displayName || user?.email?.split('@')[0] || 'User'}!</h1>
         <p className="text-muted-foreground">Here is an overview of your career workspace.</p>
       </div>
+
+      {expirationInfo && (
+        <Alert variant={expirationInfo.isExpired ? "destructive" : "default"} className="border-amber-500/50 bg-amber-500/5 text-amber-700 dark:text-amber-400 [&>svg]:text-amber-500">
+            <CalendarClock className="h-4 w-4" />
+            <AlertTitle className="font-bold">Subscription Renewal Required</AlertTitle>
+            <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
+                <span>
+                    Your <strong>{plan}</strong> plan {expirationInfo.isExpired ? 'has expired' : `expires in ${expirationInfo.daysRemaining} days`}. 
+                    Renew or upgrade now to keep your unlimited AI features and saved resumes.
+                </span>
+                <Button size="sm" asChild className="bg-amber-500 hover:bg-amber-600 text-white border-none shrink-0">
+                    <Link href="/pricing">Renew / Upgrade Plan</Link>
+                </Button>
+            </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <Card>

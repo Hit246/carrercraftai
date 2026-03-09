@@ -7,18 +7,19 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
-import { Crown, User, Handshake, Loader2, Upload, ExternalLink, ShieldCheck, Hourglass, Ban, Wallet, Calendar, BotIcon } from 'lucide-react';
+import { Crown, User, Handshake, Loader2, Upload, ExternalLink, ShieldCheck, Hourglass, Ban, Wallet, Calendar, BotIcon, Timer } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from './ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { uploadFile } from '@/lib/firebase';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { addDays, differenceInDays, format } from 'date-fns';
 
 const formSchema = z.object({
     displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }).optional(),
@@ -27,11 +28,33 @@ const formSchema = z.object({
 });
 
 export function ProfilePage() {
-    const { user, plan, loading, userData, credits, logout, updateUserProfile, requestCancellation } = useAuth();
+    const { user, plan, loading, userData, credits, effectivePlan, logout, updateUserProfile, requestCancellation } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+    const expirationInfo = useMemo(() => {
+        if (!userData?.planUpdatedAt || effectivePlan === 'free') return null;
+        
+        let upgradeDate: Date;
+        if (userData.planUpdatedAt?.toDate) {
+            upgradeDate = userData.planUpdatedAt.toDate();
+        } else if (userData.planUpdatedAt?.seconds) {
+            upgradeDate = new Date(userData.planUpdatedAt.seconds * 1000);
+        } else {
+            upgradeDate = new Date(userData.planUpdatedAt);
+        }
+
+        const expirationDate = addDays(upgradeDate, 30);
+        const daysRemaining = differenceInDays(expirationDate, new Date());
+
+        return {
+            date: expirationDate,
+            daysRemaining: daysRemaining < 0 ? 0 : daysRemaining,
+            isNearExpiry: daysRemaining <= 7
+        };
+    }, [userData, effectivePlan]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -259,6 +282,19 @@ export function ProfilePage() {
                                 {plan === 'pro' || plan === 'recruiter' ? 'Unlimited' : `${credits} remaining`}
                             </Badge>
                          </div>
+                         {expirationInfo && (
+                            <div className="flex items-center justify-between pt-2 border-t">
+                                <Label className="flex items-center gap-2"><Timer className={cn("h-4 w-4", expirationInfo.isNearExpiry ? "text-amber-500" : "text-muted-foreground")}/> Expiration</Label>
+                                <div className="text-right">
+                                    <p className={cn("text-sm font-medium", expirationInfo.isNearExpiry ? "text-amber-600 font-bold" : "")}>
+                                        {format(expirationInfo.date, 'MMM d, yyyy')}
+                                    </p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                        {expirationInfo.daysRemaining} days remaining
+                                    </p>
+                                </div>
+                            </div>
+                         )}
                     </div>
                     
                     { (plan !== 'free' && plan !== 'pending' && plan !== 'cancellation_requested') && (
@@ -271,14 +307,14 @@ export function ProfilePage() {
                                 <div className="flex items-center justify-between">
                                     <Label className="flex items-center gap-2 text-muted-foreground"><Calendar className="h-4 w-4"/> Last Payment</Label>
                                     <p className="text-sm font-medium">
-                                        {new Date(userData.planUpdatedAt.seconds * 1000).toLocaleDateString()}
+                                        {format(expirationInfo?.date ? addDays(expirationInfo.date, -30) : new Date(userData.planUpdatedAt.seconds * 1000), 'MMM d, yyyy')}
                                     </p>
                                 </div>
                             )}
                             {userData?.paymentId && (
                                 <div className="flex items-center justify-between">
                                     <Label className="flex items-center gap-2 text-muted-foreground"><ShieldCheck className="h-4 w-4"/> Payment ID</Label>
-                                    <p className="text-sm font-mono text-muted-foreground truncate" title={userData.paymentId}>
+                                    <p className="text-sm font-mono text-muted-foreground truncate max-w-[150px]" title={userData.paymentId}>
                                         {userData.paymentId}
                                     </p>
                                 </div>
@@ -287,9 +323,16 @@ export function ProfilePage() {
                     )}
                 </CardContent>
                 {(plan === 'pro' || plan === 'recruiter' || plan === 'essentials') && (
-                     <CardFooter className="flex justify-between items-center border-t pt-4">
-                        <p className="text-xs text-muted-foreground">Need to cancel? <Link href="/cancellation" className="underline">View policy</Link></p>
-                        <Button variant="destructive" onClick={handleCancellation} disabled={plan === 'cancellation_requested'}>
+                     <CardFooter className="flex flex-col sm:flex-row gap-4 justify-between items-center border-t pt-4">
+                        <div className="flex flex-col gap-1">
+                            <p className="text-xs text-muted-foreground">Need to cancel? <Link href="/cancellation" className="underline">View policy</Link></p>
+                            {expirationInfo?.isNearExpiry && (
+                                <Button size="sm" asChild className="bg-amber-500 hover:bg-amber-600 text-white">
+                                    <Link href="/pricing">Renew or Upgrade Now</Link>
+                                </Button>
+                            )}
+                        </div>
+                        <Button variant="destructive" size="sm" onClick={handleCancellation} disabled={plan === 'cancellation_requested'}>
                             <Ban className="mr-2 h-4 w-4" />
                             {plan === 'cancellation_requested' ? 'Cancellation Requested' : 'Request Cancellation'}
                         </Button>
