@@ -79,6 +79,7 @@ export function AdminDashboard() {
                     } else {
                         plans['free']++;
                     }
+                    // Accumulate revenue from amountPaid field
                     if (user.amountPaid) {
                         revenue += user.amountPaid;
                     }
@@ -125,13 +126,14 @@ export function AdminDashboard() {
                         {isLoading ? <Skeleton className="h-8 w-1/4 mt-1" /> : <div className="text-2xl font-bold">{userCount}</div>}
                     </CardContent>
                 </Card>
-                <Card className="border-green-500/20 bg-green-500/5">
+                <Card className="border-green-500/20 bg-green-500/5 shadow-md">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-green-600 dark:text-green-400">Total Revenue</CardTitle>
                         <IndianRupee className="h-4 w-4 text-green-600 dark:text-green-400" />
                     </CardHeader>
                     <CardContent>
                         {isLoading ? <Skeleton className="h-8 w-1/2 mt-1" /> : <div className="text-2xl font-bold text-green-600 dark:text-green-400">₹{totalRevenue.toLocaleString()}</div>}
+                        <p className="text-[10px] text-muted-foreground mt-1">Sum of all amounts paid</p>
                     </CardContent>
                 </Card>
                  <Card>

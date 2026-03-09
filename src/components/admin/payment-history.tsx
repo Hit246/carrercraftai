@@ -43,7 +43,8 @@ export function PaymentHistory() {
     setIsLoading(true);
     try {
         const usersCollectionRef = collection(db, 'users');
-        // We fetch anyone who has ever had a plan update (payment)
+        // Fetch any user who has ever had a plan update (payment)
+        // This ensures they stay in history even if currently 'free'
         const q = query(
             usersCollectionRef, 
             where('planUpdatedAt', '!=', null),
@@ -55,6 +56,7 @@ export function PaymentHistory() {
         
         setUsers(usersList);
         
+        // Calculate total revenue from Amount Paid
         const revenue = usersList.reduce((acc, user) => acc + (user.amountPaid || 0), 0);
         setTotalRevenue(revenue);
 
@@ -124,10 +126,10 @@ export function PaymentHistory() {
             <TableHeader>
                 <TableRow>
                 <TableHead>User</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Current Status</TableHead>
                 <TableHead>Verification</TableHead>
-                <TableHead>Price Paid</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead>Amount Paid</TableHead>
+                <TableHead>Last Updated</TableHead>
                 <TableHead className="text-right">Proof</TableHead>
                 </TableRow>
             </TableHeader>
