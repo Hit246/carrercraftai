@@ -26,8 +26,9 @@ service cloud.firestore {
     }
 
     // Collection Group rule for Team Members (needed for signup invitation check)
+    // Relaxed to allow unauthenticated lookup by email for signup flow
     match /{path=**}/members/{memberId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if isAdmin();
     }
 

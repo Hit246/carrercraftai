@@ -1,3 +1,4 @@
+
 'use server';
 
 import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
@@ -28,6 +29,37 @@ import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput }
 import { db } from './firebase';
 import type { SupportRequestInput, ReplySupportRequestInput } from './types';
 
+// Admin Deletion
+import * as admin from 'firebase-admin';
+
+if (!admin.apps.length) {
+  try {
+    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY 
+      ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY) 
+      : null;
+
+    if (serviceAccount) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+    }
+  } catch (e) {
+    console.error("Failed to initialize Firebase Admin SDK. Auth deletion will be unavailable.", e);
+  }
+}
+
+export async function deleteUserAccountAction(uid: string) {
+  if (!admin.apps.length) {
+    throw new Error("Admin SDK not initialized. Please set FIREBASE_SERVICE_ACCOUNT_KEY.");
+  }
+  try {
+    await admin.auth().deleteUser(uid);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error deleting user auth:", error);
+    throw new Error(error.message || "Failed to delete user account.");
+  }
+}
 
 export async function analyzeResumeAction(
   input: AnalyzeResumeInput
@@ -104,7 +136,6 @@ export async function verifyPromoCodeAction(code: string) {
         const cleanCode = code.toUpperCase().trim();
         if (!cleanCode) return { success: false, error: 'Promo code is required.' };
         
-        // Running this on the server avoids browser-level COEP/COOP blocking
         const docRef = doc(db, 'promoCodes', cleanCode);
         const docSnap = await getDoc(docRef);
         

@@ -190,6 +190,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const newUser = userCredential.user;
     
+    // 1. Create Base User Doc Immediately (Resilient)
     const initialUserData: any = { 
         email: newUser.email, 
         createdAt: serverTimestamp(), 
@@ -200,7 +201,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         credits: FREE_CREDITS,
     };
     
-    // Try team invitation lookup
+    await setDoc(doc(db, "users", newUser.uid), initialUserData);
+
+    // 2. Try team invitation lookup (Non-blocking)
     try {
         const membersQuery = query(collectionGroup(db, 'members'), where('email', '==', email));
         const membersSnapshot = await getDocs(membersQuery);
@@ -209,23 +212,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const invitationDoc = membersSnapshot.docs[0];
             const teamId = invitationDoc.ref.parent.parent?.id;
             if (teamId) {
-                initialUserData.plan = 'recruiter';
-                initialUserData.credits = Infinity;
-                initialUserData.teamId = teamId;
-                
                 const batch = writeBatch(db);
-                batch.set(doc(db, 'users', newUser.uid), initialUserData);
+                batch.update(doc(db, 'users', newUser.uid), {
+                    plan: 'recruiter',
+                    credits: Infinity,
+                    teamId: teamId
+                });
                 batch.update(invitationDoc.ref, { uid: newUser.uid, name: initialUserData.displayName });
                 await batch.commit();
-                return userCredential;
             }
         }
     } catch (teamError) {
-        console.warn("Team invitation lookup failed (non-critical):", teamError);
+        console.warn("Team invitation lookup failed (permissions or index):", teamError);
     }
-    
-    // Create default user doc if not part of a team or if lookup failed
-    await setDoc(doc(db, "users", newUser.uid), initialUserData);
     
     return userCredential;
   };

@@ -24,12 +24,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Crown, User, Shield, Trophy, AlertTriangle, Handshake, AlertCircle } from 'lucide-react';
+import { MoreHorizontal, Trash2, Crown, User, Shield, Trophy, AlertTriangle, Handshake, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { differenceInDays, addDays, format } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { deleteUserAccountAction } from '@/lib/actions';
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
@@ -48,6 +49,7 @@ const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
 export function UserManagementPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchUsers = async () => {
@@ -110,13 +112,27 @@ export function UserManagementPage() {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    const userRef = doc(db, 'users', userId);
+    setIsDeletingId(userId);
     try {
-      await deleteDoc(userRef);
-      toast({
-        title: 'User Document Deleted',
-        description: 'The Firestore data has been removed. Access will be revoked if they log out.',
-      });
+      // 1. Delete Firestore Document
+      await deleteDoc(doc(db, 'users', userId));
+      
+      // 2. Attempt to delete Authentication Account via Server Action
+      try {
+        await deleteUserAccountAction(userId);
+        toast({
+            title: 'User Fully Deleted',
+            description: 'Database record and authentication account have been removed.',
+        });
+      } catch (authError: any) {
+        console.warn("Auth deletion failed (likely missing Service Account Key):", authError);
+        toast({
+            title: 'Firestore Doc Deleted',
+            description: 'Database record removed, but auth account requires manual deletion in Firebase Console.',
+            variant: 'destructive',
+        });
+      }
+      
       fetchUsers(); 
     } catch (error) {
       toast({
@@ -124,6 +140,8 @@ export function UserManagementPage() {
         description: 'Failed to delete user document.',
         variant: 'destructive',
       });
+    } finally {
+        setIsDeletingId(null);
     }
   };
 
@@ -259,9 +277,9 @@ export function UserManagementPage() {
                         {!isUserAdmin && (
                             <AlertDialog>
                             <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
+                                <DropdownMenuTrigger asChild disabled={isDeletingId === user.id}>
                                 <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
+                                    {isDeletingId === user.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <MoreHorizontal className="h-4 w-4" />}
                                 </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
@@ -294,14 +312,14 @@ export function UserManagementPage() {
                             </DropdownMenu>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                <AlertDialogTitle>Delete user document?</AlertDialogTitle>
+                                <AlertDialogTitle>Delete user account permanently?</AlertDialogTitle>
                                 <AlertDialogDescription asChild>
-                                    <div className="text-sm text-muted-foreground">
-                                        This removes the user's Firestore document. 
-                                        <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900 rounded-md flex items-start gap-2 text-amber-800 dark:text-amber-200">
+                                    <div className="space-y-4">
+                                        <p>This action will delete the user's Firestore document <strong>and</strong> their Firebase Authentication account.</p>
+                                        <div className="p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900 rounded-md flex items-start gap-2 text-amber-800 dark:text-amber-200">
                                             <AlertCircle className="h-5 w-5 shrink-0" />
                                             <div className="text-xs">
-                                                <strong>Note:</strong> This does not delete their Authentication account. You must also remove them from the <strong>Firebase Auth Console</strong> to permanently revoke their access.
+                                                <strong>Note:</strong> Authentication deletion requires a configured <code>FIREBASE_SERVICE_ACCOUNT_KEY</code>. If not set, the user document will be deleted, but the account will remain in Auth.
                                             </div>
                                         </div>
                                     </div>
