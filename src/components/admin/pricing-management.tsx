@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth'; // ✅ ADDED: was missing from imports
 import { Loader2, Save, Trash2, Plus, Tag, PartyPopper } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -40,12 +41,15 @@ export function PricingManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth(); // ✅ ADDED
 
   // New Promo Code Form State
   const [newCode, setNewCode] = useState('');
   const [newDiscount, setNewDiscount] = useState(0);
 
   useEffect(() => {
+    if (!user) return; // ✅ FIXED: guard prevents firing before auth resolves
+
     const fetchPricing = async () => {
       try {
         const docRef = doc(db, 'settings', 'pricing');
@@ -65,14 +69,22 @@ export function PricingManagement() {
       }
     };
 
-    const unsubscribePromo = onSnapshot(collection(db, 'promoCodes'), (snapshot) => {
-      setPromoCodes(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PromoCode)));
-      setIsLoading(false);
-    });
+    const unsubscribePromo = onSnapshot(
+      collection(db, 'promoCodes'),
+      (snapshot) => {
+        setPromoCodes(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as PromoCode)));
+        setIsLoading(false);
+      },
+      (error) => {
+        // ✅ FIXED: error handler prevents unhandled permission errors in console
+        console.error("Promo snapshot error:", error);
+        setIsLoading(false);
+      }
+    );
 
     fetchPricing();
     return () => unsubscribePromo();
-  }, []);
+  }, [user]); // ✅ FIXED: re-runs when auth state resolves (was [])
 
   const handleSavePricing = async () => {
     setIsSaving(true);
