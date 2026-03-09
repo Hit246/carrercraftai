@@ -1,4 +1,3 @@
-
 'use server';
 
 import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
@@ -34,30 +33,31 @@ import * as admin from 'firebase-admin';
 
 if (!admin.apps.length) {
   try {
-    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY 
-      ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY) 
-      : null;
-
-    if (serviceAccount) {
+    const keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    if (keyString) {
+      const serviceAccount = JSON.parse(keyString);
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
       });
+      console.log("✅ Firebase Admin SDK initialized successfully.");
+    } else {
+      console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT_KEY missing. Admin features (like Auth deletion) will be disabled.");
     }
   } catch (e) {
-    console.error("Failed to initialize Firebase Admin SDK. Auth deletion will be unavailable.", e);
+    console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY. Ensure it is a valid JSON string wrapped in single quotes in your .env file.", e);
   }
 }
 
 export async function deleteUserAccountAction(uid: string) {
   if (!admin.apps.length) {
-    throw new Error("Admin SDK not initialized. Please set FIREBASE_SERVICE_ACCOUNT_KEY.");
+    throw new Error("Admin SDK not initialized. Please set FIREBASE_SERVICE_ACCOUNT_KEY in your .env file.");
   }
   try {
     await admin.auth().deleteUser(uid);
     return { success: true };
   } catch (error: any) {
     console.error("Error deleting user auth:", error);
-    throw new Error(error.message || "Failed to delete user account.");
+    throw new Error(error.message || "Failed to delete user account from Firebase Authentication.");
   }
 }
 
