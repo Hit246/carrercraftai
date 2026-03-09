@@ -24,6 +24,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Collection Group rule for Team Members (needed for signup invitation check)
+    match /{path=**}/members/{memberId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
     // User data and subcollections
     match /users/{userId} {
       allow read, write: if isAdmin() || isOwner(userId);

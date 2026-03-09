@@ -28,6 +28,8 @@ interface UserData {
     photoURL?: string | null;
     phoneNumber?: string | null;
     email?: string;
+    amountPaid?: number;
+    webhookVerified?: boolean;
 }
 
 interface AuthContextType {
@@ -123,8 +125,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
         if (!userDoc.exists()) {
-            // This case should be handled by the self-healing ensureUserDocument call above
-            setLoading(false);
+            // This case is handled by the self-healing ensureUserDocument call above
             return;
         }
         
@@ -195,8 +196,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         hasCompletedOnboarding: false,
         displayName: newUser.displayName || email.split('@')[0],
         photoURL: newUser.photoURL || null,
+        plan: 'free',
+        credits: FREE_CREDITS,
     };
     
+    // Try team invitation lookup
     try {
         const membersQuery = query(collectionGroup(db, 'members'), where('email', '==', email));
         const membersSnapshot = await getDocs(membersQuery);
@@ -208,19 +212,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 initialUserData.plan = 'recruiter';
                 initialUserData.credits = Infinity;
                 initialUserData.teamId = teamId;
+                
                 const batch = writeBatch(db);
                 batch.set(doc(db, 'users', newUser.uid), initialUserData);
                 batch.update(invitationDoc.ref, { uid: newUser.uid, name: initialUserData.displayName });
                 await batch.commit();
+                return userCredential;
             }
-        } else {
-            initialUserData.plan = 'free';
-            initialUserData.credits = FREE_CREDITS;
-            await setDoc(doc(db, "users", newUser.uid), initialUserData);
         }
-    } catch (firestoreError) {
-        console.error("Error creating Firestore user doc during signup:", firestoreError);
+    } catch (teamError) {
+        console.warn("Team invitation lookup failed (non-critical):", teamError);
     }
+    
+    // Create default user doc if not part of a team or if lookup failed
+    await setDoc(doc(db, "users", newUser.uid), initialUserData);
     
     return userCredential;
   };
@@ -245,6 +250,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (profile.photoURL !== undefined) firestoreData.photoURL = profile.photoURL;
     if (profile.phoneNumber !== undefined) firestoreData.phoneNumber = profile.phoneNumber;
     
+    // Use setDoc with merge: true for "Self-Healing"
     await setDoc(userRef, firestoreData, { merge: true });
   };
 

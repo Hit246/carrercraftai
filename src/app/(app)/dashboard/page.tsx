@@ -21,7 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export default function DashboardPage() {
-  const { user, plan, credits, effectivePlan } = useAuth();
+  const { user, plan, credits, effectivePlan, userData } = useAuth();
 
   const quickActions = [
     {
@@ -61,7 +61,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 pb-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold font-headline">Welcome back, {user?.displayName || user?.email?.split('@')[0] || 'User'}!</h1>
+        <h1 className="text-3xl font-bold font-headline">Welcome back, {userData?.displayName || user?.displayName || user?.email?.split('@')[0] || 'User'}!</h1>
         <p className="text-muted-foreground">Here is an overview of your career workspace.</p>
       </div>
 
@@ -113,7 +113,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-        <Card className="h-fit">
+        <Card className="h-full">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Launch your career tools instantly.</CardDescription>
@@ -146,36 +146,36 @@ export default function DashboardPage() {
         </Card>
 
         {effectivePlan === 'recruiter' && (
-          <Card className="border-primary/20 bg-primary/5 h-fit">
+          <Card className="border-primary/20 bg-primary/5 h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="text-primary" /> Recruiter Insights
               </CardTitle>
               <CardDescription>Manage your hiring pipeline efficiently.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-1">
-              <div className="p-5 rounded-lg bg-card border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="min-w-0">
+            <CardContent className="grid gap-4">
+              <div className="p-5 rounded-lg bg-card border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 overflow-hidden">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <Users2 className="h-4 w-4 text-primary" />
-                    <p className="text-sm font-semibold text-primary uppercase tracking-wider">Talent Pool</p>
+                    <Users2 className="h-4 w-4 text-primary shrink-0" />
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-tighter sm:tracking-wider">Talent Pool</p>
                   </div>
-                  <p className="text-xl font-bold">Shortlisted Talent</p>
-                  <p className="text-xs text-muted-foreground mt-1">Review your saved candidates</p>
+                  <p className="text-lg font-bold truncate">Shortlisted Talent</p>
+                  <p className="text-xs text-muted-foreground mt-1 truncate">Review your saved candidates</p>
                 </div>
                 <Button asChild size="sm" className="w-full sm:w-auto shrink-0 shadow-lg shadow-primary/20">
-                  <Link href="/recruiter-dashboard">Open Dashboard</Link>
+                  <Link href="/recruiter-dashboard">Dashboard</Link>
                 </Button>
               </div>
               
-              <div className="p-5 rounded-lg bg-card border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="min-w-0">
+              <div className="p-5 rounded-lg bg-card border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 overflow-hidden">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <Search className="h-4 w-4 text-primary" />
-                    <p className="text-sm font-semibold text-primary uppercase tracking-wider">AI Matching</p>
+                    <Search className="h-4 w-4 text-primary shrink-0" />
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-tighter sm:tracking-wider">AI Matching</p>
                   </div>
-                  <p className="text-xl font-bold">Find New Matches</p>
-                  <p className="text-xs text-muted-foreground mt-1">Upload resumes & job description</p>
+                  <p className="text-lg font-bold truncate">Find New Matches</p>
+                  <p className="text-xs text-muted-foreground mt-1 truncate">Match resumes & JD</p>
                 </div>
                 <Button size="sm" variant="outline" asChild className="w-full sm:w-auto shrink-0">
                   <Link href="/candidate-matcher">Start Search</Link>
