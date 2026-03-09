@@ -1,2 +1,2 @@
-// File deliberately emptied to prevent configuration conflicts with root next.config.js
+// This file is empty to avoid conflicts with the root next.config.js
 export default {};

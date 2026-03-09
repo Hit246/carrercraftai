@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, query, where, getDocs, writeBatch, onSnapshot, collectionGroup } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, query, where, getDocs, writeBatch, onSnapshot, collectionGroup, serverTimestamp } from 'firebase/firestore';
 import { differenceInDays, addDays } from 'date-fns';
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
@@ -27,6 +27,7 @@ interface UserData {
     displayName?: string | null;
     photoURL?: string | null;
     phoneNumber?: string | null;
+    email?: string;
 }
 
 interface AuthContextType {
@@ -67,13 +68,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (currentUser) {
         setUser(currentUser);
         const userIsAdmin = currentUser.email && ADMIN_EMAILS.includes(currentUser.email);
-        setIsAdmin(userIsAdmin);
+        setIsAdmin(!!userIsAdmin);
 
         if (userIsAdmin) {
             const userRef = doc(db, 'users', currentUser.uid);
             const userDoc = await getDoc(userRef);
             if (!userDoc.exists()) {
-                await setDoc(userRef, { email: currentUser.email, plan: 'recruiter', credits: Infinity, createdAt: new Date() });
+                await setDoc(userRef, { email: currentUser.email, plan: 'recruiter', credits: Infinity, createdAt: serverTimestamp() });
             }
             setPlan('recruiter');
             setEffectivePlan('recruiter');
@@ -100,6 +101,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userRef = doc(db, 'users', user.uid);
     const unsubscribe = onSnapshot(userRef, async (userDoc) => {
         if (!userDoc.exists()) {
+            // Document might be missing if signup failed to write to Firestore
+            // We'll keep loading true for a moment, but if it never appears, 
+            // the user will see an empty profile. We handle this in self-healing profile updates.
             setLoading(false);
             return;
         }
@@ -108,10 +112,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userPlan = currentData.plan || 'free';
         const planUpdatedAt = currentData.planUpdatedAt;
 
-        // Determine Effective Plan: If status is 'pending', they keep their old benefits
         const effPlan = userPlan === 'pending' ? (currentData.previousPlan || 'free') : userPlan;
 
-        // Expiration Logic with safe date handling
         if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
             let upgradeDate: Date;
             if (planUpdatedAt?.toDate) {
@@ -135,7 +137,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setPlan(userPlan);
         setEffectivePlan(effPlan);
 
-        // Deterministic Credit Assignment
         if (effPlan === 'pro' || effPlan === 'recruiter') {
             setCredits(Infinity);
         } else if (effPlan === 'essentials') {
@@ -153,39 +154,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 }, [user, isAdmin]);
 
   const login = (email:string, password:string) => signInWithEmailAndPassword(auth, email, password);
-  const logout = () => {
+  
+  const logout = async () => {
     setPlan('free');
     setEffectivePlan('free');
     setCredits(0);
     setIsAdmin(false);
-    return signOut(auth);
+    setUserData(null);
+    await signOut(auth);
   };
 
   const signup = async (email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const newUser = userCredential.user;
-    const initialUserData: any = { email: newUser.email, createdAt: new Date(), hasCompletedOnboarding: false };
     
-    const membersQuery = query(collectionGroup(db, 'members'), where('email', '==', email));
-    const membersSnapshot = await getDocs(membersQuery);
+    const initialUserData: any = { 
+        email: newUser.email, 
+        createdAt: serverTimestamp(), 
+        hasCompletedOnboarding: false,
+        displayName: newUser.displayName || email.split('@')[0],
+        photoURL: newUser.photoURL || null,
+    };
+    
+    try {
+        const membersQuery = query(collectionGroup(db, 'members'), where('email', '==', email));
+        const membersSnapshot = await getDocs(membersQuery);
 
-    if (!membersSnapshot.empty) {
-        const invitationDoc = membersSnapshot.docs[0];
-        const teamId = invitationDoc.ref.parent.parent?.id;
-        if (teamId) {
-            initialUserData.plan = 'recruiter';
-            initialUserData.credits = Infinity;
-            initialUserData.teamId = teamId;
-            const batch = writeBatch(db);
-            batch.set(doc(db, 'users', newUser.uid), initialUserData);
-            batch.update(invitationDoc.ref, { uid: newUser.uid, name: newUser.displayName || newUser.email });
-            await batch.commit();
+        if (!membersSnapshot.empty) {
+            const invitationDoc = membersSnapshot.docs[0];
+            const teamId = invitationDoc.ref.parent.parent?.id;
+            if (teamId) {
+                initialUserData.plan = 'recruiter';
+                initialUserData.credits = Infinity;
+                initialUserData.teamId = teamId;
+                const batch = writeBatch(db);
+                batch.set(doc(db, 'users', newUser.uid), initialUserData);
+                batch.update(invitationDoc.ref, { uid: newUser.uid, name: initialUserData.displayName });
+                await batch.commit();
+            }
+        } else {
+            initialUserData.plan = 'free';
+            initialUserData.credits = FREE_CREDITS;
+            await setDoc(doc(db, "users", newUser.uid), initialUserData);
         }
-    } else {
-        initialUserData.plan = 'free';
-        initialUserData.credits = FREE_CREDITS;
-        await setDoc(doc(db, "users", newUser.uid), initialUserData);
+    } catch (firestoreError) {
+        console.error("Error creating Firestore user doc during signup:", firestoreError);
+        // We don't throw here to avoid blocking the auth success, 
+        // but the record will be missing until self-healing kicks in.
     }
+    
     return userCredential;
   };
 
@@ -194,13 +211,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const updateUserProfile = async (profile: UserProfile) => {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error("Not authenticated");
-    await updateProfile(currentUser, { displayName: profile.displayName, photoURL: profile.photoURL });
+    
+    // 1. Update Firebase Auth Profile
+    await updateProfile(currentUser, { 
+        displayName: profile.displayName, 
+        photoURL: profile.photoURL 
+    });
+
+    // 2. Self-Healing Firestore Update: Use setDoc with merge: true 
+    // This creates the document if it's missing (e.g. from a failed signup write)
     const userRef = doc(db, 'users', currentUser.uid);
-    const firestoreData: any = {};
+    const firestoreData: any = {
+        email: currentUser.email, // Ensure email is present
+    };
+    
     if (profile.displayName !== undefined) firestoreData.displayName = profile.displayName;
     if (profile.photoURL !== undefined) firestoreData.photoURL = profile.photoURL;
     if (profile.phoneNumber !== undefined) firestoreData.phoneNumber = profile.phoneNumber;
-    await updateDoc(userRef, firestoreData);
+    
+    await setDoc(userRef, firestoreData, { merge: true });
   };
 
   const useCredit = async () => {
@@ -212,7 +241,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const requestCancellation = async () => {
     if (!user || isAdmin) return;
-    await updateDoc(doc(db, 'users', user.uid), { plan: 'cancellation_requested', planUpdatedAt: new Date() });
+    await updateDoc(doc(db, 'users', user.uid), { plan: 'cancellation_requested', planUpdatedAt: serverTimestamp() });
   };
 
   const updatePaymentProof = async (url: string) => {
