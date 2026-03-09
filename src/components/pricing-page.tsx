@@ -65,80 +65,42 @@ export function PricingPage() {
     fetchPricing();
   }, []);
 
-  // const handleApplyPromo = async () => {
-  //   const code = promoCodeInput.toUpperCase().trim();
-  //   if (!code) return;
-    
-  //   setIsVerifyingPromo(true);
-
-  //   try {
-  //     // Using a Server Action bypasses browser-level permission/COEP blocks
-  //     const result = await verifyPromoCodeAction(code);
-      
-  //     if (result.success && result.data) {
-  //       setAppliedPromo({ code: result.data.code, discount: result.data.discount });
-  //       toast({ 
-  //         title: 'Promo Applied!', 
-  //         description: `${result.data.discount}% discount has been added.` 
-  //       });
-  //     } else {
-  //       toast({ 
-  //           title: 'Verification Failed', 
-  //           description: result.error || 'Invalid promo code.', 
-  //           variant: 'destructive' 
-  //       });
-  //       setAppliedPromo(null);
-  //     }
-  //   } catch (e: any) {
-  //     toast({ 
-  //         title: 'System Error', 
-  //         description: 'Could not connect to the verification server. Please try again.', 
-  //         variant: 'destructive' 
-  //     });
-  //     setAppliedPromo(null);
-  //   } finally {
-  //     setIsVerifyingPromo(false);
-  //   }
-  // };
-
-  // In PricingPage.tsx - remove the verifyPromoCodeAction import and replace handleApplyPromo
-
-const handleApplyPromo = async () => {
-  const code = promoCodeInput.toUpperCase().trim();
-  if (!code) return;
-
-  setIsVerifyingPromo(true);
-  try {
-    // Direct client-side get — allowed by: allow get: if true;
-    const promoRef = doc(db, 'promoCodes', code);
-    const promoSnap = await getDoc(promoRef);
-
-    if (promoSnap.exists()) {
-      const data = promoSnap.data();
-      setAppliedPromo({ code: data.code, discount: data.discount });
+  const handleApplyPromo = async () => {
+    const code = promoCodeInput.toUpperCase().trim();
+    if (!code) return;
+  
+    setIsVerifyingPromo(true);
+    try {
+      const promoRef = doc(db, 'promoCodes', code); // direct get, no server action
+      const promoSnap = await getDoc(promoRef);
+  
+      if (promoSnap.exists()) {
+        const data = promoSnap.data();
+        setAppliedPromo({ code: data.code, discount: data.discount });
+        toast({ 
+          title: 'Promo Applied!', 
+          description: `${data.discount}% discount has been added.` 
+        });
+      } else {
+        toast({ 
+          title: 'Invalid Code', 
+          description: 'This promo code does not exist or has expired.', 
+          variant: 'destructive' 
+        });
+        setAppliedPromo(null);
+      }
+    } catch (e: any) {
+      console.error('Promo verify error:', e); // ← check browser console for the real error
       toast({ 
-        title: 'Promo Applied!', 
-        description: `${data.discount}% discount has been added.` 
-      });
-    } else {
-      toast({ 
-        title: 'Invalid Code', 
-        description: 'This promo code does not exist or has expired.', 
+        title: 'Error', 
+        description: e.message || 'Could not verify promo code.', 
         variant: 'destructive' 
       });
       setAppliedPromo(null);
+    } finally {
+      setIsVerifyingPromo(false);
     }
-  } catch (e: any) {
-    toast({ 
-      title: 'Error', 
-      description: 'Could not verify promo code. Check your connection.', 
-      variant: 'destructive' 
-    });
-    setAppliedPromo(null);
-  } finally {
-    setIsVerifyingPromo(false);
-  }
-};
+  };
 
   const calculatePrice = (base: number) => {
     let final = base;
