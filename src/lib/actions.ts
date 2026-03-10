@@ -72,7 +72,7 @@ export async function notifyAdminOfUpgradeAction(data: {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, ADMIN_EMAIL } = process.env;
 
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS || !ADMIN_EMAIL) {
-    console.warn("⚠️ SMTP credentials missing. Email notification skipped.");
+    console.warn("⚠️ SMTP credentials missing in .env. Email notification skipped.");
     return { success: false, error: 'SMTP missing' };
   }
 
@@ -108,15 +108,18 @@ export async function notifyAdminOfUpgradeAction(data: {
         <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
           <h2 style="color: #2563eb;">CareerCraft AI Notification</h2>
           <p>${bodyMap[data.type]}</p>
-          <hr />
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
           <p><strong>User:</strong> ${data.userEmail}</p>
           <p><strong>Plan:</strong> ${data.plan}</p>
           ${data.amount ? `<p><strong>Amount:</strong> ₹${data.amount}</p>` : ''}
           <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-          <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/upgrades" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 10px;">View in Admin Panel</a>
+          <div style="margin-top: 20px;">
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/upgrades" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 5px;">View in Admin Panel</a>
+          </div>
         </div>
       `,
     });
+    console.log(`✅ Admin notified via email (${data.type})`);
     return { success: true };
   } catch (error) {
     console.error("❌ Email notification failed:", error);

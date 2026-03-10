@@ -16,131 +16,75 @@ An AI-powered platform designed to empower job seekers and recruiters. Build stu
 ### For Job Seekers:
 - **📄 Intuitive Resume Builder:** Create professional resumes with a live preview and customizable sections.
 - **🤖 AI Resume Analyzer:** Get instant, actionable feedback on your resume's strengths, weaknesses, and areas for improvement.
-- **🤝 AI Job Matcher:** Upload your resume to discover fictional, yet plausible, job opportunities tailored to your skills and experience.
-- **✉️ AI Cover Letter Generator:** Automatically create compelling and personalized cover letters for specific job descriptions.
-- **🔒 Secure Authentication:** Standard email/password authentication to manage your profile and resumes.
-- **💎 Tiered Subscriptions:** Free access with limited AI credits and Pro plans for unlimited AI-powered assistance.
+- **🤝 AI Job Matcher:** Upload your resume to discover job opportunities tailored to your skills.
+- **✉️ AI Cover Letter Generator:** Automatically create compelling and personalized cover letters.
+- **🔒 Secure Authentication:** Standard email/password authentication.
+- **💎 Tiered Subscriptions:** Free, Essentials, and Pro plans with AI credit management.
 
 ### For Recruiters:
-- **🎯 AI Candidate Matcher:** Upload a job description and a file of resumes to instantly find the top matching candidates with scores and justifications.
-- **👥 Team Management:** Invite and manage team members under a single recruiter account.
-- **📊 Admin Dashboard:** A comprehensive dashboard for administrators to view user statistics, manage users, and monitor platform activity.
+- **🎯 AI Candidate Matcher:** Upload a job description and resumes to find the top matching candidates instantly.
+- **📊 Recruiter Dashboard:** Manage your shortlisted talent and view pipeline analytics.
+- **📊 Admin Dashboard:** Comprehensive oversight of users, payments, and support tickets.
 
 ## 🚀 Tech Stack
 
-- **Framework:** [Next.js](https://nextjs.org/) (with App Router)
-- **Language:** [TypeScript](https://www.typescriptlang.org/)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **UI Components:** [shadcn/ui](https://ui.shadcn.com/)
-- **AI Integration:** [Firebase Genkit](https://firebase.google.com/docs/genkit) with Google AI (Gemini)
-- **Backend & Database:** [Firebase](https://firebase.google.com/) (Authentication, Firestore & Storage)
-- **Forms:** [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/) for validation
-- **Icons:** [Lucide React](https://lucide.dev/)
-- **Deployment:** Ready for [Firebase App Hosting](https://firebase.google.com/docs/app-hosting)
+- **Framework:** Next.js 15 (App Router)
+- **AI Integration:** Firebase Genkit with Gemini Models
+- **Backend:** Firebase (Auth, Firestore, Storage)
+- **Payments:** Razorpay (Webhooks + Manual fallback)
+- **Notifications:** Nodemailer (SMTP)
 
 ## 🛠️ Getting Started
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+### 1. Set Up Environment Variables
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18 or later recommended)
-- [pnpm](https://pnpm.io/) (or npm/yarn)
-- [Firebase CLI](https://firebase.google.com/docs/cli)
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Hit246/careercraftai.git
-cd careercraftai
-```
-
-### 2. Install Dependencies
-
-```bash
-pnpm install
-```
-
-### 3. Set Up Environment Variables
-
-This project requires a connection to a Firebase project to function.
-
-1.  **Create a Firebase Project:** Go to the [Firebase Console](https://console.firebase.google.com/) and create a new project.
-2.  **Add a Web App:** In your project settings, add a new Web App to get your Firebase configuration keys.
-3.  **Enable Services:**
-    -   Enable **Authentication** with the "Email/Password" sign-in method.
-    -   Enable **Firestore Database**.
-    -   Enable **Firebase Storage**.
-4.  **Get Admin Service Account Key**:
-    -   In Firebase Console, go to **Project settings** > **Service accounts**.
-    -   Click **Generate new private key**.
-    -   Download the JSON file.
-5.  **Set up Environment File:**
-    -   Create a `.env` file in the root of the project.
-    -   Fill in the values with your Firebase project's configuration keys.
-    -   **CRITICAL**: Add `FIREBASE_SERVICE_ACCOUNT_KEY='<ALL_CONTENTS_OF_JSON_FILE>'`.
-    -   **Important**: You must wrap the entire JSON content in **single quotes** (`'`).
-    -   **Example**: `FIREBASE_SERVICE_ACCOUNT_KEY='{"type": "service_account", "project_id": "...", ...}'`
-    -   You will also need a `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/) for the AI features to work.
-    -   If using Razorpay, add your `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`.
-
-### 4. Admin Email Notifications (SMTP)
-
-To receive actual emails when users request upgrades, add the following to your `.env`:
+Create a `.env` file in the root directory:
 
 ```env
-SMTP_HOST='smtp.your-email-provider.com'
+# Firebase Public Config
+NEXT_PUBLIC_FIREBASE_PROJECT_ID='...'
+NEXT_PUBLIC_FIREBASE_APP_ID='...'
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET='...'
+NEXT_PUBLIC_FIREBASE_API_KEY='...'
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN='...'
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID='...'
+
+# Firebase Admin (CRITICAL for account deletion)
+# Generate this in Firebase Console > Project Settings > Service Accounts
+# Wrap the entire JSON content in SINGLE QUOTES.
+FIREBASE_SERVICE_ACCOUNT_KEY='{"type": "service_account", ...}'
+
+# AI & Payments
+GEMINI_API_KEY='...'
+NEXT_PUBLIC_RAZORPAY_KEY_ID='...'
+RAZORPAY_KEY_SECRET='...'
+RAZORPAY_WEBHOOK_SECRET='...'
+NEXT_PUBLIC_APP_URL='http://localhost:9002'
+
+# Admin Email Notifications (SMTP)
+# For Gmail: Use 'smtp.gmail.com'
+# IMPORTANT: Remove all spaces from your 16-character App Password.
+SMTP_HOST='smtp.gmail.com'
 SMTP_PORT=587
-SMTP_USER='your-smtp-username'
-SMTP_PASS='your-smtp-password'
+SMTP_USER='your-email@gmail.com'
+SMTP_PASS='your16characterapppassword'
 ADMIN_EMAIL='admin@careercraft.ai'
 ```
 
-### 5. Run the Development Server
+### 2. Run the Development Server
 
-The application uses two concurrent development servers: one for the Next.js frontend and one for the Genkit AI flows.
+```bash
+pnpm install
+pnpm run dev
+# In a separate terminal:
+pnpm run genkit:dev
+```
 
-- **Start the Next.js app:**
-  ```bash
-  pnpm run dev
-  ```
-- **In a separate terminal, start the Genkit server:**
-  ```bash
-  pnpm run genkit:dev
-  ```
+## ⚙️ Admin Setup
 
-Open [http://localhost:9002](http://localhost:9002) with your browser to see the result. The Genkit server will run on a different port and will be proxied by the Next.js server.
-
-## ⚙️ Firebase Configuration
-
-### Security Rules
-
-For the application to interact with Firestore and Storage securely, you must deploy the provided security rules.
-
-1.  Log in to the Firebase CLI: `firebase login`
-2.  Select your project: `firebase use your-project-id`
-3.  Deploy the rules: `firebase deploy --only firestore,storage`
-
-The CLI will use the `firestore.rules` and `storage.rules` files in the project root.
-
-### Enable Password Reset Emails
-
-For the "Forgot Password" feature to work, you must configure an SMTP server in Firebase. Firebase **does not** send these emails for you by default.
-
-1.  Go to the **Firebase Console** and select your project.
-2.  In the left-hand navigation menu, go to **Build > Authentication**.
-3.  Click on the **Templates** tab at the top of the page.
-4.  You will see a list of email templates (Password reset, Email verification, etc.). In the **"Sender name and email address"** section above the list, click the **Edit (pencil) icon**.
-5.  A dialog will open. Firebase will now prompt you to set up an **SMTP server**. You need to provide credentials for an external email service.
-6.  Follow the on-screen instructions to enter your SMTP server address, username, and password for that service.
-7.  Once this is configured and saved, Firebase will use that service to send all authentication-related emails.
+1. **Service Account**: The `FIREBASE_SERVICE_ACCOUNT_KEY` is required to allow the Admin Panel to delete user authentication accounts.
+2. **SMTP**: Use a "Google App Password" if using Gmail. Do not use your regular password. Ensure `SMTP_PASS` has no spaces.
+3. **Webhooks**: Set your Razorpay webhook URL to `https://your-domain.com/api/razorpay/webhook` and enable the `payment_link.paid` event.
 
 ## ✍️ Author
-
 - **CHAUHAN HITARTH**
-- **GitHub:** [Hit246](https://github.com/Hit246)
-- **LinkedIn:** [Chauhan Hitarth](https://www.linkedin.com/in/chauhan-hitarth/)
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
