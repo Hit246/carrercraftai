@@ -53,15 +53,18 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isAdmin) return;
 
+    // Listen for users with 'pending' status
     const q = query(collection(db, 'users'), where('plan', '==', 'pending'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setPendingUpgradesCount(snapshot.size);
       
+      // Skip the initial notification for existing requests on load
       if (isInitialLoad.current) {
         isInitialLoad.current = false;
         return;
       }
 
+      // Show toast only for newly added requests
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
           const newUser = change.doc.data();
@@ -186,7 +189,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                   <Bell />
                   <span>Upgrade Requests</span>
                   {pendingUpgradesCount > 0 && (
-                    <Badge className="ml-auto h-5 w-5 justify-center p-0 animate-pulse">
+                    <Badge className="ml-auto h-5 w-5 justify-center p-0 animate-pulse bg-destructive text-destructive-foreground">
                       {pendingUpgradesCount}
                     </Badge>
                   )}

@@ -110,6 +110,13 @@ For the application to interact with Firestore and Storage securely, you must de
 
 The CLI will use the `firestore.rules` and `storage.rules` files in the project root.
 
+### Admin Notifications (Email)
+
+The app currently uses real-time UI notifications for admins. To extend this to actual email notifications:
+1.  **Firebase Cloud Functions**: Create a function triggered by `firestore.onUpdate` on the `users` collection.
+2.  **Trigger Email Extension**: Install the "Trigger Email" extension in your Firebase Console.
+3.  **SMTP Service**: Configure a service like **Resend** or **SendGrid** within the extension or function.
+
 ### Enable Password Reset Emails
 
 For the "Forgot Password" feature to work, you must configure an SMTP server in Firebase. Firebase **does not** send these emails for you by default.

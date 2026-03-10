@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
@@ -6,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle, XCircle, AlertCircle, Hourglass, Upload, ExternalLink } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, AlertCircle, Hourglass, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { onSnapshot, doc } from 'firebase/firestore';
 import { db, uploadFile } from '@/lib/firebase';
@@ -15,7 +14,7 @@ import { Label } from '@/components/ui/label';
 
 type PaymentStatus = 'verifying' | 'success' | 'failed' | 'cancelled' | 'pending';
 
-function PaymentStatus() {
+function PaymentStatusContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, userData, updatePaymentProof } = useAuth();
@@ -28,7 +27,6 @@ function PaymentStatus() {
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    // This effect handles immediate feedback based on URL parameters
     const paymentLinkStatus = searchParams.get('razorpay_payment_link_status');
     
     if (paymentLinkStatus === 'paid') {
@@ -39,31 +37,26 @@ function PaymentStatus() {
       setStatus('cancelled');
       setMessage('Payment was cancelled. You will not be charged.');
       toast({ title: 'Payment Cancelled' });
-      return;
     } else if (paymentLinkStatus === 'failed') {
       setStatus('failed');
       setMessage('Payment failed. Please try again.');
       toast({ title: 'Payment Failed', variant: 'destructive' });
-      return;
     } else {
-        // Fallback for when no status is provided, but user lands here.
         setStatus('pending');
         setMessage('Your plan upgrade is being processed. We will update your account status shortly.');
     }
   }, [searchParams, toast]);
 
   useEffect(() => {
-    // This effect listens for the database change from the webhook
     if (user && status === 'pending') {
       const userRef = doc(db, 'users', user.uid);
       const unsubscribe = onSnapshot(userRef, (userDoc) => {
         if (userDoc.exists()) {
           const newUserData = userDoc.data();
-          // The webhook has successfully updated the plan
           if (newUserData.plan !== 'pending' && newUserData.plan !== 'free') {
             setStatus('success');
             setMessage(`Your plan has been successfully upgraded to ${newUserData.plan}!`);
-            unsubscribe(); // Stop listening once upgraded
+            unsubscribe();
           }
         }
       });
@@ -72,8 +65,6 @@ function PaymentStatus() {
     }
   }, [user, status]);
 
-
-  // Auto-redirect countdown for successful payments
   useEffect(() => {
     if (status === 'success') {
       const timer = setInterval(() => {
@@ -101,7 +92,7 @@ function PaymentStatus() {
             title: 'Proof Uploaded',
             description: 'Your payment proof has been submitted for review.',
         });
-        setProofFile(null); // Clear the file input
+        setProofFile(null);
     } catch (error) {
         console.error("Proof upload failed:", error);
         toast({ title: 'Upload Failed', description: 'Could not upload your proof. Please try again.', variant: 'destructive' });
@@ -200,13 +191,21 @@ function PaymentStatus() {
                     {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4" />}
                     {isUploading ? 'Uploading...' : 'Upload Proof'}
                 </Button>
+                <Button variant="ghost" onClick={() => router.push('/dashboard')} className="w-full">
+                    Go to Dashboard
+                </Button>
             </CardFooter>
         )}
         {status === 'pending' && userData?.paymentProofURL && (
-            <CardFooter className="flex-col items-center gap-2 border-t pt-6 text-center">
-                 <CheckCircle className="w-8 h-8 text-green-500 mb-2"/>
-                 <h3 className="font-semibold">Proof Submitted</h3>
-                 <p className="text-sm text-muted-foreground">We have received your payment proof. An admin will review it shortly.</p>
+            <CardFooter className="flex-col items-center gap-4 border-t pt-6 text-center">
+                 <div className="flex flex-col items-center">
+                    <CheckCircle className="w-8 h-8 text-green-500 mb-2"/>
+                    <h3 className="font-semibold">Proof Submitted</h3>
+                    <p className="text-sm text-muted-foreground">We have received your payment proof. An admin will review it shortly.</p>
+                 </div>
+                 <Button onClick={() => router.push('/dashboard')} className="w-full">
+                    Back to Dashboard
+                 </Button>
             </CardFooter>
         )}
       </Card>
@@ -224,7 +223,7 @@ export default function PaymentSuccessPage() {
         }
     >
         <AuthProvider>
-            <PaymentStatus />
+            <PaymentStatusContent />
         </AuthProvider>
     </Suspense>
   );
