@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useEffect } from "react"
@@ -14,7 +15,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast" 
 import { createPaymentLink } from "@/lib/razorpay"
 import { db } from "@/lib/firebase";
-// import { verifyPromoCodeAction } from "@/lib/actions";
+import { notifyAdminOfUpgradeAction } from "@/lib/actions";
 
 import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag } from "lucide-react"
 
@@ -71,7 +72,7 @@ export function PricingPage() {
   
     setIsVerifyingPromo(true);
     try {
-      const promoRef = doc(db, 'promoCodes', code); // direct get, no server action
+      const promoRef = doc(db, 'promoCodes', code); 
       const promoSnap = await getDoc(promoRef);
   
       if (promoSnap.exists()) {
@@ -90,7 +91,7 @@ export function PricingPage() {
         setAppliedPromo(null);
       }
     } catch (e: any) {
-      console.error('Promo verify error:', e); // ← check browser console for the real error
+      console.error('Promo verify error:', e);
       toast({ 
         title: 'Error', 
         description: e.message || 'Could not verify promo code.', 
@@ -142,6 +143,14 @@ export function PricingPage() {
             plan: 'pending',
             requestedPlan: selectedPlan,
         });
+        
+        // Notify Admin of new request via Email
+        await notifyAdminOfUpgradeAction({
+          userEmail: user.email,
+          plan: selectedPlan,
+          type: 'MANUAL_REQUEST'
+        });
+
     } catch (dbError) {
         toast({ title: "Error", description: "Could not initiate upgrade. Check your connection.", variant: "destructive" });
         setIsProcessing(null);

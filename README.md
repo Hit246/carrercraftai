@@ -1,3 +1,4 @@
+
 #CareerCraft AI
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -83,7 +84,19 @@ This project requires a connection to a Firebase project to function.
     -   You will also need a `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/) for the AI features to work.
     -   If using Razorpay, add your `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`.
 
-### 4. Run the Development Server
+### 4. Admin Email Notifications (SMTP)
+
+To receive actual emails when users request upgrades, add the following to your `.env`:
+
+```env
+SMTP_HOST='smtp.your-email-provider.com'
+SMTP_PORT=587
+SMTP_USER='your-smtp-username'
+SMTP_PASS='your-smtp-password'
+ADMIN_EMAIL='admin@careercraft.ai'
+```
+
+### 5. Run the Development Server
 
 The application uses two concurrent development servers: one for the Next.js frontend and one for the Genkit AI flows.
 
@@ -110,13 +123,6 @@ For the application to interact with Firestore and Storage securely, you must de
 
 The CLI will use the `firestore.rules` and `storage.rules` files in the project root.
 
-### Admin Notifications (Email)
-
-The app currently uses real-time UI notifications for admins. To extend this to actual email notifications:
-1.  **Firebase Cloud Functions**: Create a function triggered by `firestore.onUpdate` on the `users` collection.
-2.  **Trigger Email Extension**: Install the "Trigger Email" extension in your Firebase Console.
-3.  **SMTP Service**: Configure a service like **Resend** or **SendGrid** within the extension or function.
-
 ### Enable Password Reset Emails
 
 For the "Forgot Password" feature to work, you must configure an SMTP server in Firebase. Firebase **does not** send these emails for you by default.
@@ -125,7 +131,7 @@ For the "Forgot Password" feature to work, you must configure an SMTP server in 
 2.  In the left-hand navigation menu, go to **Build > Authentication**.
 3.  Click on the **Templates** tab at the top of the page.
 4.  You will see a list of email templates (Password reset, Email verification, etc.). In the **"Sender name and email address"** section above the list, click the **Edit (pencil) icon**.
-5.  A dialog will open. Firebase will now prompt you to set up an **SMTP server**. You need to provide credentials for an external email service. You can use services like **SendGrid**, **Mailgun**, **Resend**, or even your own Gmail account (though this is not recommended for production).
+5.  A dialog will open. Firebase will now prompt you to set up an **SMTP server**. You need to provide credentials for an external email service.
 6.  Follow the on-screen instructions to enter your SMTP server address, username, and password for that service.
 7.  Once this is configured and saved, Firebase will use that service to send all authentication-related emails.
 

@@ -1,6 +1,8 @@
+
 import { db } from '@/lib/firebase';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import * as crypto from 'crypto';
+import { notifyAdminOfUpgradeAction } from '@/lib/actions';
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -20,7 +22,6 @@ export async function POST(req: Request) {
       return new Response('Invalid signature.', { status: 403 });
     }
 
-    // Signature is valid, proceed with logic
     console.log('Razorpay webhook signature verified successfully.');
     const event = JSON.parse(body);
 
@@ -29,7 +30,6 @@ export async function POST(req: Request) {
         const plan = paymentEntity.notes.plan;
         const userId = paymentEntity.notes.userId;
         const paymentId = paymentEntity.id;
-        // Razorpay amounts are in paise, convert to INR
         const amountPaid = paymentEntity.amount / 100;
 
         if (!userId || !plan) {
@@ -39,12 +39,24 @@ export async function POST(req: Request) {
 
         console.log(`Processing webhook for user: ${userId}, plan: ${plan}, amount: ${amountPaid}`);
 
-        await updateDoc(doc(db, 'users', userId), {
+        const userRef = doc(db, 'users', userId);
+        const userSnap = await getDoc(userRef);
+        const userEmail = userSnap.exists() ? userSnap.data().email : 'Unknown User';
+
+        await updateDoc(userRef, {
             plan: plan,
             planUpdatedAt: serverTimestamp(),
             paymentId: paymentId,
             webhookVerified: true,
             amountPaid: amountPaid,
+        });
+
+        // Notify Admin of automatic success via Email
+        await notifyAdminOfUpgradeAction({
+          userEmail: userEmail,
+          plan: plan,
+          amount: amountPaid,
+          type: 'WEBHOOK_PAID'
         });
 
         console.log(`Successfully upgraded user ${userId} to ${plan} via webhook.`);

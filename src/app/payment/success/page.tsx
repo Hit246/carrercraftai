@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
@@ -11,6 +12,7 @@ import { onSnapshot, doc } from 'firebase/firestore';
 import { db, uploadFile } from '@/lib/firebase';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { notifyAdminOfUpgradeAction } from '@/lib/actions';
 
 type PaymentStatus = 'verifying' | 'success' | 'failed' | 'cancelled' | 'pending';
 
@@ -88,6 +90,14 @@ function PaymentStatusContent() {
         const filePath = `payment_proofs/${user.uid}/${Date.now()}-${proofFile.name}`;
         const downloadURL = await uploadFile(proofFile, filePath);
         await updatePaymentProof(downloadURL);
+        
+        // Notify Admin of proof upload via Email
+        await notifyAdminOfUpgradeAction({
+          userEmail: user.email!,
+          plan: userData?.requestedPlan || 'Unknown',
+          type: 'PROOF_UPLOADED'
+        });
+
         toast({
             title: 'Proof Uploaded',
             description: 'Your payment proof has been submitted for review.',
@@ -188,7 +198,7 @@ function PaymentStatusContent() {
                     <Input id="payment-proof" type="file" accept="image/*" onChange={(e) => setProofFile(e.target.files?.[0] || null)} disabled={isUploading} />
                 </div>
                 <Button onClick={handleProofUpload} disabled={!proofFile || isUploading} className="w-full">
-                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4" />}
+                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                     {isUploading ? 'Uploading...' : 'Upload Proof'}
                 </Button>
                 <Button variant="ghost" onClick={() => router.push('/dashboard')} className="w-full">

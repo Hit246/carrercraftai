@@ -1,3 +1,4 @@
+
 'use server';
 
 import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
@@ -27,6 +28,7 @@ import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeV
 import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput } from '@/ai/flows/candidate-summarizer';
 import { db } from './firebase';
 import type { SupportRequestInput, ReplySupportRequestInput } from './types';
+import nodemailer from 'nodemailer';
 
 // Admin Deletion
 import * as admin from 'firebase-admin';
@@ -58,6 +60,67 @@ export async function deleteUserAccountAction(uid: string) {
   } catch (error: any) {
     console.error("Error deleting user auth:", error);
     throw new Error(error.message || "Failed to delete user account from Firebase Authentication.");
+  }
+}
+
+export async function notifyAdminOfUpgradeAction(data: {
+  userEmail: string;
+  plan: string;
+  amount?: number;
+  type: 'MANUAL_REQUEST' | 'PROOF_UPLOADED' | 'WEBHOOK_PAID';
+}) {
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, ADMIN_EMAIL } = process.env;
+
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS || !ADMIN_EMAIL) {
+    console.warn("⚠️ SMTP credentials missing. Email notification skipped.");
+    return { success: false, error: 'SMTP missing' };
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: parseInt(SMTP_PORT || '587'),
+    secure: parseInt(SMTP_PORT || '587') === 465,
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS,
+    },
+  });
+
+  const subjectMap = {
+    MANUAL_REQUEST: `🚀 New Upgrade Request: ${data.plan}`,
+    PROOF_UPLOADED: `📸 Payment Proof Received: ${data.userEmail}`,
+    WEBHOOK_PAID: `💰 Automatic Payment Success: ${data.plan}`,
+  };
+
+  const bodyMap = {
+    MANUAL_REQUEST: `User ${data.userEmail} has requested an upgrade to the ${data.plan} plan. They are currently in the 'pending' state.`,
+    PROOF_UPLOADED: `User ${data.userEmail} has uploaded a payment proof for their ${data.plan} upgrade. Please review it in the Admin Panel.`,
+    WEBHOOK_PAID: `Great news! User ${data.userEmail} has successfully paid ₹${data.amount} for the ${data.plan} plan via Razorpay. Their account has been upgraded automatically.`,
+  };
+
+  try {
+    await transporter.sendMail({
+      from: `"CareerCraft AI System" <${SMTP_USER}>`,
+      to: ADMIN_EMAIL,
+      subject: subjectMap[data.type],
+      text: bodyMap[data.type],
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <h2 style="color: #2563eb;">CareerCraft AI Notification</h2>
+          <p>${bodyMap[data.type]}</p>
+          <hr />
+          <p><strong>User:</strong> ${data.userEmail}</p>
+          <p><strong>Plan:</strong> ${data.plan}</p>
+          ${data.amount ? `<p><strong>Amount:</strong> ₹${data.amount}</p>` : ''}
+          <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/upgrades" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 10px;">View in Admin Panel</a>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("❌ Email notification failed:", error);
+    return { success: false, error: 'Email failed' };
   }
 }
 
