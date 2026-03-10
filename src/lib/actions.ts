@@ -1,4 +1,3 @@
-
 'use server';
 
 import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
@@ -37,7 +36,14 @@ if (!admin.apps.length) {
   try {
     const keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
     if (keyString) {
-      const serviceAccount = JSON.parse(keyString);
+      // Resilient Parsing: Strip accidental surrounding quotes (common in Vercel/env-cmd)
+      let sanitizedKey = keyString.trim();
+      if ((sanitizedKey.startsWith("'") && sanitizedKey.endsWith("'")) || 
+          (sanitizedKey.startsWith('"') && sanitizedKey.endsWith('"'))) {
+        sanitizedKey = sanitizedKey.slice(1, -1).trim();
+      }
+
+      const serviceAccount = JSON.parse(sanitizedKey);
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
       });
@@ -46,7 +52,7 @@ if (!admin.apps.length) {
       console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT_KEY missing. Admin features (like Auth deletion) will be disabled.");
     }
   } catch (e) {
-    console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY. Ensure it is a valid JSON string wrapped in single quotes in your .env file.", e);
+    console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY. Ensure it is a valid JSON string. If using a local .env, wrap it in single quotes. In Vercel dashboard, do NOT use surrounding quotes.", e);
   }
 }
 

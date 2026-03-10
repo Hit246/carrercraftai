@@ -50,8 +50,10 @@ NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN='...'
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID='...'
 
 # Firebase Admin (CRITICAL for account deletion)
-# Generate this in Firebase Console > Project Settings > Service Accounts
-# Wrap the entire JSON content in SINGLE QUOTES.
+# 1. Go to Firebase Console > Project Settings > Service Accounts
+# 2. Click "Generate new private key" and download the JSON file.
+# 3. For local .env: Wrap the entire JSON content in SINGLE QUOTES.
+# 4. For Vercel Dashboard: Paste the RAW JSON content WITHOUT surrounding quotes.
 FIREBASE_SERVICE_ACCOUNT_KEY='{"type": "service_account", ...}'
 
 # AI & Payments
@@ -59,7 +61,7 @@ GEMINI_API_KEY='...'
 NEXT_PUBLIC_RAZORPAY_KEY_ID='...'
 RAZORPAY_KEY_SECRET='...'
 RAZORPAY_WEBHOOK_SECRET='...'
-NEXT_PUBLIC_APP_URL='http://localhost:9002'
+NEXT_PUBLIC_APP_URL='https://your-app-url.vercel.app'
 
 # Admin Email Notifications (SMTP)
 # For Gmail: Use 'smtp.gmail.com'
