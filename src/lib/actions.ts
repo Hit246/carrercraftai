@@ -1,3 +1,4 @@
+
 'use server';
 
 import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
@@ -29,38 +30,38 @@ import { resumeAgent, ResumeAgentInput, ResumeAgentOutput } from '@/ai/flows/res
 import { scoreResume, ResumeScorerInput, ResumeScorerOutput } from '@/ai/flows/resume-scorer';
 import { db } from './firebase';
 import type { SupportRequestInput, ReplySupportRequestInput } from './types';
-import nodemailer from 'nodemailer';
 
-// Admin Deletion
-import * as admin from 'firebase-admin';
+// Lazy initialized admin
+let adminModule: any = null;
 
-if (!admin.apps.length) {
-  try {
-    const keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-    if (keyString) {
-      let sanitizedKey = keyString.trim();
-      if ((sanitizedKey.startsWith("'") && sanitizedKey.endsWith("'")) || 
-          (sanitizedKey.startsWith('"') && sanitizedKey.endsWith('"'))) {
-        sanitizedKey = sanitizedKey.slice(1, -1).trim();
+async function getAdmin() {
+  if (adminModule) return adminModule;
+  const admin = await import('firebase-admin');
+  if (!admin.apps.length) {
+    try {
+      const keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+      if (keyString) {
+        let sanitizedKey = keyString.trim();
+        if ((sanitizedKey.startsWith("'") && sanitizedKey.endsWith("'")) || 
+            (sanitizedKey.startsWith('"') && sanitizedKey.endsWith('"'))) {
+          sanitizedKey = sanitizedKey.slice(1, -1).trim();
+        }
+
+        const serviceAccount = JSON.parse(sanitizedKey);
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+        });
       }
-
-      const serviceAccount = JSON.parse(sanitizedKey);
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      });
-      console.log("✅ Firebase Admin SDK initialized successfully.");
-    } else {
-      console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT_KEY missing.");
+    } catch (e) {
+      console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY.", e);
     }
-  } catch (e) {
-    console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY.", e);
   }
+  adminModule = admin;
+  return admin;
 }
 
 export async function deleteUserAccountAction(uid: string) {
-  if (!admin.apps.length) {
-    throw new Error("Admin SDK not initialized.");
-  }
+  const admin = await getAdmin();
   try {
     await admin.auth().deleteUser(uid);
     return { success: true };
@@ -82,6 +83,7 @@ export async function notifyAdminOfUpgradeAction(data: {
     return { success: false, error: 'SMTP missing' };
   }
 
+  const nodemailer = await import('nodemailer');
   const transporter = nodemailer.createTransport({
     host: SMTP_HOST,
     port: parseInt(SMTP_PORT || '587'),

@@ -176,7 +176,11 @@ export const ResumeBuilder = () => {
             const fetchedVersions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ResumeVersion));
             setVersions(fetchedVersions);
 
-            if (fetchedVersions.length > 0 && !currentVersion) {
+            // SYNC metadata for the active version (isPublic, shareSlug, etc.)
+            if (currentVersion) {
+                const updated = fetchedVersions.find(v => v.id === currentVersion.id);
+                if (updated) setCurrentVersion(updated);
+            } else if (fetchedVersions.length > 0) {
                 const latest = fetchedVersions[0];
                 setCurrentVersion(latest);
                 setResumeData({ ...emptyResumeData, ...latest.resumeData });
@@ -191,7 +195,7 @@ export const ResumeBuilder = () => {
         });
 
         return () => unsubscribe();
-    }, [user?.uid, authLoading]);
+    }, [user?.uid, authLoading, currentVersion?.id]);
 
     const handleAddExperience = () => {
         setResumeData(prev => ({
@@ -638,7 +642,7 @@ export const ResumeBuilder = () => {
                     resumeData,
                     updatedAt: serverTimestamp()
                 });
-                setCurrentVersion({ id: newRef.id, versionName: name, resumeData, updatedAt: new Date() });
+                // Note: The listener will pick up the update and sync currentVersion
                 toast({ title: "First Version Created!", description: `Saved as "${name}"` });
             }
         } catch (error) {
@@ -659,12 +663,11 @@ export const ResumeBuilder = () => {
         try {
             const { versionName } = await suggestResumeVersionNameAction({ resumeData });
             const name = versionName || `Version ${versions.length + 1}`;
-            const newRef = await addDoc(collection(db, `users/${user.uid}/resumeVersions`), {
+            await addDoc(collection(db, `users/${user.uid}/resumeVersions`), {
                 versionName: name,
                 resumeData,
                 updatedAt: serverTimestamp(),
             });
-            setCurrentVersion({ id: newRef.id, versionName: name, resumeData, updatedAt: new Date() });
             toast({ title: "New Version Saved!", description: `Saved as "${name}"` });
         } catch (error) {
             toast({ title: "Error", variant: "destructive" });
@@ -679,7 +682,7 @@ export const ResumeBuilder = () => {
             let slug = currentVersion.shareSlug;
             if (isPublic && !slug) {
                 const randomId = Math.random().toString(36).substring(2, 7);
-                slug = `${resumeData.name.toLowerCase().replace(/\s+/g, '-')}-${randomId}`;
+                slug = `${(resumeData.name || 'resume').toLowerCase().replace(/\s+/g, '-')}-${randomId}`;
             }
             const versionRef = doc(db, `users/${user.uid}/resumeVersions`, currentVersion.id);
             await updateDoc(versionRef, { isPublic, shareSlug: slug });
@@ -1190,7 +1193,7 @@ export const ResumeBuilder = () => {
                 </div>
 
                 {currentVersion && (
-                    <div className="flex items-center justify-between p-2 rounded-md bg-muted/50 border">
+                    <div className="flex items-center justify-between p-2 rounded-md bg-muted/50 border animate-in fade-in slide-in-from-top-1">
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
                                 {currentVersion.isPublic ? <Globe className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-muted-foreground" />}
@@ -1205,10 +1208,10 @@ export const ResumeBuilder = () => {
                         {currentVersion.isPublic && (
                             <div className="flex items-center gap-2">
                                 <Button variant="ghost" size="sm" className="h-7 text-[10px]" onClick={copyShareLink}>
-                                    <Copy className="w-3 h-3 mr-1" /> Copy
+                                    <Copy className="w-3 h-3 mr-1" /> Copy Link
                                 </Button>
                                 <Button variant="ghost" size="sm" className="h-7 text-[10px]" asChild>
-                                    <a href={`/r/${currentVersion.shareSlug}`} target="_blank">
+                                    <a href={`/r/${currentVersion.shareSlug}`} target="_blank" rel="noopener noreferrer">
                                         <ExternalLink className="w-3 h-3 mr-1" /> View
                                     </a>
                                 </Button>
@@ -1274,11 +1277,13 @@ export const ResumeBuilder = () => {
                     if (!newData) return;
                     
                     setResumeData(prev => {
-                        // Robust mapping helper to prevent "map is not a function" errors
-                        // Also ensures we merge rather than overwrite missing fields
+                        // Robust mapping helper
                         const safeMap = (items: any, existing: any[]) => {
-                            if (items === undefined) return existing; 
+                            if (items === undefined || items === null) return existing; 
                             if (!Array.isArray(items)) return existing;
+                            // Only apply AI suggestion if it has content, otherwise keep existing
+                            if (items.length === 0 && existing.length > 0) return existing;
+                            
                             return items.map((item: any, i: number) => ({
                                 ...item,
                                 id: item.id || (Date.now() + i)
@@ -1286,9 +1291,9 @@ export const ResumeBuilder = () => {
                         };
 
                         return {
-                            ...prev, // Keep ALL existing data
-                            ...newData, // Apply ONLY the data the AI returned
-                            // Handle arrays explicitly to ensure stable IDs
+                            ...prev, // Keep ALL existing data first
+                            ...newData, // Apply ONLY the suggest fields from AI
+                            // Safely merge arrays to prevent data loss if AI returns empty or missing lists
                             experience: safeMap(newData.experience, prev.experience),
                             education: safeMap(newData.education, prev.education),
                             projects: safeMap(newData.projects, prev.projects),
