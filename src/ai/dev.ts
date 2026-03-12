@@ -11,3 +11,4 @@ import '@/ai/flows/ats-optimizer.ts';
 import '@/ai/flows/resume-version-namer.ts';
 import '@/ai/flows/candidate-summarizer.ts';
 import '@/ai/flows/payment-verifier.ts';
+import '@/ai/flows/resume-scorer.ts';

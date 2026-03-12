@@ -18,6 +18,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Badge } from './ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { db } from '@/lib/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 const formSchema = z.object({
     resumeFile: z.instanceof(File).refine(
@@ -44,7 +46,7 @@ export function AtsOptimizerPage() {
   const [analysisResult, setAnalysisResult] = useState<AtsOptimizerOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { effectivePlan, credits, useCredit, isAdmin } = useAuth();
+  const { effectivePlan, credits, useCredit, isAdmin, user } = useAuth();
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -80,7 +82,24 @@ export function AtsOptimizerPage() {
             resumeDataUri,
             jobDescription: values.jobDescription,
          });
+        
         setAnalysisResult(result);
+
+        // Save result to Firestore for CareerCraft Score feature
+        if (user?.uid) {
+          await setDoc(
+            doc(db, 'users', user.uid, 'atsResults', 'latest'),
+            {
+              overall_score: result.overall_score,
+              breakdown: result.breakdown,
+              skills_matched: result.skills_matched,
+              skills_missing: result.skills_missing,
+              summary: result.summary,
+              savedAt: serverTimestamp(),
+            }
+          );
+        }
+
     } catch (error) {
         console.error(error);
         toast({

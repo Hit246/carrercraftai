@@ -1,46 +1,27 @@
-
 {
   "indexes": [
     {
       "collectionGroup": "users",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "plan",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "planUpdatedAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "users",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "plan",
-          "arrayConfig": "CONTAINS"
-        },
-        {
-          "fieldPath": "planUpdatedAt",
-          "order": "DESCENDING"
-        }
+        { "fieldPath": "plan", "order": "ASCENDING" },
+        { "fieldPath": "planUpdatedAt", "order": "DESCENDING" }
       ]
     },
     {
       "collectionGroup": "supportRequests",
       "queryScope": "COLLECTION",
       "fields": [
-        {
-          "fieldPath": "userId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "lastMessageAt",
-          "order": "DESCENDING"
-        }
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "lastMessageAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "resumeVersions",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "shareSlug", "order": "ASCENDING" },
+        { "fieldPath": "isPublic", "order": "ASCENDING" }
       ]
     }
   ],
@@ -49,10 +30,7 @@
       "collectionGroup": "members",
       "fieldPath": "email",
       "indexes": [
-        {
-          "order": "ASCENDING",
-          "queryScope": "COLLECTION_GROUP"
-        }
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
       ]
     }
   ]

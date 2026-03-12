@@ -31,6 +31,7 @@ import {
   NotebookPen,
   LayoutDashboard,
   SquarePen,
+  BarChart3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -95,6 +96,7 @@ function AppLayoutContent({
     if (isActive('/dashboard')) return 'Home';
     if (isActive('/resume-builder')) return 'Resume Builder';
     if (isActive('/resume-analyzer')) return 'Resume Analyzer';
+    if (isActive('/resume-score')) return 'CareerCraft Score';
     if (isActive('/ats-optimizer')) return 'ATS Optimizer';
     if (isActive('/job-matcher')) return 'Job Matcher';
     if (isActive('/cover-letter-generator')) return 'Cover Letter Generator';
@@ -174,6 +176,15 @@ function AppLayoutContent({
                   <span>Resume Builder</span>
                 </Link>
               </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive('/resume-score')}>
+                    <Link href="/resume-score">
+                    <BarChart3 />
+                    <span>CareerCraft Score</span>
+                    {!isProAccess && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
+                    </Link>
+                </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isActive('/resume-analyzer')}>

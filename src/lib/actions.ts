@@ -25,6 +25,8 @@ import { atsOptimizer, AtsOptimizerInput, AtsOptimizerOutput } from '@/ai/flows/
 import { submitSupportRequest, replyToSupportRequest } from '@/ai/flows/support-request';
 import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeVersionNameOutput } from '@/ai/flows/resume-version-namer';
 import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput } from '@/ai/flows/candidate-summarizer';
+import { resumeAgent, ResumeAgentInput, ResumeAgentOutput } from '@/ai/flows/resume-agent';
+import { scoreResume, ResumeScorerInput, ResumeScorerOutput } from '@/ai/flows/resume-scorer';
 import { db } from './firebase';
 import type { SupportRequestInput, ReplySupportRequestInput } from './types';
 import nodemailer from 'nodemailer';
@@ -36,7 +38,6 @@ if (!admin.apps.length) {
   try {
     const keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
     if (keyString) {
-      // Resilient Parsing: Strip accidental surrounding quotes (common in Vercel/env-cmd)
       let sanitizedKey = keyString.trim();
       if ((sanitizedKey.startsWith("'") && sanitizedKey.endsWith("'")) || 
           (sanitizedKey.startsWith('"') && sanitizedKey.endsWith('"'))) {
@@ -49,23 +50,23 @@ if (!admin.apps.length) {
       });
       console.log("✅ Firebase Admin SDK initialized successfully.");
     } else {
-      console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT_KEY missing. Admin features (like Auth deletion) will be disabled.");
+      console.warn("⚠️ FIREBASE_SERVICE_ACCOUNT_KEY missing.");
     }
   } catch (e) {
-    console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY. Ensure it is a valid JSON string. If using a local .env, wrap it in single quotes. In Vercel dashboard, do NOT use surrounding quotes.", e);
+    console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY.", e);
   }
 }
 
 export async function deleteUserAccountAction(uid: string) {
   if (!admin.apps.length) {
-    throw new Error("Admin SDK not initialized. Please set FIREBASE_SERVICE_ACCOUNT_KEY in your .env file.");
+    throw new Error("Admin SDK not initialized.");
   }
   try {
     await admin.auth().deleteUser(uid);
     return { success: true };
   } catch (error: any) {
     console.error("Error deleting user auth:", error);
-    throw new Error(error.message || "Failed to delete user account from Firebase Authentication.");
+    throw new Error(error.message || "Failed to delete user account.");
   }
 }
 
@@ -78,7 +79,6 @@ export async function notifyAdminOfUpgradeAction(data: {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, ADMIN_EMAIL } = process.env;
 
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS || !ADMIN_EMAIL) {
-    console.warn("⚠️ SMTP credentials missing in .env. Email notification skipped.");
     return { success: false, error: 'SMTP missing' };
   }
 
@@ -99,9 +99,9 @@ export async function notifyAdminOfUpgradeAction(data: {
   };
 
   const bodyMap = {
-    MANUAL_REQUEST: `User ${data.userEmail} has requested an upgrade to the ${data.plan} plan. They are currently in the 'pending' state.`,
-    PROOF_UPLOADED: `User ${data.userEmail} has uploaded a payment proof for their ${data.plan} upgrade. Please review it in the Admin Panel.`,
-    WEBHOOK_PAID: `Great news! User ${data.userEmail} has successfully paid ₹${data.amount} for the ${data.plan} plan via Razorpay. Their account has been upgraded automatically.`,
+    MANUAL_REQUEST: `User ${data.userEmail} has requested an upgrade to the ${data.plan} plan.`,
+    PROOF_UPLOADED: `User ${data.userEmail} has uploaded a payment proof.`,
+    WEBHOOK_PAID: `User ${data.userEmail} has paid ₹${data.amount} for the ${data.plan} plan.`,
   };
 
   try {
@@ -109,23 +109,8 @@ export async function notifyAdminOfUpgradeAction(data: {
       from: `"CareerCraft AI System" <${SMTP_USER}>`,
       to: ADMIN_EMAIL,
       subject: subjectMap[data.type],
-      text: bodyMap[data.type],
-      html: `
-        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h2 style="color: #2563eb;">CareerCraft AI Notification</h2>
-          <p>${bodyMap[data.type]}</p>
-          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-          <p><strong>User:</strong> ${data.userEmail}</p>
-          <p><strong>Plan:</strong> ${data.plan}</p>
-          ${data.amount ? `<p><strong>Amount:</strong> ₹${data.amount}</p>` : ''}
-          <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-          <div style="margin-top: 20px;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/upgrades" style="display: inline-block; padding: 10px 20px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 5px;">View in Admin Panel</a>
-          </div>
-        </div>
-      `,
+      html: `<p>${bodyMap[data.type]}</p>`,
     });
-    console.log(`✅ Admin notified via email (${data.type})`);
     return { success: true };
   } catch (error) {
     console.error("❌ Email notification failed:", error);
@@ -133,118 +118,46 @@ export async function notifyAdminOfUpgradeAction(data: {
   }
 }
 
-export async function analyzeResumeAction(
-  input: AnalyzeResumeInput
-): Promise<AnalyzeResumeOutput> {
+export async function analyzeResumeAction(input: AnalyzeResumeInput): Promise<AnalyzeResumeOutput> {
   return analyzeResume(input);
 }
 
-export async function jobMatcherAction(
-  input: JobMatcherInput
-): Promise<JobMatcherOutput> {
+export async function jobMatcherAction(input: JobMatcherInput): Promise<JobMatcherOutput> {
   return await jobMatcher(input);
 }
 
-
-export async function candidateMatcherAction(
-    input: CandidateMatcherInput
-  ): Promise<CandidateMatcherOutput> {
-    const matchResult = await candidateMatcher({
-        jobDescription: input.jobDescription,
-        resumeDataUris: input.resumeDataUris
-    });
-    return matchResult;
+export async function candidateMatcherAction(input: CandidateMatcherInput): Promise<CandidateMatcherOutput> {
+  return await candidateMatcher(input);
 }
 
-
-export async function generateCoverLetterAction(
-  input: GenerateCoverLetterInput
-): Promise<GenerateCoverLetterOutput> {
+export async function generateCoverLetterAction(input: GenerateCoverLetterInput): Promise<GenerateCoverLetterOutput> {
   return await generateCoverLetter(input);
 }
 
-export async function atsOptimizerAction(
-  input: AtsOptimizerInput
-): Promise<AtsOptimizerOutput> {
+export async function atsOptimizerAction(input: AtsOptimizerInput): Promise<AtsOptimizerOutput> {
   return await atsOptimizer(input);
 }
 
-export async function getPaymentSettings() {
-    const settingsRef = doc(db, 'settings', 'payment');
-    const settingsSnap = await getDoc(settingsRef);
-    if (settingsSnap.exists()) {
-        return settingsSnap.data();
-    }
-    return { upiId: 'admin@careercraft.ai', qrCodeImageUrl: 'https://i.imgur.com/2O0s4Jm.png' };
-}
-
-export async function submitSupportRequestAction(
-    input: SupportRequestInput
-  ) {
+export async function submitSupportRequestAction(input: SupportRequestInput) {
     return await submitSupportRequest(input);
 }
 
-export async function replyToSupportRequestAction(
-  input: ReplySupportRequestInput
-) {
+export async function replyToSupportRequestAction(input: ReplySupportRequestInput) {
   return await replyToSupportRequest(input);
 }
 
-
-export async function suggestResumeVersionNameAction(
-    input: SuggestResumeVersionNameInput
-    ): Promise<SuggestResumeVersionNameOutput> {
+export async function suggestResumeVersionNameAction(input: SuggestResumeVersionNameInput): Promise<SuggestResumeVersionNameOutput> {
     return await suggestResumeVersionName(input);
 }
 
-export async function summarizeCandidateAction(
-  input: SummarizeCandidateInput
-): Promise<SummarizeCandidateOutput> {
+export async function summarizeCandidateAction(input: SummarizeCandidateInput): Promise<SummarizeCandidateOutput> {
   return await summarizeCandidate(input);
 }
 
-export async function verifyPromoCodeAction(code: string) {
-    try {
-        const cleanCode = code.toUpperCase().trim();
-        if (!cleanCode) return { success: false, error: 'Promo code is required.' };
-        
-        const docRef = doc(db, 'promoCodes', cleanCode);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            return { 
-                success: true, 
-                data: {
-                    code: data.code,
-                    discount: data.discount
-                }
-            };
-        }
-        return { success: false, error: 'Invalid or expired promo code.' };
-    } catch (e: any) {
-        console.error("Server Promo Verification Error:", e);
-        return { success: false, error: e.message || 'System error during verification.' };
-    }
+export async function resumeAgentAction(input: ResumeAgentInput): Promise<ResumeAgentOutput> {
+  return await resumeAgent(input);
 }
 
-export async function saveCandidateAction(candidateData: {
-    name: string;
-    matchScore: number;
-    jobTitle: string;
-    justification: string;
-    resumeURL?: string;
-}, userId: string) {
-    try {
-        const candidateRef = firestoreCollection(db, `users/${userId}/shortlistedCandidates`);
-        await addDoc(candidateRef, {
-            ...candidateData,
-            addedAt: serverTimestamp(),
-            status: 'New'
-        });
-        return { success: true };
-    } catch (error) {
-        console.error("Error saving candidate:", error);
-        throw new Error("Failed to shortlist candidate.");
-    }
+export async function resumeScoreAction(input: ResumeScorerInput): Promise<ResumeScorerOutput> {
+  return await scoreResume(input);
 }
