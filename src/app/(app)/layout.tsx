@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -31,7 +32,6 @@ import {
   NotebookPen,
   LayoutDashboard,
   SquarePen,
-  BarChart3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -140,7 +140,6 @@ function AppLayoutContent({
   const isProAccess = effectivePlan === 'pro' || effectivePlan === 'recruiter';
   const isEssentialsAccess = effectivePlan === 'essentials' || isProAccess;
 
-  // Hardened safety for production rendering
   const userInitial = (userData?.displayName?.[0] || user?.displayName?.[0] || user?.email?.[0] || 'U').toUpperCase();
   const userName = userData?.displayName || user?.displayName || user?.email || 'User';
 
@@ -266,7 +265,6 @@ function AppLayoutContent({
               <AvatarImage 
                 src={userData?.photoURL || user.photoURL || `https://placehold.co/100x100.png?text=${userInitial}`} 
                 alt={userName} 
-                data-ai-hint="profile picture" 
               />
               <AvatarFallback>{userInitial}</AvatarFallback>
             </Avatar>
