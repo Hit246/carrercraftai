@@ -27,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from './ui/dropdown-menu';
 import { exportToDocx } from '@/lib/export-docx';
 import { ResumeAgentSidebar } from './resume-agent-sidebar';
@@ -957,12 +957,13 @@ export const ResumeBuilder = () => {
     );
 
     return (
-        <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
-            <div className="flex-1 grid lg:grid-cols-2 gap-8 h-full p-4 md:p-6 overflow-hidden">
-                <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar">
+        <div className="flex h-[calc(100svh-4rem)] overflow-hidden -m-4 md:-m-6 lg:-m-8">
+            <div className="flex-1 grid md:grid-cols-[40%_60%] h-full overflow-hidden">
+                {/* Left Side: Editor */}
+                <div className="h-full overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar border-r">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                            <CardTitle>Personal Information</CardTitle>
+                            <CardTitle className="text-lg">Personal Information</CardTitle>
                             {versions.length === 0 && (
                                 <Button variant="outline" size="sm" onClick={fillSampleData}>
                                     <FileJson className="mr-2 h-4 w-4" /> Load Sample
@@ -981,13 +982,13 @@ export const ResumeBuilder = () => {
                     </Card>
 
                     <Card>
-                        <CardHeader><CardTitle>Professional Summary</CardTitle></CardHeader>
+                        <CardHeader><CardTitle className="text-lg">Professional Summary</CardTitle></CardHeader>
                         <CardContent><Textarea id="summary" value={resumeData.summary} onChange={handleInputChange} rows={5} placeholder="Briefly describe your career goals and achievements..." /></CardContent>
                     </Card>
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                            <CardTitle>Work Experience</CardTitle>
+                            <CardTitle className="text-lg">Work Experience</CardTitle>
                             <Button variant="ghost" size="sm" onClick={handleAddExperience}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -1005,7 +1006,7 @@ export const ResumeBuilder = () => {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                            <CardTitle>Projects</CardTitle>
+                            <CardTitle className="text-lg">Projects</CardTitle>
                             <Button variant="ghost" size="sm" onClick={handleAddProject}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -1022,7 +1023,7 @@ export const ResumeBuilder = () => {
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                            <CardTitle>Education</CardTitle>
+                            <CardTitle className="text-lg">Education</CardTitle>
                             <Button variant="ghost" size="sm" onClick={handleAddEducation}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -1040,17 +1041,18 @@ export const ResumeBuilder = () => {
                         </CardContent>
                     </Card>
                     <Card>
-                        <CardHeader><CardTitle>Skills</CardTitle></CardHeader>
+                        <CardHeader><CardTitle className="text-lg">Skills</CardTitle></CardHeader>
                         <CardContent><Textarea id="skills" placeholder="Comma-separated skills..." value={resumeData.skills} onChange={handleInputChange} rows={3} /></CardContent>
                     </Card>
                 </div>
 
-                <div className="flex flex-col gap-4 overflow-hidden h-full">
-                    <Card className="p-3">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
+                {/* Right Side: Toolbar & Preview */}
+                <div className="flex flex-col h-full overflow-hidden bg-muted/20">
+                    <div className="p-4 space-y-4 border-b bg-card">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
                             <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
                                 <PopoverTrigger asChild>
-                                    <Button variant="outline" className="w-full sm:w-auto flex-1 min-w-[200px] justify-between">
+                                    <Button variant="outline" className="w-full sm:w-auto flex-1 min-w-[200px] justify-between h-9">
                                     <History className="mr-2 h-4 w-4" />
                                     <span className="truncate">{currentVersion?.versionName || "New Resume (unsaved)"}</span>
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -1116,7 +1118,7 @@ export const ResumeBuilder = () => {
 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                                        <Button variant="ghost" size="icon" className="h-9 w-9"><MoreVertical className="h-4 w-4" /></Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem onClick={() => setIsAgentOpen(!isAgentOpen)}>
@@ -1156,55 +1158,54 @@ export const ResumeBuilder = () => {
                                 </DropdownMenu>
                             </div>
                         </div>
-                    </Card>
 
-                    {currentVersion && (
-                        <Card className="p-3 bg-muted/20">
-                            <div className="flex items-center justify-between">
+                        {currentVersion && (
+                            <div className="flex items-center justify-between p-2 rounded-md bg-muted/50 border">
                                 <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-2">
                                         {currentVersion.isPublic ? <Globe className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-muted-foreground" />}
-                                        <span className="text-xs font-medium">{currentVersion.isPublic ? "Public Resume" : "Private Resume"}</span>
+                                        <span className="text-[10px] font-bold uppercase tracking-wider">{currentVersion.isPublic ? "Publicly Shared" : "Private Draft"}</span>
                                     </div>
                                     <Switch 
                                         checked={currentVersion.isPublic || false} 
                                         onCheckedChange={handleTogglePublic}
+                                        className="scale-75"
                                     />
                                 </div>
                                 {currentVersion.isPublic && (
                                     <div className="flex items-center gap-2">
                                         <Button variant="ghost" size="sm" className="h-7 text-[10px]" onClick={copyShareLink}>
-                                            <Copy className="w-3 h-3 mr-1" /> Copy Link
+                                            <Copy className="w-3 h-3 mr-1" /> Copy
                                         </Button>
                                         <Button variant="ghost" size="sm" className="h-7 text-[10px]" asChild>
                                             <a href={`/r/${currentVersion.shareSlug}`} target="_blank">
-                                                <ExternalLink className="w-3 h-3 mr-1" /> View Public
+                                                <ExternalLink className="w-3 h-3 mr-1" /> View
                                             </a>
                                         </Button>
                                     </div>
                                 )}
                             </div>
-                        </Card>
-                    )}
+                        )}
+                    </div>
 
-                    <Card className="flex-1 overflow-hidden relative">
-                        <CardContent className="p-0 h-full overflow-y-auto bg-muted/30 custom-scrollbar">
-                            <div className="mx-auto max-w-[800px] my-8 shadow-2xl">
-                                {resumeData.template === 'modern' ? <PreviewModern /> : 
-                                resumeData.template === 'minimalist' ? <PreviewMinimalist /> : 
-                                <PreviewClassic />}
-                            </div>
-                        </CardContent>
-                        <Button 
-                            className="absolute bottom-4 right-4 shadow-xl z-50"
-                            size="lg"
-                            onClick={() => setIsAgentOpen(!isAgentOpen)}
-                        >
-                            <Bot className="w-5 h-5 mr-2" /> {isAgentOpen ? 'Close Agent' : 'AI Resume Agent'}
-                        </Button>
-                    </Card>
+                    {/* Preview Scroll Area */}
+                    <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+                        <div className="mx-auto max-w-[800px] shadow-2xl origin-top transition-transform">
+                            {resumeData.template === 'modern' ? <PreviewModern /> : 
+                            resumeData.template === 'minimalist' ? <PreviewMinimalist /> : 
+                            <PreviewClassic />}
+                        </div>
+                    </div>
+                    
+                    <Button 
+                        className="fixed bottom-6 right-6 shadow-2xl z-50 rounded-full h-12 px-6"
+                        onClick={() => setIsAgentOpen(!isAgentOpen)}
+                    >
+                        <Bot className="w-5 h-5 mr-2" /> {isAgentOpen ? 'Close AI Agent' : 'AI Resume Agent'}
+                    </Button>
                 </div>
             </div>
+            
             <ResumeAgentSidebar 
                 isOpen={isAgentOpen} 
                 currentResumeData={resumeData} 
