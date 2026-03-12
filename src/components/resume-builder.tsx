@@ -1076,7 +1076,7 @@ export const ResumeBuilder = () => {
     );
 
     return (
-        <div className="flex flex-col min-h-full -m-4 md:-m-6 lg:-m-8 pb-20">
+        <div className="flex flex-col min-h-full -m-4 md:-m-6 lg:-m-8 pb-20 overflow-y-auto">
             {/* Global Sticky Toolbar */}
             <div className="sticky top-0 p-4 space-y-4 border-b bg-card z-20 shrink-0 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1217,8 +1217,8 @@ export const ResumeBuilder = () => {
                 )}
             </div>
 
-            <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[450px_1fr]">
-                <Tabs defaultValue="edit" className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[450px_1fr] min-h-0">
+                <Tabs defaultValue="edit" className="flex-1 flex flex-col min-h-0">
                     <div className="bg-card border-b p-4 lg:hidden sticky top-[180px] z-10">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="edit" className="flex items-center gap-2">
@@ -1230,14 +1230,14 @@ export const ResumeBuilder = () => {
                         </TabsList>
                     </div>
 
-                    <div className="flex-1 relative">
+                    <div className="flex-1 flex flex-col lg:flex-row min-h-0">
                         {/* Editor Section */}
-                        <TabsContent value="edit" className="mt-0 data-[state=inactive]:hidden lg:block p-4 md:p-6 border-r overflow-y-auto h-full">
+                        <TabsContent value="edit" className="mt-0 data-[state=inactive]:hidden lg:block p-4 md:p-6 border-r flex-1 lg:overflow-visible">
                             <EditorContent />
                         </TabsContent>
 
                         {/* Preview Section */}
-                        <TabsContent value="preview" className="mt-0 data-[state=inactive]:hidden lg:block bg-slate-100 dark:bg-slate-900/20 overflow-y-auto h-full">
+                        <TabsContent value="preview" className="mt-0 data-[state=inactive]:hidden lg:block bg-slate-100 dark:bg-slate-900/20 flex-1 lg:overflow-visible">
                             <div className="p-4 md:p-8 lg:p-12">
                                 <div className="mx-auto max-w-[800px] shadow-2xl origin-top transition-transform">
                                     {resumeData.template === 'modern' ? <PreviewModern /> : 
@@ -1261,12 +1261,23 @@ export const ResumeBuilder = () => {
                 isOpen={isAgentOpen} 
                 currentResumeData={resumeData} 
                 onApplyChanges={(newData) => {
-                    // Ensure incoming data has stable IDs for React keys
+                    if (!newData) return;
+                    
+                    // Robust mapping helper to prevent "map is not a function" errors
+                    // Handles cases where AI might return objects instead of arrays
+                    const safeMap = (items: any) => {
+                        if (!Array.isArray(items)) return [];
+                        return items.map((item: any, i: number) => ({
+                            ...item,
+                            id: item.id || (Date.now() + i)
+                        }));
+                    };
+
                     const normalizedData = {
                         ...newData,
-                        experience: (newData.experience || []).map((e: any, i: number) => ({ ...e, id: e.id || Date.now() + i })),
-                        education: (newData.education || []).map((e: any, i: number) => ({ ...e, id: e.id || Date.now() + i })),
-                        projects: (newData.projects || []).map((p: any, i: number) => ({ ...p, id: p.id || Date.now() + i })),
+                        experience: safeMap(newData.experience),
+                        education: safeMap(newData.education),
+                        projects: safeMap(newData.projects),
                     };
                     setResumeData(normalizedData);
                     toast({ title: "Changes Applied", description: "The AI updates have been synced to your resume builder." });
