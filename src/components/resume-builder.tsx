@@ -1,4 +1,3 @@
-
 'use client';
 import React, { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,6 @@ import {
     History, 
     ChevronsUpDown, 
     Crown, 
-    MoreVertical, 
     FileJson, 
     Layout, 
     Check, 
@@ -1069,9 +1067,9 @@ export const ResumeBuilder = () => {
     );
 
     return (
-        <div className="flex flex-col h-[calc(100svh-4rem)] overflow-hidden -m-4 md:-m-6 lg:-m-8">
+        <div className="flex flex-col min-h-full -m-4 md:-m-6 lg:-m-8 pb-20">
             {/* Global Sticky Toolbar */}
-            <div className="p-4 space-y-4 border-b bg-card z-20 shrink-0">
+            <div className="sticky top-0 p-4 space-y-4 border-b bg-card z-20 shrink-0 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
                         <PopoverTrigger asChild>
@@ -1138,43 +1136,44 @@ export const ResumeBuilder = () => {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-
-                        {/* Direct Menu Actions (Exposed from Dropdown) */}
-                        <Button size="sm" variant="outline" onClick={() => setIsAgentOpen(!isAgentOpen)}>
-                            <Bot className="mr-2 h-4 w-4" /> AI Resume Agent
-                        </Button>
-
-                        <Button size="sm" variant="outline" onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
-                            {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
-                            AI Quality Score
-                        </Button>
-
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="outline">
-                                    <PlusCircle className="mr-2 h-4 w-4" /> Save as New
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Save as New Version?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        {versions.length >= draftLimit 
-                                            ? `You've reached your limit of ${draftLimit} drafts.` 
-                                            : "This will create a duplicate version of your current resume data."}
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    {versions.length >= draftLimit ? (
-                                        <Button onClick={() => router.push('/pricing')}><Crown className="w-4 h-4 mr-2"/> Upgrade</Button>
-                                    ) : (
-                                        <AlertDialogAction onClick={handleSaveAsNew}>Save New</AlertDialogAction>
-                                    )}
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
                     </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 border-t pt-3">
+                    <Button size="sm" variant="outline" className="flex-1 sm:flex-none" onClick={() => setIsAgentOpen(!isAgentOpen)}>
+                        <Bot className="mr-2 h-4 w-4" /> AI Agent
+                    </Button>
+
+                    <Button size="sm" variant="outline" className="flex-1 sm:flex-none" onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
+                        {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                        AI Quality Score
+                    </Button>
+
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="flex-1 sm:flex-none">
+                                <PlusCircle className="mr-2 h-4 w-4" /> Save as New
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Save as New Version?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    {versions.length >= draftLimit 
+                                        ? `You've reached your limit of ${draftLimit} drafts.` 
+                                        : "This will create a duplicate version of your current resume data."}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                {versions.length >= draftLimit ? (
+                                    <Button onClick={() => router.push('/pricing')}><Crown className="w-4 h-4 mr-2"/> Upgrade</Button>
+                                ) : (
+                                    <AlertDialogAction onClick={handleSaveAsNew}>Save New</AlertDialogAction>
+                                )}
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
 
                 {currentVersion && (
@@ -1206,9 +1205,9 @@ export const ResumeBuilder = () => {
                 )}
             </div>
 
-            <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[450px_1fr] h-full overflow-hidden">
-                <Tabs defaultValue="edit" className="flex-1 flex flex-col overflow-hidden">
-                    <div className="bg-card border-b p-4 lg:hidden shrink-0">
+            <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[450px_1fr]">
+                <Tabs defaultValue="edit" className="flex-1 flex flex-col">
+                    <div className="bg-card border-b p-4 lg:hidden sticky top-[180px] z-10">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="edit" className="flex items-center gap-2">
                                 <FileText className="w-4 h-4" /> Edit
@@ -1219,14 +1218,14 @@ export const ResumeBuilder = () => {
                         </TabsList>
                     </div>
 
-                    <div className="flex-1 overflow-hidden relative">
-                        {/* Editor Section - Scrollable */}
-                        <TabsContent value="edit" className="h-full mt-0 data-[state=inactive]:hidden lg:block lg:h-full lg:overflow-y-auto custom-scrollbar p-4 md:p-6 border-r overflow-y-auto">
+                    <div className="flex-1 relative">
+                        {/* Editor Section */}
+                        <TabsContent value="edit" className="mt-0 data-[state=inactive]:hidden lg:block p-4 md:p-6 border-r">
                             <EditorContent />
                         </TabsContent>
 
-                        {/* Preview Section - Scrollable */}
-                        <TabsContent value="preview" className="h-full mt-0 data-[state=inactive]:hidden lg:absolute lg:inset-0 lg:z-10 bg-slate-100 dark:bg-slate-900/20 lg:flex lg:flex-col overflow-y-auto custom-scrollbar">
+                        {/* Preview Section */}
+                        <TabsContent value="preview" className="mt-0 data-[state=inactive]:hidden lg:block bg-slate-100 dark:bg-slate-900/20">
                             <div className="p-4 md:p-8 lg:p-12">
                                 <div className="mx-auto max-w-[800px] shadow-2xl origin-top transition-transform">
                                     {resumeData.template === 'modern' ? <PreviewModern /> : 
