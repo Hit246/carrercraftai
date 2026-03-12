@@ -1,4 +1,3 @@
-
 import { db } from '@/lib/firebase';
 import { collectionGroup, query, where, getDocs, limit } from 'firebase/firestore';
 import { Metadata } from 'next';
