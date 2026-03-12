@@ -26,8 +26,6 @@ import { atsOptimizer, AtsOptimizerInput, AtsOptimizerOutput } from '@/ai/flows/
 import { submitSupportRequest, replyToSupportRequest } from '@/ai/flows/support-request';
 import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeVersionNameOutput } from '@/ai/flows/resume-version-namer';
 import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput } from '@/ai/flows/candidate-summarizer';
-import { resumeAgent, ResumeAgentInput, ResumeAgentOutput } from '@/ai/flows/resume-agent';
-import { scoreResume, ResumeScorerInput, ResumeScorerOutput } from '@/ai/flows/resume-scorer';
 import { db } from './firebase';
 import type { SupportRequestInput, ReplySupportRequestInput } from './types';
 
@@ -154,12 +152,4 @@ export async function suggestResumeVersionNameAction(input: SuggestResumeVersion
 
 export async function summarizeCandidateAction(input: SummarizeCandidateInput): Promise<SummarizeCandidateOutput> {
   return await summarizeCandidate(input);
-}
-
-export async function resumeAgentAction(input: ResumeAgentInput): Promise<ResumeAgentOutput> {
-  return await resumeAgent(input);
-}
-
-export async function resumeScoreAction(input: ResumeScorerInput): Promise<ResumeScorerOutput> {
-  return await scoreResume(input);
 }

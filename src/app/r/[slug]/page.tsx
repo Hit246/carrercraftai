@@ -58,7 +58,6 @@ export default async function PublicResumePage({ params }: Props) {
     return (
         <div className="min-h-screen bg-slate-50 py-12 px-4 md:px-8">
             <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden">
-                {/* Clean Public Header */}
                 <div className="bg-slate-900 text-white p-8 md:p-12">
                     <h1 className="text-4xl font-bold font-headline mb-2">{data.name}</h1>
                     <p className="text-xl text-slate-300 font-medium mb-6">{data.title}</p>
@@ -70,7 +69,6 @@ export default async function PublicResumePage({ params }: Props) {
                 </div>
 
                 <div className="p-8 md:p-12 space-y-10">
-                    {/* Summary */}
                     {data.summary && (
                         <section>
                             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4 border-b pb-2">Profile</h2>
@@ -78,7 +76,6 @@ export default async function PublicResumePage({ params }: Props) {
                         </section>
                     )}
 
-                    {/* Experience */}
                     {data.experience?.length > 0 && (
                         <section>
                             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6 border-b pb-2">Experience</h2>
@@ -97,7 +94,6 @@ export default async function PublicResumePage({ params }: Props) {
                         </section>
                     )}
 
-                    {/* Education */}
                     {data.education?.length > 0 && (
                         <section>
                             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6 border-b pb-2">Education</h2>
@@ -113,7 +109,6 @@ export default async function PublicResumePage({ params }: Props) {
                         </section>
                     )}
 
-                    {/* Skills */}
                     {data.skills && (
                         <section>
                             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4 border-b pb-2">Skills</h2>
@@ -128,7 +123,6 @@ export default async function PublicResumePage({ params }: Props) {
                     )}
                 </div>
 
-                {/* Public Footer CTA */}
                 <div className="bg-slate-50 p-8 text-center border-t">
                     <p className="text-slate-500 text-sm mb-4">Want a professional resume like this?</p>
                     <Button asChild size="lg" className="rounded-full px-8">
