@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -1068,12 +1069,151 @@ export const ResumeBuilder = () => {
     );
 
     return (
-        <div className="flex h-[calc(100svh-4rem)] overflow-hidden -m-4 md:-m-6 lg:-m-8">
+        <div className="flex flex-col h-[calc(100svh-4rem)] overflow-hidden -m-4 md:-m-6 lg:-m-8">
+            {/* Global Sticky Toolbar */}
+            <div className="p-4 space-y-4 border-b bg-card z-20 shrink-0">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-full sm:w-auto flex-1 min-w-[200px] justify-between h-9">
+                            <History className="mr-2 h-4 w-4" />
+                            <span className="truncate">{currentVersion?.versionName || "New Resume (unsaved)"}</span>
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[250px] p-0">
+                            <Command>
+                            <CommandInput placeholder="Search versions..." />
+                            <CommandEmpty>No versions found.</CommandEmpty>
+                            <CommandGroup>
+                                {versions.map((v) => (
+                                <CommandItem key={v.id} value={v.id} onSelect={() => handleVersionSelect(v.id)}>
+                                    <Check className={cn("mr-2 h-4 w-4", currentVersion?.id === v.id ? "opacity-100" : "opacity-0")} />
+                                    {v.versionName}
+                                </CommandItem>
+                                ))}
+                            </CommandGroup>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
+                    
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                    <Layout className="mr-2 h-4 w-4" /> Template
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Choose Layout</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => setTemplate('classic')}>
+                                    {resumeData.template === 'classic' && <Check className="mr-2 h-4 w-4" />} Classic Professional
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setTemplate('modern')}>
+                                    {resumeData.template === 'modern' && <Check className="mr-2 h-4 w-4" />} Modern (LaTeX style)
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setTemplate('minimalist')}>
+                                    {resumeData.template === 'minimalist' && <Check className="mr-2 h-4 w-4" />} Minimalist (ATS High)
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <Button size="sm" onClick={handleSave} disabled={isSaving}>
+                            <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
+                        </Button>
+                        
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button size="sm" variant="outline">
+                                    <Download className="mr-2 h-4 w-4" /> Export
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={handleExportPdf}>
+                                    <FileDown className="mr-2 h-4 w-4" /> Export as PDF (1 Credit)
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleExportDocx}>
+                                    <FileText className="mr-2 h-4 w-4" /> Export as DOCX (Free)
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-9 w-9"><MoreVertical className="h-4 w-4" /></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setIsAgentOpen(!isAgentOpen)}>
+                                    <Bot className="mr-2 h-4 w-4" /> AI Resume Agent
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
+                                    {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                                    AI Quality Score
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                            <PlusCircle className="mr-2 h-4 w-4" /> Save as New
+                                        </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Save as New Version?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                {versions.length >= draftLimit 
+                                                    ? `You've reached your limit of ${draftLimit} drafts.` 
+                                                    : "This will create a duplicate version of your current resume data."}
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            {versions.length >= draftLimit ? (
+                                                <Button onClick={() => router.push('/pricing')}><Crown className="w-4 h-4 mr-2"/> Upgrade</Button>
+                                            ) : (
+                                                <AlertDialogAction onClick={handleSaveAsNew}>Save New</AlertDialogAction>
+                                            )}
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </div>
+
+                {currentVersion && (
+                    <div className="flex items-center justify-between p-2 rounded-md bg-muted/50 border">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                {currentVersion.isPublic ? <Globe className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-muted-foreground" />}
+                                <span className="text-[10px] font-bold uppercase tracking-wider">{currentVersion.isPublic ? "Publicly Shared" : "Private Draft"}</span>
+                            </div>
+                            <Switch 
+                                checked={currentVersion.isPublic || false} 
+                                onCheckedChange={handleTogglePublic}
+                                className="scale-75"
+                            />
+                        </div>
+                        {currentVersion.isPublic && (
+                            <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm" className="h-7 text-[10px]" onClick={copyShareLink}>
+                                    <Copy className="w-3 h-3 mr-1" /> Copy
+                                </Button>
+                                <Button variant="ghost" size="sm" className="h-7 text-[10px]" asChild>
+                                    <a href={`/r/${currentVersion.shareSlug}`} target="_blank">
+                                        <ExternalLink className="w-3 h-3 mr-1" /> View
+                                    </a>
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
             <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[450px_1fr] h-full overflow-hidden">
-                
-                {/* Desktop Sidebar Editor / Mobile Tabs Container */}
                 <Tabs defaultValue="edit" className="flex-1 flex flex-col overflow-hidden">
-                    <div className="bg-card border-b p-4 space-y-4 lg:hidden">
+                    <div className="bg-card border-b p-4 lg:hidden shrink-0">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="edit" className="flex items-center gap-2">
                                 <FileText className="w-4 h-4" /> Edit
@@ -1085,162 +1225,18 @@ export const ResumeBuilder = () => {
                     </div>
 
                     <div className="flex-1 overflow-hidden relative">
-                        {/* Editor Section */}
+                        {/* Editor Section - Always Scrollable */}
                         <TabsContent value="edit" className="h-full mt-0 data-[state=inactive]:hidden lg:block lg:h-full lg:overflow-y-auto custom-scrollbar p-4 md:p-6 border-r">
                             <EditorContent />
                         </TabsContent>
 
-                        {/* Preview Section */}
-                        <TabsContent value="preview" className="h-full mt-0 data-[state=inactive]:hidden lg:absolute lg:inset-0 lg:z-10 bg-muted/20 lg:flex lg:flex-col">
-                            <div className="flex flex-col h-full overflow-hidden bg-muted/20">
-                                {/* Toolbar */}
-                                <div className="p-4 space-y-4 border-b bg-card">
-                                    <div className="flex flex-wrap items-center justify-between gap-3">
-                                        <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
-                                            <PopoverTrigger asChild>
-                                                <Button variant="outline" className="w-full sm:w-auto flex-1 min-w-[200px] justify-between h-9">
-                                                <History className="mr-2 h-4 w-4" />
-                                                <span className="truncate">{currentVersion?.versionName || "New Resume (unsaved)"}</span>
-                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-[250px] p-0">
-                                                <Command>
-                                                <CommandInput placeholder="Search versions..." />
-                                                <CommandEmpty>No versions found.</CommandEmpty>
-                                                <CommandGroup>
-                                                    {versions.map((v) => (
-                                                    <CommandItem key={v.id} value={v.id} onSelect={() => handleVersionSelect(v.id)}>
-                                                        <Check className={cn("mr-2 h-4 w-4", currentVersion?.id === v.id ? "opacity-100" : "opacity-0")} />
-                                                        {v.versionName}
-                                                    </CommandItem>
-                                                    ))}
-                                                </CommandGroup>
-                                                </Command>
-                                            </PopoverContent>
-                                        </Popover>
-                                        
-                                        <div className="flex items-center gap-2 flex-wrap justify-end">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="outline" size="sm">
-                                                        <Layout className="mr-2 h-4 w-4" /> Template
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Choose Layout</DropdownMenuLabel>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem onClick={() => setTemplate('classic')}>
-                                                        {resumeData.template === 'classic' && <Check className="mr-2 h-4 w-4" />} Classic Professional
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => setTemplate('modern')}>
-                                                        {resumeData.template === 'modern' && <Check className="mr-2 h-4 w-4" />} Modern (LaTeX style)
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => setTemplate('minimalist')}>
-                                                        {resumeData.template === 'minimalist' && <Check className="mr-2 h-4 w-4" />} Minimalist (ATS High)
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-
-                                            <Button size="sm" onClick={handleSave} disabled={isSaving}>
-                                                <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
-                                            </Button>
-                                            
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button size="sm" variant="outline">
-                                                        <Download className="mr-2 h-4 w-4" /> Export
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem onClick={handleExportPdf}>
-                                                        <FileDown className="mr-2 h-4 w-4" /> Export as PDF (1 Credit)
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={handleExportDocx}>
-                                                        <FileText className="mr-2 h-4 w-4" /> Export as DOCX (Free)
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-9 w-9"><MoreVertical className="h-4 w-4" /></Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem onClick={() => setIsAgentOpen(!isAgentOpen)}>
-                                                        <Bot className="mr-2 h-4 w-4" /> AI Resume Agent
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
-                                                        {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
-                                                        AI Quality Score
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <AlertDialog>
-                                                        <AlertDialogTrigger asChild>
-                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                                                <PlusCircle className="mr-2 h-4 w-4" /> Save as New
-                                                            </DropdownMenuItem>
-                                                        </AlertDialogTrigger>
-                                                        <AlertDialogContent>
-                                                            <AlertDialogHeader>
-                                                                <AlertDialogTitle>Save as New Version?</AlertDialogTitle>
-                                                                <AlertDialogDescription>
-                                                                    {versions.length >= draftLimit 
-                                                                        ? `You've reached your limit of ${draftLimit} drafts.` 
-                                                                        : "This will create a duplicate version of your current resume data."}
-                                                                </AlertDialogDescription>
-                                                            </AlertDialogHeader>
-                                                            <AlertDialogFooter>
-                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                {versions.length >= draftLimit ? (
-                                                                    <Button onClick={() => router.push('/pricing')}><Crown className="w-4 h-4 mr-2"/> Upgrade</Button>
-                                                                ) : (
-                                                                    <AlertDialogAction onClick={handleSaveAsNew}>Save New</AlertDialogAction>
-                                                                )}
-                                                            </AlertDialogFooter>
-                                                        </AlertDialogContent>
-                                                    </AlertDialog>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </div>
-                                    </div>
-
-                                    {currentVersion && (
-                                        <div className="flex items-center justify-between p-2 rounded-md bg-muted/50 border">
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex items-center gap-2">
-                                                    {currentVersion.isPublic ? <Globe className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-muted-foreground" />}
-                                                    <span className="text-[10px] font-bold uppercase tracking-wider">{currentVersion.isPublic ? "Publicly Shared" : "Private Draft"}</span>
-                                                </div>
-                                                <Switch 
-                                                    checked={currentVersion.isPublic || false} 
-                                                    onCheckedChange={handleTogglePublic}
-                                                    className="scale-75"
-                                                />
-                                            </div>
-                                            {currentVersion.isPublic && (
-                                                <div className="flex items-center gap-2">
-                                                    <Button variant="ghost" size="sm" className="h-7 text-[10px]" onClick={copyShareLink}>
-                                                        <Copy className="w-3 h-3 mr-1" /> Copy
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm" className="h-7 text-[10px]" asChild>
-                                                        <a href={`/r/${currentVersion.shareSlug}`} target="_blank">
-                                                            <ExternalLink className="w-3 h-3 mr-1" /> View
-                                                        </a>
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Preview Scroll Area */}
-                                <div className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 custom-scrollbar bg-slate-100 dark:bg-slate-900/20">
-                                    <div className="mx-auto max-w-[800px] shadow-2xl origin-top transition-transform">
-                                        {resumeData.template === 'modern' ? <PreviewModern /> : 
-                                        resumeData.template === 'minimalist' ? <PreviewMinimalist /> : 
-                                        <PreviewClassic />}
-                                    </div>
+                        {/* Preview Section - Always Scrollable */}
+                        <TabsContent value="preview" className="h-full mt-0 data-[state=inactive]:hidden lg:absolute lg:inset-0 lg:z-10 bg-slate-100 dark:bg-slate-900/20 lg:flex lg:flex-col overflow-y-auto custom-scrollbar">
+                            <div className="p-4 md:p-8 lg:p-12">
+                                <div className="mx-auto max-w-[800px] shadow-2xl origin-top transition-transform">
+                                    {resumeData.template === 'modern' ? <PreviewModern /> : 
+                                    resumeData.template === 'minimalist' ? <PreviewMinimalist /> : 
+                                    <PreviewClassic />}
                                 </div>
                             </div>
                         </TabsContent>
