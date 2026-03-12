@@ -1139,46 +1139,41 @@ export const ResumeBuilder = () => {
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-9 w-9"><MoreVertical className="h-4 w-4" /></Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setIsAgentOpen(!isAgentOpen)}>
-                                    <Bot className="mr-2 h-4 w-4" /> AI Resume Agent
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
-                                    {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
-                                    AI Quality Score
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                            <PlusCircle className="mr-2 h-4 w-4" /> Save as New
-                                        </DropdownMenuItem>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Save as New Version?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                {versions.length >= draftLimit 
-                                                    ? `You've reached your limit of ${draftLimit} drafts.` 
-                                                    : "This will create a duplicate version of your current resume data."}
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            {versions.length >= draftLimit ? (
-                                                <Button onClick={() => router.push('/pricing')}><Crown className="w-4 h-4 mr-2"/> Upgrade</Button>
-                                            ) : (
-                                                <AlertDialogAction onClick={handleSaveAsNew}>Save New</AlertDialogAction>
-                                            )}
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        {/* Direct Menu Actions (Exposed from Dropdown) */}
+                        <Button size="sm" variant="outline" onClick={() => setIsAgentOpen(!isAgentOpen)}>
+                            <Bot className="mr-2 h-4 w-4" /> AI Resume Agent
+                        </Button>
+
+                        <Button size="sm" variant="outline" onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
+                            {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                            AI Quality Score
+                        </Button>
+
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="outline">
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Save as New
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Save as New Version?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        {versions.length >= draftLimit 
+                                            ? `You've reached your limit of ${draftLimit} drafts.` 
+                                            : "This will create a duplicate version of your current resume data."}
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    {versions.length >= draftLimit ? (
+                                        <Button onClick={() => router.push('/pricing')}><Crown className="w-4 h-4 mr-2"/> Upgrade</Button>
+                                    ) : (
+                                        <AlertDialogAction onClick={handleSaveAsNew}>Save New</AlertDialogAction>
+                                    )}
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 </div>
 
@@ -1225,12 +1220,12 @@ export const ResumeBuilder = () => {
                     </div>
 
                     <div className="flex-1 overflow-hidden relative">
-                        {/* Editor Section - Always Scrollable */}
-                        <TabsContent value="edit" className="h-full mt-0 data-[state=inactive]:hidden lg:block lg:h-full lg:overflow-y-auto custom-scrollbar p-4 md:p-6 border-r">
+                        {/* Editor Section - Scrollable */}
+                        <TabsContent value="edit" className="h-full mt-0 data-[state=inactive]:hidden lg:block lg:h-full lg:overflow-y-auto custom-scrollbar p-4 md:p-6 border-r overflow-y-auto">
                             <EditorContent />
                         </TabsContent>
 
-                        {/* Preview Section - Always Scrollable */}
+                        {/* Preview Section - Scrollable */}
                         <TabsContent value="preview" className="h-full mt-0 data-[state=inactive]:hidden lg:absolute lg:inset-0 lg:z-10 bg-slate-100 dark:bg-slate-900/20 lg:flex lg:flex-col overflow-y-auto custom-scrollbar">
                             <div className="p-4 md:p-8 lg:p-12">
                                 <div className="mx-auto max-w-[800px] shadow-2xl origin-top transition-transform">
