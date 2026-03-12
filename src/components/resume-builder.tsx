@@ -5,7 +5,29 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Download, Bot, Save, Loader2, History, ChevronsUpDown, Crown, MoreVertical, FileJson, Layout, Check, ExternalLink, Share2, Globe, Lock, Copy, FileDown, FileText, Sparkles } from 'lucide-react';
+import { 
+    PlusCircle, 
+    Trash2, 
+    Download, 
+    Bot, 
+    Save, 
+    Loader2, 
+    History, 
+    ChevronsUpDown, 
+    Crown, 
+    MoreVertical, 
+    FileJson, 
+    Layout, 
+    Check, 
+    ExternalLink, 
+    Copy, 
+    FileDown, 
+    FileText, 
+    Sparkles,
+    Globe,
+    Lock,
+    Eye
+} from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { doc, setDoc, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc } from 'firebase/firestore';
@@ -33,6 +55,7 @@ import { exportToDocx } from '@/lib/export-docx';
 import { ResumeAgentSidebar } from './resume-agent-sidebar';
 import { Badge } from './ui/badge';
 import { Switch } from './ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 interface Experience {
     id: number;
@@ -956,255 +979,281 @@ export const ResumeBuilder = () => {
         </div>
     );
 
+    const EditorContent = () => (
+        <div className="space-y-6 pb-20">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                    <CardTitle className="text-lg">Personal Information</CardTitle>
+                    {versions.length === 0 && (
+                        <Button variant="outline" size="sm" onClick={fillSampleData}>
+                            <FileJson className="mr-2 h-4 w-4" /> Load Sample
+                        </Button>
+                    )}
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5"><Label htmlFor="name">Full Name</Label><Input id="name" value={resumeData.name} onChange={handleInputChange} placeholder="e.g. John Doe" /></div>
+                        <div className="space-y-1.5"><Label htmlFor="title">Title</Label><Input id="title" value={resumeData.title} onChange={handleInputChange} placeholder="e.g. Software Engineer" /></div>
+                        <div className="space-y-1.5"><Label htmlFor="phone">Phone</Label><Input id="phone" value={resumeData.phone} onChange={handleInputChange} placeholder="e.g. 123-456-7890" /></div>
+                        <div className="space-y-1.5"><Label htmlFor="email">Email</Label><Input id="email" value={resumeData.email} onChange={handleInputChange} placeholder="e.g. john@example.com" /></div>
+                    </div>
+                    <div className="space-y-1.5"><Label htmlFor="linkedin">LinkedIn</Label><Input id="linkedin" value={resumeData.linkedin} onChange={handleInputChange} placeholder="linkedin.com/in/username" /></div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader><CardTitle className="text-lg">Professional Summary</CardTitle></CardHeader>
+                <CardContent><Textarea id="summary" value={resumeData.summary} onChange={handleInputChange} rows={5} placeholder="Briefly describe your career goals and achievements..." /></CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                    <CardTitle className="text-lg">Work Experience</CardTitle>
+                    <Button variant="ghost" size="sm" onClick={handleAddExperience}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {resumeData.experience.map((exp) => (
+                        <div key={exp.id} className="p-4 border rounded-lg relative space-y-2">
+                            <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveExperience(exp.id)}><Trash2 className="h-4 w-4" /></Button>
+                            <Input name="title" placeholder="Job Title" value={exp.title} onChange={(e) => handleNestedChange('experience', exp.id, e)} />
+                            <Input name="company" placeholder="Company" value={exp.company} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
+                            <Input name="dates" placeholder="Dates" value={exp.dates} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
+                            <Textarea name="description" placeholder="Achievements (use bullet points)" value={exp.description} onChange={(e) => handleNestedChange('experience', exp.id, e)} rows={4}/>
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                    <CardTitle className="text-lg">Projects</CardTitle>
+                    <Button variant="ghost" size="sm" onClick={handleAddProject}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {resumeData.projects.map((proj) => (
+                        <div key={proj.id} className="p-4 border rounded-lg relative space-y-2">
+                            <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveProject(proj.id)}><Trash2 className="h-4 w-4" /></Button>
+                            <Input name="name" placeholder="Project Name" value={proj.name} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
+                            <Input name="url" placeholder="Project URL (e.g. github.com/user/repo)" value={proj.url} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
+                            <Textarea name="description" placeholder="Project description..." value={proj.description} onChange={(e) => handleNestedChange('projects', proj.id, e)} rows={3} />
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                    <CardTitle className="text-lg">Education</CardTitle>
+                    <Button variant="ghost" size="sm" onClick={handleAddEducation}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {resumeData.education.map((edu) => (
+                        <div key={edu.id} className="p-4 border rounded-lg relative space-y-2">
+                            <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveEducation(edu.id)}><Trash2 className="h-4 w-4" /></Button>
+                            <Input name="school" placeholder="School" value={edu.school} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                            <Input name="degree" placeholder="Degree" value={edu.degree} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input name="dates" placeholder="Dates" value={edu.dates} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                                <Input name="cgpa" placeholder="CGPA" value={edu.cgpa || ''} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                            </div>
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader><CardTitle className="text-lg">Skills</CardTitle></CardHeader>
+                <CardContent><Textarea id="skills" placeholder="Comma-separated skills..." value={resumeData.skills} onChange={handleInputChange} rows={3} /></CardContent>
+            </Card>
+        </div>
+    );
+
     return (
         <div className="flex h-[calc(100svh-4rem)] overflow-hidden -m-4 md:-m-6 lg:-m-8">
-            <div className="flex-1 grid md:grid-cols-[40%_60%] h-full overflow-hidden">
-                {/* Left Side: Editor */}
-                <div className="h-full overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar border-r">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                            <CardTitle className="text-lg">Personal Information</CardTitle>
-                            {versions.length === 0 && (
-                                <Button variant="outline" size="sm" onClick={fillSampleData}>
-                                    <FileJson className="mr-2 h-4 w-4" /> Load Sample
-                                </Button>
-                            )}
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid sm:grid-cols-2 gap-4">
-                                <div className="space-y-1.5"><Label htmlFor="name">Full Name</Label><Input id="name" value={resumeData.name} onChange={handleInputChange} placeholder="e.g. John Doe" /></div>
-                                <div className="space-y-1.5"><Label htmlFor="title">Title</Label><Input id="title" value={resumeData.title} onChange={handleInputChange} placeholder="e.g. Software Engineer" /></div>
-                                <div className="space-y-1.5"><Label htmlFor="phone">Phone</Label><Input id="phone" value={resumeData.phone} onChange={handleInputChange} placeholder="e.g. 123-456-7890" /></div>
-                                <div className="space-y-1.5"><Label htmlFor="email">Email</Label><Input id="email" value={resumeData.email} onChange={handleInputChange} placeholder="e.g. john@example.com" /></div>
-                            </div>
-                            <div className="space-y-1.5"><Label htmlFor="linkedin">LinkedIn</Label><Input id="linkedin" value={resumeData.linkedin} onChange={handleInputChange} placeholder="linkedin.com/in/username" /></div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader><CardTitle className="text-lg">Professional Summary</CardTitle></CardHeader>
-                        <CardContent><Textarea id="summary" value={resumeData.summary} onChange={handleInputChange} rows={5} placeholder="Briefly describe your career goals and achievements..." /></CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                            <CardTitle className="text-lg">Work Experience</CardTitle>
-                            <Button variant="ghost" size="sm" onClick={handleAddExperience}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {resumeData.experience.map((exp) => (
-                                <div key={exp.id} className="p-4 border rounded-lg relative space-y-2">
-                                    <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveExperience(exp.id)}><Trash2 className="h-4 w-4" /></Button>
-                                    <Input name="title" placeholder="Job Title" value={exp.title} onChange={(e) => handleNestedChange('experience', exp.id, e)} />
-                                    <Input name="company" placeholder="Company" value={exp.company} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
-                                    <Input name="dates" placeholder="Dates" value={exp.dates} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
-                                    <Textarea name="description" placeholder="Achievements (use bullet points)" value={exp.description} onChange={(e) => handleNestedChange('experience', exp.id, e)} rows={4}/>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                            <CardTitle className="text-lg">Projects</CardTitle>
-                            <Button variant="ghost" size="sm" onClick={handleAddProject}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {resumeData.projects.map((proj) => (
-                                <div key={proj.id} className="p-4 border rounded-lg relative space-y-2">
-                                    <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveProject(proj.id)}><Trash2 className="h-4 w-4" /></Button>
-                                    <Input name="name" placeholder="Project Name" value={proj.name} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
-                                    <Input name="url" placeholder="Project URL (e.g. github.com/user/repo)" value={proj.url} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
-                                    <Textarea name="description" placeholder="Project description..." value={proj.description} onChange={(e) => handleNestedChange('projects', proj.id, e)} rows={3} />
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                            <CardTitle className="text-lg">Education</CardTitle>
-                            <Button variant="ghost" size="sm" onClick={handleAddEducation}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {resumeData.education.map((edu) => (
-                                <div key={edu.id} className="p-4 border rounded-lg relative space-y-2">
-                                    <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveEducation(edu.id)}><Trash2 className="h-4 w-4" /></Button>
-                                    <Input name="school" placeholder="School" value={edu.school} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
-                                    <Input name="degree" placeholder="Degree" value={edu.degree} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <Input name="dates" placeholder="Dates" value={edu.dates} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
-                                        <Input name="cgpa" placeholder="CGPA" value={edu.cgpa || ''} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
-                                    </div>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader><CardTitle className="text-lg">Skills</CardTitle></CardHeader>
-                        <CardContent><Textarea id="skills" placeholder="Comma-separated skills..." value={resumeData.skills} onChange={handleInputChange} rows={3} /></CardContent>
-                    </Card>
-                </div>
-
-                {/* Right Side: Toolbar & Preview */}
-                <div className="flex flex-col h-full overflow-hidden bg-muted/20">
-                    <div className="p-4 space-y-4 border-b bg-card">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                            <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline" className="w-full sm:w-auto flex-1 min-w-[200px] justify-between h-9">
-                                    <History className="mr-2 h-4 w-4" />
-                                    <span className="truncate">{currentVersion?.versionName || "New Resume (unsaved)"}</span>
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[250px] p-0">
-                                    <Command>
-                                    <CommandInput placeholder="Search versions..." />
-                                    <CommandEmpty>No versions found.</CommandEmpty>
-                                    <CommandGroup>
-                                        {versions.map((v) => (
-                                        <CommandItem key={v.id} value={v.id} onSelect={() => handleVersionSelect(v.id)}>
-                                            <Check className={cn("mr-2 h-4 w-4", currentVersion?.id === v.id ? "opacity-100" : "opacity-0")} />
-                                            {v.versionName}
-                                        </CommandItem>
-                                        ))}
-                                    </CommandGroup>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-                            
-                            <div className="flex items-center gap-2 flex-wrap justify-end">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" size="sm">
-                                            <Layout className="mr-2 h-4 w-4" /> Template
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>Choose Layout</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem onClick={() => setTemplate('classic')}>
-                                            {resumeData.template === 'classic' && <Check className="mr-2 h-4 w-4" />} Classic Professional
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setTemplate('modern')}>
-                                            {resumeData.template === 'modern' && <Check className="mr-2 h-4 w-4" />} Modern (LaTeX style)
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setTemplate('minimalist')}>
-                                            {resumeData.template === 'minimalist' && <Check className="mr-2 h-4 w-4" />} Minimalist (ATS High)
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-
-                                <Button size="sm" onClick={handleSave} disabled={isSaving}>
-                                    <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
-                                </Button>
-                                
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button size="sm" variant="outline">
-                                            <Download className="mr-2 h-4 w-4" /> Export
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={handleExportPdf}>
-                                            <FileDown className="mr-2 h-4 w-4" /> Export as PDF (1 Credit)
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={handleExportDocx}>
-                                            <FileText className="mr-2 h-4 w-4" /> Export as DOCX (Free)
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-9 w-9"><MoreVertical className="h-4 w-4" /></Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => setIsAgentOpen(!isAgentOpen)}>
-                                            <Bot className="mr-2 h-4 w-4" /> AI Resume Agent
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
-                                            {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
-                                            AI Quality Score
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                                    <PlusCircle className="mr-2 h-4 w-4" /> Save as New
-                                                </DropdownMenuItem>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Save as New Version?</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        {versions.length >= draftLimit 
-                                                            ? `You've reached your limit of ${draftLimit} drafts.` 
-                                                            : "This will create a duplicate version of your current resume data."}
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    {versions.length >= draftLimit ? (
-                                                        <Button onClick={() => router.push('/pricing')}><Crown className="w-4 h-4 mr-2"/> Upgrade</Button>
-                                                    ) : (
-                                                        <AlertDialogAction onClick={handleSaveAsNew}>Save New</AlertDialogAction>
-                                                    )}
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-                        </div>
-
-                        {currentVersion && (
-                            <div className="flex items-center justify-between p-2 rounded-md bg-muted/50 border">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2">
-                                        {currentVersion.isPublic ? <Globe className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-muted-foreground" />}
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">{currentVersion.isPublic ? "Publicly Shared" : "Private Draft"}</span>
-                                    </div>
-                                    <Switch 
-                                        checked={currentVersion.isPublic || false} 
-                                        onCheckedChange={handleTogglePublic}
-                                        className="scale-75"
-                                    />
-                                </div>
-                                {currentVersion.isPublic && (
-                                    <div className="flex items-center gap-2">
-                                        <Button variant="ghost" size="sm" className="h-7 text-[10px]" onClick={copyShareLink}>
-                                            <Copy className="w-3 h-3 mr-1" /> Copy
-                                        </Button>
-                                        <Button variant="ghost" size="sm" className="h-7 text-[10px]" asChild>
-                                            <a href={`/r/${currentVersion.shareSlug}`} target="_blank">
-                                                <ExternalLink className="w-3 h-3 mr-1" /> View
-                                            </a>
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+            <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[450px_1fr] h-full overflow-hidden">
+                
+                {/* Desktop Sidebar Editor / Mobile Tabs Container */}
+                <Tabs defaultValue="edit" className="flex-1 flex flex-col overflow-hidden">
+                    <div className="bg-card border-b p-4 space-y-4 lg:hidden">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="edit" className="flex items-center gap-2">
+                                <FileText className="w-4 h-4" /> Edit
+                            </TabsTrigger>
+                            <TabsTrigger value="preview" className="flex items-center gap-2">
+                                <Eye className="w-4 h-4" /> Preview
+                            </TabsTrigger>
+                        </TabsList>
                     </div>
 
-                    {/* Preview Scroll Area */}
-                    <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-                        <div className="mx-auto max-w-[800px] shadow-2xl origin-top transition-transform">
-                            {resumeData.template === 'modern' ? <PreviewModern /> : 
-                            resumeData.template === 'minimalist' ? <PreviewMinimalist /> : 
-                            <PreviewClassic />}
-                        </div>
+                    <div className="flex-1 overflow-hidden relative">
+                        {/* Editor Section */}
+                        <TabsContent value="edit" className="h-full mt-0 data-[state=inactive]:hidden lg:block lg:h-full lg:overflow-y-auto custom-scrollbar p-4 md:p-6 border-r">
+                            <EditorContent />
+                        </TabsContent>
+
+                        {/* Preview Section */}
+                        <TabsContent value="preview" className="h-full mt-0 data-[state=inactive]:hidden lg:absolute lg:inset-0 lg:z-10 bg-muted/20 lg:flex lg:flex-col">
+                            <div className="flex flex-col h-full overflow-hidden bg-muted/20">
+                                {/* Toolbar */}
+                                <div className="p-4 space-y-4 border-b bg-card">
+                                    <div className="flex flex-wrap items-center justify-between gap-3">
+                                        <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="outline" className="w-full sm:w-auto flex-1 min-w-[200px] justify-between h-9">
+                                                <History className="mr-2 h-4 w-4" />
+                                                <span className="truncate">{currentVersion?.versionName || "New Resume (unsaved)"}</span>
+                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[250px] p-0">
+                                                <Command>
+                                                <CommandInput placeholder="Search versions..." />
+                                                <CommandEmpty>No versions found.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {versions.map((v) => (
+                                                    <CommandItem key={v.id} value={v.id} onSelect={() => handleVersionSelect(v.id)}>
+                                                        <Check className={cn("mr-2 h-4 w-4", currentVersion?.id === v.id ? "opacity-100" : "opacity-0")} />
+                                                        {v.versionName}
+                                                    </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                        
+                                        <div className="flex items-center gap-2 flex-wrap justify-end">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="outline" size="sm">
+                                                        <Layout className="mr-2 h-4 w-4" /> Template
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Choose Layout</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem onClick={() => setTemplate('classic')}>
+                                                        {resumeData.template === 'classic' && <Check className="mr-2 h-4 w-4" />} Classic Professional
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => setTemplate('modern')}>
+                                                        {resumeData.template === 'modern' && <Check className="mr-2 h-4 w-4" />} Modern (LaTeX style)
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => setTemplate('minimalist')}>
+                                                        {resumeData.template === 'minimalist' && <Check className="mr-2 h-4 w-4" />} Minimalist (ATS High)
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+
+                                            <Button size="sm" onClick={handleSave} disabled={isSaving}>
+                                                <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
+                                            </Button>
+                                            
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button size="sm" variant="outline">
+                                                        <Download className="mr-2 h-4 w-4" /> Export
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={handleExportPdf}>
+                                                        <FileDown className="mr-2 h-4 w-4" /> Export as PDF (1 Credit)
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={handleExportDocx}>
+                                                        <FileText className="mr-2 h-4 w-4" /> Export as DOCX (Free)
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-9 w-9"><MoreVertical className="h-4 w-4" /></Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={() => setIsAgentOpen(!isAgentOpen)}>
+                                                        <Bot className="mr-2 h-4 w-4" /> AI Resume Agent
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
+                                                        {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                                                        AI Quality Score
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                                <PlusCircle className="mr-2 h-4 w-4" /> Save as New
+                                                            </DropdownMenuItem>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>Save as New Version?</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    {versions.length >= draftLimit 
+                                                                        ? `You've reached your limit of ${draftLimit} drafts.` 
+                                                                        : "This will create a duplicate version of your current resume data."}
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                {versions.length >= draftLimit ? (
+                                                                    <Button onClick={() => router.push('/pricing')}><Crown className="w-4 h-4 mr-2"/> Upgrade</Button>
+                                                                ) : (
+                                                                    <AlertDialogAction onClick={handleSaveAsNew}>Save New</AlertDialogAction>
+                                                                )}
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                    </div>
+
+                                    {currentVersion && (
+                                        <div className="flex items-center justify-between p-2 rounded-md bg-muted/50 border">
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex items-center gap-2">
+                                                    {currentVersion.isPublic ? <Globe className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4 text-muted-foreground" />}
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider">{currentVersion.isPublic ? "Publicly Shared" : "Private Draft"}</span>
+                                                </div>
+                                                <Switch 
+                                                    checked={currentVersion.isPublic || false} 
+                                                    onCheckedChange={handleTogglePublic}
+                                                    className="scale-75"
+                                                />
+                                            </div>
+                                            {currentVersion.isPublic && (
+                                                <div className="flex items-center gap-2">
+                                                    <Button variant="ghost" size="sm" className="h-7 text-[10px]" onClick={copyShareLink}>
+                                                        <Copy className="w-3 h-3 mr-1" /> Copy
+                                                    </Button>
+                                                    <Button variant="ghost" size="sm" className="h-7 text-[10px]" asChild>
+                                                        <a href={`/r/${currentVersion.shareSlug}`} target="_blank">
+                                                            <ExternalLink className="w-3 h-3 mr-1" /> View
+                                                        </a>
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Preview Scroll Area */}
+                                <div className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 custom-scrollbar bg-slate-100 dark:bg-slate-900/20">
+                                    <div className="mx-auto max-w-[800px] shadow-2xl origin-top transition-transform">
+                                        {resumeData.template === 'modern' ? <PreviewModern /> : 
+                                        resumeData.template === 'minimalist' ? <PreviewMinimalist /> : 
+                                        <PreviewClassic />}
+                                    </div>
+                                </div>
+                            </div>
+                        </TabsContent>
                     </div>
-                    
-                    <Button 
-                        className="fixed bottom-6 right-6 shadow-2xl z-50 rounded-full h-12 px-6"
-                        onClick={() => setIsAgentOpen(!isAgentOpen)}
-                    >
-                        <Bot className="w-5 h-5 mr-2" /> {isAgentOpen ? 'Close AI Agent' : 'AI Resume Agent'}
-                    </Button>
-                </div>
+                </Tabs>
             </div>
+            
+            <Button 
+                className="fixed bottom-6 right-6 shadow-2xl z-50 rounded-full h-12 px-6 lg:bottom-10 lg:right-10"
+                onClick={() => setIsAgentOpen(!isAgentOpen)}
+            >
+                <Bot className="w-5 h-5 mr-2" /> {isAgentOpen ? 'Close AI Agent' : 'AI Resume Agent'}
+            </Button>
             
             <ResumeAgentSidebar 
                 isOpen={isAgentOpen} 
