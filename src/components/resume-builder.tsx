@@ -10,7 +10,6 @@ import {
     PlusCircle, 
     Trash2, 
     Download, 
-    Bot, 
     Save, 
     Loader2, 
     History, 
@@ -52,7 +51,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from './ui/dropdown-menu';
 import { exportToDocx } from '@/lib/export-docx';
-import { ResumeAgentSidebar } from './resume-agent-sidebar';
 import { Badge } from './ui/badge';
 import { Switch } from './ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -152,7 +150,6 @@ export const ResumeBuilder = () => {
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
     const [isAnalyzing, setIsAnalyzing] = React.useState(false);
-    const [isAgentOpen, setIsAgentOpen] = React.useState(false);
     const [isExportingDocx, setIsExportingDocx] = React.useState(false);
     const [versions, setVersions] = React.useState<ResumeVersion[]>([]);
     const [currentVersion, setCurrentVersion] = React.useState<ResumeVersion | null>(null);
@@ -176,7 +173,6 @@ export const ResumeBuilder = () => {
             const fetchedVersions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ResumeVersion));
             setVersions(fetchedVersions);
 
-            // SYNC metadata for the active version (isPublic, shareSlug, etc.)
             if (currentVersion) {
                 const updated = fetchedVersions.find(v => v.id === currentVersion.id);
                 if (updated) setCurrentVersion(updated);
@@ -580,7 +576,6 @@ export const ResumeBuilder = () => {
     const handleExportPdf = async () => {
         const pdf = await generatePdfFromData();
         if (pdf) {
-            // Deduct credit for PDF
             if (plan !== 'pro' && plan !== 'recruiter' && credits <= 0) {
                 toast({ title: "Credit Required", description: "You need 1 AI credit to export as PDF.", variant: "destructive" });
                 router.push('/pricing');
@@ -642,7 +637,6 @@ export const ResumeBuilder = () => {
                     resumeData,
                     updatedAt: serverTimestamp()
                 });
-                // Note: The listener will pick up the update and sync currentVersion
                 toast({ title: "First Version Created!", description: `Saved as "${name}"` });
             }
         } catch (error) {
@@ -1156,10 +1150,6 @@ export const ResumeBuilder = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 border-t pt-3">
-                    <Button size="sm" variant="outline" className="flex-1 sm:flex-none" onClick={() => setIsAgentOpen(!isAgentOpen)}>
-                        <Bot className="mr-2 h-4 w-4" /> AI Agent
-                    </Button>
-
                     <Button size="sm" variant="outline" className="flex-1 sm:flex-none" onClick={handleAnalyze} disabled={isAnalyzing || !canUseFeature}>
                         {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
                         AI Quality Score
@@ -1262,47 +1252,6 @@ export const ResumeBuilder = () => {
                     </div>
                 </div>
             </div>
-            
-            <Button 
-                className="fixed bottom-6 right-6 shadow-2xl z-50 rounded-full h-12 px-6 lg:bottom-10 lg:right-10 font-bold"
-                onClick={() => setIsAgentOpen(!isAgentOpen)}
-            >
-                <Bot className="w-5 h-5 mr-2" /> {isAgentOpen ? 'Close AI Agent' : 'AI Resume Agent'}
-            </Button>
-            
-            <ResumeAgentSidebar 
-                isOpen={isAgentOpen} 
-                currentResumeData={resumeData} 
-                onApplyChanges={(newData) => {
-                    if (!newData) return;
-                    
-                    setResumeData(prev => {
-                        // Robust mapping helper
-                        const safeMap = (items: any, existing: any[]) => {
-                            if (items === undefined || items === null) return existing; 
-                            if (!Array.isArray(items)) return existing;
-                            // Only apply AI suggestion if it has content, otherwise keep existing
-                            if (items.length === 0 && existing.length > 0) return existing;
-                            
-                            return items.map((item: any, i: number) => ({
-                                ...item,
-                                id: item.id || (Date.now() + i)
-                            }));
-                        };
-
-                        return {
-                            ...prev, // Keep ALL existing data first
-                            ...newData, // Apply ONLY the suggest fields from AI
-                            // Safely merge arrays to prevent data loss if AI returns empty or missing lists
-                            experience: safeMap(newData.experience, prev.experience),
-                            education: safeMap(newData.education, prev.education),
-                            projects: safeMap(newData.projects, prev.projects),
-                        };
-                    });
-                    
-                    toast({ title: "Changes Applied", description: "The AI updates have been synced to your resume builder." });
-                }} 
-            />
         </div>
     );
 };
