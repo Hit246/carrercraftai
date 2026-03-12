@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, Download, Bot, Save, Loader2, History, ChevronsUpDown, Crown, MoreVertical, FileJson, Layout, Check, ExternalLink, Share2, Globe, Lock, Copy, FileDown, FileText } from 'lucide-react';
+import { PlusCircle, Trash2, Download, Bot, Save, Loader2, History, ChevronsUpDown, Crown, MoreVertical, FileJson, Layout, Check, ExternalLink, Share2, Globe, Lock, Copy, FileDown, FileText, Sparkles } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { doc, setDoc, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc } from 'firebase/firestore';
@@ -27,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from './ui/dropdown-menu';
 import { exportToDocx } from '@/lib/export-docx';
 import { ResumeAgentSidebar } from './resume-agent-sidebar';
