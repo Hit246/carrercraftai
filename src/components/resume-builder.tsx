@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -1260,7 +1261,14 @@ export const ResumeBuilder = () => {
                 isOpen={isAgentOpen} 
                 currentResumeData={resumeData} 
                 onApplyChanges={(newData) => {
-                    setResumeData(newData);
+                    // Ensure incoming data has stable IDs for React keys
+                    const normalizedData = {
+                        ...newData,
+                        experience: (newData.experience || []).map((e: any, i: number) => ({ ...e, id: e.id || Date.now() + i })),
+                        education: (newData.education || []).map((e: any, i: number) => ({ ...e, id: e.id || Date.now() + i })),
+                        projects: (newData.projects || []).map((p: any, i: number) => ({ ...p, id: p.id || Date.now() + i })),
+                    };
+                    setResumeData(normalizedData);
                     toast({ title: "Changes Applied", description: "The AI updates have been synced to your resume builder." });
                 }} 
             />

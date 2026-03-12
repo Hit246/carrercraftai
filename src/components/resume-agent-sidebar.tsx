@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -5,16 +6,23 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
-import { Bot, Send, Loader2, Sparkles, Check, ChevronRight, User } from 'lucide-react';
+import { Bot, Send, Loader2, Sparkles, Check, ChevronRight, User, Eye, X } from 'lucide-react';
 import { resumeAgentAction } from '@/lib/actions';
 import { cn } from '@/lib/utils';
 import { Badge } from './ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface Message {
   role: 'user' | 'model';
   content: string;
   suggestion?: any;
-  explanation?: string;
 }
 
 interface ResumeAgentSidebarProps {
@@ -29,6 +37,7 @@ export function ResumeAgentSidebar({ currentResumeData, onApplyChanges, isOpen }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [reviewData, setReviewData] = useState<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const promptChips = [
@@ -76,6 +85,7 @@ export function ResumeAgentSidebar({ currentResumeData, onApplyChanges, isOpen }
   if (!isOpen) return null;
 
   return (
+    <>
     <div className="w-full lg:w-[400px] border-l bg-background flex flex-col h-full animate-in slide-in-from-right duration-300 shadow-2xl z-50">
       <CardHeader className="border-b py-4 bg-primary/5">
         <CardTitle className="text-lg flex items-center gap-2">
@@ -112,13 +122,14 @@ export function ResumeAgentSidebar({ currentResumeData, onApplyChanges, isOpen }
                       <Badge variant="secondary" className="text-[10px] h-4 bg-primary/20 text-primary border-none">Ready</Badge>
                     </div>
                     <CardContent className="p-4">
-                      <p className="text-xs text-muted-foreground italic mb-4">Click below to update your resume builder with these changes.</p>
+                      <p className="text-xs text-muted-foreground italic mb-4">The AI has generated an optimized version of your resume.</p>
                       <Button 
                         size="sm" 
+                        variant="secondary"
                         className="w-full h-9 text-xs font-bold" 
-                        onClick={() => onApplyChanges(m.suggestion)}
+                        onClick={() => setReviewData(m.suggestion)}
                       >
-                        <Check className="w-3.5 h-3.5 mr-1.5" /> Apply Changes
+                        <Eye className="w-3.5 h-3.5 mr-1.5" /> Review & Apply
                       </Button>
                     </CardContent>
                   </Card>
@@ -174,5 +185,74 @@ export function ResumeAgentSidebar({ currentResumeData, onApplyChanges, isOpen }
         </div>
       </CardFooter>
     </div>
+
+    {/* Review Changes Dialog */}
+    <Dialog open={!!reviewData} onOpenChange={(open) => !open && setReviewData(null)}>
+        <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0">
+            <DialogHeader className="p-6 border-b shrink-0">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <DialogTitle className="text-xl flex items-center gap-2">
+                            <Sparkles className="text-primary h-5 w-5" /> Review Proposed Changes
+                        </DialogTitle>
+                        <DialogDescription>Compare the AI's suggestions with your current resume sections.</DialogDescription>
+                    </div>
+                </div>
+            </DialogHeader>
+            
+            <ScrollArea className="flex-1 p-6 bg-muted/5">
+                <div className="space-y-8">
+                    {/* Summary Comparison */}
+                    <div className="space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Professional Summary</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="p-4 rounded-lg border bg-card/50 text-muted-foreground">
+                                <p className="text-[10px] mb-2 font-bold uppercase">Current</p>
+                                <p className="text-xs">{currentResumeData.summary || 'No summary provided.'}</p>
+                            </div>
+                            <div className="p-4 rounded-lg border border-primary/20 bg-primary/5">
+                                <p className="text-[10px] mb-2 font-bold uppercase text-primary">New AI Version</p>
+                                <p className="text-xs">{reviewData?.summary}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Skills Comparison */}
+                    <div className="space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Skills</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="p-4 rounded-lg border bg-card/50 text-muted-foreground">
+                                <p className="text-[10px] mb-2 font-bold uppercase">Current</p>
+                                <p className="text-xs">{currentResumeData.skills || 'No skills listed.'}</p>
+                            </div>
+                            <div className="p-4 rounded-lg border border-primary/20 bg-primary/5">
+                                <p className="text-[10px] mb-2 font-bold uppercase text-primary">New AI Version</p>
+                                <p className="text-xs">{reviewData?.skills}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Experience Highlights */}
+                    <div className="space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Key Experience Updates</h4>
+                        <div className="p-4 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/50">
+                            <p className="text-xs text-amber-800 dark:text-amber-300">The AI has rephrased your work history to include stronger action verbs and quantifiable metrics. Applying will replace your current experience list.</p>
+                        </div>
+                    </div>
+                </div>
+            </ScrollArea>
+
+            <DialogFooter className="p-6 border-t bg-card shrink-0">
+                <Button variant="ghost" onClick={() => setReviewData(null)}>Cancel</Button>
+                <Button onClick={() => {
+                    onApplyChanges(reviewData);
+                    setReviewData(null);
+                }}>
+                    <Check className="mr-2 h-4 w-4" /> Apply All Changes
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }
