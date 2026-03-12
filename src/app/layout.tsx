@@ -7,7 +7,7 @@ import { FirebaseErrorListener } from "@/components/FirebaseErrorListener";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const siteUrl = "https://careercraftai.vercel.app";
+const siteUrl = "https://carrercraftai.vercel.app";
 
 const fontBody = Inter({ 
   subsets: ["latin"],
@@ -58,9 +58,9 @@ export const metadata: Metadata = {
     canonical: siteUrl,
   },
   icons: {
-    icon: "/logo.jpg?v=1",
-    shortcut: "/logo.jpg?v=1",
-    apple: "/logo.jpg?v=1",
+    icon: "/logo.jpg",
+    shortcut: "/logo.jpg",
+    apple: "/logo.jpg",
   },
 };
 
