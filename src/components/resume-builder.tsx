@@ -152,6 +152,7 @@ export const ResumeBuilder = () => {
     const [isSaving, setIsSaving] = React.useState(false);
     const [isAnalyzing, setIsAnalyzing] = React.useState(false);
     const [isAgentOpen, setIsAgentOpen] = React.useState(false);
+    const [isExportingDocx, setIsExportingDocx] = React.useState(false);
     const [versions, setVersions] = React.useState<ResumeVersion[]>([]);
     const [currentVersion, setCurrentVersion] = React.useState<ResumeVersion | null>(null);
     const [versionManagerOpen, setVersionManagerOpen] = React.useState(false);
@@ -587,9 +588,16 @@ export const ResumeBuilder = () => {
     }
 
     const handleExportDocx = async () => {
-        // DOCX is free
-        await exportToDocx(resumeData);
-        toast({ title: "DOCX Exported!" });
+        if (isExportingDocx) return;
+        setIsExportingDocx(true);
+        try {
+            await exportToDocx(resumeData);
+            toast({ title: "DOCX Exported!", description: "Your resume is ready for download." });
+        } catch (error) {
+            toast({ title: "Export Failed", description: "Could not generate DOCX file.", variant: "destructive" });
+        } finally {
+            setIsExportingDocx(false);
+        }
     }
     
     const handleAnalyze = async () => {
@@ -1079,7 +1087,7 @@ export const ResumeBuilder = () => {
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[250px] p-0">
+                        <PopoverContent className="w-[250px] p-0 shadow-2xl">
                             <Command>
                             <CommandInput placeholder="Search versions..." />
                             <CommandEmpty>No versions found.</CommandEmpty>
@@ -1118,21 +1126,24 @@ export const ResumeBuilder = () => {
                         </DropdownMenu>
 
                         <Button size="sm" onClick={handleSave} disabled={isSaving}>
-                            <Save className="mr-2 h-4 w-4" /> {isSaving ? "Saving..." : "Save"}
+                            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4" />}
+                            {isSaving ? "Saving..." : "Save"}
                         </Button>
                         
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button size="sm" variant="outline">
-                                    <Download className="mr-2 h-4 w-4" /> Export
+                                <Button size="sm" variant="outline" disabled={isExportingDocx}>
+                                    {isExportingDocx ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4" />}
+                                    Export
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={handleExportPdf}>
                                     <FileDown className="mr-2 h-4 w-4" /> Export as PDF (1 Credit)
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleExportDocx}>
-                                    <FileText className="mr-2 h-4 w-4" /> Export as DOCX (Free)
+                                <DropdownMenuItem onClick={handleExportDocx} disabled={isExportingDocx}>
+                                    {isExportingDocx ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileText className="mr-2 h-4 w-4" />}
+                                    Export as DOCX (Free)
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -1220,12 +1231,12 @@ export const ResumeBuilder = () => {
 
                     <div className="flex-1 relative">
                         {/* Editor Section */}
-                        <TabsContent value="edit" className="mt-0 data-[state=inactive]:hidden lg:block p-4 md:p-6 border-r">
+                        <TabsContent value="edit" className="mt-0 data-[state=inactive]:hidden lg:block p-4 md:p-6 border-r overflow-y-auto h-full">
                             <EditorContent />
                         </TabsContent>
 
                         {/* Preview Section */}
-                        <TabsContent value="preview" className="mt-0 data-[state=inactive]:hidden lg:block bg-slate-100 dark:bg-slate-900/20">
+                        <TabsContent value="preview" className="mt-0 data-[state=inactive]:hidden lg:block bg-slate-100 dark:bg-slate-900/20 overflow-y-auto h-full">
                             <div className="p-4 md:p-8 lg:p-12">
                                 <div className="mx-auto max-w-[800px] shadow-2xl origin-top transition-transform">
                                     {resumeData.template === 'modern' ? <PreviewModern /> : 
@@ -1239,7 +1250,7 @@ export const ResumeBuilder = () => {
             </div>
             
             <Button 
-                className="fixed bottom-6 right-6 shadow-2xl z-50 rounded-full h-12 px-6 lg:bottom-10 lg:right-10"
+                className="fixed bottom-6 right-6 shadow-2xl z-50 rounded-full h-12 px-6 lg:bottom-10 lg:right-10 font-bold"
                 onClick={() => setIsAgentOpen(!isAgentOpen)}
             >
                 <Bot className="w-5 h-5 mr-2" /> {isAgentOpen ? 'Close AI Agent' : 'AI Resume Agent'}
