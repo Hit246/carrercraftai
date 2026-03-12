@@ -158,6 +158,7 @@ export const ResumeBuilder = () => {
     const [currentVersion, setCurrentVersion] = React.useState<ResumeVersion | null>(null);
     const [versionManagerOpen, setVersionManagerOpen] = React.useState(false);
     const [draftLimit, setDraftLimit] = React.useState(2);
+    const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
 
     React.useEffect(() => {
         if (plan === 'essentials') setDraftLimit(10);
@@ -1076,7 +1077,7 @@ export const ResumeBuilder = () => {
     );
 
     return (
-        <div className="flex flex-col min-h-full -m-4 md:-m-6 lg:-m-8 pb-20 overflow-y-auto">
+        <div className="flex flex-col min-h-screen -m-4 md:-m-6 lg:-m-8">
             {/* Global Sticky Toolbar */}
             <div className="sticky top-0 p-4 space-y-4 border-b bg-card z-20 shrink-0 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1217,9 +1218,10 @@ export const ResumeBuilder = () => {
                 )}
             </div>
 
-            <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[450px_1fr] min-h-0">
-                <Tabs defaultValue="edit" className="flex-1 flex flex-col min-h-0">
-                    <div className="bg-card border-b p-4 lg:hidden sticky top-[180px] z-10">
+            <div className="flex-1 flex flex-col min-h-0">
+                {/* Mobile/Tablet Tabs */}
+                <div className="bg-card border-b p-4 lg:hidden sticky top-[180px] z-10">
+                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="edit" className="flex items-center gap-2">
                                 <FileText className="w-4 h-4" /> Edit
@@ -1228,26 +1230,34 @@ export const ResumeBuilder = () => {
                                 <Eye className="w-4 h-4" /> Preview
                             </TabsTrigger>
                         </TabsList>
-                    </div>
+                    </Tabs>
+                </div>
 
-                    <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-                        {/* Editor Section */}
-                        <TabsContent value="edit" className="mt-0 data-[state=inactive]:hidden lg:block p-4 md:p-6 border-r flex-1 lg:overflow-visible">
+                <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[500px_1fr] min-h-0 overflow-hidden">
+                    {/* Editor Section */}
+                    <div className={cn(
+                        "flex-1 overflow-y-auto p-4 md:p-6 border-r bg-background transition-all",
+                        activeTab === 'preview' && "hidden lg:block"
+                    )}>
+                        <div className="max-w-2xl mx-auto">
                             <EditorContent />
-                        </TabsContent>
-
-                        {/* Preview Section */}
-                        <TabsContent value="preview" className="mt-0 data-[state=inactive]:hidden lg:block bg-slate-100 dark:bg-slate-900/20 flex-1 lg:overflow-visible">
-                            <div className="p-4 md:p-8 lg:p-12">
-                                <div className="mx-auto max-w-[800px] shadow-2xl origin-top transition-transform">
-                                    {resumeData.template === 'modern' ? <PreviewModern /> : 
-                                    resumeData.template === 'minimalist' ? <PreviewMinimalist /> : 
-                                    <PreviewClassic />}
-                                </div>
-                            </div>
-                        </TabsContent>
+                        </div>
                     </div>
-                </Tabs>
+
+                    {/* Preview Section */}
+                    <div className={cn(
+                        "flex-1 overflow-y-auto bg-slate-100 dark:bg-slate-900/20 transition-all",
+                        activeTab === 'edit' && "hidden lg:block"
+                    )}>
+                        <div className="p-4 md:p-8 lg:p-12 min-h-full flex justify-center">
+                            <div className="w-full max-w-[800px] shadow-2xl origin-top h-fit bg-white">
+                                {resumeData.template === 'modern' ? <PreviewModern /> : 
+                                resumeData.template === 'minimalist' ? <PreviewMinimalist /> : 
+                                <PreviewClassic />}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <Button 
@@ -1263,23 +1273,28 @@ export const ResumeBuilder = () => {
                 onApplyChanges={(newData) => {
                     if (!newData) return;
                     
-                    // Robust mapping helper to prevent "map is not a function" errors
-                    // Handles cases where AI might return objects instead of arrays
-                    const safeMap = (items: any) => {
-                        if (!Array.isArray(items)) return [];
-                        return items.map((item: any, i: number) => ({
-                            ...item,
-                            id: item.id || (Date.now() + i)
-                        }));
-                    };
+                    setResumeData(prev => {
+                        // Robust mapping helper to prevent "map is not a function" errors
+                        // Also ensures we merge rather than overwrite missing fields
+                        const safeMap = (items: any, existing: any[]) => {
+                            if (items === undefined) return existing; 
+                            if (!Array.isArray(items)) return existing;
+                            return items.map((item: any, i: number) => ({
+                                ...item,
+                                id: item.id || (Date.now() + i)
+                            }));
+                        };
 
-                    const normalizedData = {
-                        ...newData,
-                        experience: safeMap(newData.experience),
-                        education: safeMap(newData.education),
-                        projects: safeMap(newData.projects),
-                    };
-                    setResumeData(normalizedData);
+                        return {
+                            ...prev, // Keep ALL existing data
+                            ...newData, // Apply ONLY the data the AI returned
+                            // Handle arrays explicitly to ensure stable IDs
+                            experience: safeMap(newData.experience, prev.experience),
+                            education: safeMap(newData.education, prev.education),
+                            projects: safeMap(newData.projects, prev.projects),
+                        };
+                    });
+                    
                     toast({ title: "Changes Applied", description: "The AI updates have been synced to your resume builder." });
                 }} 
             />

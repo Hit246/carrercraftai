@@ -4,6 +4,8 @@ import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import * as crypto from 'crypto';
 import { notifyAdminOfUpgradeAction } from '@/lib/actions';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request) {
   const body = await req.text();
   const sig = req.headers.get('x-razorpay-signature');
