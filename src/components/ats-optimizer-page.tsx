@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Upload, Crown, Target, Zap, TrendingUp, HelpCircle } from 'lucide-react';
+import { Loader2, Upload, Crown, Target, Zap, TrendingUp, HelpCircle, CheckCircle2, ChevronRight, AlertTriangle, FileSearch, ShieldCheck } from 'lucide-react';
 import type { AtsOptimizerOutput } from '@/ai/flows/ats-optimizer';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
@@ -20,6 +20,8 @@ import { Badge } from './ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { db } from '@/lib/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { Progress } from './ui/progress';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
     resumeFile: z.instanceof(File).refine(
@@ -85,16 +87,12 @@ export function AtsOptimizerPage() {
         
         setAnalysisResult(result);
 
-        // Save result to Firestore for CareerCraft Score feature
+        // Save result to Firestore for history
         if (user?.uid) {
           await setDoc(
             doc(db, 'users', user.uid, 'atsResults', 'latest'),
             {
-              overall_score: result.overall_score,
-              breakdown: result.breakdown,
-              skills_matched: result.skills_matched,
-              skills_missing: result.skills_missing,
-              summary: result.summary,
+              ...result,
               savedAt: serverTimestamp(),
             }
           );
@@ -112,8 +110,14 @@ export function AtsOptimizerPage() {
     }
   }
 
+  const getScoreColor = (score: number) => {
+    if (score > 70) return 'stroke-green-500 text-green-500';
+    if (score > 40) return 'stroke-amber-500 text-amber-500';
+    return 'stroke-destructive text-destructive';
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-12">
         {!isProAccess && (
              <Alert variant="pro">
                 <Crown />
@@ -127,10 +131,10 @@ export function AtsOptimizerPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-headline flex items-center gap-2">
-            <Target className="text-primary"/> ATS Optimizer
+            <Target className="text-primary"/> Professional ATS Optimizer
           </CardTitle>
           <CardDescription>
-            Optimize your resume for any job. Upload your resume and paste a job description to get a match score and improvement suggestions.
+            Get a comprehensive Job Match Score and a professional Quality Audit in one pass.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -180,9 +184,9 @@ export function AtsOptimizerPage() {
                 </div>
               <Button type="submit" disabled={isLoading || !canUseFeature} size="lg" className="w-full">
                 {isLoading ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Optimizing...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Analyzing Everything...</>
                 ) : (
-                  'Optimize My Resume'
+                  'Start Full Analysis'
                 )}
               </Button>
             </form>
@@ -193,91 +197,121 @@ export function AtsOptimizerPage() {
     {isLoading && (
          <div className="flex flex-col items-center justify-center text-center pt-10">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4"/>
-              <h2 className="text-xl font-semibold">Optimizing Your Resume...</h2>
-              <p className="text-muted-foreground">The AI is analyzing the job description and your resume. Please wait.</p>
+              <h2 className="text-xl font-semibold">Performing Professional Audit...</h2>
+              <p className="text-muted-foreground max-w-sm">We are checking match accuracy and 23 professional checkpoints.</p>
           </div>
     )}
         
     {analysisResult && (
-        <div className="mt-8 space-y-6">
-             <h3 className="text-xl font-headline text-center">Optimization Results</h3>
-             <Card>
-                <CardHeader>
-                    <CardTitle>AI Summary</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">{analysisResult.summary}</p>
-                </CardContent>
-             </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-3">
-                        <TrendingUp /> 
-                        Overall Match Score
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger>
-                                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p className="max-w-xs">This score represents how well your resume matches the job description based on keywords and skills identified by the AI. A higher score means better alignment.</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                    <div className="relative w-32 h-32 mx-auto">
+        <div className="space-y-8 animate-in fade-in duration-500">
+            <div className="grid md:grid-cols-2 gap-8">
+                {/* Match Score Card */}
+                <Card className="flex flex-col items-center justify-center p-8">
+                    <CardHeader className="text-center p-0 mb-6">
+                        <CardTitle className="flex items-center gap-2">
+                            <Target className="h-5 w-5 text-primary" /> Job Match Score
+                        </CardTitle>
+                        <CardDescription>Alignment with your target role</CardDescription>
+                    </CardHeader>
+                    <div className="relative w-40 h-40">
                         <svg className="w-full h-full" viewBox="0 0 36 36">
-                            <path
-                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                className="stroke-current text-gray-200 dark:text-gray-700"
-                                strokeWidth="2"
-                                fill="none"
-                            />
-                            <path
-                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                className="stroke-current text-primary"
-                                strokeWidth="2"
-                                strokeDasharray={`${analysisResult.overall_score}, 100`}
-                                fill="none"
-                                strokeLinecap="round"
-                            />
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" className="text-muted" strokeWidth="2" />
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" className={cn("transition-all duration-1000", getScoreColor(analysisResult.overall_score))} strokeWidth="2" strokeDasharray={`${analysisResult.overall_score}, 100`} />
                         </svg>
-                         <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-3xl font-bold text-primary">{analysisResult.overall_score}%</span>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className={cn("text-4xl font-black", getScoreColor(analysisResult.overall_score).split(' ')[1])}>{analysisResult.overall_score}%</span>
                         </div>
                     </div>
-                    <p className="text-muted-foreground mt-2">Your resume's alignment with the job description.</p>
-                </CardContent>
-            </Card>
-            <div className="grid md:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-                        <Zap className="w-6 h-6 text-primary" />
-                        <CardTitle>Skills Matched</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                            {analysisResult.skills_matched.map((keyword, index) => (
-                                <Badge key={index} variant="secondary">{keyword}</Badge>
-                            ))}
-                        </div>
-                    </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-                        <Target className="w-6 h-6 text-amber-500" />
-                        <CardTitle>Skills Missing</CardTitle>
+
+                {/* Quality Score Card */}
+                <Card className="flex flex-col items-center justify-center p-8">
+                    <CardHeader className="text-center p-0 mb-6">
+                        <CardTitle className="flex items-center gap-2">
+                            <ShieldCheck className="h-5 w-5 text-primary" /> Quality Score
+                        </CardTitle>
+                        <CardDescription>Professional audit rating</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <div className="flex flex-wrap gap-2">
-                             {analysisResult.skills_missing.map((item, index) => (
-                                <Badge key={index} variant="destructive">{item}</Badge>
-                             ))}
+                    <div className="relative w-40 h-40">
+                        <svg className="w-full h-full" viewBox="0 0 36 36">
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" className="text-muted" strokeWidth="2" />
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" className={cn("transition-all duration-1000", getScoreColor(analysisResult.professional_audit.quality_score))} strokeWidth="2" strokeDasharray={`${analysisResult.professional_audit.quality_score}, 100`} />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className={cn("text-4xl font-black", getScoreColor(analysisResult.professional_audit.quality_score).split(' ')[1])}>{analysisResult.professional_audit.quality_score}%</span>
                         </div>
-                    </CardContent>
+                    </div>
                 </Card>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+                {/* Skills Section */}
+                <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Zap className="text-primary h-5 w-5"/> Skills Matched</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex flex-wrap gap-2">
+                                {analysisResult.skills_matched.map((skill, i) => (
+                                    <Badge key={i} variant="secondary">{skill}</Badge>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Target className="text-amber-500 h-5 w-5"/> Skills Missing</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex flex-wrap gap-2">
+                                {analysisResult.skills_missing.map((skill, i) => (
+                                    <Badge key={i} variant="destructive">{skill}</Badge>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Audit & Suggestions Section */}
+                <div className="space-y-6">
+                    <Card className="border-primary/20 bg-primary/5">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><TrendingUp className="text-primary h-5 w-5"/> Priority Fixes</CardTitle>
+                            <CardDescription>Top 3 professional document improvements</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="space-y-4">
+                                {analysisResult.professional_audit.critical_fixes.map((fix, i) => (
+                                    <li key={i} className="flex gap-3 text-sm">
+                                        <div className="h-5 w-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold shrink-0">{i+1}</div>
+                                        {fix}
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+                    <div className="space-y-4">
+                        <h3 className="font-bold flex items-center gap-2"><CheckCircle2 className="text-green-500 h-5 w-5"/> Category Audit</h3>
+                        {analysisResult.professional_audit.categories.map((cat) => (
+                            <div key={cat.name} className="p-4 border rounded-lg bg-card">
+                                <div className="flex justify-between items-center mb-2">
+                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{cat.name}</p>
+                                    <p className="text-xs font-bold">{cat.score} / {cat.maxScore}</p>
+                                </div>
+                                <Progress value={(cat.score / cat.maxScore) * 100} className="h-1.5 mb-3" />
+                                <ul className="space-y-1.5">
+                                    {cat.suggestions.map((s, i) => (
+                                        <li key={i} className="text-xs flex items-start gap-2">
+                                            <ChevronRight className="h-3 w-3 text-primary shrink-0 mt-0.5" />
+                                            {s}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     )}

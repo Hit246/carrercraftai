@@ -1,9 +1,9 @@
 'use server';
 
 /**
- * @fileOverview ATS Optimization AI agent.
+ * @fileOverview Consolidated ATS Optimization & Professional Audit AI agent.
  *
- * - atsOptimizer - A function that compares a resume to a job description.
+ * - atsOptimizer - A function that compares a resume to a job description AND performs a document quality audit.
  * - AtsOptimizerInput - The input type for the atsOptimizer function.
  * - AtsOptimizerOutput - The return type for the atsOptimizer function.
  */
@@ -22,7 +22,7 @@ const AtsOptimizerInputSchema = z.object({
 export type AtsOptimizerInput = z.infer<typeof AtsOptimizerInputSchema>;
 
 const AtsOptimizerOutputSchema = z.object({
-    overall_score: z.number().int().min(0).max(100).describe("The final, overall score from 0-100."),
+    overall_score: z.number().int().min(0).max(100).describe("The job match score (0-100) based on alignment with the JD."),
     breakdown: z.object({
         skill_match: z.number().int().min(0).max(50),
         experience_alignment: z.number().int().min(0).max(25),
@@ -30,9 +30,21 @@ const AtsOptimizerOutputSchema = z.object({
         keyword_fit: z.number().int().min(0).max(10),
         formatting_readability: z.number().int().min(0).max(5),
     }),
-    skills_matched: z.array(z.string()).describe("A list of skills found in both the job description and the resume."),
-    skills_missing: z.array(z.string()).describe("A list of important skills from the job description that were not found in the resume."),
-    summary: z.string().describe("A single, one-sentence factual summary of the match result."),
+    skills_matched: z.array(z.string()).describe("Skills present in both JD and resume."),
+    skills_missing: z.array(z.string()).describe("Critical skills from JD missing in resume."),
+    summary: z.string().describe("A one-sentence factual summary of the match."),
+    
+    // Integrated Professional Audit (CareerCraft Score Logic)
+    professional_audit: z.object({
+        quality_score: z.number().int().min(0).max(100).describe("General professional quality score."),
+        categories: z.array(z.object({
+            name: z.string(),
+            score: z.number().int(),
+            maxScore: z.number().int(),
+            suggestions: z.array(z.string())
+        })),
+        critical_fixes: z.array(z.string()).describe("Top 3 most important professional document fixes.")
+    })
 });
 export type AtsOptimizerOutput = z.infer<typeof AtsOptimizerOutputSchema>;
 
@@ -46,32 +58,25 @@ const prompt = ai.definePrompt({
   input: {schema: AtsOptimizerInputSchema},
   output: {schema: AtsOptimizerOutputSchema},
   config: {
-    temperature: 0, // Set to 0 for deterministic behavior
+    temperature: 0,
   },
-  prompt: `You are an Applicant Tracking System (ATS) evaluation engine.
+  prompt: `You are an advanced Applicant Tracking System (ATS) and professional resume auditor.
 
-Task:
-Evaluate how well the provided RESUME matches the JOB DESCRIPTION.
-Be deterministic and consistent — identical inputs must yield identical output.
+Evaluate the provided RESUME against the JOB DESCRIPTION and conduct a comprehensive professional document audit.
 
-Scoring Criteria (Total 100 points):
-
+### TASK 1: ATS MATCHING
+Score the resume's alignment with the JD across:
 1. Skill Match (50 pts)
-   - Identify overlap between technical and professional skills.
-   - Consider close synonyms (e.g., "React" ≈ "Next.js", "SQL" ≈ "PostgreSQL").
-   - Partial similarity = half credit.
-
 2. Experience Alignment (25 pts)
-   - Check whether the candidate’s experience, job titles, and responsibilities align with the described role and level.
-
 3. Education & Certifications (10 pts)
-   - Determine if degrees or certifications satisfy stated requirements.
-
 4. Keyword & Industry Fit (10 pts)
-   - Evaluate language similarity and relevance to the target industry.
-
 5. Formatting & Readability (5 pts)
-   - Penalize for poor structure, images, or excessive tables.
+
+### TASK 2: PROFESSIONAL AUDIT (Quality Score)
+Evaluate the document itself based on professional standards:
+- **Content**: Summary strength, action verbs, quantification (numbers/metrics), no cliches.
+- **Completeness**: Contact info, LinkedIn, dates, skills, education.
+- **Strength**: Quantified achievements, strong verbs, impact-focused bullets.
 
 **RESUME PDF**:
 {{media url=resumeDataUri}}
@@ -79,15 +84,10 @@ Scoring Criteria (Total 100 points):
 **JOB DESCRIPTION**:
 {{{jobDescription}}}
 
-
 Rules:
-- Output must be valid JSON only.
-- Never invent skills not present in either text.
-- Always ground scores in textual evidence.
-- The sum of the breakdown scores must equal the overall_score.
-- Do not add any commentary or explanation outside of the JSON structure.
-
-Your output must be a valid JSON object conforming to the schema I have provided.
+- Output valid JSON only.
+- Identify the top 3 'Critical Fixes' for the document quality.
+- Ensure the breakdown matches the overall_score.
 `,
 });
 
