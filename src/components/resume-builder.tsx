@@ -195,28 +195,28 @@ export const ResumeBuilder = () => {
     const handleAddExperience = () => {
         setResumeData(prev => ({
             ...prev,
-            experience: [...prev.experience, { id: Date.now(), title: '', company: '', dates: '', description: '' }]
+            experience: [...(prev.experience || []), { id: Date.now(), title: '', company: '', dates: '', description: '' }]
         }));
     };
     
     const handleRemoveExperience = (id: number) => {
         setResumeData(prev => ({
             ...prev,
-            experience: prev.experience.filter(exp => exp.id !== id)
+            experience: (prev.experience || []).filter(exp => exp.id !== id)
         }));
     };
 
     const handleAddEducation = () => {
         setResumeData(prev => ({
             ...prev,
-            education: [...prev.education, { id: Date.now(), school: '', degree: '', dates: '', cgpa: '' }]
+            education: [...(prev.education || []), { id: Date.now(), school: '', degree: '', dates: '', cgpa: '' }]
         }));
     };
 
     const handleRemoveEducation = (id: number) => {
         setResumeData(prev => ({
             ...prev,
-            education: prev.education.filter(edu => edu.id !== id)
+            education: (prev.education || []).filter(edu => edu.id !== id)
         }));
     };
 
@@ -230,7 +230,7 @@ export const ResumeBuilder = () => {
     const handleRemoveProject = (id: number) => {
         setResumeData(prev => ({
             ...prev,
-            projects: prev.projects.filter(proj => proj.id !== id)
+            projects: (prev.projects || []).filter(proj => proj.id !== id)
         }));
     };
     
@@ -402,7 +402,7 @@ export const ResumeBuilder = () => {
         }
 
         // Experience
-        if (resumeData.experience?.length > 0) {
+        if ((resumeData.experience || []).length > 0) {
             addSectionHeader('Experience');
             resumeData.experience.forEach(exp => {
                 if (!exp.title && !exp.company) return;
@@ -421,7 +421,7 @@ export const ResumeBuilder = () => {
                     doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor(lightTextColor);
                     doc.text(exp.company, margin + 20, y);
                     y += 14;
-                    const points = exp.description.split('\n').filter(Boolean);
+                    const points = (exp.description || '').split('\n').filter(Boolean);
                     points.forEach(point => {
                         y = addWrappedText(`${point.trim()}`, margin + 20, y, { maxWidth: pageW - margin * 2 - 20, fontSize: 9, color: lightTextColor });
                     });
@@ -434,7 +434,7 @@ export const ResumeBuilder = () => {
                     doc.setFontSize(9).setFont('helvetica', 'italic').setTextColor('#333333');
                     doc.text(exp.title, margin, y);
                     y += 14;
-                    const points = exp.description.split('\n').filter(Boolean);
+                    const points = (exp.description || '').split('\n').filter(Boolean);
                     points.forEach(point => {
                         y = addWrappedText(`${point.trim()}`, margin, y, { maxWidth: pageW - margin * 2, fontSize: 9, color: '#333333' });
                     });
@@ -448,7 +448,7 @@ export const ResumeBuilder = () => {
                     doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor(lightTextColor);
                     doc.text(exp.company, margin, y);
                     y += 14;
-                    const points = exp.description.split('\n').filter(Boolean);
+                    const points = (exp.description || '').split('\n').filter(Boolean);
                     points.forEach(point => {
                         y = addWrappedText(`• ${point.trim()}`, margin + 10, y, { maxWidth: pageW - margin * 2 - 10, fontSize: 9, color: lightTextColor });
                     });
@@ -459,7 +459,7 @@ export const ResumeBuilder = () => {
         }
 
         // Projects
-        if(resumeData.projects?.length > 0) {
+        if((resumeData.projects || []).length > 0) {
             addSectionHeader('Projects');
             resumeData.projects.forEach(proj => {
                 if (!proj.name) return;
@@ -478,7 +478,7 @@ export const ResumeBuilder = () => {
                         addLink(proj.url, pageW - margin, y, formatUrl(proj.url), 'right');
                     }
                     y += 14;
-                    const points = proj.description.split('\n').filter(Boolean);
+                    const points = (proj.description || '').split('\n').filter(Boolean);
                     points.forEach(point => {
                         y = addWrappedText(`${point.trim()}`, margin + 20, y, { maxWidth: pageW - margin * 2 - 20, fontSize: 9, color: lightTextColor });
                     });
@@ -492,7 +492,7 @@ export const ResumeBuilder = () => {
                         addLink(proj.url, pageW - margin, y, formatUrl(proj.url), 'right');
                     }
                     y += 14;
-                    const points = proj.description.split('\n').filter(Boolean);
+                    const points = (proj.description || '').split('\n').filter(Boolean);
                     points.forEach(point => {
                         y = addWrappedText(`${point.trim()}`, margin, y, { maxWidth: pageW - margin * 2, fontSize: 9, color: '#333333' });
                     });
@@ -506,7 +506,7 @@ export const ResumeBuilder = () => {
                         addLink(proj.url, pageW - margin, y, formatUrl(proj.url), 'right');
                     }
                     y += 14;
-                    const points = proj.description.split('\n').filter(Boolean);
+                    const points = (proj.description || '').split('\n').filter(Boolean);
                     points.forEach(point => {
                         y = addWrappedText(`• ${point.trim()}`, margin + 10, y, { maxWidth: pageW - margin * 2 - 10, fontSize: 9, color: lightTextColor });
                     });
@@ -517,7 +517,7 @@ export const ResumeBuilder = () => {
         }
 
         // Education
-        if (resumeData.education?.length > 0) {
+        if ((resumeData.education || []).length > 0) {
             addSectionHeader('Education');
             resumeData.education.forEach(edu => {
                 if (!edu.school) return;
@@ -546,7 +546,7 @@ export const ResumeBuilder = () => {
         // Skills
         if (resumeData.skills) {
             addSectionHeader('Skills');
-            const skills = resumeData.skills.split(',').map(s => s.trim()).filter(Boolean);
+            const skills = (resumeData.skills || '').split(',').map(s => s.trim()).filter(Boolean);
             
             if (resumeData.template === 'minimalist') {
                 y = addWrappedText(skills.join(' • '), margin, y, { maxWidth: pageW - margin * 2, fontSize: 9, color: '#333333' });
@@ -712,7 +712,7 @@ export const ResumeBuilder = () => {
     const handleNestedChange = (section: 'experience' | 'education' | 'projects', id: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setResumeData(prev => {
-            const sectionData = prev[section] as any[];
+            const sectionData = (prev[section] || []) as any[];
             return {
                 ...prev,
                 [section]: sectionData.map(item => item.id === id ? { ...item, [name]: value } : item)
@@ -756,7 +756,7 @@ export const ResumeBuilder = () => {
                     <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{resumeData.summary}</p>
                 </div>
             )}
-            {resumeData.experience?.length > 0 && (
+            {(resumeData.experience || []).length > 0 && (
                 <div className="mb-8">
                     <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Work Experience</h3>
                     {resumeData.experience.map(exp => (exp.title || exp.company) && (
@@ -771,7 +771,7 @@ export const ResumeBuilder = () => {
                     ))}
                 </div>
             )}
-            {resumeData.projects?.length > 0 && (
+            {(resumeData.projects || []).length > 0 && (
                 <div className="mb-8">
                     <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Projects</h3>
                     {resumeData.projects.map(proj => (proj.name) && (
@@ -785,7 +785,7 @@ export const ResumeBuilder = () => {
                     ))}
                 </div>
             )}
-            {resumeData.education?.length > 0 && (
+            {(resumeData.education || []).length > 0 && (
                 <div className="mb-8">
                     <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Education</h3>
                     {resumeData.education.map(edu => (edu.school) && (
@@ -803,7 +803,7 @@ export const ResumeBuilder = () => {
                 <div>
                     <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Core Competencies</h3>
                     <div className="flex flex-wrap gap-2">
-                        {resumeData.skills.split(',').map(skill => skill.trim() && (
+                        {(resumeData.skills || '').split(',').map(skill => skill.trim() && (
                             <span key={skill} className="bg-primary/5 text-primary border border-primary/10 text-xs px-3 py-1 rounded-full font-medium">{skill.trim()}</span>
                         ))}
                     </div>
@@ -835,7 +835,7 @@ export const ResumeBuilder = () => {
                     </section>
                 )}
 
-                {resumeData.experience?.length > 0 && (
+                {(resumeData.experience || []).length > 0 && (
                     <section>
                         <h3 className="text-lg font-bold font-headline text-gray-900 mb-6 flex items-center gap-2">
                             <span className="w-1.5 h-6 bg-primary rounded-full" /> Experience
@@ -856,7 +856,7 @@ export const ResumeBuilder = () => {
                     </section>
                 )}
 
-                {resumeData.projects?.length > 0 && (
+                {(resumeData.projects || []).length > 0 && (
                     <section>
                         <h3 className="text-lg font-bold font-headline text-gray-900 mb-6 flex items-center gap-2">
                             <span className="w-1.5 h-6 bg-primary rounded-full" /> Projects
@@ -877,7 +877,7 @@ export const ResumeBuilder = () => {
                 )}
 
                 <div className="grid sm:grid-cols-2 gap-10">
-                    {resumeData.education?.length > 0 && (
+                    {(resumeData.education || []).length > 0 && (
                         <section>
                             <h3 className="text-lg font-bold font-headline text-gray-900 mb-4">Education</h3>
                             {resumeData.education.map(edu => (edu.school) && (
@@ -893,7 +893,7 @@ export const ResumeBuilder = () => {
                         <section>
                             <h3 className="text-lg font-bold font-headline text-gray-900 mb-4">Skills</h3>
                             <div className="flex flex-wrap gap-2">
-                                {resumeData.skills.split(',').map(skill => skill.trim() && (
+                                {(resumeData.skills || '').split(',').map(skill => skill.trim() && (
                                     <span key={skill} className="bg-gray-100 text-gray-800 text-[10px] uppercase font-bold px-2 py-1 rounded">{skill.trim()}</span>
                                 ))}
                             </div>
@@ -926,7 +926,7 @@ export const ResumeBuilder = () => {
                     </section>
                 )}
 
-                {resumeData.experience?.length > 0 && (
+                {(resumeData.experience || []).length > 0 && (
                     <section>
                         <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-4 pb-1">Experience</h3>
                         {resumeData.experience.map(exp => (exp.title || exp.company) && (
@@ -942,7 +942,7 @@ export const ResumeBuilder = () => {
                     </section>
                 )}
 
-                {resumeData.projects?.length > 0 && (
+                {(resumeData.projects || []).length > 0 && (
                     <section>
                         <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-4 pb-1">Projects</h3>
                         {resumeData.projects.map(proj => (proj.name) && (
@@ -958,7 +958,7 @@ export const ResumeBuilder = () => {
                 )}
 
                 <div className="grid sm:grid-cols-2 gap-x-12 gap-y-8">
-                    {resumeData.education?.length > 0 && (
+                    {(resumeData.education || []).length > 0 && (
                         <section>
                             <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-3 pb-1">Education</h3>
                             {resumeData.education.map(edu => (edu.school) && (
@@ -973,7 +973,7 @@ export const ResumeBuilder = () => {
                         <section>
                             <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-3 pb-1">Skills</h3>
                             <p className="text-xs leading-relaxed">
-                                {resumeData.skills.split(',').map((s, i, arr) => (
+                                {(resumeData.skills || '').split(',').map((s, i, arr) => (
                                     <span key={i}>{s.trim()}{i < arr.length - 1 ? ' • ' : ''}</span>
                                 ))}
                             </p>
@@ -1017,7 +1017,7 @@ export const ResumeBuilder = () => {
                     <Button variant="ghost" size="sm" onClick={handleAddExperience}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {resumeData.experience.map((exp) => (
+                    {(resumeData.experience || []).map((exp) => (
                         <div key={exp.id} className="p-4 border rounded-lg relative space-y-2">
                             <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveExperience(exp.id)}><Trash2 className="h-4 w-4" /></Button>
                             <Input name="title" placeholder="Job Title" value={exp.title} onChange={(e) => handleNestedChange('experience', exp.id, e)} />
@@ -1035,7 +1035,7 @@ export const ResumeBuilder = () => {
                     <Button variant="ghost" size="sm" onClick={handleAddProject}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {resumeData.projects.map((proj) => (
+                    {(resumeData.projects || []).map((proj) => (
                         <div key={proj.id} className="p-4 border rounded-lg relative space-y-2">
                             <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveProject(proj.id)}><Trash2 className="h-4 w-4" /></Button>
                             <Input name="name" placeholder="Project Name" value={proj.name} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
@@ -1052,7 +1052,7 @@ export const ResumeBuilder = () => {
                     <Button variant="ghost" size="sm" onClick={handleAddEducation}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {resumeData.education.map((edu) => (
+                    {(resumeData.education || []).map((edu) => (
                         <div key={edu.id} className="p-4 border rounded-lg relative space-y-2">
                             <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveEducation(edu.id)}><Trash2 className="h-4 w-4" /></Button>
                             <Input name="school" placeholder="School" value={edu.school} onChange={(e) => handleNestedChange('education', edu.id, e)}/>

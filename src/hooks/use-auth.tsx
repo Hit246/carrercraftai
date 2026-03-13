@@ -162,9 +162,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (effPlan === 'pro' || effPlan === 'recruiter') {
             setCredits(Infinity);
         } else if (effPlan === 'essentials') {
-            setCredits(currentData.credits ?? ESSENTIALS_CREDITS);
+            // Robust fallback handling for 0 credits
+            setCredits(currentData.credits !== undefined ? currentData.credits : ESSENTIALS_CREDITS);
         } else {
-            setCredits(currentData.credits ?? FREE_CREDITS);
+            setCredits(currentData.credits !== undefined ? currentData.credits : FREE_CREDITS);
         }
         setLoading(false);
     }, (error) => {

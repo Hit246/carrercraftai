@@ -11,25 +11,30 @@ interface Props {
 }
 
 async function getResumeBySlug(slug: string) {
-    const q = query(
-        collectionGroup(db, 'resumeVersions'),
-        where('shareSlug', '==', slug),
-        where('isPublic', '==', true),
-        limit(1)
-    );
-    const snapshot = await getDocs(q);
-    if (snapshot.empty) return null;
-    return snapshot.docs[0].data();
+    try {
+        const q = query(
+            collectionGroup(db, 'resumeVersions'),
+            where('shareSlug', '==', slug),
+            where('isPublic', '==', true),
+            limit(1)
+        );
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) return null;
+        return snapshot.docs[0].data();
+    } catch (error) {
+        console.error("Error fetching public resume:", error);
+        return null;
+    }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
     const resume = await getResumeBySlug(slug);
-    if (!resume) return { title: 'Resume Not Found' };
+    if (!resume || !resume.resumeData) return { title: 'Resume Not Found' };
 
     const data = resume.resumeData;
     return {
-        title: `${data.name} - ${data.title} | CareerCraft AI`,
+        title: `${data.name || 'Resume'} - ${data.title || 'Professional'} | CareerCraft AI`,
         description: data.summary || `View the professional resume of ${data.name}.`,
         openGraph: {
             title: `${data.name} - ${data.title}`,
@@ -44,7 +49,7 @@ export default async function PublicResumePage({ params }: Props) {
     const { slug } = await params;
     const resume = await getResumeBySlug(slug);
 
-    if (!resume) return notFound();
+    if (!resume || !resume.resumeData) return notFound();
 
     const data = resume.resumeData;
 
@@ -58,12 +63,12 @@ export default async function PublicResumePage({ params }: Props) {
         <div className="min-h-screen bg-slate-50 py-12 px-4 md:px-8">
             <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden">
                 <div className="bg-slate-900 text-white p-8 md:p-12">
-                    <h1 className="text-4xl font-bold font-headline mb-2">{data.name}</h1>
-                    <p className="text-xl text-slate-300 font-medium mb-6">{data.title}</p>
+                    <h1 className="text-4xl font-bold font-headline mb-2">{data.name || 'Name Not Provided'}</h1>
+                    <p className="text-xl text-slate-300 font-medium mb-6">{data.title || 'Professional Title'}</p>
                     <div className="flex flex-wrap gap-4 text-sm text-slate-400">
                         {data.phone && <span>{data.phone}</span>}
                         {data.linkedin && <a href={formatUrl(data.linkedin)} className="hover:text-white underline">{data.linkedin}</a>}
-                        <span>{data.email?.split('@')[0]}@***.com (Protected)</span>
+                        {data.email && <span>{data.email?.split('@')[0]}@***.com (Protected)</span>}
                     </div>
                 </div>
 
@@ -75,7 +80,7 @@ export default async function PublicResumePage({ params }: Props) {
                         </section>
                     )}
 
-                    {data.experience?.length > 0 && (
+                    {(data.experience || []).length > 0 && (
                         <section>
                             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6 border-b pb-2">Experience</h2>
                             <div className="space-y-8">
@@ -93,7 +98,7 @@ export default async function PublicResumePage({ params }: Props) {
                         </section>
                     )}
 
-                    {data.education?.length > 0 && (
+                    {(data.education || []).length > 0 && (
                         <section>
                             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-6 border-b pb-2">Education</h2>
                             <div className="grid md:grid-cols-2 gap-6">
@@ -112,7 +117,7 @@ export default async function PublicResumePage({ params }: Props) {
                         <section>
                             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4 border-b pb-2">Skills</h2>
                             <div className="flex flex-wrap gap-2">
-                                {data.skills.split(',').map((skill: string, i: number) => (
+                                {(data.skills || '').split(',').map((skill: string, i: number) => skill.trim() && (
                                     <span key={i} className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">
                                         {skill.trim()}
                                     </span>
