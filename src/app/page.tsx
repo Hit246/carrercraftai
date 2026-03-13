@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key, PartyPopper, Loader2, Sparkles as SparklesIcon, FileSearch, Zap } from 'lucide-react';
+import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key, PartyPopper, Loader2, Sparkles as SparklesIcon, FileSearch, Zap, HelpCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { HomeHeader } from '@/components/home-header';
 import React from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface PricingSettings {
   essentials: number;
@@ -23,9 +24,9 @@ const featureVisuals: Record<string, React.ReactNode> = {
   "Intuitive Resume Builder": (
     <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-[10px] mt-4">
       <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1.5 flex gap-1.5">
-        <span className="w-2 h-2 rounded-full bg-red-400" />
-        <span className="w-2 h-2 rounded-full bg-yellow-400" />
-        <span className="w-2 h-2 rounded-full bg-green-400" />
+        <span className="w-2 pill h-2 rounded-full bg-red-400" />
+        <span className="w-2 pill h-2 rounded-full bg-yellow-400" />
+        <span className="w-2 pill h-2 rounded-full bg-green-400" />
       </div>
       <div className="p-3 space-y-2 bg-white dark:bg-gray-900">
         <div className="flex gap-2">
@@ -111,6 +112,33 @@ const featureVisuals: Record<string, React.ReactNode> = {
     </div>
   ),
 };
+
+const faqs = [
+  {
+    question: "Is CareerCraft AI free to use?",
+    answer: "Yes! We offer a 'Free Forever' plan that allows you to create up to 2 resume versions and includes 5 AI credits every month to try out our premium analysis tools."
+  },
+  {
+    question: "What is an ATS and why does it matter?",
+    answer: "ATS stands for Applicant Tracking System. It's software used by 95% of Fortune 500 companies to filter resumes. CareerCraft AI's optimizer identifies missing keywords and formatting issues so you pass these automated filters."
+  },
+  {
+    question: "How do AI credits work?",
+    answer: "Credits are used for intensive AI tasks like generating a full resume analysis, tailoring a cover letter, or matching your profile to jobs. Free users get 5/month, while Pro and Recruiter plans enjoy unlimited AI access."
+  },
+  {
+    question: "Can I export my resume to Word?",
+    answer: "Absolutely. You can export your completed resume as a professional PDF (optimized for ATS) or as a fully editable DOCX file for further manual tweaks."
+  },
+  {
+    question: "Is my data secure?",
+    answer: "Yes. We take privacy seriously. Your resume data is used only to provide the requested AI analysis and is stored securely in encrypted Firestore databases."
+  },
+  {
+    question: "What makes the Recruiter plan different?",
+    answer: "The Recruiter plan is designed for hiring teams. It includes advanced tools like the AI Candidate Matcher, which allows you to upload batches of resumes and rank them against a job description in seconds."
+  }
+];
 
 function HomePageContent() {
   const { user } = useAuth();
@@ -396,10 +424,40 @@ function HomePageContent() {
             </p>
           </div>
         </section>
+
+        {/* FAQ Section */}
+        <section id="faq" className="py-24 md:py-32 bg-muted/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <p className="font-semibold text-primary">FAQ</p>
+              <h2 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">Common Questions</h2>
+              <p className="mt-4 text-muted-foreground text-lg">
+                Everything you need to know about CareerCraft AI.
+              </p>
+            </div>
+            <div className="max-w-3xl mx-auto">
+              <Accordion type="single" collapsible className="w-full">
+                {faqs.map((faq, index) => (
+                  <AccordionItem key={index} value={`item-${index}`} className="border-b border-muted-foreground/20">
+                    <AccordionTrigger className="text-left font-semibold py-6 hover:no-underline">
+                      <div className="flex items-center gap-3">
+                        <HelpCircle className="h-5 w-5 text-primary shrink-0" />
+                        {faq.question}
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* ===== FOOTER ===== */}
-      <footer className="border-t border-gray-800 bg-[#0d0f14] mt-20">
+      <footer className="border-t border-gray-800 bg-[#0d0f14]">
         <div className="max-w-6xl mx-auto px-6 py-12">
 
           {/* Top Row — Brand + PH Badge */}
