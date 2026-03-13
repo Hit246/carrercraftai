@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -34,24 +35,24 @@ export default function CancellationPage() {
                 You can cancel your "Pro" or "Recruiter" subscription at any time. When you cancel, your subscription will remain active until the end of your current billing period. You will not be charged for the next billing cycle.
               </p>
               <p>
-                To cancel your subscription, please navigate to your Profile page and follow the cancellation instructions, or contact our support team for assistance.
+                To cancel your subscription, please navigate to your Profile page and follow the cancellation instructions.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-semibold font-headline">Refund Policy</h2>
               <p>
-                Due to the nature of our digital services and the immediate access to AI credits and features, we have a limited refund policy.
+                Due to the nature of our digital services and the immediate access to AI credits and features, we have a specific refund policy:
               </p>
               <ul className="list-disc pl-5 space-y-2">
                 <li>
-                  <strong>Full Refunds:</strong> A full refund can be requested on the same day as your initial subscription purchase, provided that you have not used any of the "Pro" or "Recruiter" specific AI features (e.g., Resume Analyzer, Job Matcher, Candidate Matcher).
+                  <strong>Full Refund (100%):</strong> A full refund can be requested within **24 hours** of your initial subscription purchase, provided that you have **not used** any of the "Pro" or "Recruiter" specific AI features (e.g., Resume Analyzer, Job Matcher, Candidate Matcher).
                 </li>
                 <li>
-                  <strong>Partial Refunds:</strong> We do not offer partial refunds for subscriptions canceled mid-cycle. You will continue to have access to the features until your subscription period ends.
+                  <strong>No Refunds:</strong> We do not offer refunds after 24 hours of purchase, or if any AI-powered premium feature has been utilized, as the computing credits are consumed instantly.
                 </li>
                 <li>
-                  <strong>AI Credits:</strong> AI credits purchased or included in the "Free" plan are non-refundable.
+                  <strong>Prorated Refunds:</strong> We do not offer partial or prorated refunds for subscriptions canceled mid-cycle. You will continue to have access to the features until your current subscription period ends.
                 </li>
               </ul>
               <p>
@@ -62,7 +63,7 @@ export default function CancellationPage() {
             <section>
               <h2 className="text-xl font-semibold font-headline">How to Request a Refund</h2>
               <p>
-                To request a refund, please contact our support team via the <Link href="/support" className="underline">Support page</Link>. Please include your account email and the reason for your refund request. Our team will review your request and respond within 3-5 business days.
+                To request a refund, please contact our support team via the <Link href="/support" className="underline">Support page</Link> within the eligible 24-hour window. Please include your account email and the reason for your refund request. Our team will review your request and respond within 3-5 business days.
               </p>
             </section>
             

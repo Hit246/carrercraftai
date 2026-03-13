@@ -1,3 +1,4 @@
+
 'use client';
 
 import { signInWithPopup } from 'firebase/auth';
@@ -41,6 +42,20 @@ export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {
 
         await setDoc(userRef, initialUserData);
 
+        // Trigger Welcome Email Drip for new signups
+        try {
+          await fetch("/api/send-welcome-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              email: user.email, 
+              name: user.displayName || user.email?.split('@')[0] 
+            }),
+          });
+        } catch (e) {
+          console.warn("Welcome email drip skip/failed:", e);
+        }
+
         // Check for team invitations
         if (user.email) {
             try {
@@ -79,16 +94,12 @@ export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {
       });
 
     } catch (error: any) {
-      console.error('Google Auth Error Details:', {
-        code: error.code,
-        message: error.message,
-        hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown'
-      });
+      console.error('Google Auth Error Details:', error);
 
       if (error.code === 'auth/unauthorized-domain') {
         toast({
           title: 'Domain Not Authorized',
-          description: `The domain "${window.location.hostname}" is not authorized in Firebase. Please add both "careercraftai.tech" AND "www.careercraftai.tech" to Authorized Domains in Firebase Console.`,
+          description: `Please add "${window.location.hostname}" to Authorized Domains in Firebase Console.`,
           variant: 'destructive',
           duration: 10000,
         });

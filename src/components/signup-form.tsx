@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -37,7 +38,6 @@ function PasswordStrength({ password }: { password: string }) {
 
   return (
     <div className="mt-2 space-y-2">
-      {/* Bar */}
       <div className="flex gap-1">
         {[0, 1, 2, 3].map((i) => (
           <div
@@ -48,11 +48,9 @@ function PasswordStrength({ password }: { password: string }) {
           />
         ))}
       </div>
-      {/* Label */}
       <p className={`text-[10px] font-bold uppercase tracking-wider ${strength >= 3 ? "text-green-500" : strength === 2 ? "text-yellow-500" : "text-red-500"}`}>
         {labels[strength - 1] || "Too weak"}
       </p>
-      {/* Checklist */}
       <ul className="space-y-0.5">
         {checks.map((c) => (
           <li key={c.label} className={`text-[10px] flex items-center gap-1.5 ${c.pass ? "text-green-500" : "text-muted-foreground"}`}>
@@ -85,7 +83,23 @@ export function SignupForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await signup(values.email, values.password);
+      const userCredential = await signup(values.email, values.password);
+      const user = userCredential.user;
+
+      // Trigger Welcome Email Drip
+      try {
+        await fetch("/api/send-welcome-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            email: user.email, 
+            name: user.displayName || values.email.split('@')[0] 
+          }),
+        });
+      } catch (e) {
+        console.error("Welcome email drip failed:", e);
+      }
+
       if(ADMIN_EMAILS.includes(values.email)) {
         router.push('/admin/dashboard');
       } else {

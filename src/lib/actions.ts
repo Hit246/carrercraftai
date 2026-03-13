@@ -1,3 +1,4 @@
+
 'use server';
 
 import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
@@ -72,7 +73,7 @@ export async function notifyAdminOfUpgradeAction(data: {
   userEmail: string;
   plan: string;
   amount?: number;
-  type: 'MANUAL_REQUEST' | 'PROOF_UPLOADED' | 'WEBHOOK_PAID';
+  type: 'MANUAL_REQUEST' | 'PROOF_UPLOADED' | 'WEBHOOK_PAID' | 'CANCELLATION_REQUEST';
 }) {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, ADMIN_EMAIL } = process.env;
 
@@ -95,21 +96,40 @@ export async function notifyAdminOfUpgradeAction(data: {
     MANUAL_REQUEST: `🚀 New Upgrade Request: ${data.plan}`,
     PROOF_UPLOADED: `📸 Payment Proof Received: ${data.userEmail}`,
     WEBHOOK_PAID: `💰 Automatic Payment Success: ${data.plan}`,
+    CANCELLATION_REQUEST: `⚠️ Cancellation Requested: ${data.userEmail}`,
   };
 
   const bodyMap = {
     MANUAL_REQUEST: `User ${data.userEmail} has requested an upgrade to the ${data.plan} plan.`,
-    PROOF_UPLOADED: `User ${data.userEmail} has uploaded a payment proof.`,
-    WEBHOOK_PAID: `User ${data.userEmail} has paid ₹${data.amount} for the ${data.plan} plan.`,
+    PROOF_UPLOADED: `User ${data.userEmail} has uploaded a payment proof. Review it in the Admin Panel.`,
+    WEBHOOK_PAID: `User ${data.userEmail} has paid ₹${data.amount} for the ${data.plan} plan. Account upgraded.`,
+    CANCELLATION_REQUEST: `User ${data.userEmail} has requested to cancel their ${data.plan} subscription. Revert them to Free if eligible.`,
   };
 
   try {
+    // Notify ADMIN
     await transporter.sendMail({
       from: `"CareerCraft AI System" <${SMTP_USER}>`,
       to: ADMIN_EMAIL,
       subject: subjectMap[data.type],
       html: `<p>${bodyMap[data.type]}</p>`,
     });
+
+    // Notify USER (Confirmation)
+    if (data.type === 'MANUAL_REQUEST' || data.type === 'CANCELLATION_REQUEST') {
+        const userSubject = data.type === 'MANUAL_REQUEST' ? 'Upgrade Request Received' : 'Cancellation Request Received';
+        const userBody = data.type === 'MANUAL_REQUEST' 
+            ? `We've received your request to upgrade to ${data.plan}. Our team is reviewing your payment and will activate your account shortly.`
+            : `We've received your request to cancel your subscription. Your access will continue until the end of your billing cycle. If you're eligible for a refund per our policy, it will be processed within 5-7 business days.`;
+
+        await transporter.sendMail({
+            from: `"CareerCraft AI" <${SMTP_USER}>`,
+            to: data.userEmail,
+            subject: userSubject,
+            html: `<div style="font-family:sans-serif;"><h2 style="color:#3b82f6;">CareerCraft AI</h2><p>${userBody}</p></div>`,
+        });
+    }
+
     return { success: true };
   } catch (error) {
     console.error("❌ Email notification failed:", error);
