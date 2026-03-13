@@ -1,4 +1,3 @@
-
 import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -78,34 +77,44 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.RESEND_API_KEY;
   
   if (!apiKey) {
-    console.error("❌ Resend API key is missing. Email sequence skipped.");
-    return NextResponse.json({ error: "Resend API key missing" }, { status: 500 });
+    console.warn("⚠️ Resend API key is missing in .env. Skipping welcome email sequence.");
+    return NextResponse.json({ success: false, message: "API key missing" });
   }
 
   try {
     const resend = new Resend(apiKey);
     const { email, name } = await req.json();
 
+    console.log(`📧 Initiating email drip for: ${email}`);
+
     // Send Day 0 email immediately
-    await resend.emails.send({
+    const welcomeResult = await resend.emails.send({
       from: "CareerCraft AI <hello@careercraftai.tech>",
       to: email,
       subject: emails[0].subject,
       html: emails[0].html.replace(/aboard!/g, `aboard, ${name || "there"}!`),
     });
 
+    if (welcomeResult.error) {
+        console.error("❌ Resend Error (Day 0):", welcomeResult.error);
+    }
+
     // Schedule Day 2, 5, 10
     for (const drip of emails.slice(1)) {
       const sendAt = new Date();
       sendAt.setDate(sendAt.getDate() + drip.delay);
 
-      await resend.emails.send({
+      const scheduledResult = await resend.emails.send({
         from: "CareerCraft AI <hello@careercraftai.tech>",
         to: email,
         subject: drip.subject,
         html: drip.html,
         scheduledAt: sendAt.toISOString(),
       });
+
+      if (scheduledResult.error) {
+          console.error(`❌ Resend Error (Day ${drip.delay}):`, scheduledResult.error);
+      }
     }
 
     return NextResponse.json({ success: true });

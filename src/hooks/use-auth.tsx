@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, query, where, getDocs, writeBatch, onSnapshot, collectionGroup, serverTimestamp } from 'firebase/firestore';
@@ -70,6 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [credits, setCredits] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userData, setUserData] = useState<UserData| null>(null);
+  const hasNotifiedExpiration = useRef(false);
 
   const ensureUserDocument = async (authUser: User) => {
     const userRef = doc(db, 'users', authUser.uid);
@@ -137,6 +138,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const effPlan = userPlan === 'pending' ? (currentData.previousPlan || 'free') : userPlan;
 
+        // Lazy expiration check
         if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
             let upgradeDate: Date;
             if (planUpdatedAt?.toDate) {
@@ -150,15 +152,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (!isNaN(upgradeDate.getTime())) {
                 const expirationDate = addDays(upgradeDate, 30);
                 if (differenceInDays(new Date(), expirationDate) >= 0) {
-                    await updateDoc(userRef, { plan: 'free', credits: FREE_CREDITS, previousPlan: null });
+                    // Update DB first to prevent loop
+                    await updateDoc(userRef, { 
+                        plan: 'free', 
+                        credits: FREE_CREDITS, 
+                        previousPlan: null,
+                        requestedPlan: null 
+                    });
                     
-                    // Notify Admin and User about the expiration
-                    if (user.email) {
-                        await notifyAdminOfUpgradeAction({
-                            userEmail: user.email,
-                            plan: userPlan,
-                            type: 'PLAN_EXPIRED'
-                        });
+                    // Trigger Alert once per session/change
+                    if (!hasNotifiedExpiration.current) {
+                        hasNotifiedExpiration.current = true;
+                        if (user.email) {
+                            await notifyAdminOfUpgradeAction({
+                                userEmail: user.email,
+                                plan: userPlan,
+                                type: 'PLAN_EXPIRED'
+                            });
+                        }
                     }
                     return;
                 }
@@ -283,6 +294,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };
