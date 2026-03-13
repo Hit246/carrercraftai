@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,7 +6,7 @@ import { FirebaseErrorListener } from "@/components/FirebaseErrorListener";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const siteUrl = "https://carrercraftai.vercel.app";
+const siteUrl = "https://careercraftai.tech";
 
 const fontBody = Inter({ 
   subsets: ["latin"],

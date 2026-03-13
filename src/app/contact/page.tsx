@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -10,7 +9,7 @@ export const metadata: Metadata = {
   description:
     "Get in touch with the CareerCraft AI team for support, partnerships, or general questions.",
   alternates: {
-    canonical: "https://carrercraftai.vercel.app/contact",
+    canonical: "https://careercraftai.tech/contact",
   },
 };
 

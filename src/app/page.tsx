@@ -69,7 +69,7 @@ function HomePageContent() {
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
               name: "CareerCraft AI",
-              url: "https://carrercraftai.vercel.app",
+              url: "https://careercraftai.tech",
               applicationCategory: "BusinessApplication",
               operatingSystem: "Web",
               description:

@@ -1,5 +1,4 @@
-
-#CareerCraft AI
+# CareerCraft AI
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-15.x-black?logo=next.js)](https://nextjs.org/)
@@ -50,10 +49,6 @@ NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN='...'
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID='...'
 
 # Firebase Admin (CRITICAL for account deletion)
-# 1. Go to Firebase Console > Project Settings > Service Accounts
-# 2. Click "Generate new private key" and download the JSON file.
-# 3. For local .env: Wrap the entire JSON content in SINGLE QUOTES.
-# 4. For Vercel Dashboard: Paste the RAW JSON content WITHOUT surrounding quotes.
 FIREBASE_SERVICE_ACCOUNT_KEY='{"type": "service_account", ...}'
 
 # AI & Payments
@@ -61,11 +56,9 @@ GEMINI_API_KEY='...'
 NEXT_PUBLIC_RAZORPAY_KEY_ID='...'
 RAZORPAY_KEY_SECRET='...'
 RAZORPAY_WEBHOOK_SECRET='...'
-NEXT_PUBLIC_APP_URL='https://your-app-url.vercel.app'
+NEXT_PUBLIC_APP_URL='https://careercraftai.tech'
 
 # Admin Email Notifications (SMTP)
-# For Gmail: Use 'smtp.gmail.com'
-# IMPORTANT: Remove all spaces from your 16-character App Password.
 SMTP_HOST='smtp.gmail.com'
 SMTP_PORT=587
 SMTP_USER='your-email@gmail.com'
@@ -76,17 +69,11 @@ ADMIN_EMAIL='admin@careercraft.ai'
 ### 2. Run the Development Server
 
 ```bash
-pnpm install
-pnpm run dev
+npm install
+npm run dev
 # In a separate terminal:
-pnpm run genkit:dev
+npm run genkit:dev
 ```
-
-## ⚙️ Admin Setup
-
-1. **Service Account**: The `FIREBASE_SERVICE_ACCOUNT_KEY` is required to allow the Admin Panel to delete user authentication accounts.
-2. **SMTP**: Use a "Google App Password" if using Gmail. Do not use your regular password. Ensure `SMTP_PASS` has no spaces.
-3. **Webhooks**: Set your Razorpay webhook URL to `https://your-domain.com/api/razorpay/webhook` and enable the `payment_link.paid` event.
 
 ## ✍️ Author
 - **CHAUHAN HITARTH**

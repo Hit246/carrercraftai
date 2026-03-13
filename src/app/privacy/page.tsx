@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Learn how CareerCraft AI collects, uses, and protects your personal and resume data when you use our AI-powered career tools.",
   alternates: {
-    canonical: "https://carrercraftai.vercel.app/privacy",
+    canonical: "https://careercraftai.tech/privacy",
   },
 };
 
@@ -36,7 +35,7 @@ export default function PrivacyPolicyPage() {
           </CardHeader>
           <CardContent className="space-y-6 prose prose-stone dark:prose-invert max-w-none">
             <p>
-              CareerCraft AI ("us", "we", or "our") operates the careercraftai.vercel.app website (the "Service"). This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service and the choices you have associated with that data.
+              CareerCraft AI ("us", "we", or "our") operates the careercraftai.tech website (the "Service"). This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service and the choices you have associated with that data.
             </p>
 
             <section>

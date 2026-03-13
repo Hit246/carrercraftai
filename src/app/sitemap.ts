@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = "https://carrercraftai.vercel.app";
+const siteUrl = "https://careercraftai.tech";
 
 export default function sitemap(): MetadataRoute.Sitemap {
     return [
@@ -35,31 +35,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.2,
         },
         {
-            url: `${siteUrl}/(app)/ats-optimizer`,
+            url: `${siteUrl}/ats-optimizer`,
             changeFrequency: "weekly",
             priority: 0.7,
         },
         {
-            url: `${siteUrl}/(app)/resume-analyzer`,
+            url: `${siteUrl}/resume-analyzer`,
             changeFrequency: "weekly",
             priority: 0.7,
         },
         {
-            url: `${siteUrl}/(app)/job-matcher`,
+            url: `${siteUrl}/job-matcher`,
             changeFrequency: "weekly",
             priority: 0.7,
         },
         {
-            url: `${siteUrl}/(app)/cover-letter-generator`,
+            url: `${siteUrl}/cover-letter-generator`,
             changeFrequency: "weekly",
             priority: 0.6,
         },
         {
-            url: `${siteUrl}/(app)/candidate-matcher`,
+            url: `${siteUrl}/candidate-matcher`,
             changeFrequency: "weekly",
             priority: 0.6,
         },
     ];
 }
-
-

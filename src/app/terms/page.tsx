@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Read the Terms of Service for using CareerCraft AI, including account usage, subscriptions, and governing law.",
   alternates: {
-    canonical: "https://carrercraftai.vercel.app/terms",
+    canonical: "https://careercraftai.tech/terms",
   },
 };
 
@@ -36,7 +35,7 @@ export default function TermsOfServicePage() {
           </CardHeader>
           <CardContent className="space-y-6 prose prose-stone dark:prose-invert max-w-none">
             <p>
-              Welcome to CareerCraft AI! These terms and conditions outline the rules and regulations for the use of CareerCraft AI's Website, located at careercraftai.vercel.app.
+              Welcome to CareerCraft AI! These terms and conditions outline the rules and regulations for the use of CareerCraft AI's Website, located at careercraftai.tech.
             </p>
 
             <p>

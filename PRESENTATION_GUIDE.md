@@ -156,7 +156,7 @@ This guide provides a detailed, slide-by-slide outline for your project presenta
 *   **Title:** Thank You!
 *   **Subtitle:** Questions & Answers
 *   **(Footer with Contact Info):**
-    *   `careercraftai.vercel.app`
+    *   `careercraftai.tech`
     *   `hitarth0236@gmail.com`
     *   `+91-98987-60325`
 

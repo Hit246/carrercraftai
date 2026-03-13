@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     description:
         "Choose from Free, Essentials, Pro, and Recruiter plans on CareerCraft AI to build resumes, optimize for ATS, and manage candidates with AI.",
     alternates: {
-        canonical: "https://carrercraftai.vercel.app/pricing",
+        canonical: "https://careercraftai.tech/pricing",
     },
 };
 
