@@ -7,7 +7,23 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
-import { Crown, User, Handshake, Loader2, Upload, ExternalLink, ShieldCheck, Hourglass, Ban, Wallet, Calendar, BotIcon, Timer } from 'lucide-react';
+import { 
+    Crown, 
+    User, 
+    Handshake, 
+    Loader2, 
+    ShieldCheck, 
+    Hourglass, 
+    Ban, 
+    Wallet, 
+    Calendar, 
+    BotIcon, 
+    Timer,
+    CheckCircle2,
+    Info,
+    Receipt,
+    CreditCard
+} from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -20,12 +36,20 @@ import { uploadFile } from '@/lib/firebase';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { addDays, differenceInDays, format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
     displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }).optional(),
     phoneNumber: z.string().min(10, { message: 'Please enter a valid 10-digit phone number.' }).optional(),
     photoFile: z.instanceof(File).optional(),
 });
+
+const PLAN_BENEFITS = {
+    free: ["5 AI Credits", "2 Resume Drafts", "Classic Template"],
+    essentials: ["50 AI Credits", "10 Resume Drafts", "ATS Keywords", "Email Support"],
+    pro: ["Unlimited AI Credits", "Unlimited Drafts", "Advanced Templates", "Priority Support"],
+    recruiter: ["Unlimited AI Credits", "Candidate Matcher", "Recruiter Dashboard", "Talent Analytics"]
+};
 
 export function ProfilePage() {
     const { user, plan, loading, userData, credits, effectivePlan, logout, updateUserProfile, requestCancellation } = useAuth();
@@ -52,14 +76,15 @@ export function ProfilePage() {
         return {
             date: expirationDate,
             daysRemaining: daysRemaining < 0 ? 0 : daysRemaining,
-            isNearExpiry: daysRemaining <= 7
+            isNearExpiry: daysRemaining <= 7,
+            isExpired: daysRemaining < 0
         };
     }, [userData, effectivePlan]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         values: {
-            displayName: user?.displayName || '',
+            displayName: userData?.displayName || user?.displayName || '',
             phoneNumber: userData?.phoneNumber || '',
         }
     });
@@ -85,7 +110,7 @@ export function ProfilePage() {
         if (!user) return;
         setIsSaving(true);
         try {
-            let photoURL: string | undefined = user.photoURL || undefined;
+            let photoURL: string | undefined = userData?.photoURL || user.photoURL || undefined;
 
             if (values.photoFile) {
                  photoURL = await uploadFile(values.photoFile, `avatars/${user.uid}`);
@@ -103,7 +128,7 @@ export function ProfilePage() {
                 title: 'Profile Updated',
                 description: 'Your profile has been successfully updated.',
             });
-            setPhotoPreview(null); // Clear preview after successful upload
+            setPhotoPreview(null);
         } catch (error) {
             console.error(error);
             toast({
@@ -115,7 +140,6 @@ export function ProfilePage() {
             setIsSaving(false);
         }
     }
-
 
     const handleCancellation = async () => {
         if(!user) return;
@@ -134,226 +158,279 @@ export function ProfilePage() {
         }
     }
 
-
     const getPlanBadge = () => {
         switch (plan) {
             case 'essentials':
-                return <Badge className="bg-gray-400/20 text-gray-500 border-gray-400/30"><User className="mr-2 h-4 w-4"/> Essentials</Badge>;
+                return <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300"><User className="mr-2 h-3.5 w-3.5"/> Essentials</Badge>;
             case 'pro':
-                return <Badge className="bg-amber-400/20 text-amber-500 border-amber-400/30"><Crown className="mr-2 h-4 w-4"/> Pro</Badge>;
+                return <Badge className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300"><Crown className="mr-2 h-3.5 w-3.5"/> Pro</Badge>;
             case 'recruiter':
-                return <Badge className="bg-blue-400/20 text-blue-500 border-blue-400/30"><Handshake className="mr-2 h-4 w-4"/> Recruiter</Badge>;
+                return <Badge className="bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/20 dark:text-indigo-300"><Handshake className="mr-2 h-3.5 w-3.5"/> Recruiter</Badge>;
             case 'pending':
-                return <Badge className="bg-yellow-400/20 text-yellow-500 border-yellow-400/30"><Hourglass className="mr-2 h-4 w-4"/> Pending Approval</Badge>;
+                return <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200 animate-pulse"><Hourglass className="mr-2 h-3.5 w-3.5"/> Pending Approval</Badge>;
              case 'cancellation_requested':
-                return <Badge variant="destructive"><Ban className="mr-2 h-4 w-4"/> Cancellation Requested</Badge>;
+                return <Badge variant="destructive" className="bg-red-50 text-red-700 border-red-200"><Ban className="mr-2 h-3.5 w-3.5"/> Cancellation Pending</Badge>;
             default:
-                return <Badge variant="secondary"><User className="mr-2 h-4 w-4"/> Free</Badge>;
+                return <Badge variant="outline" className="text-muted-foreground"><User className="mr-2 h-3.5 w-3.5"/> Free Plan</Badge>;
         }
     }
 
     if (loading || !user) {
         return (
-            <div className="max-w-2xl mx-auto space-y-6">
-                <Card>
-                    <CardHeader>
-                        <Skeleton className="h-8 w-1/2" />
-                        <Skeleton className="h-4 w-3/4" />
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                         <div className="space-y-2">
-                            <Skeleton className="h-4 w-20" />
-                            <Skeleton className="h-10 w-full" />
-                        </div>
-                        <div className="space-y-2">
-                            <Skeleton className="h-4 w-20" />
-                            <Skeleton className="h-10 w-1/2" />
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between">
-                         <Skeleton className="h-10 w-32" />
-                         <Skeleton className="h-10 w-24" />
-                    </CardFooter>
-                </Card>
+            <div className="max-w-4xl mx-auto space-y-6">
+                <div className="grid md:grid-cols-3 gap-6">
+                    <div className="md:col-span-2 space-y-6">
+                        <Card><CardHeader><Skeleton className="h-8 w-1/2" /></CardHeader><CardContent className="space-y-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></CardContent></Card>
+                    </div>
+                    <Card><CardHeader><Skeleton className="h-8 w-full" /></CardHeader><CardContent><Skeleton className="h-40 w-full" /></CardContent></Card>
+                </div>
             </div>
         )
     }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-5xl mx-auto space-y-8 pb-12">
              {plan === 'pending' && (
-                <Alert variant="pro" className="border-yellow-400/50 text-yellow-600 dark:text-yellow-500 [&>svg]:text-yellow-500">
-                    <Hourglass/>
-                    <AlertTitle>Your Upgrade is Pending</AlertTitle>
+                <Alert variant="default" className="border-yellow-400/50 bg-yellow-50 dark:bg-yellow-950/20 text-yellow-800 dark:text-yellow-500 [&>svg]:text-yellow-600">
+                    <Hourglass className="h-4 w-4"/>
+                    <AlertTitle className="font-bold">Your Upgrade is Pending</AlertTitle>
                     <AlertDescription>
-                        An administrator will review your payment soon. Your request is being processed. If you haven't already, you can submit your proof of payment on the order status page.
+                        An administrator is reviewing your payment. You will receive an email once your {userData?.requestedPlan || 'Pro'} plan is activated.
                     </AlertDescription>
                 </Alert>
             )}
-             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <Card>
+
+            <div className="grid md:grid-cols-12 gap-8">
+                {/* Left Column: Profile & Security */}
+                <div className="md:col-span-7 space-y-8">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                            <Card className="shadow-md">
+                                <CardHeader>
+                                    <CardTitle className="text-xl flex items-center gap-2"><User className="h-5 w-5 text-primary"/> Personal Profile</CardTitle>
+                                    <CardDescription>Manage your public identity and contact information.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-xl bg-muted/30 border border-dashed">
+                                        <Avatar className="h-24 w-24 ring-4 ring-background shadow-lg">
+                                            <AvatarImage src={photoPreview || userData?.photoURL || user.photoURL || `https://placehold.co/200x200.png?text=${user.email?.[0].toUpperCase()}`} />
+                                            <AvatarFallback className="text-2xl">{user.email?.[0].toUpperCase()}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="space-y-3 flex-1 w-full text-center sm:text-left">
+                                            <Label className="text-sm font-semibold">Profile Picture</Label>
+                                            <Input
+                                                type="file"
+                                                className="h-9 cursor-pointer"
+                                                accept="image/*"
+                                                onChange={handlePhotoChange}
+                                            />
+                                            <p className="text-[10px] text-muted-foreground uppercase tracking-tight font-bold">JPG, PNG or WEBP. Max 2MB.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid sm:grid-cols-2 gap-4">
+                                        <FormField
+                                            control={form.control}
+                                            name="displayName"
+                                            render={({ field }) => (
+                                            <FormItem>
+                                                <Label className="text-xs uppercase font-bold text-muted-foreground">Display Name</Label>
+                                                <FormControl>
+                                                    <Input placeholder="Your Full Name" {...field} className="h-10" />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                            )}
+                                        />
+                                        <div className="space-y-2">
+                                            <Label className="text-xs uppercase font-bold text-muted-foreground">Account Email</Label>
+                                            <div className="relative">
+                                                <Input id="email" value={user.email || ''} readOnly disabled className="bg-muted/50 h-10 pl-9" />
+                                                <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <FormField
+                                        control={form.control}
+                                        name="phoneNumber"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <Label className="text-xs uppercase font-bold text-muted-foreground">Phone Number (Required for Payments)</Label>
+                                            <FormControl>
+                                                <Input type="tel" placeholder="e.g. 9876543210" {...field} className="h-10" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                </CardContent>
+                                <CardFooter className="flex justify-between bg-muted/10 border-t py-4">
+                                    <Button variant="ghost" size="sm" type="button" onClick={handleLogout} className="text-muted-foreground hover:text-destructive">Log Out Account</Button>
+                                    <Button type="submit" size="sm" disabled={isSaving}>
+                                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {isSaving ? 'Updating...' : 'Save Changes'}
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        </form>
+                    </Form>
+
+                    {/* Payment History Section */}
+                    <Card className="shadow-md overflow-hidden">
+                        <CardHeader className="bg-muted/30">
+                            <CardTitle className="text-xl flex items-center gap-2"><Receipt className="h-5 w-5 text-primary"/> Billing & Payment Details</CardTitle>
+                            <CardDescription>Your transaction history and billing configuration.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            {(plan === 'free' || plan === 'pending') && !userData?.paymentId ? (
+                                <div className="p-8 text-center space-y-3">
+                                    <CreditCard className="h-10 w-10 mx-auto text-muted-foreground/30" />
+                                    <div className="space-y-1">
+                                        <p className="font-semibold text-sm">No payment records found</p>
+                                        <p className="text-xs text-muted-foreground">Upgrade your plan to see billing history and receipts.</p>
+                                    </div>
+                                    <Button variant="outline" size="sm" onClick={() => router.push('/pricing')}>View Pricing</Button>
+                                </div>
+                            ) : (
+                                <div className="divide-y">
+                                    <div className="p-4 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-9 w-9 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                                <ShieldCheck className="h-5 w-5 text-green-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold">Secure Razorpay Payment</p>
+                                                <p className="text-[10px] text-muted-foreground font-mono uppercase">ID: {userData?.paymentId || 'WH_SUCCESS'}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm font-bold">₹{userData?.amountPaid || '---'}</p>
+                                            <Badge variant="outline" className="text-[10px] h-5 py-0 px-1 bg-green-50 text-green-700 border-green-200">Paid</Badge>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-muted/5">
+                                        <div className="grid grid-cols-2 gap-4 text-xs">
+                                            <div className="space-y-1">
+                                                <p className="text-muted-foreground">Billing Date</p>
+                                                <p className="font-medium">{userData?.planUpdatedAt ? format(new Date(userData.planUpdatedAt.seconds * 1000), 'MMM d, yyyy') : 'N/A'}</p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="text-muted-foreground">Currency</p>
+                                                <p className="font-medium">INR (₹)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Right Column: Subscription & Comparison */}
+                <div className="md:col-span-5 space-y-8">
+                    <Card className="shadow-md border-primary/20 bg-primary/5">
                         <CardHeader>
-                            <CardTitle>My Profile</CardTitle>
-                            <CardDescription>Manage your account settings.</CardDescription>
+                            <CardTitle className="flex items-center justify-between">
+                                <span className="flex items-center gap-2"><Crown className="h-5 w-5 text-amber-500" /> Current Plan</span>
+                                {getPlanBadge()}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                             <div className="flex items-center gap-4">
-                                <Avatar className="h-16 w-16">
-                                    <AvatarImage src={photoPreview || userData?.photoURL || user.photoURL || `https://placehold.co/100x100.png?text=${user.email?.[0].toUpperCase()}`} />
-                                    <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
-                                </Avatar>
-                                 <FormField
-                                    control={form.control}
-                                    name="photoFile"
-                                    render={() => (
-                                    <FormItem className="flex-1">
-                                        <Label>Profile Picture</Label>
-                                        <Input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handlePhotoChange}
-                                        />
-                                        <FormMessage />
-                                    </FormItem>
-                                     )}
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-3 rounded-lg bg-background border flex flex-col items-center justify-center text-center space-y-1">
+                                    <BotIcon className="h-5 w-5 text-primary" />
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">AI Credits</p>
+                                    <p className="text-lg font-black">{effectivePlan === 'pro' || effectivePlan === 'recruiter' ? '∞' : credits}</p>
+                                    <p className="text-[9px] text-muted-foreground">{effectivePlan === 'pro' || effectivePlan === 'recruiter' ? 'Unlimited Access' : 'Available units'}</p>
+                                </div>
+                                <div className="p-3 rounded-lg bg-background border flex flex-col items-center justify-center text-center space-y-1">
+                                    <Timer className={cn("h-5 w-5", expirationInfo?.isNearExpiry ? "text-amber-500" : "text-primary")} />
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Renewal In</p>
+                                    <p className="text-lg font-black">{expirationInfo ? `${expirationInfo.daysRemaining}d` : '---'}</p>
+                                    <p className="text-[9px] text-muted-foreground">30-day cycle</p>
+                                </div>
                             </div>
 
-                            <FormField
-                                control={form.control}
-                                name="displayName"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <Label>Full Name</Label>
-                                    <FormControl>
-                                        <Input placeholder="Your Name" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
+                            {expirationInfo && (
+                                <div className="flex items-center gap-2 p-3 rounded-lg bg-background/50 border text-xs">
+                                    <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                                    <span className="text-muted-foreground">Subscription Renews on:</span>
+                                    <span className="font-bold ml-auto">{format(expirationInfo.date, 'MMM d, yyyy')}</span>
+                                </div>
+                            )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email Address</Label>
-                                <Input id="email" value={user.email || ''} readOnly disabled />
+                            <div className="space-y-3">
+                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                                    <Info className="h-3 w-3" /> Included in your plan
+                                </p>
+                                <ul className="grid gap-2">
+                                    {(PLAN_BENEFITS[effectivePlan as keyof typeof PLAN_BENEFITS] || PLAN_BENEFITS.free).map((benefit, i) => (
+                                        <li key={i} className="flex items-center gap-2 text-xs font-medium">
+                                            <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                                            {benefit}
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
-
-                            <FormField
-                                control={form.control}
-                                name="phoneNumber"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <Label>Phone Number</Label>
-                                    <FormControl>
-                                        <Input type="tel" placeholder="Your 10-digit phone number" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
                         </CardContent>
-                        <CardFooter className="flex justify-between">
-                            <Button variant="outline" onClick={handleLogout}>Log Out</Button>
-                            <Button type="submit" disabled={isSaving}>
-                                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isSaving ? 'Saving...' : 'Save Changes'}
-                            </Button>
-                        </CardFooter>
-                    </Card>
-                </form>
-            </Form>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>My Subscription</CardTitle>
-                    <CardDescription>Manage your subscription plan and payment details.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="space-y-4 rounded-lg border p-4">
-                         <div className="flex items-center justify-between">
-                            <Label>Current Plan</Label>
-                            {getPlanBadge()}
-                         </div>
-                         <div className="flex items-center justify-between">
-                            <Label>AI Credits</Label>
-                            <Badge variant="outline">
-                                <BotIcon className="mr-2 h-4 w-4"/>
-                                {plan === 'pro' || plan === 'recruiter' ? 'Unlimited' : `${credits} remaining`}
-                            </Badge>
-                         </div>
-                         {expirationInfo && (
-                            <div className="flex items-center justify-between pt-2 border-t">
-                                <Label className="flex items-center gap-2"><Timer className={cn("h-4 w-4", expirationInfo.isNearExpiry ? "text-amber-500" : "text-muted-foreground")}/> Expiration</Label>
-                                <div className="text-right">
-                                    <p className={cn("text-sm font-medium", expirationInfo.isNearExpiry ? "text-amber-600 font-bold" : "")}>
-                                        {format(expirationInfo.date, 'MMM d, yyyy')}
-                                    </p>
-                                    <p className="text-[10px] text-muted-foreground">
-                                        {expirationInfo.daysRemaining} days remaining
-                                    </p>
-                                </div>
-                            </div>
-                         )}
-                    </div>
-                    
-                    { (plan !== 'free' && plan !== 'pending' && plan !== 'cancellation_requested') && (
-                        <div className="space-y-4 rounded-lg border p-4">
-                            <div className="flex items-center gap-2">
-                                <Wallet className="h-5 w-5 text-muted-foreground"/>
-                                <h4 className="font-semibold">Payment Details</h4>
-                            </div>
-                            {userData?.planUpdatedAt && (
-                                <div className="flex items-center justify-between">
-                                    <Label className="flex items-center gap-2 text-muted-foreground"><Calendar className="h-4 w-4"/> Last Payment</Label>
-                                    <p className="text-sm font-medium">
-                                        {format(expirationInfo?.date ? addDays(expirationInfo.date, -30) : new Date(userData.planUpdatedAt.seconds * 1000), 'MMM d, yyyy')}
-                                    </p>
-                                </div>
-                            )}
-                            {userData?.paymentId && (
-                                <div className="flex items-center justify-between">
-                                    <Label className="flex items-center gap-2 text-muted-foreground"><ShieldCheck className="h-4 w-4"/> Payment ID</Label>
-                                    <p className="text-sm font-mono text-muted-foreground truncate max-w-[150px]" title={userData.paymentId}>
-                                        {userData.paymentId}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </CardContent>
-                {(plan === 'pro' || plan === 'recruiter' || plan === 'essentials') && (
-                     <CardFooter className="flex flex-col sm:flex-row gap-4 justify-between items-center border-t pt-4">
-                        <div className="flex flex-col gap-1">
-                            <p className="text-xs text-muted-foreground">Need to cancel? <Link href="/cancellation" className="underline">View policy</Link></p>
-                            {expirationInfo?.isNearExpiry && (
-                                <Button size="sm" asChild className="bg-amber-500 hover:bg-amber-600 text-white">
-                                    <Link href="/pricing">Renew or Upgrade Now</Link>
+                        <CardFooter className="flex flex-col gap-3 pt-0">
+                            {effectivePlan !== 'recruiter' && (
+                                <Button className="w-full shadow-lg shadow-primary/20" onClick={() => router.push('/pricing')}>
+                                    <Crown className="mr-2 h-4 w-4" /> Upgrade Plan
                                 </Button>
                             )}
-                        </div>
-                        <Button variant="destructive" size="sm" onClick={handleCancellation} disabled={plan === 'cancellation_requested'}>
-                            <Ban className="mr-2 h-4 w-4" />
-                            {plan === 'cancellation_requested' ? 'Cancellation Requested' : 'Request Cancellation'}
-                        </Button>
-                    </CardFooter>
-                )}
-                 {plan === 'free' && (
-                     <CardFooter className="border-t pt-4">
-                        <Button className="w-full" onClick={() => router.push('/pricing')}>
-                            <Crown className="mr-2 h-4 w-4" />
-                            Upgrade to Pro
-                        </Button>
-                    </CardFooter>
-                )}
-                 {plan === 'pending' && (
-                     <CardFooter className="border-t pt-4">
-                        <Button className="w-full" onClick={() => router.push('/pricing')} variant="secondary">
-                            Change Plan
-                        </Button>
-                    </CardFooter>
-                )}
-            </Card>
+                            
+                            {(plan !== 'free' && plan !== 'pending' && plan !== 'cancellation_requested') && (
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="w-full text-[10px] h-8 font-bold uppercase text-muted-foreground hover:text-destructive hover:bg-destructive/5" 
+                                    onClick={handleCancellation}
+                                >
+                                    Request Subscription Cancellation
+                                </Button>
+                            )}
+                        </CardFooter>
+                    </Card>
+
+                    {/* Quick Comparison Card */}
+                    <Card className="shadow-md overflow-hidden">
+                        <CardHeader className="py-4">
+                            <CardTitle className="text-sm">Plan Comparisons</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <div className="divide-y text-[11px]">
+                                <div className="p-3 flex justify-between bg-muted/30">
+                                    <span className="font-bold">Feature</span>
+                                    <span className="font-bold w-20 text-center">Pro</span>
+                                    <span className="font-bold w-20 text-center">Recruiter</span>
+                                </div>
+                                <div className="p-3 flex justify-between items-center">
+                                    <span className="text-muted-foreground">AI Resume Credits</span>
+                                    <span className="w-20 text-center font-medium">Unlimited</span>
+                                    <span className="w-20 text-center font-medium">Unlimited</span>
+                                </div>
+                                <div className="p-3 flex justify-between items-center">
+                                    <span className="text-muted-foreground">Resume Versions</span>
+                                    <span className="w-20 text-center font-medium">Unlimited</span>
+                                    <span className="w-20 text-center font-medium">Unlimited</span>
+                                </div>
+                                <div className="p-3 flex justify-between items-center">
+                                    <span className="text-muted-foreground">Candidate Ranking</span>
+                                    <span className="w-20 text-center">—</span>
+                                    <span className="w-20 text-center text-green-600 font-bold">Included</span>
+                                </div>
+                                <div className="p-3 flex justify-between items-center">
+                                    <span className="text-muted-foreground">Analytics Dash</span>
+                                    <span className="w-20 text-center">—</span>
+                                    <span className="w-20 text-center text-green-600 font-bold">Included</span>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
         </div>
     );
 }
