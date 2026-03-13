@@ -113,10 +113,7 @@ export function UserManagementPage() {
   const handleDeleteUser = async (userId: string) => {
     setIsDeletingId(userId);
     try {
-      // 1. Delete Firestore Document
       await deleteDoc(doc(db, 'users', userId));
-      
-      // 2. Attempt to delete Authentication Account via Server Action
       try {
         await deleteUserAccountAction(userId);
         toast({
@@ -124,10 +121,10 @@ export function UserManagementPage() {
             description: 'Database record and authentication account have been removed.',
         });
       } catch (authError: any) {
-        console.warn("Auth deletion failed (likely missing Service Account Key):", authError);
+        console.warn("Auth deletion failed:", authError);
         toast({
             title: 'Firestore Doc Deleted',
-            description: 'Database record removed, but auth account requires manual deletion in Firebase Console.',
+            description: 'Database record removed, but auth account requires manual deletion.',
             variant: 'destructive',
         });
       }
@@ -318,7 +315,7 @@ export function UserManagementPage() {
                                         <div className="p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900 rounded-md flex items-start gap-2 text-amber-800 dark:text-amber-200">
                                             <AlertCircle className="h-5 w-5 shrink-0" />
                                             <div className="text-xs">
-                                                <strong>Note:</strong> Authentication deletion requires a configured <code>FIREBASE_SERVICE_ACCOUNT_KEY</code>. If not set, the user document will be deleted, but the account will remain in Auth.
+                                                <strong>Note:</strong> Authentication deletion requires a configured <code>FIREBASE_SERVICE_ACCOUNT_KEY</code>.
                                             </div>
                                         </div>
                                     </div>

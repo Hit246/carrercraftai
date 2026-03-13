@@ -65,13 +65,11 @@ export function SubscriptionsManagementPage() {
     const userRef = doc(db, 'users', userId);
     try {
       let amountPaid = 0;
-      // If manually upgrading, try to record the price based on current settings
       if (['essentials', 'pro', 'recruiter'].includes(newPlan)) {
           const pricingSnap = await getDoc(doc(db, 'settings', 'pricing'));
           if (pricingSnap.exists()) {
               const pricing = pricingSnap.data();
               amountPaid = pricing[newPlan] || 0;
-              // Apply festive discount if active
               if (pricing.festiveDiscount > 0) {
                   amountPaid = Math.floor(amountPaid * (1 - pricing.festiveDiscount / 100));
               }
@@ -82,8 +80,6 @@ export function SubscriptionsManagementPage() {
         plan: newPlan, 
       };
 
-      // Only update timestamp and price when moving TO a paid plan
-      // Moving back to 'free' preserves the old planUpdatedAt for history
       if (['essentials', 'pro', 'recruiter'].includes(newPlan)) {
           updateData.planUpdatedAt = new Date();
           updateData.amountPaid = amountPaid;
@@ -99,7 +95,7 @@ export function SubscriptionsManagementPage() {
         title: 'Plan Updated',
         description: `User's plan has been changed to ${newPlan}.`,
       });
-      fetchUsers(); // Refresh users list
+      fetchUsers();
     } catch (error) {
       toast({
         title: 'Error',
@@ -131,7 +127,7 @@ export function SubscriptionsManagementPage() {
 
   const getStatusBadge = (user: UserData) => {
      if (user.plan === 'pending' || user.plan === 'cancellation_requested') {
-        return null; // The plan badge already shows this.
+        return null;
     }
     if (user.plan === 'free' || ADMIN_EMAILS.includes(user.email)) {
         return <Badge variant="secondary">N/A</Badge>;

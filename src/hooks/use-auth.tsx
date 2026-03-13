@@ -65,13 +65,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userData, setUserData] = useState<UserData| null>(null);
 
-  // Helper to ensure user document exists (Self-Healing)
   const ensureUserDocument = async (authUser: User) => {
     const userRef = doc(db, 'users', authUser.uid);
     try {
         const userDoc = await getDoc(userRef);
         if (!userDoc.exists()) {
-            console.log("Self-Healing: User document missing. Creating now...");
             const userIsAdmin = authUser.email && ADMIN_EMAILS.includes(authUser.email);
             
             await setDoc(userRef, { 
@@ -96,7 +94,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userIsAdmin = currentUser.email && ADMIN_EMAILS.includes(currentUser.email);
         setIsAdmin(!!userIsAdmin);
 
-        // Proactively heal missing user document
         await ensureUserDocument(currentUser);
 
         if (userIsAdmin) {
@@ -134,7 +131,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         const effPlan = userPlan === 'pending' ? (currentData.previousPlan || 'free') : userPlan;
 
-        // Auto-expiry logic (30 days)
         if (planUpdatedAt && ['essentials', 'pro', 'recruiter'].includes(userPlan)) {
             let upgradeDate: Date;
             if (planUpdatedAt?.toDate) {
@@ -189,7 +185,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const newUser = userCredential.user;
     
-    // 1. Create Base User Doc Immediately (Resilient)
     const initialUserData: any = { 
         email: newUser.email, 
         createdAt: serverTimestamp(), 
@@ -202,7 +197,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     await setDoc(doc(db, "users", newUser.uid), initialUserData);
 
-    // 2. Try team invitation lookup (Non-blocking)
     try {
         const membersQuery = query(collectionGroup(db, 'members'), where('email', '==', email));
         const membersSnapshot = await getDocs(membersQuery);
@@ -222,7 +216,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         }
     } catch (teamError) {
-        console.warn("Team invitation lookup failed (permissions or index):", teamError);
+        console.warn("Team invitation lookup failed:", teamError);
     }
     
     return userCredential;
