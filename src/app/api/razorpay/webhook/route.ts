@@ -1,6 +1,6 @@
 
 import { db } from '@/lib/firebase';
-import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, getDoc, increment } from 'firebase/firestore';
 import * as crypto from 'crypto';
 import { notifyAdminOfUpgradeAction } from '@/lib/actions';
 
@@ -47,9 +47,18 @@ export async function POST(req: Request) {
         const userSnap = await getDoc(userRef);
         const userEmail = userSnap.exists() ? userSnap.data().email : 'Unknown User';
 
+        // Calculate credits to add
+        let creditsUpdate: any = 5; // Default for free
+        if (plan === 'essentials') {
+            creditsUpdate = increment(50);
+        } else if (plan === 'pro' || plan === 'recruiter') {
+            creditsUpdate = 999999;
+        }
+
         await updateDoc(userRef, {
             plan: plan,
             planUpdatedAt: serverTimestamp(),
+            credits: creditsUpdate,
             paymentId: paymentId,
             webhookVerified: true,
             amountPaid: amountPaid,

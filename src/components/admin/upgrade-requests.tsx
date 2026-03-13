@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc, query, where, orderBy, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, query, where, orderBy, getDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -88,9 +89,19 @@ export function UpgradeRequestsPage() {
       }
 
       const userRef = doc(db, 'users', user.id);
+      
+      // Calculate credits to add
+      let creditsUpdate: any = 5;
+      if (user.requestedPlan === 'essentials') {
+          creditsUpdate = increment(50);
+      } else if (user.requestedPlan === 'pro' || user.requestedPlan === 'recruiter') {
+          creditsUpdate = 999999;
+      }
+
       await updateDoc(userRef, { 
         plan: user.requestedPlan, 
         planUpdatedAt: new Date(),
+        credits: creditsUpdate,
         requestedPlan: null,
         previousPlan: null,
         amountPaid: amountPaid, // Record the price at time of approval

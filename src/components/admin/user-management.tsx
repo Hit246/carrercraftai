@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, deleteDoc, getDoc, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -90,6 +91,14 @@ export function UserManagementPage() {
           updateData.planUpdatedAt = new Date();
           updateData.amountPaid = amountPaid;
           updateData.webhookVerified = false;
+          
+          if (newPlan === 'essentials') {
+              updateData.credits = increment(50);
+          } else if (newPlan === 'pro' || newPlan === 'recruiter') {
+              updateData.credits = 999999;
+          }
+      } else if (newPlan === 'free') {
+          updateData.credits = 5;
       }
       
       if (newPlan !== 'pending') {
