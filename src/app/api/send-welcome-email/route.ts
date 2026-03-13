@@ -2,8 +2,6 @@
 import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const emails = [
   {
     delay: 0,
@@ -77,11 +75,15 @@ const emails = [
 ];
 
 export async function POST(req: NextRequest) {
-  if (!process.env.RESEND_API_KEY) {
+  const apiKey = process.env.RESEND_API_KEY;
+  
+  if (!apiKey) {
+    console.error("❌ Resend API key is missing. Email sequence skipped.");
     return NextResponse.json({ error: "Resend API key missing" }, { status: 500 });
   }
 
   try {
+    const resend = new Resend(apiKey);
     const { email, name } = await req.json();
 
     // Send Day 0 email immediately
