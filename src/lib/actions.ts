@@ -1,4 +1,3 @@
-
 'use server';
 
 import { doc, getDoc, addDoc, collection as firestoreCollection, serverTimestamp } from 'firebase/firestore';
@@ -73,7 +72,7 @@ export async function notifyAdminOfUpgradeAction(data: {
   userEmail: string;
   plan: string;
   amount?: number;
-  type: 'MANUAL_REQUEST' | 'PROOF_UPLOADED' | 'WEBHOOK_PAID' | 'CANCELLATION_REQUEST';
+  type: 'MANUAL_REQUEST' | 'PROOF_UPLOADED' | 'WEBHOOK_PAID' | 'CANCELLATION_REQUEST' | 'PLAN_EXPIRED';
 }) {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, ADMIN_EMAIL } = process.env;
 
@@ -97,6 +96,7 @@ export async function notifyAdminOfUpgradeAction(data: {
     PROOF_UPLOADED: `📸 Payment Proof Received: ${data.userEmail}`,
     WEBHOOK_PAID: `💰 Automatic Payment Success: ${data.plan}`,
     CANCELLATION_REQUEST: `⚠️ Cancellation Requested: ${data.userEmail}`,
+    PLAN_EXPIRED: `⏰ Subscription Expired: ${data.userEmail}`,
   };
 
   const bodyMap = {
@@ -104,6 +104,7 @@ export async function notifyAdminOfUpgradeAction(data: {
     PROOF_UPLOADED: `User ${data.userEmail} has uploaded a payment proof. Review it in the Admin Panel.`,
     WEBHOOK_PAID: `User ${data.userEmail} has paid ₹${data.amount} for the ${data.plan} plan. Account upgraded.`,
     CANCELLATION_REQUEST: `User ${data.userEmail} has requested to cancel their ${data.plan} subscription. Revert them to Free if eligible.`,
+    PLAN_EXPIRED: `User ${data.userEmail}'s ${data.plan} subscription has expired after 30 days. They have been reverted to the Free plan.`,
   };
 
   try {
@@ -115,12 +116,21 @@ export async function notifyAdminOfUpgradeAction(data: {
       html: `<p>${bodyMap[data.type]}</p>`,
     });
 
-    // Notify USER (Confirmation)
-    if (data.type === 'MANUAL_REQUEST' || data.type === 'CANCELLATION_REQUEST') {
-        const userSubject = data.type === 'MANUAL_REQUEST' ? 'Upgrade Request Received' : 'Cancellation Request Received';
-        const userBody = data.type === 'MANUAL_REQUEST' 
-            ? `We've received your request to upgrade to ${data.plan}. Our team is reviewing your payment and will activate your account shortly.`
-            : `We've received your request to cancel your subscription. Your access will continue until the end of your billing cycle. If you're eligible for a refund per our policy, it will be processed within 5-7 business days.`;
+    // Notify USER (Confirmation or Expiry Notice)
+    if (data.type === 'MANUAL_REQUEST' || data.type === 'CANCELLATION_REQUEST' || data.type === 'PLAN_EXPIRED') {
+        let userSubject = '';
+        let userBody = '';
+
+        if (data.type === 'MANUAL_REQUEST') {
+            userSubject = 'Upgrade Request Received';
+            userBody = `We've received your request to upgrade to ${data.plan}. Our team is reviewing your payment and will activate your account shortly.`;
+        } else if (data.type === 'CANCELLATION_REQUEST') {
+            userSubject = 'Cancellation Request Received';
+            userBody = `We've received your request to cancel your subscription. Your access will continue until the end of your billing cycle. If you're eligible for a refund per our policy, it will be processed within 5-7 business days.`;
+        } else if (data.type === 'PLAN_EXPIRED') {
+            userSubject = 'Your Subscription Has Expired';
+            userBody = `Your ${data.plan} subscription has expired. Your account has been reverted to the Free plan. To keep enjoying unlimited AI features and saved resumes, please <a href="${process.env.NEXT_PUBLIC_APP_URL}/pricing">renew your subscription here</a>.`;
+        }
 
         await transporter.sendMail({
             from: `"CareerCraft AI" <${SMTP_USER}>`,

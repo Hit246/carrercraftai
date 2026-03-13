@@ -5,6 +5,7 @@ import { onAuthStateChanged, User, signOut, createUserWithEmailAndPassword, sign
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, query, where, getDocs, writeBatch, onSnapshot, collectionGroup, serverTimestamp } from 'firebase/firestore';
 import { differenceInDays, addDays } from 'date-fns';
+import { notifyAdminOfUpgradeAction } from '@/lib/actions';
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
@@ -150,6 +151,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 const expirationDate = addDays(upgradeDate, 30);
                 if (differenceInDays(new Date(), expirationDate) >= 0) {
                     await updateDoc(userRef, { plan: 'free', credits: FREE_CREDITS, previousPlan: null });
+                    
+                    // Notify Admin and User about the expiration
+                    if (user.email) {
+                        await notifyAdminOfUpgradeAction({
+                            userEmail: user.email,
+                            plan: userPlan,
+                            type: 'PLAN_EXPIRED'
+                        });
+                    }
                     return;
                 }
             }
@@ -162,7 +172,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (effPlan === 'pro' || effPlan === 'recruiter') {
             setCredits(Infinity);
         } else if (effPlan === 'essentials') {
-            // Robust fallback handling for 0 credits
             setCredits(currentData.credits !== undefined ? currentData.credits : ESSENTIALS_CREDITS);
         } else {
             setCredits(currentData.credits !== undefined ? currentData.credits : FREE_CREDITS);
