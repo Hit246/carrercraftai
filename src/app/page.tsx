@@ -342,9 +342,9 @@ function HomePageContent() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground text-sm">
           {/* Product Hunt Official Embed */}
           <div className="flex justify-center mb-8">
-            <a href="https://www.producthunt.com/posts/careercraft-ai?embed=true&utm_source=badge-featured" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.producthunt.com/posts/careercraft-ai" target="_blank" rel="noopener noreferrer">
               <img
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=126122&theme=light"
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=careercraft-ai&theme=light"
                 alt="CareerCraft AI - Featured on Product Hunt"
                 width="250"
                 height="54"
