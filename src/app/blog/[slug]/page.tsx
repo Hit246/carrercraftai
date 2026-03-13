@@ -20,6 +20,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${post.title} | CareerCraft AI Blog`,
     description: post.description,
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      type: 'article',
+      publishedTime: post.date,
+      authors: ['Hitarth Chauhan'],
+      tags: post.tags,
+    }
   };
 }
 
@@ -29,9 +37,28 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post) return notFound();
 
+  // JSON-LD Structured Data for Google
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.description,
+    "author": {
+      "@type": "Person",
+      "name": "Hitarth Chauhan",
+      "url": "https://github.com/Hit246"
+    },
+    "datePublished": post.date,
+    "image": "https://careercraftai.tech/og-image.png",
+  };
+
   return (
     <AuthProvider>
       <div className="flex flex-col min-h-screen bg-background">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <HomeHeader />
         <main className="flex-1">
           <div className="container mx-auto px-4 py-12">
