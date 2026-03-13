@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff, CheckCircle2, Circle } from 'lucide-react';
 import { GoogleAuthButton } from '@/components/auth/google-auth-button';
 
 const formSchema = z.object({
@@ -21,6 +21,49 @@ const formSchema = z.object({
   });
 
 const ADMIN_EMAILS = ['admin@careercraftai.tech', 'hitarth0236@gmail.com'];
+
+function PasswordStrength({ password }: { password: string }) {
+  const checks = [
+    { label: "8+ characters", pass: password.length >= 8 },
+    { label: "Uppercase letter", pass: /[A-Z]/.test(password) },
+    { label: "Number", pass: /[0-9]/.test(password) },
+    { label: "Special character", pass: /[^A-Za-z0-9]/.test(password) },
+  ];
+  const strength = checks.filter((c) => c.pass).length;
+  const colors = ["bg-red-500", "bg-orange-400", "bg-yellow-400", "bg-green-500"];
+  const labels = ["Weak", "Fair", "Good", "Strong"];
+
+  if (!password) return null;
+
+  return (
+    <div className="mt-2 space-y-2">
+      {/* Bar */}
+      <div className="flex gap-1">
+        {[0, 1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+              i < strength ? colors[strength - 1] : "bg-muted"
+            }`}
+          />
+        ))}
+      </div>
+      {/* Label */}
+      <p className={`text-[10px] font-bold uppercase tracking-wider ${strength >= 3 ? "text-green-500" : strength === 2 ? "text-yellow-500" : "text-red-500"}`}>
+        {labels[strength - 1] || "Too weak"}
+      </p>
+      {/* Checklist */}
+      <ul className="space-y-0.5">
+        {checks.map((c) => (
+          <li key={c.label} className={`text-[10px] flex items-center gap-1.5 ${c.pass ? "text-green-500" : "text-muted-foreground"}`}>
+            {c.pass ? <CheckCircle2 className="h-2.5 w-2.5" /> : <Circle className="h-2.5 w-2.5 opacity-50" />} 
+            {c.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -36,6 +79,8 @@ export function SignupForm() {
       password: '',
     },
   });
+
+  const passwordValue = form.watch('password');
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -117,6 +162,7 @@ export function SignupForm() {
                         </Button>
                       </div>
                     </FormControl>
+                    <PasswordStrength password={passwordValue} />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -127,6 +173,10 @@ export function SignupForm() {
               </Button>
             </form>
           </Form>
+          
+          <p className="text-center text-[10px] text-muted-foreground mt-3 font-medium uppercase tracking-widest">
+            🔒 No credit card required · Free forever plan available
+          </p>
         </div>
         <div className="mt-6 text-center text-sm">
           Already have an account?{' '}
