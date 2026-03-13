@@ -4,6 +4,7 @@ import { blogPosts } from "@/data/blog-posts";
 const siteUrl = "https://careercraftai.tech";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+    // Generate sitemap entries for all blog posts
     const blogSitemap: MetadataRoute.Sitemap = blogPosts.map((post) => ({
         url: `${siteUrl}/blog/${post.slug}`,
         lastModified: new Date(post.date),
@@ -11,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.8,
     }));
 
+    // Define all static public routes
     const staticPages: MetadataRoute.Sitemap = [
         {
             url: siteUrl,
@@ -29,6 +31,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
             lastModified: new Date(),
             changeFrequency: "weekly",
             priority: 0.9,
+        },
+        {
+            url: `${siteUrl}/login`,
+            lastModified: new Date(),
+            changeFrequency: "monthly",
+            priority: 0.8,
+        },
+        {
+            url: `${siteUrl}/signup`,
+            lastModified: new Date(),
+            changeFrequency: "monthly",
+            priority: 0.8,
         },
         {
             url: `${siteUrl}/contact`,
