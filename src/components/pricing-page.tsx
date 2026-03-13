@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useEffect } from "react"
@@ -43,6 +42,7 @@ export function PricingPage() {
     festiveName: '',
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [annual, setAnnual] = useState(false);
 
   // Promo Code State
   const [promoCodeInput, setPromoCodeInput] = useState('');
@@ -103,10 +103,13 @@ export function PricingPage() {
     }
   };
 
-  const calculatePrice = (base: number) => {
+  const calculateMonthlyPrice = (base: number) => {
     let final = base;
     if (settings.festiveDiscount > 0) {
       final = final * (1 - settings.festiveDiscount / 100);
+    }
+    if (annual) {
+      final = final * 0.8; // 20% Annual Discount
     }
     if (appliedPromo) {
       final = final * (1 - appliedPromo.discount / 100);
@@ -134,7 +137,9 @@ export function PricingPage() {
     }
   
     setIsProcessing(selectedPlan);
-    const finalAmount = calculatePrice(settings[selectedPlan]);
+    const monthlyRate = calculateMonthlyPrice(settings[selectedPlan]);
+    const finalAmount = annual ? monthlyRate * 12 : monthlyRate;
+    
     const basePrice = settings[selectedPlan];
     const festiveDiscount = settings.festiveDiscount;
     const promoDiscount = appliedPromo?.discount || 0;
@@ -146,6 +151,7 @@ export function PricingPage() {
             previousPlan: plan,
             plan: 'pending',
             requestedPlan: selectedPlan,
+            billingCycle: annual ? 'annual' : 'monthly',
             // Temporarily store intended breakdown for history sync if webhook is slow
             tempBasePrice: basePrice,
             tempFestiveDiscount: festiveDiscount,
@@ -155,7 +161,7 @@ export function PricingPage() {
         
         await notifyAdminOfUpgradeAction({
           userEmail: user.email,
-          plan: selectedPlan,
+          plan: `${selectedPlan} (${annual ? 'Annual' : 'Monthly'})`,
           type: 'MANUAL_REQUEST'
         });
 
@@ -213,6 +219,23 @@ export function PricingPage() {
             </span>
           ) : 'Upgrade to unlock AI-powered career tools and unlimited features.'}
         </p>
+
+        {/* Billing Toggle */}
+        <div className="flex items-center justify-center gap-3 mt-8">
+          <span className={`text-sm font-medium ${!annual ? "text-foreground" : "text-muted-foreground"}`}>Monthly</span>
+          <button
+            onClick={() => setAnnual(!annual)}
+            className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${annual ? "bg-primary" : "bg-muted"}`}
+          >
+            <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-300 ${annual ? "translate-x-7" : "translate-x-1"}`} />
+          </button>
+          <span className={`text-sm font-medium ${annual ? "text-foreground" : "text-muted-foreground"}`}>
+            Annual
+            <span className="ml-2 text-[10px] text-green-500 font-black bg-green-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">
+              Save 20%
+            </span>
+          </span>
+        </div>
       </div>
 
       <div className="mt-8 w-full max-w-sm flex items-end gap-2 text-left mx-auto">
@@ -258,7 +281,7 @@ export function PricingPage() {
         </Card>
 
         <Card className="flex flex-col relative overflow-hidden">
-          {(settings.festiveDiscount > 0 || appliedPromo) && <Badge className="absolute top-2 right-2 bg-green-500">Sale</Badge>}
+          {(settings.festiveDiscount > 0 || appliedPromo || annual) && <Badge className="absolute top-2 right-2 bg-green-500">Sale</Badge>}
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
               <Trophy className="text-gray-400" /> Essentials
@@ -266,10 +289,11 @@ export function PricingPage() {
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="flex flex-col">
-              {(settings.festiveDiscount > 0 || appliedPromo) && (
+              {(settings.festiveDiscount > 0 || appliedPromo || annual) && (
                 <span className="text-sm text-muted-foreground line-through">₹{settings.essentials}</span>
               )}
-              <p className="text-4xl font-bold font-headline">₹{calculatePrice(settings.essentials)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+              <p className="text-4xl font-bold font-headline">₹{calculateMonthlyPrice(settings.essentials)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+              {annual && <p className="text-[10px] text-muted-foreground mt-1 font-bold">Billed annually (₹{calculateMonthlyPrice(settings.essentials) * 12}/yr)</p>}
             </div>
             <ul className="space-y-2 text-left text-sm">
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 50 AI credits</li>
@@ -290,10 +314,11 @@ export function PricingPage() {
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="flex flex-col">
-              {(settings.festiveDiscount > 0 || appliedPromo) && (
+              {(settings.festiveDiscount > 0 || appliedPromo || annual) && (
                 <span className="text-sm text-muted-foreground line-through">₹{settings.pro}</span>
               )}
-              <p className="text-4xl font-bold font-headline">₹{calculatePrice(settings.pro)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+              <p className="text-4xl font-bold font-headline">₹{calculateMonthlyPrice(settings.pro)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+              {annual && <p className="text-[10px] text-muted-foreground mt-1 font-bold">Billed annually (₹{calculateMonthlyPrice(settings.pro) * 12}/yr)</p>}
             </div>
             <ul className="space-y-2 text-left text-sm">
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited AI analysis</li>
@@ -315,10 +340,11 @@ export function PricingPage() {
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="flex flex-col">
-              {(settings.festiveDiscount > 0 || appliedPromo) && (
+              {(settings.festiveDiscount > 0 || appliedPromo || annual) && (
                 <span className="text-sm text-muted-foreground line-through">₹{settings.recruiter}</span>
               )}
-              <p className="text-4xl font-bold font-headline">₹{calculatePrice(settings.recruiter)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+              <p className="text-4xl font-bold font-headline">₹{calculateMonthlyPrice(settings.recruiter)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+              {annual && <p className="text-[10px] text-muted-foreground mt-1 font-bold">Billed annually (₹{calculateMonthlyPrice(settings.recruiter) * 12}/yr)</p>}
             </div>
             <ul className="space-y-2 text-left text-sm">
               <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking</li>
@@ -332,6 +358,11 @@ export function PricingPage() {
           </CardFooter>
         </Card>
       </div>
+      
+      {/* Trust signals */}
+      <p className="text-center text-xs text-muted-foreground mt-12 font-medium uppercase tracking-widest">
+        🔒 Secure payments via Razorpay · Cancel anytime · No hidden fees
+      </p>
     </div>
   )
 }
