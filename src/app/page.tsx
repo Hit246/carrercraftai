@@ -224,18 +224,18 @@ function HomePageContent() {
                 ) : 'Choose the plan that’s right for you and take the next step in your career.'}
               </p>
 
-              {/* Billing Toggle */}
+              {/* Improved Toggle UI */}
               <div className="flex items-center justify-center gap-3 mt-8">
                 <span className={`text-sm font-medium ${!annual ? "text-foreground" : "text-muted-foreground"}`}>Monthly</span>
                 <button
                   onClick={() => setAnnual(!annual)}
-                  className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${annual ? "bg-primary" : "bg-muted"}`}
+                  className={`relative w-12 h-6 rounded-full transition-colors duration-300 flex items-center px-1 ${annual ? "bg-primary" : "bg-slate-800"}`}
                 >
-                  <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-300 ${annual ? "translate-x-7" : "translate-x-1"}`} />
+                  <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${annual ? "translate-x-6" : "translate-x-0"}`} />
                 </button>
-                <span className={`text-sm font-medium ${annual ? "text-foreground" : "text-muted-foreground"}`}>
+                <span className={`text-sm font-medium flex items-center gap-2 ${annual ? "text-foreground" : "text-muted-foreground"}`}>
                   Annual
-                  <span className="ml-2 text-[10px] text-green-500 font-black bg-green-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">
+                  <span className="text-[10px] text-green-500 font-black bg-green-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">
                     Save 20%
                   </span>
                 </span>

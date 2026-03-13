@@ -21,6 +21,7 @@ interface UserData {
     paymentProofURL?: string | null;
     paymentId?: string | null;
     requestedPlan?: 'essentials' | 'pro' | 'recruiter';
+    billingCycle?: 'monthly' | 'annual';
     previousPlan?: Plan;
     teamId?: string;
     hasCompletedOnboarding?: boolean;
@@ -30,6 +31,10 @@ interface UserData {
     email?: string;
     amountPaid?: number;
     webhookVerified?: boolean;
+    basePrice?: number;
+    festiveDiscount?: number;
+    promoDiscount?: number;
+    appliedPromoCode?: string;
 }
 
 interface AuthContextType {

@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Crown, User, Shield, Trophy, AlertTriangle, Handshake, AlertCircle, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Trash2, Crown, User, Shield, Trophy, AlertTriangle, Handshake, AlertCircle, Loader2, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
@@ -39,6 +39,7 @@ interface UserData {
   plan: Plan;
   photoURL?: string;
   requestedPlan?: 'essentials' | 'pro' | 'recruiter';
+  billingCycle?: 'monthly' | 'annual';
   createdAt?: { seconds: number };
   planUpdatedAt?: { seconds: number };
 }
@@ -199,6 +200,7 @@ export function UserManagementPage() {
                 <TableRow>
                 <TableHead>User</TableHead>
                 <TableHead>Subscription Plan</TableHead>
+                <TableHead>Cycle</TableHead>
                 <TableHead>Joined Date</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -209,6 +211,7 @@ export function UserManagementPage() {
                     <TableRow key={i}>
                         <TableCell><Skeleton className="h-10 w-48" /></TableCell>
                         <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-16" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                     </TableRow>
@@ -263,6 +266,15 @@ export function UserManagementPage() {
                                     </Tooltip>
                                 )}
                             </div>
+                        </TableCell>
+                        <TableCell>
+                            {user.billingCycle ? (
+                                <Badge variant="outline" className="capitalize text-[10px]">
+                                    {user.billingCycle === 'annual' ? (
+                                        <span className="flex items-center gap-1"><Calendar className="h-3 w-3 text-green-500"/> Annual</span>
+                                    ) : 'Monthly'}
+                                </Badge>
+                            ) : '-'}
                         </TableCell>
                         <TableCell>
                         {user.createdAt

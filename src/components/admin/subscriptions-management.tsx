@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Crown, User, Shield, Trophy, Handshake } from 'lucide-react';
+import { MoreHorizontal, Crown, User, Shield, Trophy, Handshake, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { differenceInDays, addDays, format } from 'date-fns';
@@ -35,6 +35,7 @@ interface UserData {
   email: string;
   plan: Plan;
   requestedPlan?: 'essentials' | 'pro' | 'recruiter';
+  billingCycle?: 'monthly' | 'annual';
   createdAt?: { seconds: number };
   planUpdatedAt?: { seconds: number };
 }
@@ -160,6 +161,7 @@ export function SubscriptionsManagementPage() {
             <TableRow>
               <TableHead>User</TableHead>
               <TableHead>Current Plan</TableHead>
+              <TableHead>Cycle</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Upgrade Date</TableHead>
               <TableHead>Expires On</TableHead>
@@ -172,6 +174,7 @@ export function SubscriptionsManagementPage() {
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-10 w-48" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-16" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-28" /></TableCell>
@@ -197,6 +200,15 @@ export function SubscriptionsManagementPage() {
                         </div>
                       </TableCell>
                       <TableCell>{getPlanBadge(user)}</TableCell>
+                      <TableCell>
+                        {user.billingCycle ? (
+                            <Badge variant="outline" className="capitalize text-[10px]">
+                                {user.billingCycle === 'annual' ? (
+                                    <span className="flex items-center gap-1"><Calendar className="h-3 w-3 text-green-500"/> Annual</span>
+                                ) : 'Monthly'}
+                            </Badge>
+                        ) : '-'}
+                      </TableCell>
                       <TableCell>{getStatusBadge(user)}</TableCell>
                       <TableCell>{upgradeDate ? format(upgradeDate, 'MMM d, yyyy') : 'N/A'}</TableCell>
                       <TableCell>{expiryDate ? format(expiryDate, 'MMM d, yyyy') : 'N/A'}</TableCell>
