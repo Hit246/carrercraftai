@@ -97,10 +97,25 @@ function HomePageContent() {
             <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline sm:text-5xl md:text-6xl lg:text-7xl">
               Craft Your Future with AI
             </h1>
-            <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl">
+            <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl mb-6">
               Build the perfect resume, get AI-driven feedback, and find jobs that truly match your skills. CareerCraft AI is your ultimate partner in professional growth.
             </p>
-            <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
+
+            {/* Product Hunt Pill Badge */}
+            <a
+              href="https://www.producthunt.com/posts/careercraft-ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 text-sm font-medium hover:scale-105 transition-transform mb-10"
+            >
+              <svg width="16" height="16" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="20" fill="#DA552F"/>
+                <path d="M22.7 20c1.7-.6 2.8-2.2 2.8-4 0-2.4-2-4.3-4.5-4.3H14v16.6h3.3v-7.6h2.8l4.8 7.6H28L22.7 20zm-5.4-5.2h3.5c.7 0 1.3.5 1.3 1.2s-.6 1.2-1.3 1.2h-3.5v-2.4z" fill="white"/>
+              </svg>
+              Featured on Product Hunt
+            </a>
+
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
               <Button size="lg" asChild className="w-full sm:w-auto">
                 <Link href={getStartedLink}>Create My Resume</Link>
               </Button>
@@ -325,6 +340,19 @@ function HomePageContent() {
       </main>
       <footer className="py-8 bg-card border-t">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground text-sm">
+          {/* Product Hunt Official Embed */}
+          <div className="flex justify-center mb-8">
+            <a href="https://www.producthunt.com/posts/careercraft-ai?embed=true&utm_source=badge-featured" target="_blank" rel="noopener noreferrer">
+              <img
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=126122&theme=light"
+                alt="CareerCraft AI - Featured on Product Hunt"
+                width="250"
+                height="54"
+                style={{ width: 250, height: 54 }}
+              />
+            </a>
+          </div>
+
           <p>&copy; {new Date().getFullYear()} CareerCraft AI. All rights reserved.</p>
           <div className="flex justify-center gap-4 mt-2">
             <Link href="/terms" className="underline hover:text-foreground">Terms of Service</Link>
