@@ -29,6 +29,7 @@ function HomePageContent() {
     festiveName: '',
   });
   const [isLoadingPricing, setIsLoadingPricing] = React.useState(true);
+  const [annual, setAnnual] = React.useState(false);
 
   React.useEffect(() => {
     const fetchPricing = async () => {
@@ -51,6 +52,9 @@ function HomePageContent() {
     let final = base;
     if (pricing.festiveDiscount > 0) {
       final = final * (1 - pricing.festiveDiscount / 100);
+    }
+    if (annual) {
+      final = final * 0.8; // 20% Annual Discount
     }
     return Math.floor(final);
   };
@@ -97,7 +101,7 @@ function HomePageContent() {
             <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline sm:text-5xl md:text-6xl lg:text-7xl">
               Craft Your Future with AI
             </h1>
-            <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:text-xl mb-6">
+            <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:xl mb-6">
               Build the perfect resume, get AI-driven feedback, and find jobs that truly match your skills. CareerCraft AI is your ultimate partner in professional growth.
             </p>
 
@@ -219,6 +223,23 @@ function HomePageContent() {
                   </span>
                 ) : 'Choose the plan that’s right for you and take the next step in your career.'}
               </p>
+
+              {/* Billing Toggle */}
+              <div className="flex items-center justify-center gap-3 mt-8">
+                <span className={`text-sm font-medium ${!annual ? "text-foreground" : "text-muted-foreground"}`}>Monthly</span>
+                <button
+                  onClick={() => setAnnual(!annual)}
+                  className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${annual ? "bg-primary" : "bg-muted"}`}
+                >
+                  <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-300 ${annual ? "translate-x-7" : "translate-x-1"}`} />
+                </button>
+                <span className={`text-sm font-medium ${annual ? "text-foreground" : "text-muted-foreground"}`}>
+                  Annual
+                  <span className="ml-2 text-[10px] text-green-500 font-black bg-green-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">
+                    Save 20%
+                  </span>
+                </span>
+              </div>
             </div>
 
             <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl w-full mx-auto">
@@ -228,7 +249,7 @@ function HomePageContent() {
                   <CardDescription>For students & freshers exploring jobs.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1">
-                  <p className="text-4xl font-bold font-headline">₹0<span className="text-lg font-normal text-muted-foreground">/month</span></p>
+                  <p className="text-4xl font-bold font-headline">₹0<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
                   <ul className="space-y-2 text-left text-sm">
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 5 AI credits per month</li>
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Basic templates</li>
@@ -236,10 +257,6 @@ function HomePageContent() {
                   </ul>
                 </CardContent>
                 <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Key className="w-4 h-4" />
-                    <span>Good for beginners.</span>
-                  </div>
                   <Button asChild variant="outline" className="w-full mt-2">
                     <Link href={getStartedLink}>Get Started</Link>
                   </Button>
@@ -247,17 +264,18 @@ function HomePageContent() {
               </Card>
 
               <Card className="flex flex-col relative overflow-hidden">
-                {pricing.festiveDiscount > 0 && <Badge className="absolute top-2 right-2 bg-green-500">Sale</Badge>}
+                {(pricing.festiveDiscount > 0 || annual) && <Badge className="absolute top-2 right-2 bg-green-500">Sale</Badge>}
                 <CardHeader>
                   <CardTitle className="font-headline flex items-center gap-2"><Trophy className="text-gray-400" /> Essentials</CardTitle>
                   <CardDescription>For active job seekers.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1">
                   <div className="flex flex-col">
-                    {pricing.festiveDiscount > 0 && (
+                    {(pricing.festiveDiscount > 0 || annual) && (
                       <span className="text-sm text-muted-foreground line-through">₹{pricing.essentials}</span>
                     )}
                     <p className="text-4xl font-bold font-headline">₹{calculatePrice(pricing.essentials)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                    {annual && <p className="text-[10px] text-muted-foreground mt-1">Billed annually</p>}
                   </div>
                   <ul className="space-y-2 text-left text-sm">
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 50 AI credits</li>
@@ -266,10 +284,6 @@ function HomePageContent() {
                   </ul>
                 </CardContent>
                 <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Key className="w-4 h-4" />
-                    <span>Great for people applying regularly.</span>
-                  </div>
                   <Button asChild className="w-full mt-2">
                     <Link href={pricingLink}>Choose Essentials</Link>
                   </Button>
@@ -284,10 +298,11 @@ function HomePageContent() {
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1">
                   <div className="flex flex-col">
-                    {pricing.festiveDiscount > 0 && (
+                    {(pricing.festiveDiscount > 0 || annual) && (
                       <span className="text-sm text-muted-foreground line-through">₹{pricing.pro}</span>
                     )}
                     <p className="text-4xl font-bold font-headline">₹{calculatePrice(pricing.pro)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                    {annual && <p className="text-[10px] text-muted-foreground mt-1">Billed annually</p>}
                   </div>
                   <ul className="space-y-2 text-left text-sm">
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited AI generation</li>
@@ -296,10 +311,6 @@ function HomePageContent() {
                   </ul>
                 </CardContent>
                 <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Key className="w-4 h-4" />
-                    <span>Perfect for experienced professionals.</span>
-                  </div>
                   <Button asChild className="w-full mt-2">
                     <Link href={pricingLink}>Choose Pro</Link>
                   </Button>
@@ -313,10 +324,11 @@ function HomePageContent() {
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1">
                   <div className="flex flex-col">
-                    {pricing.festiveDiscount > 0 && (
+                    {(pricing.festiveDiscount > 0 || annual) && (
                       <span className="text-sm text-muted-foreground line-through">₹{pricing.recruiter}</span>
                     )}
                     <p className="text-4xl font-bold font-headline">₹{calculatePrice(pricing.recruiter)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                    {annual && <p className="text-[10px] text-muted-foreground mt-1">Billed annually</p>}
                   </div>
                   <ul className="space-y-2 text-left text-sm">
                     <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking</li>
@@ -325,16 +337,17 @@ function HomePageContent() {
                   </ul>
                 </CardContent>
                 <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Key className="w-4 h-4" />
-                    <span>Best for freelance recruiters.</span>
-                  </div>
                   <Button asChild variant="secondary" className="w-full mt-2">
-                    <Link href={pricingLink}>Contact Sales</Link>
+                    <Link href={pricingLink}>Choose Recruiter</Link>
                   </Button>
                 </CardFooter>
               </Card>
             </div>
+
+            {/* Trust signals */}
+            <p className="text-center text-xs text-muted-foreground mt-12 font-medium uppercase tracking-widest">
+              🔒 Secure payments via Razorpay · Cancel anytime · No hidden fees
+            </p>
           </div>
         </section>
       </main>
