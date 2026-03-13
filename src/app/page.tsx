@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key, PartyPopper, Loader2 } from 'lucide-react';
+import { FileText, Briefcase, Users, Sparkles, Check, Crown, Target, Star, Trophy, Diamond, Key, PartyPopper, Loader2, Sparkles as SparklesIcon, FileSearch, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { HomeHeader } from '@/components/home-header';
@@ -18,6 +18,99 @@ interface PricingSettings {
   festiveDiscount: number;
   festiveName: string;
 }
+
+const featureVisuals: Record<string, React.ReactNode> = {
+  "Intuitive Resume Builder": (
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-[10px] mt-4">
+      <div className="bg-gray-100 dark:bg-gray-800 px-3 py-1.5 flex gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-red-400" />
+        <span className="w-2 h-2 rounded-full bg-yellow-400" />
+        <span className="w-2 h-2 rounded-full bg-green-400" />
+      </div>
+      <div className="p-3 space-y-2 bg-white dark:bg-gray-900">
+        <div className="flex gap-2">
+          <div className="h-2 w-1/3 bg-gray-200 dark:bg-gray-700 rounded" />
+          <div className="h-2 w-2/3 bg-primary/20 rounded" />
+        </div>
+        <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded" />
+        <div className="h-8 w-full border border-dashed rounded flex items-center justify-center text-muted-foreground text-[8px]">
+          + Drag & Drop Section
+        </div>
+      </div>
+    </div>
+  ),
+  "AI Resume Analyzer": (
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-[10px] bg-white dark:bg-gray-900 mt-4 space-y-2">
+      <div className="flex items-center gap-2 text-green-500 font-bold uppercase tracking-wider">
+        <Check className="w-3 h-3" /> Strength: Action Verbs
+      </div>
+      <div className="flex items-center gap-2 text-amber-500 font-bold uppercase tracking-wider">
+        <SparklesIcon className="w-3 h-3" /> Suggestion: Quantify Metrics
+      </div>
+      <div className="p-2 bg-muted rounded italic">
+        "Increased sales by 20%..."
+      </div>
+    </div>
+  ),
+  "ATS Optimizer": (
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-[10px] bg-white dark:bg-gray-900 mt-4 space-y-2">
+      <div className="flex justify-between items-center">
+        <span className="text-gray-500">Match Score</span>
+        <span className="text-green-500 font-bold">87%</span>
+      </div>
+      <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
+        <div className="bg-green-500 h-1.5 rounded-full" style={{ width: "87%" }} />
+      </div>
+      <div className="flex gap-1 flex-wrap">
+        {["React", "Node.js", "SQL"].map((kw) => (
+          <span key={kw} className="bg-green-100 dark:bg-green-900/30 text-green-600 px-1.5 py-0.5 rounded">
+            {kw} ✓
+          </span>
+        ))}
+        <span className="bg-red-100 dark:bg-red-900/30 text-red-500 px-1.5 py-0.5 rounded">Docker ✗</span>
+      </div>
+    </div>
+  ),
+  "Smart Job Matching": (
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-[10px] bg-white dark:bg-gray-900 mt-4 space-y-2">
+      {[1, 2].map((i) => (
+        <div key={i} className="flex items-center justify-between p-1.5 border rounded">
+          <div>
+            <div className="font-bold">Software Engineer</div>
+            <div className="text-[8px] text-muted-foreground">Google • Mountain View</div>
+          </div>
+          <div className="text-primary font-bold">95% Match</div>
+        </div>
+      ))}
+    </div>
+  ),
+  "Cover Letter Generator": (
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-[10px] bg-white dark:bg-gray-900 mt-4">
+      <div className="space-y-1">
+        <div className="h-1.5 w-1/4 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
+        <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded" />
+        <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded" />
+        <div className="h-1.5 w-3/4 bg-gray-100 dark:bg-gray-800 rounded" />
+        <div className="h-4 w-1/3 bg-primary/10 rounded mt-2 border border-primary/20" />
+      </div>
+    </div>
+  ),
+  "Candidate Matching": (
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 text-[10px] bg-white dark:bg-gray-900 mt-4">
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-full bg-primary/20" />
+          <div className="h-1.5 w-1/2 bg-gray-200 dark:bg-gray-700 rounded" />
+          <Badge variant="outline" className="ml-auto text-[8px] h-4">Rank #1</Badge>
+        </div>
+        <div className="flex items-center gap-2 opacity-50">
+          <div className="w-4 h-4 rounded-full bg-muted" />
+          <div className="h-1.5 w-1/3 bg-gray-200 dark:bg-gray-700 rounded" />
+        </div>
+      </div>
+    </div>
+  ),
+};
 
 function HomePageContent() {
   const { user } = useAuth();
@@ -140,72 +233,27 @@ function HomePageContent() {
               </p>
             </div>
             <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="border-0 shadow-none bg-transparent">
-                <CardHeader>
-                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                    <FileText className="w-6 h-6" />
-                  </div>
-                  <CardTitle>Intuitive Resume Builder</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Create professional, version-controlled resumes with our intuitive builder and live preview, designed to impress any recruiter.</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-none bg-transparent">
-                <CardHeader>
-                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                    <Sparkles className="w-6 h-6" />
-                  </div>
-                  <CardTitle>AI Resume Analyzer</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Get instant, actionable feedback to improve your resume's impact, clarity, and keyword optimization.</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-none bg-transparent">
-                <CardHeader>
-                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                    <Target className="w-6 h-6" />
-                  </div>
-                  <CardTitle>ATS Optimizer</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Compare your resume against a job description to identify missing keywords and get a match score to beat the bots.</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-none bg-transparent">
-                <CardHeader>
-                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                    <Briefcase className="w-6 h-6" />
-                  </div>
-                  <CardTitle>Smart Job Matching</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Discover job opportunities that perfectly align with your unique skills, experience, and career aspirations.</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-none bg-transparent">
-                <CardHeader>
-                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                    <FileText className="w-6 h-6" />
-                  </div>
-                  <CardTitle>Cover Letter Generator</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Instantly generate a personalized cover letter for any job description, based on the contents of your resume.</p>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-none bg-transparent">
-                <CardHeader>
-                  <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                    <Users className="w-6 h-6" />
-                  </div>
-                  <CardTitle>Candidate Matching</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">For recruiters: efficiently find the best candidates for your roles from a diverse pool of qualified resumes.</p>
-                </CardContent>
-              </Card>
+              {[
+                { title: "Intuitive Resume Builder", desc: "Create professional, version-controlled resumes with our intuitive builder and live preview.", icon: FileText },
+                { title: "AI Resume Analyzer", desc: "Get instant, actionable feedback to improve your resume's impact, clarity, and keyword optimization.", icon: Sparkles },
+                { title: "ATS Optimizer", desc: "Compare your resume against a job description to identify missing keywords and get a match score.", icon: Target },
+                { title: "Smart Job Matching", desc: "Discover job opportunities that perfectly align with your unique skills and aspirations.", icon: Briefcase },
+                { title: "Cover Letter Generator", desc: "Instantly generate a personalized cover letter for any job description, based on your resume.", icon: FileText },
+                { title: "Candidate Matching", desc: "For recruiters: efficiently find the best candidates for your roles from a diverse pool.", icon: Users },
+              ].map((f) => (
+                <Card key={f.title} className="border hover:border-primary transition-all duration-300">
+                  <CardHeader>
+                    <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                      <f.icon className="w-6 h-6" />
+                    </div>
+                    <CardTitle className="text-xl">{f.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
+                    {featureVisuals[f.title]}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
@@ -224,7 +272,6 @@ function HomePageContent() {
                 ) : 'Choose the plan that’s right for you and take the next step in your career.'}
               </p>
 
-              {/* Improved Toggle UI */}
               <div className="flex items-center justify-center gap-3 mt-8">
                 <span className={`text-sm font-medium ${!annual ? "text-foreground" : "text-muted-foreground"}`}>Monthly</span>
                 <button
@@ -344,7 +391,6 @@ function HomePageContent() {
               </Card>
             </div>
 
-            {/* Trust signals */}
             <p className="text-center text-xs text-muted-foreground mt-12 font-medium uppercase tracking-widest">
               🔒 Secure payments via Razorpay · Cancel anytime · No hidden fees
             </p>
@@ -396,9 +442,9 @@ function HomePageContent() {
               <ul className="space-y-2">
                 {[
                   { label: "Features", href: "/#features" },
-                  { label: "Pricing", href: "/pricing" },
+                  { label: "Pricing", href: "/#pricing" },
+                  { label: "Blog", href: "/blog" },
                   { label: "Resume Builder", href: "/resume-builder" },
-                  { label: "ATS Optimizer", href: "/ats-optimizer" },
                 ].map(({ label, href }) => (
                   <li key={label}>
                     <Link href={href} className="text-sm text-gray-500 hover:text-white transition-colors">{label}</Link>

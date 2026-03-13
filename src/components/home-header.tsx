@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -24,8 +23,9 @@ export function HomeHeader() {
           </h1>
         </Link>
         <nav className="hidden md:flex gap-6 items-center text-sm font-medium flex-1">
-          <Link href="#features" className="text-muted-foreground transition-colors hover:text-foreground">Features</Link>
-          <Link href="#pricing" className="text-muted-foreground transition-colors hover:text-foreground">Pricing</Link>
+          <Link href="/#features" className="text-muted-foreground transition-colors hover:text-foreground">Features</Link>
+          <Link href="/#pricing" className="text-muted-foreground transition-colors hover:text-foreground">Pricing</Link>
+          <Link href="/blog" className="text-muted-foreground transition-colors hover:text-foreground">Blog</Link>
           <Link href={resumeBuilderLink} className="text-muted-foreground transition-colors hover:text-foreground">Resume Builder</Link>
           <Link href={forRecruitersLink} className="text-muted-foreground transition-colors hover:text-foreground">For Recruiters</Link>
         </nav>
