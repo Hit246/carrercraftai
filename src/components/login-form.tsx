@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -20,7 +19,7 @@ const formSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
-const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+const ADMIN_EMAILS = ['admin@careercraftai.tech', 'hitarth0236@gmail.com'];
 
 
 export function LoginForm() {

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
@@ -55,7 +54,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const FREE_CREDITS = 5;
 const ESSENTIALS_CREDITS = 50;
-const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+const ADMIN_EMAILS = ['admin@careercraftai.tech', 'hitarth0236@gmail.com'];
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);

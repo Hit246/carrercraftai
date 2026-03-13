@@ -39,7 +39,7 @@ interface UserData {
   planUpdatedAt?: { seconds: number };
 }
 
-const ADMIN_EMAILS = ['admin@careercraft.ai', 'hitarth0236@gmail.com'];
+const ADMIN_EMAILS = ['admin@careercraftai.tech', 'hitarth0236@gmail.com'];
 
 export function SubscriptionsManagementPage() {
   const [users, setUsers] = useState<UserData[]>([]);

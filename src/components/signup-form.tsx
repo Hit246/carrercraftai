@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -39,7 +38,7 @@ export function SignupForm() {
     setIsLoading(true);
     try {
       await signup(values.email, values.password);
-      if(values.email === 'admin@careercraft.ai') {
+      if(values.email === 'admin@careercraftai.tech') {
         router.push('/admin/dashboard');
       } else {
         router.push('/dashboard');
