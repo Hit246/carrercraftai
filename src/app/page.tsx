@@ -338,79 +338,156 @@ function HomePageContent() {
           </div>
         </section>
       </main>
-      <footer className="py-12 bg-card border-t">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground text-sm">
-          {/* Product Hunt Official Embed */}
-          <div className="flex justify-center mb-8">
-            <a href="https://www.producthunt.com/posts/careercraft-ai" target="_blank" rel="noopener noreferrer">
-              <img
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=careercraft-ai&theme=light"
-                alt="CareerCraft AI - Featured on Product Hunt"
-                width="250"
-                height="54"
-                style={{ width: 250, height: 54 }}
-              />
+
+      {/* ===== FOOTER ===== */}
+      <footer className="border-t border-gray-800 bg-[#0d0f14] mt-20">
+        <div className="max-w-6xl mx-auto px-6 py-12">
+
+          {/* Top Row — Brand + PH Badge */}
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
+            
+            {/* Brand */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <img src="/logo.jpg" alt="CareerCraft AI" className="w-7 h-7 rounded-md" />
+                <span className="font-bold text-white text-lg font-headline">CareerCraft AI</span>
+              </div>
+              <p className="text-gray-500 text-sm max-w-xs">
+                AI-powered resume builder for students and professionals in India.
+              </p>
+            </div>
+
+            {/* Product Hunt Badge */}
+            <a 
+              href="https://www.producthunt.com/posts/careercraft-ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-orange-800/50 bg-orange-950/20 hover:bg-orange-950/40 transition-colors group"
+            >
+              <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="20" fill="#DA552F"/>
+                <path d="M22.7 20c1.7-.6 2.8-2.2 2.8-4 0-2.4-2-4.3-4.5-4.3H14v16.6h3.3v-7.6h2.8l4.8 7.6H28L22.7 20zm-5.4-5.2h3.5c.7 0 1.3.5 1.3 1.2s-.6 1.2-1.3 1.2h-3.5v-2.4z" fill="white"/>
+              </svg>
+              <div>
+                <p className="text-[10px] text-orange-400 uppercase tracking-widest font-medium">Find us on</p>
+                <p className="text-white font-bold text-sm group-hover:text-orange-300 transition-colors">Product Hunt</p>
+              </div>
             </a>
           </div>
 
-          <p>&copy; {new Date().getFullYear()} CareerCraft AI. All rights reserved.</p>
-          <div className="flex justify-center gap-4 mt-2">
-            <Link href="/terms" className="underline hover:text-foreground">Terms of Service</Link>
-            <Link href="/privacy" className="underline hover:text-foreground">Privacy Policy</Link>
-            <Link href="/cancellation" className="underline hover:text-foreground">Cancellation & Refund Policy</Link>
-            <Link href="/contact" className="underline hover:text-foreground">Contact Us</Link>
-          </div>
-
-          {/* Creator Profile */}
-          <div className="border-t border-gray-200 dark:border-gray-800 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-center md:text-left">
-              <p className="text-xs text-gray-400">Built by</p>
-              <p className="text-sm font-semibold">Hitarth Chauhan</p>
+          {/* Middle Row — Links Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+            
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Product</p>
+              <ul className="space-y-2">
+                {[
+                  { label: "Features", href: "/#features" },
+                  { label: "Pricing", href: "/pricing" },
+                  { label: "Resume Builder", href: "/resume-builder" },
+                  { label: "ATS Optimizer", href: "/ats-optimizer" },
+                ].map(({ label, href }) => (
+                  <li key={label}>
+                    <Link href={href} className="text-sm text-gray-500 hover:text-white transition-colors">{label}</Link>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="flex items-center gap-3">
-              {[
-                {
-                  label: "GitHub",
-                  href: "https://github.com/Hit246",
-                  icon: (
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12c0-5.523-4.477-10-10-10z"/>
-                    </svg>
-                  ),
-                },
-                {
-                  label: "LinkedIn",
-                  href: "https://linkedin.com/in/chauhanhitarth6",
-                  icon: (
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                    </svg>
-                  ),
-                },
-                {
-                  label: "Portfolio",
-                  href: "https://hitarth-chauhan.vercel.app",
-                  icon: (
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2c1.29 0 2.56.27 3.72.76L13 7H9.5L8 9.5l2 4-1.5 3H6.28A8 8 0 0 1 4 12c0-4.41 3.59-8 8-8zm0 16a8 8 0 0 1-5.47-2.15L8 15.5l1.5-3-2-4L9.5 6H13l3-2.63A8 8 0 0 1 12 20z"/>
-                    </svg>
-                  ),
-                },
-              ].map(({ label, href, icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="p-2 rounded-lg text-gray-400 hover:text-foreground hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                >
-                  {icon}
-                </a>
-              ))}
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">For You</p>
+              <ul className="space-y-2">
+                {[
+                  { label: "For Students", href: "/signup" },
+                  { label: "For Professionals", href: "/signup" },
+                  { label: "For Recruiters", href: "/signup" },
+                  { label: "Job Matcher", href: "/job-matcher" },
+                ].map(({ label, href }) => (
+                  <li key={label}>
+                    <Link href={href} className="text-sm text-gray-500 hover:text-white transition-colors">{label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Legal</p>
+              <ul className="space-y-2">
+                {[
+                  { label: "Terms of Service", href: "/terms" },
+                  { label: "Privacy Policy", href: "/privacy" },
+                  { label: "Cancellation & Refund", href: "/cancellation" },
+                ].map(({ label, href }) => (
+                  <li key={label}>
+                    <Link href={href} className="text-sm text-gray-500 hover:text-white transition-colors">{label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Support</p>
+              <ul className="space-y-2">
+                {[
+                  { label: "Contact Us", href: "/contact" },
+                  { label: "Help Center", href: "/support" },
+                ].map(({ label, href }) => (
+                  <li key={label}>
+                    <Link href={href} className="text-sm text-gray-500 hover:text-white transition-colors">{label}</Link>
+                  </li>
+                ))}
+              </ul>
+              {/* Razorpay trust badge */}
+              <div className="mt-4 flex items-center gap-1.5 text-gray-600">
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                </svg>
+                <span className="text-xs">Secured by Razorpay</span>
+              </div>
             </div>
           </div>
+
+          {/* Bottom Row — Copyright + Creator */}
+          <div className="border-t border-gray-800 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <p className="text-xs text-gray-600">© {new Date().getFullYear()} CareerCraft AI. All rights reserved.</p>
+
+            {/* Built by */}
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-gray-600">Built by <span className="text-gray-400 font-medium">Hitarth Chauhan</span></span>
+              <div className="flex items-center gap-1">
+                {[
+                  {
+                    label: "GitHub",
+                    href: "https://github.com/Hit246",
+                    icon: <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12c0-5.523-4.477-10-10-10z"/></svg>,
+                  },
+                  {
+                    label: "LinkedIn",
+                    href: "https://linkedin.com/in/chauhanhitarth6",
+                    icon: <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>,
+                  },
+                  {
+                    label: "Portfolio",
+                    href: "https://hitarth-chauhan.vercel.app",
+                    icon: <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2c1.29 0 2.56.27 3.72.76L13 7H9.5L8 9.5l2 4-1.5 3H6.28A8 8 0 0 1 4 12c0-4.41 3.59-8 8-8zm0 16a8 8 0 0 1-5.47-2.15L8 15.5l1.5-3-2-4L9.5 6H13l3-2.63A8 8 0 0 1 12 20z"/></svg>,
+                  },
+                ].map(({ label, href, icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="p-1.5 rounded-md text-gray-600 hover:text-white hover:bg-gray-800 transition-colors"
+                  >
+                    {icon}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
         </div>
       </footer>
     </div>
