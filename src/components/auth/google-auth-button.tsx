@@ -79,8 +79,20 @@ export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {
       });
 
     } catch (error: any) {
-      console.error('Google auth error:', error);
-      if (error.code !== 'auth/popup-closed-by-user') {
+      console.error('Google Auth Error Details:', {
+        code: error.code,
+        message: error.message,
+        hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown'
+      });
+
+      if (error.code === 'auth/unauthorized-domain') {
+        toast({
+          title: 'Domain Not Authorized',
+          description: `The domain "${window.location.hostname}" is not authorized in Firebase. Please add both "careercraftai.tech" AND "www.careercraftai.tech" to Authorized Domains in Firebase Console.`,
+          variant: 'destructive',
+          duration: 10000,
+        });
+      } else if (error.code !== 'auth/popup-closed-by-user') {
         toast({
           title: 'Authentication Failed',
           description: error.message || 'Could not sign in with Google.',
