@@ -24,7 +24,6 @@ export async function POST(req: Request) {
       return new Response('Invalid signature.', { status: 403 });
     }
 
-    console.log('Razorpay webhook signature verified successfully.');
     const event = JSON.parse(body);
 
     if (event.event === 'payment_link.paid') {
@@ -34,12 +33,15 @@ export async function POST(req: Request) {
         const paymentId = paymentEntity.id;
         const amountPaid = paymentEntity.amount / 100;
 
+        // Discount metadata from notes
+        const basePrice = parseInt(paymentEntity.notes.basePrice || '0');
+        const festiveDiscount = parseInt(paymentEntity.notes.festiveDiscount || '0');
+        const promoDiscount = parseInt(paymentEntity.notes.promoDiscount || '0');
+        const promoCode = paymentEntity.notes.promoCode || null;
+
         if (!userId || !plan) {
-            console.error('Webhook Error: Missing userId or plan in payment notes.', paymentEntity.notes);
             return new Response('Missing required data in webhook payload.', { status: 400 });
         }
-
-        console.log(`Processing webhook for user: ${userId}, plan: ${plan}, amount: ${amountPaid}`);
 
         const userRef = doc(db, 'users', userId);
         const userSnap = await getDoc(userRef);
@@ -51,17 +53,18 @@ export async function POST(req: Request) {
             paymentId: paymentId,
             webhookVerified: true,
             amountPaid: amountPaid,
+            basePrice: basePrice,
+            festiveDiscount: festiveDiscount,
+            promoDiscount: promoDiscount,
+            appliedPromoCode: promoCode,
         });
 
-        // Notify Admin of automatic success via Email
         await notifyAdminOfUpgradeAction({
           userEmail: userEmail,
           plan: plan,
           amount: amountPaid,
           type: 'WEBHOOK_PAID'
         });
-
-        console.log(`Successfully upgraded user ${userId} to ${plan} via webhook.`);
     }
 
     return new Response(JSON.stringify({ ok: true }), { 

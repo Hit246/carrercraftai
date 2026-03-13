@@ -26,7 +26,13 @@ export async function createPaymentLink(
   amount: number,
   planName: Exclude<Plan, 'free'>,
   customer: { name: string; email: string; contact: string },
-  userId: string
+  userId: string,
+  metadata?: {
+    basePrice: number;
+    festiveDiscount: number;
+    promoDiscount: number;
+    promoCode: string | null;
+  }
 ) {
   try {
     const razorpay = getRazorpay();
@@ -50,6 +56,10 @@ export async function createPaymentLink(
       notes: {
         plan: planName,
         userId: userId,
+        basePrice: metadata?.basePrice.toString() || '0',
+        festiveDiscount: metadata?.festiveDiscount.toString() || '0',
+        promoDiscount: metadata?.promoDiscount.toString() || '0',
+        promoCode: metadata?.promoCode || '',
       },
       notify: {
         sms: true,
@@ -108,42 +118,30 @@ export async function verifyAndUpgrade(
         return { success: false, message: 'Server configuration error.' };
     }
 
-    // The body should be payment_link_id|razorpay_payment_id
     const body = `${paymentLinkId}|${paymentId}`;
     const expectedSig = crypto.createHmac('sha256', secret).update(body).digest('hex');
 
-    console.log("Signature Verification Body:", body);
-    console.log("Received Signature:", signature);
-    console.log("Expected Signature:", expectedSig);
-
     if (expectedSig !== signature) {
-      console.error('Signature mismatch – fake or corrupt callback');
-      return { success: false, message: 'Payment verification failed. Invalid signature.' };
+      console.error('Signature mismatch');
+      return { success: false, message: 'Payment verification failed.' };
     }
 
-    // Signature verified — now check DB for intended plan
-    console.log(`Signature verified for user ${userId}. Checking database for requested plan...`);
     const userRef = doc(db, 'users', userId);
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
-      console.error(`User with ID ${userId} not found in database.`);
-      return { success: false, message: 'User not found in database' };
+      return { success: false, message: 'User not found' };
     }
 
     const plan = userSnap.data()?.requestedPlan;
     if (!plan) {
-      console.warn(`No 'requestedPlan' found for user ${userId}. The plan might have already been activated by a webhook.`);
-      // Check if the plan is already active
       const currentPlan = userSnap.data()?.plan;
       if (currentPlan !== 'free' && currentPlan !== 'pending') {
         return { success: true, message: `Plan is already active.` };
       }
-      return { success: false, message: 'No upgrade plan was requested. Please contact support.' };
+      return { success: false, message: 'No upgrade plan was requested.' };
     }
 
-    console.log(`Found requested plan '${plan}' for user ${userId}. Upgrading...`);
-    // Upgrade user plan
     await updateDoc(userRef, {
       plan,
       planUpdatedAt: new Date(),
@@ -153,10 +151,9 @@ export async function verifyAndUpgrade(
       paymentPending: false,
     });
 
-    console.log(`Successfully upgraded user ${userId} to ${plan} plan.`);
     return { success: true, message: `Upgraded to ${plan} plan` };
   } catch (e: any) {
-    console.error('Error during payment verification and upgrade:', e);
+    console.error('Error during payment verification:', e);
     return { success: false, message: e.message || 'An unexpected server error occurred.' };
   }
 }

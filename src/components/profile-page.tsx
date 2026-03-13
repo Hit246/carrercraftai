@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -15,14 +16,14 @@ import {
     ShieldCheck, 
     Hourglass, 
     Ban, 
-    Wallet, 
     Calendar, 
     BotIcon, 
     Timer,
     CheckCircle2,
     Info,
     Receipt,
-    CreditCard
+    CreditCard,
+    Tag
 } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 import { useForm } from 'react-hook-form';
@@ -37,6 +38,11 @@ import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { addDays, differenceInDays, format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 const formSchema = z.object({
     displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }).optional(),
@@ -147,12 +153,12 @@ export function ProfilePage() {
             await requestCancellation();
             toast({
                 title: 'Cancellation Requested',
-                description: 'Your request has been submitted. An admin will process it shortly.',
+                description: 'Your request has been submitted.',
             });
         } catch (error) {
             toast({
                 title: 'Error',
-                description: 'Failed to submit cancellation request.',
+                description: 'Failed to submit request.',
                 variant: 'destructive',
             });
         }
@@ -201,7 +207,6 @@ export function ProfilePage() {
             )}
 
             <div className="grid md:grid-cols-12 gap-8">
-                {/* Left Column: Profile & Security */}
                 <div className="md:col-span-7 space-y-8">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -276,7 +281,6 @@ export function ProfilePage() {
                         </form>
                     </Form>
 
-                    {/* Payment History Section */}
                     <Card className="shadow-md overflow-hidden">
                         <CardHeader className="bg-muted/30">
                             <CardTitle className="text-xl flex items-center gap-2"><Receipt className="h-5 w-5 text-primary"/> Billing & Payment Details</CardTitle>
@@ -305,7 +309,25 @@ export function ProfilePage() {
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm font-bold">₹{userData?.amountPaid || '---'}</p>
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-sm font-bold">₹{userData?.amountPaid || '---'}</p>
+                                                {(userData?.festiveDiscount || userData?.promoDiscount) && (
+                                                    <Popover>
+                                                        <PopoverTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="h-6 w-6"><Info className="h-3.5 w-3.5"/></Button>
+                                                        </PopoverTrigger>
+                                                        <PopoverContent className="w-56 text-xs p-3">
+                                                            <p className="font-bold mb-2 uppercase text-[10px] text-muted-foreground">Savings Applied</p>
+                                                            <div className="space-y-1">
+                                                                <div className="flex justify-between"><span>Base Price</span><span>₹{userData?.basePrice || '---'}</span></div>
+                                                                {userData?.festiveDiscount ? <div className="flex justify-between text-green-600"><span>Festive Sale</span><span>-{userData.festiveDiscount}%</span></div> : null}
+                                                                {userData?.promoDiscount ? <div className="flex justify-between text-blue-600"><span>Promo ({userData.appliedPromoCode})</span><span>-{userData.promoDiscount}%</span></div> : null}
+                                                                <div className="border-t pt-1 flex justify-between font-bold text-primary"><span>Final Paid</span><span>₹{userData?.amountPaid}</span></div>
+                                                            </div>
+                                                        </PopoverContent>
+                                                    </Popover>
+                                                )}
+                                            </div>
                                             <Badge variant="outline" className="text-[10px] h-5 py-0 px-1 bg-green-50 text-green-700 border-green-200">Paid</Badge>
                                         </div>
                                     </div>
@@ -327,7 +349,6 @@ export function ProfilePage() {
                     </Card>
                 </div>
 
-                {/* Right Column: Subscription & Comparison */}
                 <div className="md:col-span-5 space-y-8">
                     <Card className="shadow-md border-primary/20 bg-primary/5">
                         <CardHeader>
@@ -394,7 +415,6 @@ export function ProfilePage() {
                         </CardFooter>
                     </Card>
 
-                    {/* Quick Comparison Card */}
                     <Card className="shadow-md overflow-hidden">
                         <CardHeader className="py-4">
                             <CardTitle className="text-sm">Plan Comparisons</CardTitle>

@@ -135,6 +135,10 @@ export function PricingPage() {
   
     setIsProcessing(selectedPlan);
     const finalAmount = calculatePrice(settings[selectedPlan]);
+    const basePrice = settings[selectedPlan];
+    const festiveDiscount = settings.festiveDiscount;
+    const promoDiscount = appliedPromo?.discount || 0;
+    const promoCode = appliedPromo?.code || null;
 
     try {
         const userRef = doc(db, 'users', user.uid);
@@ -142,9 +146,13 @@ export function PricingPage() {
             previousPlan: plan,
             plan: 'pending',
             requestedPlan: selectedPlan,
+            // Temporarily store intended breakdown for history sync if webhook is slow
+            tempBasePrice: basePrice,
+            tempFestiveDiscount: festiveDiscount,
+            tempPromoDiscount: promoDiscount,
+            tempPromoCode: promoCode,
         });
         
-        // Notify Admin of new request via Email
         await notifyAdminOfUpgradeAction({
           userEmail: user.email,
           plan: selectedPlan,
@@ -152,7 +160,7 @@ export function PricingPage() {
         });
 
     } catch (dbError) {
-        toast({ title: "Error", description: "Could not initiate upgrade. Check your connection.", variant: "destructive" });
+        toast({ title: "Error", description: "Could not initiate upgrade.", variant: "destructive" });
         setIsProcessing(null);
         return;
     }
@@ -166,17 +174,23 @@ export function PricingPage() {
           email: user.email,
           contact: phoneNumber,
         },
-        user.uid
+        user.uid,
+        {
+          basePrice,
+          festiveDiscount,
+          promoDiscount,
+          promoCode,
+        }
       );
   
       if (res.success && res.url) {
         window.location.href = res.url;
       } else {
-        toast({ title: "Payment Error", description: res.error ?? "Failed to create link.", variant: "destructive" });
+        toast({ title: "Payment Error", description: res.error || "Failed to create link.", variant: "destructive" });
         setIsProcessing(null);
       }
     } catch (err) {
-      toast({ title: "Critical Error", description: "Unexpected error during checkout.", variant: "destructive" });
+      toast({ title: "Critical Error", description: "Checkout failed.", variant: "destructive" });
       setIsProcessing(null);
     }
   };
