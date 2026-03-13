@@ -17,7 +17,7 @@ An AI-powered platform designed to empower job seekers and recruiters. Build stu
 - **🤖 AI Resume Analyzer:** Get instant, actionable feedback on your resume's strengths, weaknesses, and areas for improvement.
 - **🤝 AI Job Matcher:** Upload your resume to discover job opportunities tailored to your skills.
 - **✉️ AI Cover Letter Generator:** Automatically create compelling and personalized cover letters.
-- **🔒 Secure Authentication:** Standard email/password authentication.
+- **🔒 Secure Authentication:** Standard email/password authentication with Google Auth support.
 - **💎 Tiered Subscriptions:** Free, Essentials, and Pro plans with AI credit management.
 
 ### For Recruiters:
@@ -31,7 +31,7 @@ An AI-powered platform designed to empower job seekers and recruiters. Build stu
 - **AI Integration:** Firebase Genkit with Gemini Models
 - **Backend:** Firebase (Auth, Firestore, Storage)
 - **Payments:** Razorpay (Webhooks + Manual fallback)
-- **Notifications:** Nodemailer (SMTP)
+- **Email/Drips:** Resend (Onboarding) & Nodemailer (SMTP for Alerts)
 
 ## 🛠️ Getting Started
 
@@ -58,11 +58,14 @@ RAZORPAY_KEY_SECRET='...'
 RAZORPAY_WEBHOOK_SECRET='...'
 NEXT_PUBLIC_APP_URL='https://careercraftai.tech'
 
-# Admin Email Notifications (SMTP)
+# Email Automation (Resend)
+RESEND_API_KEY='re_...'
+
+# Admin & Transactional Notifications (SMTP)
 SMTP_HOST='smtp.gmail.com'
 SMTP_PORT=587
 SMTP_USER='your-email@gmail.com'
-SMTP_PASS='your16characterapppassword'
+SMTP_PASS='your-16-character-app-password'
 ADMIN_EMAIL='admin@careercraftai.tech'
 ```
 
