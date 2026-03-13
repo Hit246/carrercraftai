@@ -2,56 +2,104 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, MoveRight } from 'lucide-react';
+import { LayoutDashboard, MoveRight, Menu } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Skeleton } from './ui/skeleton';
 import Image from 'next/image';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 
 export function HomeHeader() {
   const { user, loading } = useAuth();
 
-  const resumeBuilderLink = user ? '/dashboard' : '/login';
-  const forRecruitersLink = user ? '/candidate-matcher' : '/login';
+  const navLinks = [
+    { label: "Features", href: "/#features" },
+    { label: "Pricing", href: "/#pricing" },
+    { label: "Blog", href: "/blog" },
+    { label: "Resume Builder", href: user ? "/dashboard" : "/login" },
+    { label: "For Recruiters", href: user ? "/candidate-matcher" : "/login" },
+  ];
 
   return (
-    <header className="container mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex h-20 items-center justify-between gap-8">
-        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <Image src="/logo.jpg" alt="CareerCraft AI Logo" width={32} height={32} className="rounded-full object-cover" />
-          <h1 className="text-2xl font-bold font-headline text-foreground">
-            CareerCraft AI
-          </h1>
-        </Link>
-        <nav className="hidden md:flex gap-6 items-center text-sm font-medium flex-1">
-          <Link href="/#features" className="text-muted-foreground transition-colors hover:text-foreground">Features</Link>
-          <Link href="/#pricing" className="text-muted-foreground transition-colors hover:text-foreground">Pricing</Link>
-          <Link href="/blog" className="text-muted-foreground transition-colors hover:text-foreground">Blog</Link>
-          <Link href={resumeBuilderLink} className="text-muted-foreground transition-colors hover:text-foreground">Resume Builder</Link>
-          <Link href={forRecruitersLink} className="text-muted-foreground transition-colors hover:text-foreground">For Recruiters</Link>
-        </nav>
-        <div className="flex items-center gap-2">
-          {loading ? (
-            <div className="flex items-center gap-2">
-                <Skeleton className="h-9 w-20" />
-                <Skeleton className="h-10 w-40" />
-            </div>
-          ) : user ? (
-            <Button asChild>
-              <Link href="/dashboard">
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                Dashboard
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-4">
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+            <Image src="/logo.jpg" alt="CareerCraft AI Logo" width={28} height={28} className="rounded-full object-cover" />
+            <h1 className="text-xl font-bold font-headline text-foreground">
+              CareerCraft AI
+            </h1>
+          </Link>
+          
+          <nav className="hidden md:flex gap-6 items-center text-sm font-medium flex-1 justify-center">
+            {navLinks.map(link => (
+              <Link key={link.label} href={link.href} className="text-muted-foreground transition-colors hover:text-foreground">
+                {link.label}
               </Link>
-            </Button>
-          ) : (
-            <>
-              <Button variant="ghost" asChild>
-                <Link href="/login">Log In</Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-2">
+            {loading ? (
+              <div className="flex items-center gap-2">
+                  <Skeleton className="h-8 w-20" />
+              </div>
+            ) : user ? (
+              <Button size="sm" asChild>
+                <Link href="/dashboard">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                  <span className="sm:hidden">Home</span>
+                </Link>
               </Button>
-              <Button asChild>
-                <Link href="/signup">Get Started Free <MoveRight className="ml-2 h-4 w-4"/></Link>
-              </Button>
-            </>
-          )}
+            ) : (
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Button variant="ghost" size="sm" asChild className="hidden xs:flex">
+                  <Link href="/login">Log In</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href="/signup">
+                    <span className="hidden sm:inline">Get Started Free</span>
+                    <span className="sm:hidden">Get Started</span>
+                    <MoveRight className="ml-2 h-4 w-4 hidden xs:inline-block"/>
+                  </Link>
+                </Button>
+              </div>
+            )}
+
+            {/* Mobile Menu */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden ml-1">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+                <SheetTitle className="text-left mb-4">Navigation</SheetTitle>
+                <nav className="flex flex-col gap-4 mt-8">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.label}
+                      href={link.href}
+                      className="text-lg font-medium transition-colors hover:text-primary py-2 border-b border-muted"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  {!user && !loading && (
+                    <div className="flex flex-col gap-3 mt-6">
+                      <Button variant="outline" asChild className="w-full justify-start">
+                        <Link href="/login">Log In</Link>
+                      </Button>
+                      <Button asChild className="w-full justify-start">
+                        <Link href="/signup">Create Free Account</Link>
+                      </Button>
+                    </div>
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>

@@ -212,35 +212,33 @@ function HomePageContent() {
             }),
           }}
         />
-        <section className="relative py-24 md:py-32 lg:py-40">
+        <section className="relative py-16 md:py-32 lg:py-40">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent -z-10" />
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <Badge variant="outline" className="mb-4 py-1 px-3 rounded-full text-primary border-primary/50">
-              <Sparkles className="w-4 h-4 mr-2 -ml-1" />
+            <Badge variant="outline" className="mb-4 py-1 px-3 rounded-full text-primary border-primary/50 text-[10px] sm:text-xs">
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-2 -ml-1" />
               Powered by Generative AI
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline sm:text-5xl md:text-6xl lg:text-7xl">
               Craft Your Future with AI
             </h1>
-            <p className="mt-6 max-w-3xl mx-auto text-lg text-muted-foreground md:xl mb-6">
+            <p className="mt-6 max-w-2xl mx-auto text-base sm:text-lg text-muted-foreground mb-8">
               Build the perfect resume, get AI-driven feedback, and find jobs that truly match your skills. CareerCraft AI is your ultimate partner in professional growth.
             </p>
 
-            {/* Product Hunt Pill Badge */}
-            <a
-              href="https://www.producthunt.com/posts/careercraft-ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400 text-sm font-medium hover:scale-105 transition-transform mb-10"
-            >
-              <svg width="16" height="16" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="20" fill="#DA552F"/>
-                <path d="M22.7 20c1.7-.6 2.8-2.2 2.8-4 0-2.4-2-4.3-4.5-4.3H14v16.6h3.3v-7.6h2.8l4.8 7.6H28L22.7 20zm-5.4-5.2h3.5c.7 0 1.3.5 1.3 1.2s-.6 1.2-1.3 1.2h-3.5v-2.4z" fill="white"/>
-              </svg>
-              Featured on Product Hunt
-            </a>
+            {/* Product Hunt Badge */}
+            <div className="flex justify-center mb-10">
+              <a href="https://www.producthunt.com/posts/careercraft-ai" target="_blank" rel="noopener noreferrer">
+                <img 
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=careercraft-ai&theme=light"
+                  alt="CareerCraft AI - Featured on Product Hunt"
+                  width="200" height="44"
+                  className="w-[200px] h-[44px] sm:w-[250px] sm:h-[54px]"
+                />
+              </a>
+            </div>
 
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 max-w-md mx-auto sm:max-w-none">
               <Button size="lg" asChild className="w-full sm:w-auto">
                 <Link href={getStartedLink}>Create My Resume</Link>
               </Button>
@@ -251,16 +249,16 @@ function HomePageContent() {
           </div>
         </section>
 
-        <section id="features" className="py-24 md:py-32 bg-card border-t">
+        <section id="features" className="py-20 md:py-32 bg-card border-t">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              <p className="font-semibold text-primary">Our Features</p>
+              <p className="font-semibold text-primary text-sm sm:text-base">Our Features</p>
               <h2 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">Everything you need to level up your career</h2>
-              <p className="mt-4 text-muted-foreground text-lg">
+              <p className="mt-4 text-muted-foreground text-base sm:text-lg">
                 From creation to application, our intelligent tools support you at every step.
               </p>
             </div>
-            <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-16 grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {[
                 { title: "Intuitive Resume Builder", desc: "Create professional, version-controlled resumes with our intuitive builder and live preview.", icon: FileText },
                 { title: "AI Resume Analyzer", desc: "Get instant, actionable feedback to improve your resume's impact, clarity, and keyword optimization.", icon: Sparkles },
@@ -271,10 +269,10 @@ function HomePageContent() {
               ].map((f) => (
                 <Card key={f.title} className="border hover:border-primary transition-all duration-300">
                   <CardHeader>
-                    <div className="bg-primary/10 text-primary w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                      <f.icon className="w-6 h-6" />
+                    <div className="bg-primary/10 text-primary w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center mb-4">
+                      <f.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <CardTitle className="text-xl">{f.title}</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl">{f.title}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
@@ -286,29 +284,29 @@ function HomePageContent() {
           </div>
         </section>
 
-        <section id="pricing" className="py-24 md:py-32">
+        <section id="pricing" className="py-20 md:py-32">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto">
-              <p className="font-semibold text-primary">Pricing</p>
+              <p className="font-semibold text-primary text-sm sm:text-base">Pricing</p>
               <h2 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">The right plan for your needs</h2>
-              <p className="mt-4 text-muted-foreground text-lg">
+              <p className="mt-4 text-muted-foreground text-base sm:text-lg">
                 {pricing.festiveDiscount > 0 ? (
                   <span className="flex items-center justify-center gap-2 text-primary font-semibold">
-                    <PartyPopper className="h-5 w-5" /> 
+                    <PartyPopper className="h-4 w-4 sm:h-5 sm:w-5" /> 
                     {pricing.festiveName}: Extra {pricing.festiveDiscount}% Off All Plans!
                   </span>
-                ) : 'Choose the plan that’s right for you and take the next step in your career.'}
+                ) : 'Choose the plan that’s right for you.'}
               </p>
 
               <div className="flex items-center justify-center gap-3 mt-8">
-                <span className={`text-sm font-medium ${!annual ? "text-foreground" : "text-muted-foreground"}`}>Monthly</span>
+                <span className={`text-xs sm:text-sm font-medium ${!annual ? "text-foreground" : "text-muted-foreground"}`}>Monthly</span>
                 <button
                   onClick={() => setAnnual(!annual)}
-                  className={`relative w-12 h-6 rounded-full transition-colors duration-300 flex items-center px-1 ${annual ? "bg-primary" : "bg-slate-800"}`}
+                  className={`relative w-10 h-5 sm:w-12 sm:h-6 rounded-full transition-colors duration-300 flex items-center px-1 ${annual ? "bg-primary" : "bg-slate-800"}`}
                 >
-                  <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${annual ? "translate-x-6" : "translate-x-0"}`} />
+                  <div className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${annual ? "translate-x-5 sm:translate-x-6" : "translate-x-0"}`} />
                 </button>
-                <span className={`text-sm font-medium flex items-center gap-2 ${annual ? "text-foreground" : "text-muted-foreground"}`}>
+                <span className={`text-xs sm:text-sm font-medium flex items-center gap-2 ${annual ? "text-foreground" : "text-muted-foreground"}`}>
                   Annual
                   <span className="text-[10px] text-green-500 font-black bg-green-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">
                     Save 20%
@@ -318,75 +316,76 @@ function HomePageContent() {
             </div>
 
             <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl w-full mx-auto">
+              {/* Pricing Cards */}
               <Card className="flex flex-col">
                 <CardHeader>
-                  <CardTitle className="font-headline flex items-center gap-2"><Star className="text-yellow-500" /> Free</CardTitle>
-                  <CardDescription>For students & freshers exploring jobs.</CardDescription>
+                  <CardTitle className="font-headline flex items-center gap-2 text-lg sm:text-xl"><Star className="text-yellow-500 w-4 h-4 sm:w-5 sm:h-5" /> Free</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">For students exploring jobs.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1">
-                  <p className="text-4xl font-bold font-headline">₹0<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                  <p className="text-3xl sm:text-4xl font-bold font-headline">₹0<span className="text-base sm:text-lg font-normal text-muted-foreground">/mo</span></p>
                   <ul className="space-y-2 text-left text-sm">
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 5 AI credits per month</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Basic templates</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 2 resume drafts</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> 5 AI credits per month</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> Basic templates</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> Store 2 resume drafts</li>
                   </ul>
                 </CardContent>
-                <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                  <Button asChild variant="outline" className="w-full mt-2">
+                <CardFooter className="pt-4 border-t">
+                  <Button asChild variant="outline" className="w-full">
                     <Link href={getStartedLink}>Get Started</Link>
                   </Button>
                 </CardFooter>
               </Card>
 
               <Card className="flex flex-col relative overflow-hidden">
-                {(pricing.festiveDiscount > 0 || annual) && <Badge className="absolute top-2 right-2 bg-green-500">Sale</Badge>}
+                {(pricing.festiveDiscount > 0 || annual) && <Badge className="absolute top-2 right-2 bg-green-500 text-[10px]">Sale</Badge>}
                 <CardHeader>
-                  <CardTitle className="font-headline flex items-center gap-2"><Trophy className="text-gray-400" /> Essentials</CardTitle>
-                  <CardDescription>For active job seekers.</CardDescription>
+                  <CardTitle className="font-headline flex items-center gap-2 text-lg sm:text-xl"><Trophy className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5" /> Essentials</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">For active job seekers.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1">
                   <div className="flex flex-col">
                     {(pricing.festiveDiscount > 0 || annual) && (
-                      <span className="text-sm text-muted-foreground line-through">₹{pricing.essentials}</span>
+                      <span className="text-xs text-muted-foreground line-through">₹{pricing.essentials}</span>
                     )}
-                    <p className="text-4xl font-bold font-headline">₹{calculatePrice(pricing.essentials)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                    <p className="text-3xl sm:text-4xl font-bold font-headline">₹{calculatePrice(pricing.essentials)}<span className="text-base sm:text-lg font-normal text-muted-foreground">/mo</span></p>
                     {annual && <p className="text-[10px] text-muted-foreground mt-1">Billed annually</p>}
                   </div>
                   <ul className="space-y-2 text-left text-sm">
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> 50 AI credits</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> ATS keyword suggestions</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Store 10 resumes</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> 50 AI credits</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> ATS keyword suggestions</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> Store 10 resumes</li>
                   </ul>
                 </CardContent>
-                <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                  <Button asChild className="w-full mt-2">
+                <CardFooter className="pt-4 border-t">
+                  <Button asChild className="w-full">
                     <Link href={pricingLink}>Choose Essentials</Link>
                   </Button>
                 </CardFooter>
               </Card>
 
               <Card className="border-primary border-2 relative flex flex-col overflow-hidden">
-                <Badge className="absolute top-4 right-4" variant="secondary">Most Popular</Badge>
+                <Badge className="absolute top-2 right-2 sm:top-4 sm:right-4 text-[10px]" variant="secondary">Popular</Badge>
                 <CardHeader>
-                  <CardTitle className="font-headline flex items-center gap-2"><Crown className="text-amber-500" /> Pro</CardTitle>
-                  <CardDescription>For professionals aiming for top jobs.</CardDescription>
+                  <CardTitle className="font-headline flex items-center gap-2 text-lg sm:text-xl"><Crown className="text-amber-500 w-4 h-4 sm:w-5 sm:h-5" /> Pro</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">For top-tier professionals.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1">
                   <div className="flex flex-col">
                     {(pricing.festiveDiscount > 0 || annual) && (
-                      <span className="text-sm text-muted-foreground line-through">₹{pricing.pro}</span>
+                      <span className="text-xs text-muted-foreground line-through">₹{pricing.pro}</span>
                     )}
-                    <p className="text-4xl font-bold font-headline">₹{calculatePrice(pricing.pro)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                    <p className="text-3xl sm:text-4xl font-bold font-headline">₹{calculatePrice(pricing.pro)}<span className="text-base sm:text-lg font-normal text-muted-foreground">/mo</span></p>
                     {annual && <p className="text-[10px] text-muted-foreground mt-1">Billed annually</p>}
                   </div>
                   <ul className="space-y-2 text-left text-sm">
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited AI generation</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Advanced ATS optimization</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited resumes</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited AI generation</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> Advanced ATS optimization</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> Unlimited resumes</li>
                   </ul>
                 </CardContent>
-                <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                  <Button asChild className="w-full mt-2">
+                <CardFooter className="pt-4 border-t">
+                  <Button asChild className="w-full">
                     <Link href={pricingLink}>Choose Pro</Link>
                   </Button>
                 </CardFooter>
@@ -394,44 +393,44 @@ function HomePageContent() {
 
               <Card className="flex flex-col relative overflow-hidden">
                 <CardHeader>
-                  <CardTitle className="font-headline flex items-center gap-2"><Diamond className="text-blue-500" /> Recruiter</CardTitle>
-                  <CardDescription>For recruiters & HR teams.</CardDescription>
+                  <CardTitle className="font-headline flex items-center gap-2 text-lg sm:text-xl"><Diamond className="text-blue-500 w-4 h-4 sm:w-5 sm:h-5" /> Recruiter</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">For hiring teams.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 flex-1">
                   <div className="flex flex-col">
                     {(pricing.festiveDiscount > 0 || annual) && (
-                      <span className="text-sm text-muted-foreground line-through">₹{pricing.recruiter}</span>
+                      <span className="text-xs text-muted-foreground line-through">₹{pricing.recruiter}</span>
                     )}
-                    <p className="text-4xl font-bold font-headline">₹{calculatePrice(pricing.recruiter)}<span className="text-lg font-normal text-muted-foreground">/mo</span></p>
+                    <p className="text-3xl sm:text-4xl font-bold font-headline">₹{calculatePrice(pricing.recruiter)}<span className="text-base sm:text-lg font-normal text-muted-foreground">/mo</span></p>
                     {annual && <p className="text-[10px] text-muted-foreground mt-1">Billed annually</p>}
                   </div>
                   <ul className="space-y-2 text-left text-sm">
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Team Management</li>
-                    <li className="flex items-start gap-2"><Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter analytics</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> AI Candidate Ranking</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> Team Management</li>
+                    <li className="flex items-start gap-2"><Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-0.5" /> Recruiter analytics</li>
                   </ul>
                 </CardContent>
-                <CardFooter className="flex-col items-start gap-2 pt-4 border-t">
-                  <Button asChild variant="secondary" className="w-full mt-2">
+                <CardFooter className="pt-4 border-t">
+                  <Button asChild variant="secondary" className="w-full">
                     <Link href={pricingLink}>Choose Recruiter</Link>
                   </Button>
                 </CardFooter>
               </Card>
             </div>
 
-            <p className="text-center text-xs text-muted-foreground mt-12 font-medium uppercase tracking-widest">
+            <p className="text-center text-[10px] text-muted-foreground mt-12 font-medium uppercase tracking-widest">
               🔒 Secure payments via Razorpay · Cancel anytime · No hidden fees
             </p>
           </div>
         </section>
 
         {/* FAQ Section */}
-        <section id="faq" className="py-24 md:py-32 bg-muted/30">
+        <section id="faq" className="py-20 md:py-32 bg-muted/30">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <p className="font-semibold text-primary">FAQ</p>
+              <p className="font-semibold text-primary text-sm sm:text-base">FAQ</p>
               <h2 className="mt-2 text-3xl font-bold font-headline sm:text-4xl">Common Questions</h2>
-              <p className="mt-4 text-muted-foreground text-lg">
+              <p className="mt-4 text-muted-foreground text-base sm:text-lg">
                 Everything you need to know about CareerCraft AI.
               </p>
             </div>
@@ -440,12 +439,12 @@ function HomePageContent() {
                 {faqs.map((faq, index) => (
                   <AccordionItem key={index} value={`item-${index}`} className="border-b border-muted-foreground/20">
                     <AccordionTrigger className="text-left font-semibold py-6 hover:no-underline">
-                      <div className="flex items-center gap-3">
-                        <HelpCircle className="h-5 w-5 text-primary shrink-0" />
+                      <div className="flex items-center gap-3 text-sm sm:text-base">
+                        <HelpCircle className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
                         {faq.question}
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground pb-6 leading-relaxed">
+                    <AccordionContent className="text-muted-foreground pb-6 leading-relaxed text-sm">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>
@@ -475,20 +474,13 @@ function HomePageContent() {
             </div>
 
             {/* Product Hunt Badge */}
-            <a 
-              href="https://www.producthunt.com/posts/careercraft-ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-orange-800/50 bg-orange-950/20 hover:bg-orange-950/40 transition-colors group"
-            >
-              <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="20" fill="#DA552F"/>
-                <path d="M22.7 20c1.7-.6 2.8-2.2 2.8-4 0-2.4-2-4.3-4.5-4.3H14v16.6h3.3v-7.6h2.8l4.8 7.6H28L22.7 20zm-5.4-5.2h3.5c.7 0 1.3.5 1.3 1.2s-.6 1.2-1.3 1.2h-3.5v-2.4z" fill="white"/>
-              </svg>
-              <div>
-                <p className="text-[10px] text-orange-400 uppercase tracking-widest font-medium">Find us on</p>
-                <p className="text-white font-bold text-sm group-hover:text-orange-300 transition-colors">Product Hunt</p>
-              </div>
+            <a href="https://www.producthunt.com/posts/careercraft-ai" target="_blank" rel="noopener noreferrer">
+              <img 
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=careercraft-ai&theme=light"
+                alt="CareerCraft AI - Featured on Product Hunt"
+                width="200" height="44"
+                className="w-[200px] h-[44px] sm:w-[250px] sm:h-[54px]"
+              />
             </a>
           </div>
 
