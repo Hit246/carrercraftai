@@ -76,8 +76,11 @@ export async function notifyAdminOfUpgradeAction(data: {
 }) {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, ADMIN_EMAIL } = process.env;
 
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS || !ADMIN_EMAIL) {
-    return { success: false, error: 'SMTP missing' };
+  // Use the new support email as the primary contact if defined in env, otherwise fallback to admin
+  const targetAdminEmail = ADMIN_EMAIL || 'support@careercraftai.tech';
+
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    return { success: false, error: 'SMTP configuration missing' };
   }
 
   const nodemailer = await import('nodemailer');
@@ -111,7 +114,7 @@ export async function notifyAdminOfUpgradeAction(data: {
     // Notify ADMIN
     await transporter.sendMail({
       from: `"CareerCraft AI System" <${SMTP_USER}>`,
-      to: ADMIN_EMAIL,
+      to: targetAdminEmail,
       subject: subjectMap[data.type],
       html: `<p>${bodyMap[data.type]}</p>`,
     });
@@ -133,7 +136,7 @@ export async function notifyAdminOfUpgradeAction(data: {
         }
 
         await transporter.sendMail({
-            from: `"CareerCraft AI" <${SMTP_USER}>`,
+            from: `"CareerCraft AI" <support@careercraftai.tech>`,
             to: data.userEmail,
             subject: userSubject,
             html: `<div style="font-family:sans-serif;"><h2 style="color:#3b82f6;">CareerCraft AI</h2><p>${userBody}</p></div>`,

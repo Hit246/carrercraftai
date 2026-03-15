@@ -40,7 +40,7 @@ export default function ContactPage() {
                 <Mail className="h-10 w-10 mx-auto text-primary mb-4" />
                 <h3 className="text-lg font-semibold">General Inquiries</h3>
                 <p className="text-muted-foreground text-sm mb-4">For general questions, partnerships, or media inquiries.</p>
-                <a href="mailto:hitarth0236@gmail.com" className="text-primary font-medium hover:underline">hitarth0236@gmail.com</a>
+                <a href="mailto:support@careercraftai.tech" className="text-primary font-medium hover:underline">support@careercraftai.tech</a>
               </div>
               <div className="flex-1 p-6 border rounded-lg text-center">
                 <LifeBuoy className="h-10 w-10 mx-auto text-primary mb-4" />

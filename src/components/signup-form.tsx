@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -21,7 +20,7 @@ const formSchema = z.object({
     password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
   });
 
-const ADMIN_EMAILS = ['admin@careercraftai.tech', 'hitarth0236@gmail.com'];
+const ADMIN_EMAILS = ['support@careercraftai.tech', 'admin@careercraftai.tech', 'hitarth0236@gmail.com'];
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = [
@@ -88,7 +87,8 @@ export function SignupForm() {
 
       // Trigger Welcome Email Drip
       try {
-        await fetch("/api/send-welcome-email", {
+        console.log("🚀 Triggering welcome email sequence for new email signup...");
+        const welcomeResponse = await fetch("/api/send-welcome-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
@@ -96,8 +96,14 @@ export function SignupForm() {
             name: user.displayName || values.email.split('@')[0] 
           }),
         });
+        const welcomeData = await welcomeResponse.json();
+        if (welcomeData.success) {
+          console.log("✅ Welcome email sequence initiated.");
+        } else {
+          console.warn("⚠️ Welcome email API failure:", welcomeData.message);
+        }
       } catch (e) {
-        console.error("Welcome email drip failed:", e);
+        console.error("❌ Welcome email trigger error:", e);
       }
 
       if(ADMIN_EMAILS.includes(values.email)) {

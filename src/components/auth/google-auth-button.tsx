@@ -1,4 +1,3 @@
-
 'use client';
 
 import { signInWithPopup } from 'firebase/auth';
@@ -9,7 +8,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const ADMIN_EMAILS = ['admin@careercraftai.tech', 'hitarth0236@gmail.com'];
+const ADMIN_EMAILS = ['support@careercraftai.tech', 'admin@careercraftai.tech', 'hitarth0236@gmail.com'];
 const FREE_CREDITS = 5;
 
 export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {
@@ -44,7 +43,8 @@ export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {
 
         // Trigger Welcome Email Drip for new signups
         try {
-          await fetch("/api/send-welcome-email", {
+          console.log("🚀 Triggering welcome email sequence...");
+          const welcomeResponse = await fetch("/api/send-welcome-email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
@@ -52,8 +52,14 @@ export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {
               name: user.displayName || user.email?.split('@')[0] 
             }),
           });
+          const welcomeData = await welcomeResponse.json();
+          if (welcomeData.success) {
+            console.log("✅ Welcome email sequence initiated successfully.");
+          } else {
+            console.warn("⚠️ Welcome email API returned failure:", welcomeData.message);
+          }
         } catch (e) {
-          console.warn("Welcome email drip skip/failed:", e);
+          console.error("❌ Welcome email fetch failed:", e);
         }
 
         // Check for team invitations

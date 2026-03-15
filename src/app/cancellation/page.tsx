@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -63,13 +62,13 @@ export default function CancellationPage() {
             <section>
               <h2 className="text-xl font-semibold font-headline">How to Request a Refund</h2>
               <p>
-                To request a refund, please contact our support team via the <Link href="/support" className="underline">Support page</Link> within the eligible 24-hour window. Please include your account email and the reason for your refund request. Our team will review your request and respond within 3-5 business days.
+                To request a refund, please contact our support team via the <Link href="/support" className="underline">Support page</Link> within the eligible 24-hour window. Alternatively, you can email us at <strong>support@careercraftai.tech</strong>. Please include your account email and the reason for your refund request. Our team will review your request and respond within 3-5 business days.
               </p>
             </section>
             
             <section>
                 <h2 className="text-xl font-semibold font-headline">Contact Us</h2>
-                <p>If you have any questions about our Cancellation and Refund Policy, please contact us through the support channels available on our website.</p>
+                <p>If you have any questions about our Cancellation and Refund Policy, please contact us through the support channels available on our website or email <strong>support@careercraftai.tech</strong>.</p>
             </section>
           </CardContent>
         </Card>
