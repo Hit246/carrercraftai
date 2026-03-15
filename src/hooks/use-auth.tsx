@@ -152,7 +152,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (!isNaN(upgradeDate.getTime())) {
                 const expirationDate = addDays(upgradeDate, 30);
                 if (differenceInDays(new Date(), expirationDate) >= 0) {
-                    // Update DB first to prevent loop
                     await updateDoc(userRef, { 
                         plan: 'free', 
                         credits: FREE_CREDITS, 
@@ -160,7 +159,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         requestedPlan: null 
                     });
                     
-                    // Trigger Alert once per session/change
                     if (!hasNotifiedExpiration.current) {
                         hasNotifiedExpiration.current = true;
                         if (user.email) {
