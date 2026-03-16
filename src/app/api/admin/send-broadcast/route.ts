@@ -13,6 +13,7 @@ function initAdmin() {
 
   try {
     let sanitizedKey = keyString.trim();
+    // Remove potential surrounding quotes from env string
     if ((sanitizedKey.startsWith("'") && sanitizedKey.endsWith("'")) || 
         (sanitizedKey.startsWith('"') && sanitizedKey.endsWith('"'))) {
       sanitizedKey = sanitizedKey.slice(1, -1).trim();
@@ -36,6 +37,10 @@ export async function POST(req: NextRequest) {
 
     const { subject, html, audience } = await req.json();
 
+    if (!subject || !html) {
+      return NextResponse.json({ success: false, error: "Subject and HTML body are required." }, { status: 400 });
+    }
+
     // 1. Fetch targeted users
     let usersQuery: admin.firestore.Query = db.collection("users");
     
@@ -55,27 +60,31 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    console.log(`📧 Starting broadcast to ${emails.length} users. Audience: ${audience}`);
+    console.log(`📧 Initiating broadcast to ${emails.length} users. Audience: ${audience}`);
 
-    // 2. Send in batches of 50 (Resend limit per request for 'to' array)
-    const batchSize = 50;
+    // 2. Send using Resend Batch API (max 100 per batch)
+    // This is safer for privacy than putting 50 people in the 'to' field
+    const batchSize = 100;
     let sentCount = 0;
 
     for (let i = 0; i < emails.length; i += batchSize) {
-      const batch = emails.slice(i, i + batchSize);
+      const emailBatch = emails.slice(i, i + batchSize);
       
-      const { data, error } = await resend.emails.send({
+      const batchPayload = emailBatch.map(email => ({
         from: "CareerCraft AI <support@careercraftai.tech>",
-        to: batch,
+        to: email,
         subject: subject,
         html: html,
-      });
+      }));
+
+      const { data, error } = await resend.batch.send(batchPayload);
 
       if (error) {
-        console.error(`❌ Resend Error in batch ${i / batchSize}:`, error);
-        // We continue with other batches even if one fails
-      } else {
-        sentCount += batch.length;
+        console.error(`❌ Resend Batch Error at index ${i}:`, error);
+        // We throw if the first batch fails, or log and continue
+        if (sentCount === 0) throw error; 
+      } else if (data) {
+        sentCount += emailBatch.length;
       }
     }
 
@@ -87,6 +96,6 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error("Broadcast Critical Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || "An internal error occurred during broadcast." }, { status: 500 });
   }
 }

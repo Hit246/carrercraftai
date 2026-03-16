@@ -111,18 +111,30 @@ export default function EmailBroadcastPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subject, html: emailHTML, audience }),
       });
-      const data = await res.json();
-      if (data.success) {
-        setResult({ success: true, message: `Successfully sent to ${data.count} users!` });
-        toast({ title: "Broadcast Sent", description: `Sent to ${data.count} users.` });
-        setSubject("");
-        setBody("");
+
+      // Defensive JSON parsing
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const data = await res.json();
+        if (data.success) {
+          setResult({ success: true, message: `Successfully sent to ${data.count} users!` });
+          toast({ title: "Broadcast Sent", description: `Sent to ${data.count} users.` });
+          setSubject("");
+          setBody("");
+        } else {
+          setResult({ success: false, message: data.error || "Failed to send broadcast" });
+          toast({ title: "Error", description: data.error || "Failed to send", variant: "destructive" });
+        }
       } else {
-        setResult({ success: false, message: data.error || "Failed to send broadcast" });
-        toast({ title: "Error", description: data.error || "Failed to send", variant: "destructive" });
+        // Handle non-JSON response (likely an error page)
+        const text = await res.text();
+        console.error("Server returned non-JSON response:", text);
+        setResult({ success: false, message: `Server error (${res.status}). Please check logs.` });
+        toast({ title: "Critical Server Error", description: `Status ${res.status}`, variant: "destructive" });
       }
     } catch (e) {
-      setResult({ success: false, message: "Network error occurred" });
+      console.error("Broadcast request failed:", e);
+      setResult({ success: false, message: "Network error occurred. Check your connection." });
     } finally {
       setSending(false);
     }
