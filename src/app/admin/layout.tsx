@@ -18,6 +18,7 @@ import {
   Bell,
   Wallet,
   Tag,
+  Mail,
 } from 'lucide-react';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -112,6 +113,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
     if (isActive('/admin/cancellations')) return 'Cancellation Requests';
     if (isActive('/admin/support')) return 'Support Tickets';
     if (isActive('/admin/payment-history')) return 'Payment History';
+    if (isActive('/admin/email-broadcast')) return 'Email Broadcast';
     return 'Admin Panel';
   };
 
@@ -204,6 +206,17 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                 <Link href="/admin/support">
                   <LifeBuoy />
                   <span>Support</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/admin/email-broadcast')}
+              >
+                <Link href="/admin/email-broadcast">
+                  <Mail />
+                  <span>Email Broadcast</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
