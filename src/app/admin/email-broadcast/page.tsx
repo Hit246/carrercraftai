@@ -8,10 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { Mail, Eye, Send, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-const ADMIN_EMAILS = ['support@careercraftai.tech', 'hello@careercraftai.tech', 'hitarth0236@gmail.com'];
 
 export default function EmailBroadcastPage() {
   const { user, isAdmin } = useAuth();
