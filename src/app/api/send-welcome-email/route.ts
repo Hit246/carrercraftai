@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const emails = [
   {
@@ -74,6 +75,17 @@ const emails = [
 ];
 
 export async function POST(req: NextRequest) {
+  // Extract IP for rate limiting
+  const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+  const { success } = checkRateLimit(ip);
+
+  if (!success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
   
   if (!apiKey) {
@@ -85,11 +97,11 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(apiKey);
     const { email, name } = await req.json();
 
-    console.log(`📧 Initiating email drip for: ${email}`);
+    console.log(`📧 Initiating email drip for: ${email} (IP: ${ip})`);
 
     // Send Day 0 email immediately
     const welcomeResult = await resend.emails.send({
-      from: "CareerCraft AI <hello@careercraftai.tech>",
+      from: "CareerCraft AI <support@careercraftai.tech>",
       to: email,
       subject: emails[0].subject,
       html: emails[0].html.replace(/aboard!/g, `aboard, ${name || "there"}!`),
@@ -105,7 +117,7 @@ export async function POST(req: NextRequest) {
       sendAt.setDate(sendAt.getDate() + drip.delay);
 
       const scheduledResult = await resend.emails.send({
-        from: "CareerCraft AI <hello@careercraftai.tech>",
+        from: "CareerCraft AI <support@careercraftai.tech>",
         to: email,
         subject: drip.subject,
         html: drip.html,
