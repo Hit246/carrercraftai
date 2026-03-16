@@ -2,7 +2,6 @@ import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
 import * as admin from 'firebase-admin';
 
-// Initialize Firebase Admin lazily
 function initAdmin() {
   if (admin.apps.length > 0) return admin.app();
 
@@ -14,8 +13,8 @@ function initAdmin() {
   try {
     let sanitizedKey = keyString.trim();
     // Remove potential surrounding quotes from env string
-    if ((sanitizedKey.startsWith("'") && sanitizedKey.endsWith("'")) || 
-        (sanitizedKey.startsWith('"') && sanitizedKey.endsWith('"'))) {
+    if ((sanitizedKey.startsWith("'") && sanitizedKey.endsWith("'")) ||
+      (sanitizedKey.startsWith('"') && sanitizedKey.endsWith('"'))) {
       sanitizedKey = sanitizedKey.slice(1, -1).trim();
     }
 
@@ -43,20 +42,24 @@ export async function POST(req: NextRequest) {
 
     // 1. Fetch targeted users
     let usersQuery: admin.firestore.Query = db.collection("users");
-    
+
     if (audience !== "all") {
       usersQuery = usersQuery.where("plan", "==", audience);
     }
 
     const snapshot = await usersQuery.get();
+    const ADMIN_EMAILS = ['hitarth0236@gmail.com', 'support@careercraftai.tech', 'hello@careercraftai.tech'];
     const emails = snapshot.docs
       .map((doc) => doc.data().email)
-      .filter((email): email is string => !!email && typeof email === 'string');
-
+      .filter((email): email is string =>
+        !!email &&
+        typeof email === 'string' &&
+        !ADMIN_EMAILS.includes(email)
+      );
     if (emails.length === 0) {
-      return NextResponse.json({ 
-        success: false, 
-        error: "No users found for the selected audience." 
+      return NextResponse.json({
+        success: false,
+        error: "No users found for the selected audience."
       });
     }
 
@@ -69,9 +72,9 @@ export async function POST(req: NextRequest) {
 
     for (let i = 0; i < emails.length; i += batchSize) {
       const emailBatch = emails.slice(i, i + batchSize);
-      
+
       const batchPayload = emailBatch.map(email => ({
-        from: "CareerCraft AI <support@careercraftai.tech>",
+        from: "CareerCraft AI <hello@careercraftai.tech>",
         to: email,
         subject: subject,
         html: html,
@@ -82,16 +85,16 @@ export async function POST(req: NextRequest) {
       if (error) {
         console.error(`❌ Resend Batch Error at index ${i}:`, error);
         // We throw if the first batch fails, or log and continue
-        if (sentCount === 0) throw error; 
+        if (sentCount === 0) throw error;
       } else if (data) {
         sentCount += emailBatch.length;
       }
     }
 
-    return NextResponse.json({ 
-        success: true, 
-        count: sentCount,
-        total: emails.length 
+    return NextResponse.json({
+      success: true,
+      count: sentCount,
+      total: emails.length
     });
 
   } catch (error: any) {

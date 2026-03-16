@@ -105,11 +105,18 @@ export default function EmailBroadcastPage() {
     }
     setSending(true);
     setResult(null);
+
+    const sanitizedHTML = emailHTML
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, '-')
+    .trim();
+
     try {
       const res = await fetch("/api/admin/send-broadcast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, html: emailHTML, audience }),
+        body: JSON.stringify({ subject, html: sanitizedHTML, audience }),
       });
 
       // Defensive JSON parsing
