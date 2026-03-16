@@ -109,7 +109,6 @@ export async function POST(req: NextRequest) {
         to: email,
         subject: drip.subject,
         html: drip.html,
-        scheduledAt: sendAt.toISOString(),
       });
 
       if (scheduledResult.error) {
