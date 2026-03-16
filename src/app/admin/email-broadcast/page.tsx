@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Mail, Eye, Send, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// Reusable function to build email HTML from a body string
 function buildEmailHTML(bodyContent: string) {
   return `<!DOCTYPE html>
 <html>
@@ -44,16 +43,16 @@ function buildEmailHTML(bodyContent: string) {
             <td style="padding:0 40px 40px;text-align:center;">
               <a href="https://careercraftai.tech/dashboard"
                 style="display:inline-block;background-color:#3b82f6;color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">
-                Go to Dashboard →
+                Go to Dashboard
               </a>
             </td>
           </tr>
           <tr>
             <td style="padding:24px 40px;background-color:#f8fafc;border-top:1px solid #f1f5f9;text-align:center;">
               <p style="color:#64748b;font-size:12px;margin:0;">
-                © ${new Date().getFullYear()} CareerCraft AI ·
-                <a href="https://careercraftai.tech/privacy" style="color:#3b82f6;text-decoration:none;">Privacy Policy</a> ·
-                <a href="https://careercraftai.tech/contact" style="color:#3b82f6;text-decoration:none;">Contact Support</a>
+                2026 CareerCraft AI
+                <a href="https://careercraftai.tech/privacy" style="color:#3b82f6;text-decoration:none;margin-left:8px;">Privacy Policy</a>
+                <a href="https://careercraftai.tech/contact" style="color:#3b82f6;text-decoration:none;margin-left:8px;">Contact</a>
               </p>
               <p style="color:#94a3b8;font-size:11px;margin-top:8px;">
                 You received this email because you are a registered user of CareerCraft AI.
@@ -89,7 +88,6 @@ export default function EmailBroadcastPage() {
     );
   }
 
-  // For live preview — uses raw body (fine for iframe)
   const previewHTML = buildEmailHTML(body);
 
   const handleSend = async () => {
@@ -100,19 +98,12 @@ export default function EmailBroadcastPage() {
     setSending(true);
     setResult(null);
 
-    // Sanitize body FIRST then build final HTML
+    // Sanitize body only — no HTML building here
     const sanitizedBody = body
       .replace(/[\u2018\u2019]/g, "'")
       .replace(/[\u201C\u201D]/g, '"')
       .replace(/[\u2013\u2014]/g, '-')
       .trim();
-
-    const finalHTML = buildEmailHTML(sanitizedBody);
-
-    const payload = { subject: subject.trim(), html: finalHTML, audience };
-    console.log("Payload size:", JSON.stringify(payload).length);
-    console.log("Subject:", subject);
-    console.log("First 100 chars of HTML:", finalHTML.substring(0, 100));
 
     try {
       const res = await fetch("/api/admin/send-broadcast", {
@@ -120,9 +111,8 @@ export default function EmailBroadcastPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           subject: subject.trim(),
-          html: btoa(encodeURIComponent(finalHTML).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode(parseInt(p1, 16)))),
+          bodyContent: sanitizedBody, // ← plain body only
           audience,
-
         }),
       });
 
@@ -150,7 +140,6 @@ export default function EmailBroadcastPage() {
     } finally {
       setSending(false);
     }
-
   };
 
   return (
