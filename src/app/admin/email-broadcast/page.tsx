@@ -12,6 +12,62 @@ import { Badge } from "@/components/ui/badge";
 import { Mail, Eye, Send, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+// Reusable function to build email HTML from a body string
+function buildEmailHTML(bodyContent: string) {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body style="margin:0;padding:0;background-color:#f8fafc;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        <table width="600" cellpadding="0" cellspacing="0"
+          style="background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;width:600px;">
+          <tr>
+            <td style="padding:32px 40px;border-bottom:1px solid #f1f5f9;text-align:center;">
+              <img src="https://careercraftai.tech/logo.jpg"
+                width="48" height="48" style="border-radius:10px;" alt="Logo" />
+              <h1 style="color:#0f172a;font-size:22px;margin:16px 0 0;font-weight:700;">CareerCraft AI</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px;color:#334155;font-size:16px;line-height:1.6;">
+              <div style="margin-bottom:20px;">
+                ${bodyContent || "<p style='color:#94a3b8;font-style:italic;'>Email content will appear here...</p>"}
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 40px 40px;text-align:center;">
+              <a href="https://careercraftai.tech/dashboard"
+                style="display:inline-block;background-color:#3b82f6;color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">
+                Go to Dashboard →
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px 40px;background-color:#f8fafc;border-top:1px solid #f1f5f9;text-align:center;">
+              <p style="color:#64748b;font-size:12px;margin:0;">
+                © ${new Date().getFullYear()} CareerCraft AI ·
+                <a href="https://careercraftai.tech/privacy" style="color:#3b82f6;text-decoration:none;">Privacy Policy</a> ·
+                <a href="https://careercraftai.tech/contact" style="color:#3b82f6;text-decoration:none;">Contact Support</a>
+              </p>
+              <p style="color:#94a3b8;font-size:11px;margin-top:8px;">
+                You received this email because you are a registered user of CareerCraft AI.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
 export default function EmailBroadcastPage() {
   const { user, isAdmin } = useAuth();
   const { toast } = useToast();
@@ -26,77 +82,15 @@ export default function EmailBroadcastPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center space-y-2">
-            <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
-            <p className="text-destructive font-bold">Access Denied</p>
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
+          <p className="text-destructive font-bold">Access Denied</p>
         </div>
       </div>
     );
   }
 
-  const emailHTML = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    </head>
-    <body style="margin:0;padding:0;background-color:#f8fafc;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8fafc;">
-        <tr>
-          <td align="center" style="padding:40px 20px;">
-            <table width="100%" maxWidth="600" cellpadding="0" cellspacing="0" 
-              style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; width: 600px;">
-              
-              <!-- Header -->
-              <tr>
-                <td style="padding:32px 40px;border-bottom:1px solid #f1f5f9;text-align:center;">
-                  <img src="https://careercraftai.tech/logo.jpg" 
-                    width="48" height="48" style="border-radius:10px;" alt="Logo" />
-                  <h1 style="color:#0f172a;font-size:22px;margin:16px 0 0; font-weight: 700;">CareerCraft AI</h1>
-                </td>
-              </tr>
-
-              <!-- Body -->
-              <tr>
-                <td style="padding:40px;color:#334155;font-size:16px;line-height:1.6;">
-                  <div style="margin-bottom: 20px;">
-                    ${body || "<p style='color:#94a3b8; font-style:italic;'>Email content will appear here...</p>"}
-                  </div>
-                </td>
-              </tr>
-
-              <!-- CTA -->
-              <tr>
-                <td style="padding:0 40px 40px;text-align:center;">
-                  <a href="https://careercraftai.tech/dashboard"
-                    style="display:inline-block;background-color:#3b82f6;color:#ffffff;
-                    padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600; font-size: 15px;">
-                    Go to Dashboard →
-                  </a>
-                </td>
-              </tr>
-
-              <!-- Footer -->
-              <tr>
-                <td style="padding:24px 40px;background-color:#f8fafc;border-top:1px solid #f1f5f9;text-align:center;">
-                  <p style="color:#64748b;font-size:12px;margin:0;">
-                    © ${new Date().getFullYear()} CareerCraft AI · 
-                    <a href="https://careercraftai.tech/privacy" style="color:#3b82f6; text-decoration:none;">Privacy Policy</a> · 
-                    <a href="https://careercraftai.tech/contact" style="color:#3b82f6; text-decoration:none;">Contact Support</a>
-                  </p>
-                  <p style="color:#94a3b8;font-size:11px;margin-top:8px;">
-                    You received this email because you are a registered user of CareerCraft AI.
-                  </p>
-                </td>
-              </tr>
-
-            </table>
-          </td>
-        </tr>
-      </table>
-    </body>
-    </html>
-  `;
+  // For live preview — uses raw body (fine for iframe)
+  const previewHTML = buildEmailHTML(body);
 
   const handleSend = async () => {
     if (!subject || !body) {
@@ -106,22 +100,28 @@ export default function EmailBroadcastPage() {
     setSending(true);
     setResult(null);
 
-    const sanitizedHTML = emailHTML
-    .replace(/[\u2018\u2019]/g, "'")
-    .replace(/[\u201C\u201D]/g, '"')
-    .replace(/[\u2013\u2014]/g, '-')
-    .trim();
+    // Sanitize body FIRST then build final HTML
+    const sanitizedBody = body
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2013\u2014]/g, '-')
+      .trim();
+
+    const finalHTML = buildEmailHTML(sanitizedBody);
 
     try {
       const res = await fetch("/api/admin/send-broadcast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, html: sanitizedHTML, audience }),
+        body: JSON.stringify({
+          subject: subject.trim(),
+          html: finalHTML,
+          audience,
+        }),
       });
 
-      // Defensive JSON parsing
       const contentType = res.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
+      if (contentType && contentType.includes("application/json")) {
         const data = await res.json();
         if (data.success) {
           setResult({ success: true, message: `Successfully sent to ${data.count} users!` });
@@ -133,15 +133,14 @@ export default function EmailBroadcastPage() {
           toast({ title: "Error", description: data.error || "Failed to send", variant: "destructive" });
         }
       } else {
-        // Handle non-JSON response (likely an error page)
         const text = await res.text();
-        console.error("Server returned non-JSON response:", text);
-        setResult({ success: false, message: `Server error (${res.status}). Please check logs.` });
+        console.error("Non-JSON response:", text);
+        setResult({ success: false, message: `Server error (${res.status}). Check logs.` });
         toast({ title: "Critical Server Error", description: `Status ${res.status}`, variant: "destructive" });
       }
     } catch (e) {
-      console.error("Broadcast request failed:", e);
-      setResult({ success: false, message: "Network error occurred. Check your connection." });
+      console.error("Broadcast failed:", e);
+      setResult({ success: false, message: "Network error. Check your connection." });
     } finally {
       setSending(false);
     }
@@ -151,15 +150,15 @@ export default function EmailBroadcastPage() {
     <div className="space-y-8 max-w-6xl mx-auto pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-            <h1 className="text-3xl font-bold font-headline flex items-center gap-3">
-                <Mail className="h-8 w-8 text-primary" /> Email Broadcast
-            </h1>
-            <p className="text-muted-foreground mt-1">Communicate directly with your user base.</p>
+          <h1 className="text-3xl font-bold font-headline flex items-center gap-3">
+            <Mail className="h-8 w-8 text-primary" /> Email Broadcast
+          </h1>
+          <p className="text-muted-foreground mt-1">Communicate directly with your user base.</p>
         </div>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
-        
+
         {/* Left — Compose */}
         <Card className="shadow-md">
           <CardHeader>
@@ -167,7 +166,7 @@ export default function EmailBroadcastPage() {
             <CardDescription>Select your audience and write your message.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            
+
             <div className="space-y-2">
               <Label>Target Audience</Label>
               <Select value={audience} onValueChange={setAudience}>
@@ -197,23 +196,21 @@ export default function EmailBroadcastPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="body">
-                Message Body (HTML Supported)
-              </Label>
+              <Label htmlFor="body">Message Body (HTML Supported)</Label>
               <Textarea
                 id="body"
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 rows={15}
-                placeholder={`<h2>Hello {{name}},</h2>\n<p>We've just launched a new feature...</p>`}
+                placeholder={`<h2>Hello there,</h2>\n<p>We have exciting news...</p>`}
                 className="font-mono text-xs resize-none"
               />
             </div>
 
             {result && (
               <div className={`p-4 rounded-lg flex items-center gap-3 ${
-                result.success 
-                  ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20" 
+                result.success
+                  ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
                   : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
               }`}>
                 {result.success ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
@@ -222,23 +219,15 @@ export default function EmailBroadcastPage() {
             )}
 
             <div className="flex gap-4 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => setShowPreview(!showPreview)}
-                className="flex-1"
-              >
+              <Button variant="outline" onClick={() => setShowPreview(!showPreview)} className="flex-1">
                 <Eye className="mr-2 h-4 w-4" />
                 {showPreview ? "Hide Preview" : "Preview"}
               </Button>
-              <Button
-                onClick={handleSend}
-                disabled={sending}
-                className="flex-1 shadow-lg shadow-primary/20"
-              >
+              <Button onClick={handleSend} disabled={sending} className="flex-1 shadow-lg shadow-primary/20">
                 {sending ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...</>
                 ) : (
-                    <><Send className="mr-2 h-4 w-4" /> Send Broadcast</>
+                  <><Send className="mr-2 h-4 w-4" /> Send Broadcast</>
                 )}
               </Button>
             </div>
@@ -247,20 +236,24 @@ export default function EmailBroadcastPage() {
 
         {/* Right — Preview */}
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <Label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Mobile/Desktop Preview</Label>
-                <Badge variant="outline" className="bg-muted/50">Subject: {subject || "(Empty)"}</Badge>
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              Live Preview
+            </Label>
+            <Badge variant="outline" className="bg-muted/50">
+              Subject: {subject || "(Empty)"}
+            </Badge>
+          </div>
+          <Card className="overflow-hidden border-2 border-muted h-[700px] shadow-2xl relative">
+            <div className="absolute inset-0 bg-muted/5 flex items-center justify-center -z-10">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" />
             </div>
-            <Card className="overflow-hidden border-2 border-muted h-[700px] shadow-2xl relative">
-                <div className="absolute inset-0 bg-muted/5 flex items-center justify-center -z-10">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/20" />
-                </div>
-                <iframe
-                    srcDoc={emailHTML}
-                    className="w-full h-full"
-                    title="Email Preview"
-                />
-            </Card>
+            <iframe
+              srcDoc={previewHTML}
+              className="w-full h-full"
+              title="Email Preview"
+            />
+          </Card>
         </div>
       </div>
     </div>
