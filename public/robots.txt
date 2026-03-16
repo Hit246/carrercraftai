@@ -1,0 +1,19 @@
+# See https://www.robotstxt.org/robotstxt.html for syntax and directives
+
+User-agent: *
+Allow: /
+
+# Disallow crawling of admin and user-specific pages
+Disallow: /admin/
+Disallow: /payment/
+Disallow: /order-status/
+Disallow: /profile/
+Disallow: /api/
+Disallow: /login
+Disallow: /signup
+Disallow: /dashboard/
+Disallow: /team/
+Disallow: /support/
+
+# Sitemap
+Sitemap: https://careercraftai.tech/sitemap.xml

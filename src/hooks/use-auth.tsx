@@ -60,7 +60,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const FREE_CREDITS = 5;
 const ESSENTIALS_CREDITS = 50;
-const ADMIN_EMAILS = ['support@careercraftai.tech', 'admin@careercraftai.tech', 'hitarth0236@gmail.com'];
+const ADMIN_EMAILS = ['support@careercraftai.tech', 'hello@careercraftai.tech', 'hitarth0236@gmail.com'];
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);

@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 
     // Send Day 0 email immediately
     const welcomeResult = await resend.emails.send({
-      from: "CareerCraft AI <support@careercraftai.tech>",
+      from: "CareerCraft AI <hello@careercraftai.tech>",
       to: email,
       subject: emails[0].subject,
       html: emails[0].html.replace(/aboard!/g, `aboard, ${name || "there"}!`),
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
       sendAt.setDate(sendAt.getDate() + drip.delay);
 
       const scheduledResult = await resend.emails.send({
-        from: "CareerCraft AI <support@careercraftai.tech>",
+        from: "CareerCraft AI <hello@careercraftai.tech>",
         to: email,
         subject: drip.subject,
         html: drip.html,

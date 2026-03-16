@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const ADMIN_EMAILS = ['support@careercraftai.tech', 'admin@careercraftai.tech', 'hitarth0236@gmail.com'];
+const ADMIN_EMAILS = ['support@careercraftai.tech', 'hello@careercraftai.tech', 'hitarth0236@gmail.com'];
 const FREE_CREDITS = 5;
 
 export function GoogleAuthButton({ mode }: { mode: 'login' | 'signup' }) {

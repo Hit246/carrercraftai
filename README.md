@@ -66,7 +66,7 @@ SMTP_HOST='smtp.gmail.com'
 SMTP_PORT=587
 SMTP_USER='your-email@gmail.com'
 SMTP_PASS='your-16-character-app-password'
-ADMIN_EMAIL='admin@careercraftai.tech'
+ADMIN_EMAIL='hello@careercraftai.tech'
 ```
 
 ### 2. Run the Development Server
