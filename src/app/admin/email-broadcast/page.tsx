@@ -110,9 +110,9 @@ export default function EmailBroadcastPage() {
     const finalHTML = buildEmailHTML(sanitizedBody);
 
     const payload = { subject: subject.trim(), html: finalHTML, audience };
-console.log("Payload size:", JSON.stringify(payload).length);
-console.log("Subject:", subject);
-console.log("First 100 chars of HTML:", finalHTML.substring(0, 100));
+    console.log("Payload size:", JSON.stringify(payload).length);
+    console.log("Subject:", subject);
+    console.log("First 100 chars of HTML:", finalHTML.substring(0, 100));
 
     try {
       const res = await fetch("/api/admin/send-broadcast", {
@@ -120,8 +120,9 @@ console.log("First 100 chars of HTML:", finalHTML.substring(0, 100));
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           subject: subject.trim(),
-          html: finalHTML,
+          html: btoa(encodeURIComponent(finalHTML).replace(/%([0-9A-F]{2})/g, (_, p1) => String.fromCharCode(parseInt(p1, 16)))),
           audience,
+
         }),
       });
 

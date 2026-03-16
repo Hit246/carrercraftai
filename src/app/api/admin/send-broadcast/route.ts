@@ -34,9 +34,12 @@ export async function POST(req: NextRequest) {
     const db = admin.firestore();
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    const { subject, html, audience } = await req.json();
-
-    if (!subject || !html) {
+    const { subject, html, audience, encoded } = await req.json();
+    const finalHtml = encoded
+    ? decodeURIComponent(Array.from(atob(html)).map(c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join(''))
+    : html;
+    
+    if (!subject || !finalHtml) {
       return NextResponse.json({ success: false, error: "Subject and HTML body are required." }, { status: 400 });
     }
 
@@ -77,7 +80,7 @@ export async function POST(req: NextRequest) {
         from: "CareerCraft AI <hello@careercraftai.tech>",
         to: email,
         subject: subject,
-        html: html,
+        html: finalHtml,
       }));
 
       const { data, error } = await resend.batch.send(batchPayload);
