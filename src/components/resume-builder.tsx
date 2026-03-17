@@ -688,12 +688,33 @@ export const ResumeBuilder = () => {
         }
     }
 
-    const copyShareLink = () => {
+    const copyShareLink = async () => {
         if (!currentVersion?.shareSlug) return;
         const url = `${window.location.origin}/r/${currentVersion.shareSlug}`;
-        navigator.clipboard.writeText(url);
-        toast({ title: "Link Copied!", description: "Share this link with employers." });
-    }
+        
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(url);
+          } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = url;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            document.execCommand('copy');
+            textArea.remove();
+          }
+          toast({ title: "Link Copied!", description: "Share this link with employers." });
+        } catch (err) {
+          toast({ 
+            title: "Copy this link manually",
+            description: url,
+          });
+        }
+      };
     
     const handleVersionSelect = (versionId: string) => {
         const selected = versions.find(v => v.id === versionId);
