@@ -27,8 +27,8 @@ export const metadata: Metadata = {
     default: "CareerCraft AI: Build Resumes & Find Jobs with AI",
     template: "%s | CareerCraft AI",
   },
-  description: "Build professional resumes, get AI-driven feedback, discover job opportunities, and streamline your job search with CareerCraft AI.",
-  keywords: ["AI resume builder", "resume analysis", "job matcher", "career platform", "ATS optimization", "cover letter generator"],
+  description: "Build professional resumes, get AI-driven feedback, discover job opportunities, and streamline your job search with CareerCraft AI's ATS-friendly tools.",
+  keywords: ["AI resume builder", "resume analysis", "job matcher", "career platform", "ATS optimization", "cover letter generator", "career growth India", "fresher jobs"],
   authors: [{ name: "CHAUHAN HITARTH", url: "https://github.com/Hit246" }],
   creator: "CHAUHAN HITARTH",
   openGraph: {
@@ -60,6 +60,17 @@ export const metadata: Metadata = {
     icon: "/logo.jpg",
     shortcut: "/logo.jpg",
     apple: "/logo.jpg",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 

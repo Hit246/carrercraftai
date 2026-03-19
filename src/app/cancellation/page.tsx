@@ -1,6 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Cancellation & Refund Policy",
+  description: "Learn about subscription cancellations, 24-hour refund eligibility, and how to manage your CareerCraft AI account billing.",
+};
 
 export default function CancellationPage() {
   return (
