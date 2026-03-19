@@ -1,5 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'carrercraftai.vercel.app',
+          },
+        ],
+        destination: 'https://careercraftai.tech/:path*',
+        permanent: true,
+      }
+    ];
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
