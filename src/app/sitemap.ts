@@ -33,16 +33,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.9,
         },
         {
-            url: `${siteUrl}/login`,
+            url: `${siteUrl}/#faq`,
             lastModified: new Date(),
-            changeFrequency: "monthly",
-            priority: 0.8,
-        },
-        {
-            url: `${siteUrl}/signup`,
-            lastModified: new Date(),
-            changeFrequency: "monthly",
-            priority: 0.8,
+            changeFrequency: "weekly",
+            priority: 0.9,
         },
         {
             url: `${siteUrl}/contact`,
@@ -54,49 +48,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
             url: `${siteUrl}/terms`,
             lastModified: new Date(),
             changeFrequency: "yearly",
-            priority: 0.2,
+            priority: 0.4,
         },
         {
             url: `${siteUrl}/privacy`,
             lastModified: new Date(),
             changeFrequency: "yearly",
-            priority: 0.2,
+            priority: 0.4,
         },
         {
             url: `${siteUrl}/cancellation`,
             lastModified: new Date(),
             changeFrequency: "yearly",
-            priority: 0.2,
-        },
-        {
-            url: `${siteUrl}/ats-optimizer`,
-            lastModified: new Date(),
-            changeFrequency: "weekly",
-            priority: 0.7,
-        },
-        {
-            url: `${siteUrl}/resume-analyzer`,
-            lastModified: new Date(),
-            changeFrequency: "weekly",
-            priority: 0.7,
-        },
-        {
-            url: `${siteUrl}/job-matcher`,
-            lastModified: new Date(),
-            changeFrequency: "weekly",
-            priority: 0.7,
-        },
-        {
-            url: `${siteUrl}/cover-letter-generator`,
-            lastModified: new Date(),
-            changeFrequency: "weekly",
-            priority: 0.6,
-        },
-        {
-            url: `${siteUrl}/candidate-matcher`,
-            lastModified: new Date(),
-            changeFrequency: "weekly",
-            priority: 0.6,
+            priority: 0.4,
         },
     ];
 
