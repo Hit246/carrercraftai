@@ -8,7 +8,9 @@
 
 An AI-powered platform designed to empower job seekers and recruiters. Build stunning resumes, receive intelligent feedback, discover matching job opportunities, and streamline the hiring process.
 
-![CareerCraft AI Screenshot](./public/og-image.png)
+## 🌐 Live Demo
+
+👉 [careercraftai.tech](https://careercraftai.tech)
 
 ## ✨ Key Features
 
@@ -17,7 +19,7 @@ An AI-powered platform designed to empower job seekers and recruiters. Build stu
 - **🤖 AI Resume Analyzer:** Get instant, actionable feedback on your resume's strengths, weaknesses, and areas for improvement.
 - **🤝 AI Job Matcher:** Upload your resume to discover job opportunities tailored to your skills.
 - **✉️ AI Cover Letter Generator:** Automatically create compelling and personalized cover letters.
-- **🔒 Secure Authentication:** Standard email/password authentication with Google Auth support.
+- **🔒 Secure Authentication:** Email/password and Google OAuth.
 - **💎 Tiered Subscriptions:** Free, Essentials, and Pro plans with AI credit management.
 
 ### For Recruiters:
@@ -25,19 +27,57 @@ An AI-powered platform designed to empower job seekers and recruiters. Build stu
 - **📊 Recruiter Dashboard:** Manage your shortlisted talent and view pipeline analytics.
 - **📊 Admin Dashboard:** Comprehensive oversight of users, payments, and support tickets.
 
+## 📖 Usage
+
+1. Sign up for a free account at [careercraftai.tech](https://careercraftai.tech)
+2. Upload or build your resume using the Resume Builder
+3. Run the AI Analyzer to get instant ATS feedback and improvement suggestions
+4. Use Job Matcher to find roles that match your skills and experience
+5. Generate a tailored cover letter for any job in seconds
+
 ## 🚀 Tech Stack
 
-- **Framework:** Next.js 15 (App Router)
-- **AI Integration:** Firebase Genkit with Gemini Models
-- **Backend:** Firebase (Auth, Firestore, Storage)
-- **Payments:** Razorpay (Webhooks + Manual fallback)
-- **Email/Drips:** Resend (Onboarding) & Nodemailer (SMTP for Alerts)
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 15 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS + shadcn/ui |
+| AI | Firebase Genkit with Gemini Models |
+| Backend | Firebase (Auth, Firestore, Storage) |
+| Payments | Razorpay (Webhooks + Manual fallback) |
+| Email | Resend (onboarding drips) + Nodemailer (SMTP alerts) |
+| Deployment | Vercel |
 
 ## 🛠️ Getting Started
 
-### 1. Set Up Environment Variables
+### Prerequisites
+- Node.js 18+
+- Firebase project
+- Google Gemini API key
+- Razorpay account
 
-Create a `.env` file in the root directory:
+### Installation
+
+```bash
+git clone https://github.com/Hit246/carrercraftai.git
+cd carrercraftai
+npm install
+cp .env.example .env
+# Fill in your environment variables
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+In a separate terminal, start the Genkit AI server:
+
+```bash
+npm run genkit:dev
+```
+
+### Environment Variables
+
+Copy `.env.example` and fill in your values. Key variables:
 
 ```env
 # Firebase Public Config
@@ -48,7 +88,7 @@ NEXT_PUBLIC_FIREBASE_API_KEY='...'
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN='...'
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID='...'
 
-# Firebase Admin (CRITICAL for account deletion)
+# Firebase Admin
 FIREBASE_SERVICE_ACCOUNT_KEY='{"type": "service_account", ...}'
 
 # AI & Payments
@@ -58,25 +98,28 @@ RAZORPAY_KEY_SECRET='...'
 RAZORPAY_WEBHOOK_SECRET='...'
 NEXT_PUBLIC_APP_URL='https://careercraftai.tech'
 
-# Email Automation (Resend)
+# Email
 RESEND_API_KEY='re_...'
-
-# Admin & Transactional Notifications (SMTP)
 SMTP_HOST='smtp.gmail.com'
 SMTP_PORT=587
 SMTP_USER='your-email@gmail.com'
-SMTP_PASS='your-16-character-app-password'
-ADMIN_EMAIL='hello@careercraftai.tech'
+SMTP_PASS='your16characterapppassword'
+ADMIN_EMAIL='admin@careercraftai.tech'
 ```
 
-### 2. Run the Development Server
+## 📁 Project Structure
 
-```bash
-npm install
-npm run dev
-# In a separate terminal:
-npm run genkit:dev
 ```
+/app          → Next.js App Router pages and API routes
+/components   → Reusable UI components
+/lib          → Utilities, Firebase config, AI helpers
+/public       → Static assets
+```
+
+## 📄 License
+
+MIT © [Hitarth Chauhan](https://github.com/Hit246)
 
 ## ✍️ Author
-- **CHAUHAN HITARTH**
+
+**Hitarth Chauhan** — [github.com/Hit246](https://github.com/Hit246) · [linkedin.com/in/chauhanhitarth6](https://linkedin.com/in/chauhanhitarth6)
