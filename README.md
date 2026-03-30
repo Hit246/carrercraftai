@@ -2,59 +2,192 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-15.x-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-SDK%20v11-orange?logo=firebase)](https://firebase.google.com/)
 [![Genkit AI](https://img.shields.io/badge/Genkit-AI-green?logo=google-cloud)](https://firebase.google.com/docs/genkit)
-[![shadcn/ui](https://img.shields.io/badge/shadcn/ui-black?logo=shadcn-ui&logoColor=white)](https://ui.shadcn.com/)
+[![Razorpay](https://img.shields.io/badge/Payments-Razorpay-02042B?logo=razorpay)](https://razorpay.com/)
+[![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel)](https://careercraftai.tech)
 
-An AI-powered platform designed to empower job seekers and recruiters. Build stunning resumes, receive intelligent feedback, discover matching job opportunities, and streamline the hiring process.
+An AI-powered career platform built for Indian students and job seekers. Build professional resumes, receive intelligent ATS feedback, discover matching job opportunities, and streamline your hiring process — all in one place.
+
+---
 
 ## 🌐 Live Demo
 
-👉 [careercraftai.tech](https://careercraftai.tech)
+👉 **[careercraftai.tech](https://careercraftai.tech)**
 
-## ✨ Key Features
+---
 
-### For Job Seekers:
-- **📄 Intuitive Resume Builder:** Create professional resumes with a live preview and customizable sections.
-- **🤖 AI Resume Analyzer:** Get instant, actionable feedback on your resume's strengths, weaknesses, and areas for improvement.
-- **🤝 AI Job Matcher:** Upload your resume to discover job opportunities tailored to your skills.
-- **✉️ AI Cover Letter Generator:** Automatically create compelling and personalized cover letters.
-- **🔒 Secure Authentication:** Email/password and Google OAuth.
-- **💎 Tiered Subscriptions:** Free, Essentials, and Pro plans with AI credit management.
+## 1. Features Overview
 
-### For Recruiters:
-- **🎯 AI Candidate Matcher:** Upload a job description and resumes to find the top matching candidates instantly.
-- **📊 Recruiter Dashboard:** Manage your shortlisted talent and view pipeline analytics.
-- **📊 Admin Dashboard:** Comprehensive oversight of users, payments, and support tickets.
+### 1.1 For Job Seekers
 
-## 📖 Usage
+- **📄 Resume Builder:** Create professional resumes with a live preview, customizable sections, and ATS-friendly templates.
+- **🤖 AI Resume Analyzer:** Get instant, actionable feedback on your resume's strengths, weaknesses, and keyword gaps.
+- **🎯 ATS Score Engine:** Receive a detailed ATS compatibility score with section-by-section breakdown.
+- **🤝 AI Job Matcher:** Upload your resume to discover curated job opportunities tailored to your skill set.
+- **✉️ AI Cover Letter Generator:** Automatically create compelling, personalized cover letters for any job description.
+- **📥 DOCX Download:** Export your resume as a formatted `.docx` file ready for submission.
+- **🔗 Shareable Resume URLs:** Generate a public link to share your resume with recruiters.
+- **🔒 Secure Authentication:** Email/password and Google OAuth via Firebase Auth.
+- **💎 Tiered Subscriptions:** Free, Essentials, and Pro plans with AI credit management via Razorpay.
 
-1. Sign up for a free account at [careercraftai.tech](https://careercraftai.tech)
-2. Upload or build your resume using the Resume Builder
-3. Run the AI Analyzer to get instant ATS feedback and improvement suggestions
-4. Use Job Matcher to find roles that match your skills and experience
-5. Generate a tailored cover letter for any job in seconds
+### 1.2 For Recruiters
 
-## 🚀 Tech Stack
+- **🎯 AI Candidate Matcher:** Upload a job description and multiple resumes to instantly rank the best-fit candidates.
+- **📊 Recruiter Dashboard:** Manage shortlisted candidates and view pipeline analytics.
+- **📊 Admin Dashboard:** Comprehensive oversight of users, payments, subscriptions, and support tickets.
+
+---
+
+## 2. Demo
+
+> Live at **[careercraftai.tech](https://careercraftai.tech)** — sign up for a free account to try all features.
+
+<!-- Add screenshots here once available -->
+<!-- ![Resume Builder](./docs/screenshots/builder.png) -->
+<!-- ![ATS Score](./docs/screenshots/ats-score.png) -->
+
+---
+
+## 3. Project Structure
+
+```
+carrercraftai/
+├── .env.example              # Environment variable template
+├── .gitignore                # Git ignore rules
+├── README.md                 # This file
+├── next.config.ts            # Next.js configuration
+├── tailwind.config.ts        # Tailwind CSS config
+├── tsconfig.json             # TypeScript config
+│
+├── app/                      # Next.js 15 App Router
+│   ├── (auth)/               # Auth pages (login, signup)
+│   ├── (app)/                # Protected app pages
+│   │   ├── resume-builder/   # Resume builder UI
+│   │   ├── resume-analyzer/  # AI Feedback interface
+│   │   ├── ats-optimizer/    # ATS scoring results
+│   │   ├── job-matcher/      # Job matching interface
+│   │   └── cover-letter-generator/ # Cover letter generator
+│   ├── admin/                # Admin dashboard
+│   ├── api/                  # API route handlers
+│   │   ├── razorpay/         # Payment webhook + order creation
+│   │   └── admin/            # Admin-only endpoints (broadcast, etc.)
+│   └── layout.tsx            # Root layout
+│
+├── components/               # Reusable UI components
+│   ├── ui/                   # shadcn/ui base components
+│   ├── admin/                # Admin-specific components
+│   └── icons.tsx             # Custom icon components
+│
+├── lib/                      # Core utilities and helpers
+│   ├── firebase.ts           # Firebase client config
+│   ├── genkit.ts             # Genkit AI config
+│   ├── razorpay.ts           # Payment logic
+│   └── actions.ts            # Server actions
+│
+└── public/                   # Static assets
+```
+
+---
+
+## 4. Architecture & Workflows
+
+### 4.1 AI Resume Analysis Flow
+
+*How a resume goes from upload to ATS score.*
+
+```
+User Uploads Resume (PDF)
+        ↓
+Data URI generated (client-side)
+        ↓
+Genkit Flow triggered (Server Action)
+        ↓
+Gemini Pro parses resume content
+        ↓
+ATS scoring engine runs (keyword match, format check, section detection)
+        ↓
+Results persisted to Firestore (optional history)
+        ↓
+Score + feedback rendered in dashboard
+```
+
+### 4.2 Payment & Subscription Flow
+
+*How credit purchases and plan upgrades work.*
+
+```
+User selects plan
+        ↓
+Server Action creates Razorpay Payment Link
+        ↓
+User completes payment on Razorpay
+        ↓
+Razorpay sends webhook to /api/razorpay/webhook
+        ↓
+Signature verified + logic check
+        ↓
+Firestore user document updated (plan + credits)
+        ↓
+User gains access to premium features
+```
+
+### 4.3 Authentication Flow
+
+```
+Email/Password OR Google OAuth
+        ↓
+Firebase Auth (client SDK)
+        ↓
+onAuthStateChanged listener in use-auth hook
+        ↓
+User document created/synced in Firestore
+        ↓
+Session persisted via client-side SDK
+        ↓
+Middleware protects dashboard routes
+```
+
+---
+
+## 5. Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Framework | Next.js 15 (App Router) |
-| Language | TypeScript |
+| Language | TypeScript 5.x |
 | Styling | Tailwind CSS + shadcn/ui |
-| AI | Firebase Genkit with Gemini Models |
-| Backend | Firebase (Auth, Firestore, Storage) |
+| AI | Firebase Genkit with Gemini 1.5 Pro |
+| Database | Firebase Firestore |
+| Auth | Firebase Authentication (Email + Google OAuth) |
+| Storage | Firebase Storage |
 | Payments | Razorpay (Webhooks + Manual fallback) |
-| Email | Resend (onboarding drips) + Nodemailer (SMTP alerts) |
+| Email (Onboarding) | Resend |
+| Email (Alerts) | Nodemailer (SMTP) |
 | Deployment | Vercel |
 
-## 🛠️ Getting Started
+---
+
+## 6. API Reference
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/send-welcome-email` | POST | Trigger onboarding email sequence via Resend |
+| `/api/razorpay/webhook` | POST | Handle Razorpay payment status updates |
+| `/api/admin/send-broadcast` | POST | Send batch emails to selected user segments |
+
+---
+
+## 7. Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
-- Firebase project
+- Firebase project (Auth + Firestore + Storage enabled)
 - Google Gemini API key
-- Razorpay account
+- Razorpay account (for payments)
+- Resend account (for email)
 
 ### Installation
 
@@ -63,63 +196,143 @@ git clone https://github.com/Hit246/carrercraftai.git
 cd carrercraftai
 npm install
 cp .env.example .env
-# Fill in your environment variables
+# Fill in your environment variables (see Section 8)
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-In a separate terminal, start the Genkit AI server:
+In a separate terminal, start the Genkit AI development server:
 
 ```bash
 npm run genkit:dev
 ```
 
-### Environment Variables
+---
 
-Copy `.env.example` and fill in your values. Key variables:
+## 8. Environment Variables
+
+Copy `.env.example` and fill in your values:
 
 ```env
-# Firebase Public Config
-NEXT_PUBLIC_FIREBASE_PROJECT_ID='...'
-NEXT_PUBLIC_FIREBASE_APP_ID='...'
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET='...'
-NEXT_PUBLIC_FIREBASE_API_KEY='...'
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN='...'
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID='...'
+# ── Firebase Client (Public) ──────────────────────────────
+NEXT_PUBLIC_FIREBASE_PROJECT_ID='your-project-id'
+NEXT_PUBLIC_FIREBASE_APP_ID='your-app-id'
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET='your-bucket.appspot.com'
+NEXT_PUBLIC_FIREBASE_API_KEY='your-api-key'
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN='your-project.firebaseapp.com'
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID='your-sender-id'
 
-# Firebase Admin
-FIREBASE_SERVICE_ACCOUNT_KEY='{"type": "service_account", ...}'
+# ── Firebase Admin (Server) ───────────────────────────────
+FIREBASE_SERVICE_ACCOUNT_KEY='{"type":"service_account",...}'
 
-# AI & Payments
-GEMINI_API_KEY='...'
-NEXT_PUBLIC_RAZORPAY_KEY_ID='...'
-RAZORPAY_KEY_SECRET='...'
-RAZORPAY_WEBHOOK_SECRET='...'
-NEXT_PUBLIC_APP_URL='https://careercraftai.tech'
+# ── AI ────────────────────────────────────────────────────
+GEMINI_API_KEY='your-gemini-key'
 
-# Email
+# ── Payments ──────────────────────────────────────────────
+NEXT_PUBLIC_RAZORPAY_KEY_ID='rzp_live_...'
+RAZORPAY_KEY_SECRET='your-secret'
+RAZORPAY_WEBHOOK_SECRET='your-webhook-secret'
+
+# ── Email ─────────────────────────────────────────────────
 RESEND_API_KEY='re_...'
 SMTP_HOST='smtp.gmail.com'
 SMTP_PORT=587
 SMTP_USER='your-email@gmail.com'
-SMTP_PASS='your16characterapppassword'
-ADMIN_EMAIL='admin@careercraftai.tech'
+SMTP_PASS='your-16-char-app-password'
+ADMIN_EMAIL='support@careercraftai.tech'
+
+# ── App ───────────────────────────────────────────────────
+NEXT_PUBLIC_APP_URL='https://careercraftai.tech'
 ```
 
-## 📁 Project Structure
+---
 
-```
-/app          → Next.js App Router pages and API routes
-/components   → Reusable UI components
-/lib          → Utilities, Firebase config, AI helpers
-/public       → Static assets
+## 9. Usage Guide
+
+### Build a Resume
+1. Go to **Dashboard → Resume Builder**
+2. Fill in your details across sections (Personal, Experience, Education, Skills)
+3. Preview updates in real-time on the right panel
+4. Download as `.docx` or generate a shareable link
+
+### Get Your ATS Score
+1. Go to **Dashboard → ATS Optimizer**
+2. Upload your resume PDF or use your built resume
+3. Paste the job description you're targeting
+4. Review your score, keyword gaps, and improvement suggestions
+
+### Match Jobs to Your Profile
+1. Go to **Dashboard → Job Matcher**
+2. Upload your resume
+3. Browse AI-curated job recommendations ranked by fit percentage
+
+### Generate a Cover Letter
+1. Go to **Dashboard → Cover Letter Generator**
+2. Paste the job description
+3. Review and edit the AI-generated letter
+4. Copy the final version for your application
+
+---
+
+## 10. Subscription Plans
+
+| Feature | Free | Essentials | Pro |
+|---------|------|-----------|-----|
+| Resume Builder | ✅ | ✅ | ✅ |
+| AI Credits | 5/month | 50 + Previous | Unlimited |
+| Job Matches | Credits | Credits | Unlimited |
+| ATS Optimization | Credits | Credits | Unlimited |
+| DOCX Export | ✅ | ✅ | ✅ |
+| Shareable URL | ✅ | ✅ | ✅ |
+| Candidate Matcher | ❌ | ❌ | Recruiter Only |
+
+---
+
+## 11. Deployment
+
+The app is deployed on **Vercel** with automatic deployments on every push to `main`.
+
+```bash
+# Production build
+npm run build
+npm run start
+
+# Deploy via Vercel CLI
+vercel --prod
 ```
 
-## 📄 License
+Add all variables from Section 8 under Vercel → Project → Settings → Environment Variables.
+
+---
+
+## 12. Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit using conventional commits (`git commit -m "feat: add X"`)
+4. Push to your branch (`git push origin feature/your-feature`)
+5. Open a Pull Request
+
+---
+
+## 13. Legal
+
+This platform is built for legitimate career assistance. All AI-generated content (resumes, cover letters) is a starting point — users are responsible for the accuracy and truthfulness of their applications.
+
+---
+
+## 14. License
 
 MIT © [Hitarth Chauhan](https://github.com/Hit246)
 
+---
+
 ## ✍️ Author
 
-**Hitarth Chauhan** — [github.com/Hit246](https://github.com/Hit246) · [linkedin.com/in/chauhanhitarth6](https://linkedin.com/in/chauhanhitarth6)
+**Hitarth Chauhan**
+[github.com/Hit246](https://github.com/Hit246) · [linkedin.com/in/chauhanhitarth6](https://linkedin.com/in/chauhanhitarth6) · [careercraftai.tech](https://careercraftai.tech)
+
+---
+
+*Last Updated: March 2026*
