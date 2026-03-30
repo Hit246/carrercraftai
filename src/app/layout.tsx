@@ -53,9 +53,6 @@ export const metadata: Metadata = {
     description: "Build professional resumes, get AI-driven feedback, discover job opportunities, and streamline your job search with CareerCraft AI.",
     images: [`${siteUrl}/og-image.png`],
   },
-  alternates: {
-    canonical: siteUrl,
-  },
   icons: {
     icon: "/logo.jpg",
     shortcut: "/logo.jpg",

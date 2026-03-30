@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Cancellation & Refund Policy",
-  description: "Learn about subscription cancellations, 24-hour refund eligibility, and how to manage your CareerCraft AI account billing.",
+  title: "Cancellation & Refund Policy | CareerCraft AI",
+  description: "Learn about subscription cancellations, 24-hour refund eligibility...",
+  alternates: {
+    canonical: "https://careercraftai.tech/cancellation",
+  },
 };
 
 export default function CancellationPage() {
