@@ -21,7 +21,18 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    optimizePackageImports: [
+      'firebase/app',
+      'firebase/auth',
+      'firebase/firestore',
+      'firebase/storage',
+      'lucide-react',
+      '@radix-ui/react-icons',
+    ],
+  },
   images: {
+    formats: ['image/webp', 'image/avif'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -46,7 +57,13 @@ const nextConfig = {
         hostname: 'picsum.photos',
         port: '',
         pathname: '/**',
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: 'ph-avatars.imgix.net',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   async headers() {
@@ -61,6 +78,36 @@ const nextConfig = {
           {
             key: 'Cross-Origin-Resource-Policy',
             value: 'cross-origin',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+      {
+        source: '/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },
