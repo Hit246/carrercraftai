@@ -25,25 +25,25 @@ const tourSteps = [
     title: 'Welcome to CareerCraft AI!',
     description: "Let's take a quick tour your user dashboard show quick actions.",
     icon: Rocket,
-    image: '/onboarding/welcome.png',
+    image: '/onboarding/welcome.webp',
   },
   {
     title: 'Step 1: Edit Your Resume',
     description: 'This is the resume builder. You can edit all the fields on the left, and the live preview on the right will update instantly. Start by filling in your information.',
     icon: Edit,
-    image: '/onboarding/step1-resume.png',
+    image: '/onboarding/step1-resume.webp',
   },
   {
     title: 'Step 2: Get AI Feedback',
     description: 'Once you are happy with your resume, click the "AI Analyze" button. Our AI will provide detailed feedback on strengths, weaknesses, and suggestions for improvement.',
     icon: Bot,
-    image: '/onboarding/step2-ai-feedback.png',
+    image: '/onboarding/step2-ai-feedback.webp',
   },
   {
     title: 'Step 3: Download & Apply',
     description: 'After making improvements based on the AI feedback, click the "Export" button to download your professional resume as a PDF. You are now ready to apply for jobs!',
     icon: Download,
-    image: '/onboarding/step3-download.png',
+    image: '/onboarding/step3-download.webp',
   },
 ];
 

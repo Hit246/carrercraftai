@@ -12,7 +12,7 @@ export default function NotFound() {
       <div className="text-center max-w-md">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          <img src="/logo.jpg" alt="CareerCraft AI" className="w-8 h-8 rounded-md" />
+          <img src="/logo.webp" alt="CareerCraft AI" className="w-8 h-8 rounded-md" />
           <span className="font-bold text-white text-lg font-headline">CareerCraft AI</span>
         </div>
 

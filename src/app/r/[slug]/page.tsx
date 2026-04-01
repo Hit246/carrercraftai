@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${data.name} - ${data.title}`,
       description: data.summary,
       type: 'website',
-      images: ['/og-image.png'],
+      images: ['/og-image.webp'],
     }
   };
 }
@@ -158,7 +158,7 @@ export default async function PublicResumePage({ params }: Props) {
       </div>
 
       <div className="max-w-4xl mx-auto mt-8 flex justify-center items-center gap-2 text-slate-400 text-xs">
-        <Image src="/logo.jpg" alt="CareerCraft AI" width={20} height={20} className="rounded-full" />
+        <Image src="/logo.webp" alt="CareerCraft AI" width={20} height={20} className="rounded-full" />
         <span>Powered by CareerCraft AI — An AI-Powered Career Platform</span>
       </div>
     </div>

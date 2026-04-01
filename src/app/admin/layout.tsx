@@ -131,7 +131,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-2">
             <Image
-              src="/logo.jpg"
+              src="/logo.webp"
               alt="CareerCraft AI"
               width={28}
               height={28}

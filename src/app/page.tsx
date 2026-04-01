@@ -465,7 +465,7 @@ function HomePageContent() {
             {/* Brand */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <img src="/logo.jpg" alt="CareerCraft AI" className="w-7 h-7 rounded-md" />
+                <img src="/logo.webp" alt="CareerCraft AI" className="w-7 h-7 rounded-md" />
                 <span className="font-bold text-white text-lg font-headline">CareerCraft AI</span>
               </div>
               <p className="text-gray-500 text-sm max-w-xs">

@@ -52,7 +52,7 @@ export default async function BlogPostPage({ params }: Props) {
       "url": "https://github.com/Hit246"
     },
     "datePublished": post.date,
-    "image": "https://careercraftai.tech/og-image.png",
+    "image": "https://careercraftai.tech/og-image.webp",
   };
 
   return (

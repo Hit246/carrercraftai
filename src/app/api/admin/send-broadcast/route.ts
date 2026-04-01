@@ -18,7 +18,7 @@ function buildEmailHTML(bodyContent: string) {
           style="background:#ffffff;border-radius:12px;border:1px solid #e2e8f0;width:600px;">
           <tr>
             <td style="padding:32px 40px;border-bottom:1px solid #f1f5f9;text-align:center;">
-              <img src="https://careercraftai.tech/logo.jpg" width="48" height="48" style="border-radius:10px;" />
+              <img src="https://careercraftai.tech/logo.webp" width="48" height="48" style="border-radius:10px;" />
               <h1 style="color:#0f172a;font-size:22px;margin:16px 0 0;font-weight:700;">CareerCraft AI</h1>
             </td>
           </tr>

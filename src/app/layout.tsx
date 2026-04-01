@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     siteName: "CareerCraft AI",
     images: [
       {
-        url: `${siteUrl}/og-image.png`,
+        url: `${siteUrl}/og-image.webp`,
         width: 1200,
         height: 630,
         alt: "CareerCraft AI Banner",
@@ -51,12 +51,12 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "CareerCraft AI: Build Resumes & Find Jobs with AI",
     description: "Build professional resumes, get AI-driven feedback, discover job opportunities, and streamline your job search with CareerCraft AI.",
-    images: [`${siteUrl}/og-image.png`],
+    images: [`${siteUrl}/og-image.webp`],
   },
   icons: {
-    icon: "/logo.jpg",
-    shortcut: "/logo.jpg",
-    apple: "/logo.jpg",
+    icon: "/logo.webp",
+    shortcut: "/logo.webp",
+    apple: "/logo.webp",
   },
   robots: {
     index: true,
