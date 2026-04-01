@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils";
 
 const siteUrl = "https://careercraftai.tech";
 
-const fontBody = Inter({ 
+const fontBody = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
 });
 
 const fontHeadline = Space_Grotesk({
@@ -21,7 +22,7 @@ const fontHeadline = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   verification: {
-    google:'m9NCKssWohWHN-B-t5wf3XhwCqQmitLh_apuVQep9sc'
+    google: 'm9NCKssWohWHN-B-t5wf3XhwCqQmitLh_apuVQep9sc'
   },
   title: {
     default: "CareerCraft AI: Build Resumes & Find Jobs with AI",
@@ -78,21 +79,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head/>
+      <head>
+        <link rel="preconnect" href="https://firebasestorage.googleapis.com" />
+        <link rel="preconnect" href="https://www.googleapis.com" />
+      </head>
       <body className={cn(
-          "font-body antialiased",
-          fontBody.variable,
-          fontHeadline.variable
+        "font-body antialiased",
+        fontBody.variable,
+        fontHeadline.variable
       )}>
-         <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
-            {children}
-            <Toaster />
-            <FirebaseErrorListener />
+          {children}
+          <Toaster />
+          <FirebaseErrorListener />
         </ThemeProvider>
       </body>
     </html>
