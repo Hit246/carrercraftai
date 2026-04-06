@@ -148,7 +148,7 @@ export const ResumeBuilder = () => {
     const [resumeData, setResumeData] = React.useState<ResumeData>(emptyResumeData);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
-    const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+    const [isAnalyzing, React.useState(false)];
     const [isExportingDocx, setIsExportingDocx] = React.useState(false);
     const [versions, setVersions] = React.useState<ResumeVersion[]>([]);
     const [currentVersion, setCurrentVersion] = React.useState<ResumeVersion | null>(null);
@@ -268,7 +268,7 @@ export const ResumeBuilder = () => {
 
         const addWrappedText = (text: string, x: number, startY: number, options: { maxWidth: number, fontSize: number, style?: 'normal' | 'bold', color?: string }) => {
             doc.setFontSize(options.fontSize).setFont('helvetica', options.style || 'normal').setTextColor(options.color || textColor);
-            const lines = doc.splitTextToSize(text, options.maxWidth);
+            const lines = doc.splitTextToSize(text || '', options.maxWidth);
             doc.text(lines, x, startY, {lineHeightFactor: lineSpacing});
             return startY + (lines.length * options.fontSize * lineSpacing);
         };
@@ -282,7 +282,6 @@ export const ResumeBuilder = () => {
             if (resumeData.template === 'modern') {
                 doc.setFontSize(13).setFont('helvetica', 'bold').setTextColor(textColor);
                 doc.text(title, margin, y);
-                const titleW = doc.getTextWidth(title);
                 doc.setDrawColor(primaryColor).setLineWidth(1.5);
                 doc.line(margin, y + 4, margin + 20, y + 4);
                 y += 20;
@@ -414,12 +413,12 @@ export const ResumeBuilder = () => {
                     doc.circle(margin + 5, y, 4, 'FD'); // Timeline marker
                     
                     doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
-                    doc.text(exp.title, margin + 20, y);
+                    doc.text(exp.title || '', margin + 20, y);
                     doc.setFontSize(9).setFont('helvetica', 'bold').setTextColor(primaryColor);
-                    doc.text(exp.dates.toUpperCase(), pageW - margin, y, { align: 'right'});
+                    doc.text((exp.dates || '').toUpperCase(), pageW - margin, y, { align: 'right'});
                     y += 14;
                     doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor(lightTextColor);
-                    doc.text(exp.company, margin + 20, y);
+                    doc.text(exp.company || '', margin + 20, y);
                     y += 14;
                     const points = (exp.description || '').split('\n').filter(Boolean);
                     points.forEach(point => {
@@ -428,11 +427,11 @@ export const ResumeBuilder = () => {
                     y += 12;
                 } else if (resumeData.template === 'minimalist') {
                     doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor('#000000');
-                    doc.text(exp.company.toUpperCase(), margin, y);
-                    doc.text(exp.dates, pageW - margin, y, { align: 'right'});
+                    doc.text((exp.company || '').toUpperCase(), margin, y);
+                    doc.text(exp.dates || '', pageW - margin, y, { align: 'right'});
                     y += 12;
                     doc.setFontSize(9).setFont('helvetica', 'italic').setTextColor('#333333');
-                    doc.text(exp.title, margin, y);
+                    doc.text(exp.title || '', margin, y);
                     y += 14;
                     const points = (exp.description || '').split('\n').filter(Boolean);
                     points.forEach(point => {
@@ -441,12 +440,12 @@ export const ResumeBuilder = () => {
                     y += 10;
                 } else {
                     doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
-                    doc.text(exp.title, margin, y);
+                    doc.text(exp.title || '', margin, y);
                     doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
-                    doc.text(exp.dates, pageW - margin, y, { align: 'right'});
+                    doc.text(exp.dates || '', pageW - margin, y, { align: 'right'});
                     y += 12;
                     doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor(lightTextColor);
-                    doc.text(exp.company, margin, y);
+                    doc.text(exp.company || '', margin, y);
                     y += 14;
                     const points = (exp.description || '').split('\n').filter(Boolean);
                     points.forEach(point => {
@@ -471,7 +470,7 @@ export const ResumeBuilder = () => {
                     doc.circle(margin + 5, y, 4, 'FD');
 
                     doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
-                    doc.text(proj.name, margin + 20, y);
+                    doc.text(proj.name || '', margin + 20, y);
                     if (proj.url) {
                         doc.setFontSize(9).setFont('helvetica', 'bold').setTextColor(primaryColor);
                         doc.text(proj.url, pageW - margin, y, { align: 'right' });
@@ -485,7 +484,7 @@ export const ResumeBuilder = () => {
                     y += 12;
                 } else if (resumeData.template === 'minimalist') {
                     doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor('#000000');
-                    doc.text(proj.name.toUpperCase(), margin, y);
+                    doc.text((proj.name || '').toUpperCase(), margin, y);
                     if (proj.url) {
                         doc.setFontSize(8).setFont('helvetica', 'normal').setTextColor('#666666');
                         doc.text(proj.url, pageW - margin, y, { align: 'right'});
@@ -499,7 +498,7 @@ export const ResumeBuilder = () => {
                     y += 10;
                 } else {
                     doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
-                    doc.text(proj.name, margin, y);
+                    doc.text(proj.name || '', margin, y);
                     if (proj.url) {
                         doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(primaryColor);
                         doc.text(proj.url, pageW - margin, y, { align: 'right' });
@@ -524,19 +523,19 @@ export const ResumeBuilder = () => {
                 
                 if (resumeData.template === 'minimalist') {
                     doc.setFontSize(10).setFont('helvetica', 'bold').setTextColor('#000000');
-                    doc.text(edu.school, margin, y);
+                    doc.text(edu.school || '', margin, y);
                     y += 12;
                     doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor('#333333');
-                    doc.text(`${edu.degree} | ${edu.dates} ${edu.cgpa ? `| ${edu.cgpa}` : ''}`, margin, y);
+                    doc.text(`${edu.degree || ''} | ${edu.dates || ''} ${edu.cgpa ? `| ${edu.cgpa}` : ''}`, margin, y);
                     y += 18;
                 } else {
                     doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
-                    doc.text(edu.school, margin, y);
+                    doc.text(edu.school || '', margin, y);
                     doc.setFontSize(9).setFont('helvetica', 'normal').setTextColor(lightTextColor);
-                    doc.text(edu.dates, pageW - margin, y, { align: 'right'});
+                    doc.text(edu.dates || '', pageW - margin, y, { align: 'right'});
                     y += 12;
                     doc.setFontSize(10).setFont('helvetica', 'normal').setTextColor(textColor);
-                    doc.text(`${edu.degree} ${edu.cgpa ? `| CGPA: ${edu.cgpa}` : ''}`, margin, y);
+                    doc.text(`${edu.degree || ''} ${edu.cgpa ? `| CGPA: ${edu.cgpa}` : ''}`, margin, y);
                     y += 18;
                 }
             });
@@ -787,7 +786,7 @@ export const ResumeBuilder = () => {
                                 <p className="text-xs font-medium text-gray-500">{exp.dates}</p>
                             </div>
                             <p className="text-sm font-bold text-gray-600 mb-2">{exp.company}</p>
-                            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{exp.description}</div>
+                            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{(exp.description || '')}</div>
                         </div>
                     ))}
                 </div>
@@ -801,7 +800,7 @@ export const ResumeBuilder = () => {
                                 <h4 className="font-bold text-gray-900">{proj.name}</h4>
                                 {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-bold hover:underline">{proj.url}</a>}
                             </div>
-                            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{proj.description}</div>
+                            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{(proj.description || '')}</div>
                         </div>
                     ))}
                 </div>
@@ -870,7 +869,7 @@ export const ResumeBuilder = () => {
                                         <span className="text-xs font-bold text-primary uppercase">{exp.dates}</span>
                                     </div>
                                     <p className="text-sm font-bold text-gray-500 italic mb-3">{exp.company}</p>
-                                    <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">{exp.description}</div>
+                                    <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">{(exp.description || '')}</div>
                                 </div>
                             ))}
                         </div>
@@ -890,7 +889,7 @@ export const ResumeBuilder = () => {
                                         <h4 className="font-bold text-gray-900">{proj.name}</h4>
                                         {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-bold hover:underline">{proj.url}</a>}
                                     </div>
-                                    <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">{proj.description}</div>
+                                    <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">{(proj.description || '')}</div>
                                 </div>
                             ))}
                         </div>
@@ -953,11 +952,11 @@ export const ResumeBuilder = () => {
                         {resumeData.experience.map(exp => (exp.title || exp.company) && (
                             <div key={exp.id} className="mb-6">
                                 <div className="flex justify-between font-bold text-sm">
-                                    <span>{exp.company?.toUpperCase()}</span>
+                                    <span>{(exp.company || '').toUpperCase()}</span>
                                     <span>{exp.dates}</span>
                                 </div>
                                 <div className="italic text-xs mb-2">{exp.title}</div>
-                                <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap">{exp.description}</div>
+                                <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap">{(exp.description || '')}</div>
                             </div>
                         ))}
                     </section>
@@ -969,10 +968,10 @@ export const ResumeBuilder = () => {
                         {resumeData.projects.map(proj => (proj.name) && (
                             <div key={proj.id} className="mb-6">
                                 <div className="flex justify-between font-bold text-sm">
-                                    <span>{proj.name?.toUpperCase()}</span>
+                                    <span>{(proj.name || '').toUpperCase()}</span>
                                     {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-[10px] font-normal hover:underline">{proj.url}</a>}
                                 </div>
-                                <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap">{proj.description}</div>
+                                <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap">{(proj.description || '')}</div>
                             </div>
                         ))}
                     </section>

@@ -8,15 +8,19 @@ import { Skeleton } from './ui/skeleton';
 import Image from 'next/image';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 
-export function HomeHeader() {
+interface HomeHeaderProps {
+  onOpenAuth?: () => void;
+}
+
+export function HomeHeader({ onOpenAuth }: HomeHeaderProps) {
   const { user, loading } = useAuth();
 
   const navLinks = [
     { label: "Features", href: "/#features" },
     { label: "Pricing", href: "/#pricing" },
     { label: "Blog", href: "/blog" },
-    { label: "Resume Builder", href: user ? "/dashboard" : "/login" },
-    { label: "For Recruiters", href: user ? "/candidate-matcher" : "/login" },
+    { label: "Resume Builder", href: user ? "/dashboard" : "#", onClick: (e: any) => !user && onOpenAuth?.() },
+    { label: "For Recruiters", href: user ? "/candidate-matcher" : "#", onClick: (e: any) => !user && onOpenAuth?.() },
   ];
 
   return (
@@ -32,7 +36,12 @@ export function HomeHeader() {
           
           <nav className="hidden md:flex gap-6 items-center text-sm font-medium flex-1 justify-center">
             {navLinks.map(link => (
-              <Link key={link.label} href={link.href} className="text-muted-foreground transition-colors hover:text-foreground">
+              <Link 
+                key={link.label} 
+                href={link.href} 
+                onClick={link.onClick}
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
                 {link.label}
               </Link>
             ))}
@@ -44,7 +53,7 @@ export function HomeHeader() {
                   <Skeleton className="h-8 w-20" />
               </div>
             ) : user ? (
-              <Button size="sm" asChild>
+              <Button size="sm" asChild className="shadow-lg shadow-primary/10">
                 <Link href="/dashboard">
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">Dashboard</span>
@@ -56,12 +65,10 @@ export function HomeHeader() {
                 <Button variant="ghost" size="sm" asChild className="hidden xs:flex">
                   <Link href="/login">Log In</Link>
                 </Button>
-                <Button size="sm" asChild>
-                  <Link href="/signup">
-                    <span className="hidden sm:inline">Get Started Free</span>
-                    <span className="sm:hidden">Get Started</span>
-                    <MoveRight className="ml-2 h-4 w-4 hidden xs:inline-block"/>
-                  </Link>
+                <Button size="sm" onClick={() => onOpenAuth?.()} className="shadow-lg shadow-primary/20">
+                  <span className="hidden sm:inline">Get Started Free</span>
+                  <span className="sm:hidden">Get Started</span>
+                  <MoveRight className="ml-2 h-4 w-4 hidden xs:inline-block"/>
                 </Button>
               </div>
             )}
@@ -75,12 +82,13 @@ export function HomeHeader() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">
-                <SheetTitle className="text-left mb-4">Navigation</SheetTitle>
+                <SheetTitle className="text-left mb-4 font-headline">Navigation</SheetTitle>
                 <nav className="flex flex-col gap-4 mt-8">
                   {navLinks.map((link) => (
                     <Link
                       key={link.label}
                       href={link.href}
+                      onClick={link.onClick}
                       className="text-lg font-medium transition-colors hover:text-primary py-2 border-b border-muted"
                     >
                       {link.label}
@@ -91,8 +99,8 @@ export function HomeHeader() {
                       <Button variant="outline" asChild className="w-full justify-start">
                         <Link href="/login">Log In</Link>
                       </Button>
-                      <Button asChild className="w-full justify-start">
-                        <Link href="/signup">Create Free Account</Link>
+                      <Button onClick={() => onOpenAuth?.()} className="w-full justify-start shadow-xl shadow-primary/10">
+                        Create Free Account
                       </Button>
                     </div>
                   )}
