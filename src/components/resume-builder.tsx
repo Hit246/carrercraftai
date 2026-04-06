@@ -148,7 +148,7 @@ export const ResumeBuilder = () => {
     const [resumeData, setResumeData] = React.useState<ResumeData>(emptyResumeData);
     const [isLoading, setIsLoading] = React.useState(true);
     const [isSaving, setIsSaving] = React.useState(false);
-    const [isAnalyzing, React.useState(false)];
+    const [isAnalyzing, setIsAnalyzing] = React.useState(false);
     const [isExportingDocx, setIsExportingDocx] = React.useState(false);
     const [versions, setVersions] = React.useState<ResumeVersion[]>([]);
     const [currentVersion, setCurrentVersion] = React.useState<ResumeVersion | null>(null);
