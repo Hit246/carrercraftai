@@ -20,6 +20,7 @@ import {
   CalendarClock,
   ExternalLink,
   ChevronRight,
+  Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -42,8 +43,10 @@ export default function DashboardPage() {
   const [recentResumes, setRecentResumes] = useState<RecentResume[]>([]);
   const [resumeCount, setResumeCount] = useState(0);
   const [isLoadingResumes, setIsLoadingResumes] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const hour = new Date().getHours();
     if (hour >= 12 && hour < 17) setGreeting('Good afternoon');
     else if (hour >= 17) setGreeting('Good evening');
@@ -57,13 +60,15 @@ export default function DashboardPage() {
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
         setRecentResumes(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as RecentResume)));
-        setResumeCount(snapshot.size); // This is just the limited size, ideally we'd have a counter or another query
+        setResumeCount(snapshot.size);
         setIsLoadingResumes(false);
       });
 
       return () => unsubscribe();
     }
   }, [user]);
+
+  if (!mounted) return null;
 
   const stats = [
     {
@@ -80,7 +85,7 @@ export default function DashboardPage() {
       subtext: 'Monthly computing units',
       icon: Bot,
       color: 'text-purple-500',
-      progress: effectivePlan !== 'pro' && effectivePlan !== 'recruiter' ? (credits / 50) * 100 : null,
+      progress: effectivePlan !== 'pro' && effectivePlan !== 'recruiter' ? (credits / 50) * 100 : 100,
     },
     {
       title: 'Resumes Saved',
@@ -109,18 +114,18 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-500">
+    <div className="space-y-10 fade-in">
       {/* Header Row */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl md:text-4xl font-headline font-bold tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
             {greeting}, {userData?.displayName?.split(' ')[0] || 'User'}! 👋
           </h1>
           <p className="text-muted-foreground font-medium">
             Welcome to your career command center.
           </p>
         </div>
-        <div className="px-4 py-2 bg-secondary/50 border border-border/40 rounded-xl flex items-center gap-2 text-sm font-bold text-muted-foreground">
+        <div className="px-4 py-2 bg-card border border-border/40 rounded-xl flex items-center gap-2 text-sm font-bold text-muted-foreground shadow-sm">
           <CalendarClock className="h-4 w-4" />
           {format(new Date(), 'EEEE, MMMM do')}
         </div>
@@ -129,11 +134,11 @@ export default function DashboardPage() {
       {/* Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, i) => (
-          <Card key={i} className="border-border/40 shadow-sm hover:shadow-md transition-all duration-200">
+          <Card key={i} className="card-hover border-border/40">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="space-y-3 flex-1">
-                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">{stat.title}</p>
+                  <p className="text-[10px] font-black uppercase tracking-[2px] text-muted-foreground">{stat.title}</p>
                   <div className="flex items-center gap-2">
                     {stat.dot && <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />}
                     <h3 className={cn("text-2xl font-bold tracking-tight", stat.action && "text-amber-500")}>
@@ -143,7 +148,7 @@ export default function DashboardPage() {
                   {stat.progress !== null && <Progress value={stat.progress} className="h-1.5 bg-muted" />}
                   <p className="text-[11px] text-muted-foreground font-medium">{stat.subtext}</p>
                 </div>
-                <div className={cn("p-2 rounded-xl bg-secondary/80", stat.color)}>
+                <div className={cn("p-2.5 rounded-xl bg-muted/50", stat.color)}>
                   <stat.icon className="h-5 w-5" />
                 </div>
               </div>
@@ -162,16 +167,16 @@ export default function DashboardPage() {
         {/* Left: Quick Actions */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-headline font-bold flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" /> Quick Actions
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <Zap className="h-5 w-5 text-primary" /> Quick Actions
             </h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {quickActions.map((action, i) => (
               <Link key={i} href={action.href}>
-                <Card className="group border-border/40 card-hover bg-card/50">
+                <Card className="group border-border/40 card-hover bg-card/50 overflow-hidden relative">
                   <CardContent className="p-5 flex items-center gap-4">
-                    <div className={cn("p-3 rounded-2xl text-white shadow-lg shadow-white/5", action.color)}>
+                    <div className={cn("p-3 rounded-2xl text-white shadow-lg", action.color)}>
                       <action.icon className="h-6 w-6" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -185,7 +190,7 @@ export default function DashboardPage() {
                       </div>
                       <p className="text-xs text-muted-foreground truncate">{action.desc}</p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
                   </CardContent>
                 </Card>
               </Link>
@@ -196,8 +201,8 @@ export default function DashboardPage() {
         {/* Right: Recent Activity */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-headline font-bold flex items-center gap-2">
-              <History className="h-5 w-5 text-primary" /> Recent Resumes
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <History className="h-5 w-5 text-primary" /> Recent Activity
             </h3>
             <Link href="/resume-builder" className="text-xs font-bold text-primary hover:underline">View All</Link>
           </div>
@@ -214,7 +219,7 @@ export default function DashboardPage() {
                 <div className="space-y-1">
                   {recentResumes.map((resume) => (
                     <Link key={resume.id} href={`/resume-builder?id=${resume.id}`} className="block">
-                      <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary/50 transition-colors group">
+                      <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 transition-colors group">
                         <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all">
                           <FileText className="h-4 w-4" />
                         </div>
@@ -231,14 +236,14 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="p-10 flex flex-col items-center justify-center text-center gap-4 border-2 border-dashed border-border/40 rounded-2xl m-2">
-                  <div className="p-3 rounded-full bg-secondary">
+                  <div className="p-3 rounded-full bg-muted">
                     <FileText className="h-6 w-6 text-muted-foreground" />
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm font-bold">No resumes yet</p>
                     <p className="text-xs text-muted-foreground">Start your career journey now.</p>
                   </div>
-                  <Button size="sm" asChild className="btn-primary-gradient rounded-xl mt-2 h-8">
+                  <Button size="sm" asChild className="btn-gradient rounded-xl mt-2 h-8">
                     <Link href="/resume-builder">Start Building</Link>
                   </Button>
                 </div>
@@ -254,16 +259,12 @@ export default function DashboardPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 space-y-4">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-muted-foreground uppercase tracking-widest text-[9px]">Talent Pool</span>
-                  <Badge className="bg-primary text-white text-[9px] h-4">Active</Badge>
-                </div>
                 <div className="space-y-2">
                   <Button variant="outline" size="sm" className="w-full justify-between h-9 rounded-xl text-xs font-bold" asChild>
                     <Link href="/recruiter-dashboard"> Talent Pipeline <ChevronRight className="h-3 w-3" /></Link>
                   </Button>
                   <Button variant="outline" size="sm" className="w-full justify-between h-9 rounded-xl text-xs font-bold" asChild>
-                    <Link href="/candidate-matcher"> Start AI Matching <ChevronRight className="h-3 w-3" /></Link>
+                    <Link href="/candidate-matcher"> AI Candidate Match <ChevronRight className="h-3 w-3" /></Link>
                   </Button>
                 </div>
               </CardContent>

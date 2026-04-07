@@ -22,6 +22,7 @@ import {
   Bell,
   Sun,
   Moon,
+  TextSearch
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -53,7 +54,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true);
     if (!loading && !user) {
-      router.push('/login');
+      router.push('/');
     }
   }, [user, loading, router]);
 
@@ -81,7 +82,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
   const secondaryItems = [
     { label: 'Support', icon: LifeBuoy, href: '/support' },
-    { label: 'Settings', icon: Settings, href: '/profile' },
+    { label: 'Settings', icon: Settings, href: '/settings' },
   ];
 
   const isActive = (href: string) => pathname === href;
@@ -89,13 +90,13 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full bg-background overflow-hidden">
-        <Sidebar className="border-r border-border/40">
+        <Sidebar className="border-r border-border/40 w-[260px]">
           <SidebarHeader className="p-6">
             <Link href="/" className="flex items-center gap-3">
-              <div className="bg-primary p-1.5 rounded-lg">
+              <div className="bg-primary p-1.5 rounded-lg shadow-lg shadow-primary/20">
                 <Image src="/logo.webp" alt="Logo" width={24} height={24} className="rounded-sm" />
               </div>
-              <span className="font-headline font-bold text-lg tracking-tight">CareerCraft AI</span>
+              <span className="font-bold text-lg tracking-tight">CareerCraft AI</span>
             </Link>
           </SidebarHeader>
           
@@ -107,13 +108,13 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                     asChild
                     isActive={isActive(item.href)}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-6 rounded-xl transition-all duration-200 hover:bg-primary/5",
-                      isActive(item.href) && "bg-primary/10 text-primary border-l-4 border-primary"
+                      "flex items-center gap-3 px-4 py-6 rounded-xl transition-all duration-200",
+                      isActive(item.href) && "sidebar-active-gradient"
                     )}
                   >
                     <Link href={item.href}>
                       <item.icon className={cn("h-5 w-5", isActive(item.href) ? "text-primary" : "text-muted-foreground")} />
-                      <span className="font-medium">{item.label}</span>
+                      <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -129,13 +130,13 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                     asChild
                     isActive={isActive(item.href)}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-6 rounded-xl transition-all duration-200 hover:bg-primary/5",
-                      isActive(item.href) && "bg-primary/10 text-primary border-l-4 border-primary"
+                      "flex items-center gap-3 px-4 py-6 rounded-xl transition-all duration-200",
+                      isActive(item.href) && "sidebar-active-gradient"
                     )}
                   >
                     <Link href={item.href}>
                       <item.icon className={cn("h-5 w-5", isActive(item.href) ? "text-primary" : "text-muted-foreground")} />
-                      <span className="font-medium">{item.label}</span>
+                      <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -143,9 +144,9 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             </SidebarMenu>
           </SidebarContent>
 
-          <SidebarFooter className="p-4 bg-secondary/30">
-            <div className="flex items-center gap-3 p-2 bg-card border border-border/40 rounded-2xl">
-              <Avatar className="h-10 w-10 border-2 border-primary/20">
+          <SidebarFooter className="p-4 bg-muted/30">
+            <div className="flex items-center gap-3 p-2 bg-card border border-border/40 rounded-2xl shadow-sm">
+              <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-sm">
                 <AvatarImage src={userData?.photoURL || user.photoURL || ''} />
                 <AvatarFallback className="bg-primary/10 text-primary font-bold">
                   {user.email?.[0].toUpperCase()}
@@ -153,15 +154,13 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
               </Avatar>
               <div className="flex flex-col min-w-0 flex-1">
                 <span className="text-sm font-bold truncate">{userData?.displayName || 'User'}</span>
-                <div className="flex items-center gap-1.5">
-                  <Badge variant="outline" className={cn(
-                    "text-[10px] h-4 py-0 px-1.5 uppercase font-black tracking-tighter border-none",
-                    effectivePlan === 'pro' ? "bg-amber-500/10 text-amber-500" : 
-                    effectivePlan === 'recruiter' ? "bg-blue-500/10 text-blue-500" : "bg-muted text-muted-foreground"
-                  )}>
-                    {effectivePlan}
-                  </Badge>
-                </div>
+                <Badge variant="outline" className={cn(
+                  "text-[10px] h-4 py-0 px-1.5 uppercase font-black tracking-tighter border-none w-fit",
+                  effectivePlan === 'pro' ? "bg-amber-500/10 text-amber-500" : 
+                  effectivePlan === 'recruiter' ? "bg-blue-500/10 text-blue-500" : "bg-muted text-muted-foreground"
+                )}>
+                  {effectivePlan}
+                </Badge>
               </div>
               <Button variant="ghost" size="icon" onClick={() => logout()} className="h-8 w-8 text-muted-foreground hover:text-destructive">
                 <LogOut className="h-4 w-4" />
@@ -174,25 +173,25 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           <header className="flex h-16 shrink-0 items-center justify-between gap-4 px-6 border-b border-border/40 bg-background/80 backdrop-blur-md sticky top-0 z-30">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="md:hidden" />
-              <h2 className="text-lg font-headline font-bold tracking-tight">
+              <h2 className="text-lg font-bold tracking-tight">
                 {menuItems.find(i => i.href === pathname)?.label || 'Dashboard'}
               </h2>
             </div>
             
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-secondary" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-muted" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
                 {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
-              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-secondary">
+              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-muted">
                 <Bell className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-secondary md:hidden">
-                <Settings className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-muted md:hidden" asChild>
+                <Link href="/settings"><Settings className="h-5 w-5" /></Link>
               </Button>
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto p-6 md:p-10 fade-in">
+          <main className="flex-1 overflow-y-auto p-6 md:p-10">
             <div className="max-w-7xl mx-auto space-y-12 pb-20">
               {children}
             </div>
