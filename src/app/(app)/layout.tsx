@@ -1,9 +1,28 @@
-
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import {
+  Home,
+  SquarePen,
+  Sparkles,
+  Target,
+  Briefcase,
+  FileText,
+  Users,
+  LayoutDashboard,
+  NotebookPen,
+  LifeBuoy,
+  Settings,
+  LogOut,
+  Loader2,
+  Menu,
+  Crown,
+  Bell,
+  Sun,
+  Moon,
+} from 'lucide-react';
 import {
   SidebarProvider,
   Sidebar,
@@ -13,304 +32,181 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
-  SidebarTrigger,
   SidebarInset,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
-import {
-  Sparkles,
-  Briefcase,
-  Users,
-  Settings,
-  LogOut,
-  FileText,
-  Loader2,
-  Crown,
-  LifeBuoy,
-  Home,
-  Shield,
-  Target,
-  NotebookPen,
-  LayoutDashboard,
-  SquarePen,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import { useTheme } from 'next-themes';
 import Image from 'next/image';
-import { OnboardingTour } from '@/components/onboarding-tour';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { cn } from '@/lib/utils';
 
-function AppLayoutContent({
-    children,
-  }: {
-    children: React.ReactNode;
-  }) {
+function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logout, plan, effectivePlan, isAdmin, userData } = useAuth();
-  const [showTour, setShowTour] = useState(false);
+  const { user, loading, logout, effectivePlan, userData } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
-  
-  useEffect(() => {
-    if (userData && userData.hasCompletedOnboarding === false) {
-      setShowTour(true);
-    }
-  }, [userData]);
 
-
-  if (loading) {
+  if (!mounted || loading) {
     return (
-        <div className="flex h-screen w-full items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-    )
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
-  const handleTourComplete = async () => {
-    if(user) {
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, { hasCompletedOnboarding: true });
-    }
-    setShowTour(false);
-  }
+  const menuItems = [
+    { label: 'Home', icon: Home, href: '/dashboard' },
+    { label: 'Resume Builder', icon: SquarePen, href: '/resume-builder' },
+    { label: 'Resume Analyzer', icon: Sparkles, href: '/resume-analyzer' },
+    { label: 'ATS Optimizer', icon: Target, href: '/ats-optimizer' },
+    { label: 'Job Matcher', icon: Briefcase, href: '/job-matcher' },
+    { label: 'Cover Letter', icon: FileText, href: '/cover-letter-generator' },
+    { label: 'Candidate Match', icon: Users, href: '/candidate-matcher' },
+    { label: 'Recruiter Dash', icon: LayoutDashboard, href: '/recruiter-dashboard' },
+    { label: 'Candidate Sum.', icon: NotebookPen, href: '/candidate-summarizer' },
+  ];
 
+  const secondaryItems = [
+    { label: 'Support', icon: LifeBuoy, href: '/support' },
+    { label: 'Settings', icon: Settings, href: '/profile' },
+  ];
 
-  const isActive = (path: string) => {
-    if (path === '/dashboard') return pathname === path;
-    return pathname.startsWith(path);
-  }
-
-  const getPageTitle = () => {
-    if (isActive('/dashboard')) return 'Home';
-    if (isActive('/resume-builder')) return 'Resume Builder';
-    if (isActive('/resume-analyzer')) return 'Resume Analyzer';
-    if (isActive('/ats-optimizer')) return 'ATS Optimizer';
-    if (isActive('/job-matcher')) return 'Job Matcher';
-    if (isActive('/cover-letter-generator')) return 'Cover Letter Generator';
-    if (isActive('/candidate-matcher')) return 'Candidate Matcher';
-    if (isActive('/recruiter-dashboard')) return 'Recruiter Dashboard';
-    if (isActive('/candidate-summarizer')) return 'Candidate Summarizer';
-    if (isActive('/support')) return 'Support';
-    if (isActive('/pricing')) return 'Upgrade Plan';
-    if (isActive('/profile')) return 'Profile Settings';
-    if (isActive('/order-status')) return 'Order Status';
-    return 'CareerCraft AI';
-  }
-
-  const handleLogout = async () => {
-    await logout();
-    window.location.href = '/';
-  }
-
-  const getPlanBadge = () => {
-    if (effectivePlan === 'recruiter') {
-        return <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>
-    }
-    if (effectivePlan === 'pro') {
-        return <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>
-    }
-    if (effectivePlan === 'essentials') {
-      return <Badge variant="secondary" className="ml-auto bg-gray-400/20 text-gray-500 border-gray-400/30">Essentials</Badge>
-    }
-    if (plan === 'pending') {
-      return <Badge variant="secondary" className="ml-auto bg-yellow-400/20 text-yellow-500 border-yellow-400/30 animate-pulse">Pending</Badge>
-    }
-    return (
-        <Button variant="ghost" size="sm" className="ml-auto" asChild>
-            <Link href="/pricing">
-                <Crown className="w-4 h-4 mr-2"/>
-                Upgrade
-            </Link>
-        </Button>
-    )
-  }
-
-  const isProAccess = effectivePlan === 'pro' || effectivePlan === 'recruiter';
-  const isEssentialsAccess = effectivePlan === 'essentials' || isProAccess;
-
-  const userInitial = (userData?.displayName?.[0] || user?.displayName?.[0] || user?.email?.[0] || 'U').toUpperCase();
-  const userName = userData?.displayName || user?.displayName || user?.email || 'User';
+  const isActive = (href: string) => pathname === href;
 
   return (
-    <>
-    <OnboardingTour
-        isOpen={showTour}
-        onClose={handleTourComplete}
-      />
     <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader className="p-4 flex-shrink-0">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.webp" alt="CareerCraft AI" width={28} height={28} className="rounded-full object-cover" />
-            <span className="text-lg font-semibold font-headline">CareerCraft AI</span>
-          </Link>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/dashboard')}>
-                <Link href="/dashboard">
-                  <Home />
-                  <span>Home</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/resume-builder')}>
-                <Link href="/resume-builder">
-                  <SquarePen />
-                  <span>Resume Builder</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/resume-analyzer')}>
-                    <Link href="/resume-analyzer">
-                    <Sparkles />
-                    <span>Resume Analyzer</span>
-                    {!isProAccess && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/ats-optimizer')}>
-                    <Link href="/ats-optimizer">
-                    <Target />
-                    <span>ATS Optimizer</span>
-                    {!isProAccess && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/job-matcher')}>
-                    <Link href="/job-matcher">
-                    <Briefcase />
-                    <span>Job Matcher</span>
-                    {!isProAccess && <Badge variant="secondary" className="ml-auto bg-amber-400/20 text-amber-500 border-amber-400/30">Pro</Badge>}
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/cover-letter-generator')}>
-                    <Link href="/cover-letter-generator">
-                    <FileText />
-                    <span>Cover Letter Generator</span>
-                    {!isEssentialsAccess && <Badge variant="secondary" className="ml-auto bg-gray-400/20 text-gray-500 border-gray-400/30">Essentials</Badge>}
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/candidate-matcher')}>
-                    <Link href="/candidate-matcher">
-                    <Users />
-                    <span>Candidate Matcher</span>
-                    {effectivePlan !== 'recruiter' && <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>}
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-            {effectivePlan === 'recruiter' && (
-                <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive('/recruiter-dashboard')}>
-                        <Link href="/recruiter-dashboard">
-                            <LayoutDashboard />
-                            <span>Recruiter Dashboard</span>
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            )}
-             <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/candidate-summarizer')}>
-                    <Link href="/candidate-summarizer">
-                    <NotebookPen />
-                    <span>Candidate Summarizer</span>
-                    {effectivePlan !== 'recruiter' && <Badge variant="secondary" className="ml-auto bg-blue-400/20 text-blue-500 border-blue-400/30">Recruiter</Badge>}
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive('/support')}>
-                    <Link href="/support">
-                    <LifeBuoy />
-                    <span>Support</span>
-                    </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-             {isAdmin && (
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith('/admin')}>
-                  <Link href="/admin/dashboard">
-                    <Shield />
-                    <span>Admin Panel</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )}
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter className="p-4 mt-auto border-t flex-shrink-0 bg-sidebar/50 backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-             <Avatar className="h-9 w-9">
-              <AvatarImage 
-                src={userData?.photoURL || user.photoURL || `https://placehold.co/100x100.png?text=${userInitial}`} 
-                alt={userName} 
-              />
-              <AvatarFallback>{userInitial}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col truncate flex-1">
-                <span className="text-sm font-medium truncate">{userName}</span>
-                <button onClick={handleLogout} className="text-xs text-muted-foreground hover:text-foreground text-left flex items-center gap-1">
-                  <LogOut className="w-3 h-3"/>
-                  Logout
-                </button>
-            </div>
-            {getPlanBadge()}
-          </div>
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sm:px-6 shadow-md">
-          <SidebarTrigger />
-          <div className="flex-1">
-             <h2 className="text-lg font-semibold font-headline">
-                {getPageTitle()}
-             </h2>
-          </div>
-          <ThemeSwitcher />
-          <Button variant="outline" size="icon" asChild>
-            <Link href="/profile">
-                <Settings className="h-5 w-5" />
+      <div className="flex h-screen w-full bg-background overflow-hidden">
+        <Sidebar className="border-r border-border/40">
+          <SidebarHeader className="p-6">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="bg-primary p-1.5 rounded-lg">
+                <Image src="/logo.webp" alt="Logo" width={24} height={24} className="rounded-sm" />
+              </div>
+              <span className="font-headline font-bold text-lg tracking-tight">CareerCraft AI</span>
             </Link>
-          </Button>
-        </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
-          {children}
-        </main>
-      </SidebarInset>
+          </SidebarHeader>
+          
+          <SidebarContent className="px-4">
+            <SidebarMenu>
+              {menuItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-6 rounded-xl transition-all duration-200 hover:bg-primary/5",
+                      isActive(item.href) && "bg-primary/10 text-primary border-l-4 border-primary"
+                    )}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className={cn("h-5 w-5", isActive(item.href) ? "text-primary" : "text-muted-foreground")} />
+                      <span className="font-medium">{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+
+            <div className="my-6 border-t border-border/40 mx-4" />
+
+            <SidebarMenu>
+              {secondaryItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-6 rounded-xl transition-all duration-200 hover:bg-primary/5",
+                      isActive(item.href) && "bg-primary/10 text-primary border-l-4 border-primary"
+                    )}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className={cn("h-5 w-5", isActive(item.href) ? "text-primary" : "text-muted-foreground")} />
+                      <span className="font-medium">{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarContent>
+
+          <SidebarFooter className="p-4 bg-secondary/30">
+            <div className="flex items-center gap-3 p-2 bg-card border border-border/40 rounded-2xl">
+              <Avatar className="h-10 w-10 border-2 border-primary/20">
+                <AvatarImage src={userData?.photoURL || user.photoURL || ''} />
+                <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                  {user.email?.[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-sm font-bold truncate">{userData?.displayName || 'User'}</span>
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="outline" className={cn(
+                    "text-[10px] h-4 py-0 px-1.5 uppercase font-black tracking-tighter border-none",
+                    effectivePlan === 'pro' ? "bg-amber-500/10 text-amber-500" : 
+                    effectivePlan === 'recruiter' ? "bg-blue-500/10 text-blue-500" : "bg-muted text-muted-foreground"
+                  )}>
+                    {effectivePlan}
+                  </Badge>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => logout()} className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </SidebarFooter>
+        </Sidebar>
+
+        <SidebarInset className="flex flex-col flex-1 overflow-hidden">
+          <header className="flex h-16 shrink-0 items-center justify-between gap-4 px-6 border-b border-border/40 bg-background/80 backdrop-blur-md sticky top-0 z-30">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="md:hidden" />
+              <h2 className="text-lg font-headline font-bold tracking-tight">
+                {menuItems.find(i => i.href === pathname)?.label || 'Dashboard'}
+              </h2>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-secondary" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
+              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-secondary">
+                <Bell className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-secondary md:hidden">
+                <Settings className="h-5 w-5" />
+              </Button>
+            </div>
+          </header>
+
+          <main className="flex-1 overflow-y-auto p-6 md:p-10 fade-in">
+            <div className="max-w-7xl mx-auto space-y-12 pb-20">
+              {children}
+            </div>
+          </main>
+        </SidebarInset>
+      </div>
     </SidebarProvider>
-    </>
   );
 }
 
-export default function AppLayout({
-    children,
-  }: {
-    children: React.ReactNode;
-  }) {
-      return (
-          <AuthProvider>
-              <AppLayoutContent>{children}</AppLayoutContent>
-          </AuthProvider>
-      )
-  }
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider>
+      <AppLayoutContent>{children}</AppLayoutContent>
+    </AuthProvider>
+  );
+}
