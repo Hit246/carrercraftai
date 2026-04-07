@@ -33,12 +33,120 @@ const socialProofLogos = [
 ];
 
 const features = [
-  { id: 'builder', title: "Resume Builder", color: "text-blue-500", bg: "bg-blue-500/10", icon: FileText, desc: "Drag & drop builder with ATS-optimized templates." },
-  { id: 'analyzer', title: "AI Resume Analyzer", color: "text-purple-500", bg: "bg-purple-500/10", icon: Sparkles, desc: "Instant feedback on strengths and critical gaps." },
-  { id: 'optimizer', title: "ATS Optimizer", color: "text-green-500", bg: "bg-green-500/10", icon: Target, desc: "Match your resume to specific job descriptions." },
-  { id: 'matcher', title: "Smart Job Matching", color: "text-amber-500", bg: "bg-amber-500/10", icon: Briefcase, desc: "Discover roles that perfectly fit your unique skills." },
-  { id: 'cover', title: "Cover Letter Generator", color: "text-pink-500", bg: "bg-pink-500/10", icon: Mail, desc: "Generate tailored letters in under 2 minutes." },
-  { id: 'recruiter', title: "Candidate Matching", color: "text-cyan-500", bg: "bg-cyan-500/10", icon: Users, desc: "Recruiter tools to rank candidates by job fit." },
+  { 
+    id: 'builder', 
+    title: "Resume Builder", 
+    color: "text-blue-500", 
+    bg: "bg-blue-500/10", 
+    icon: FileText, 
+    desc: "Drag & drop builder with ATS-optimized templates.",
+    preview: (
+      <div className="w-full h-full p-2 space-y-2">
+        <div className="h-2 w-1/2 bg-blue-500/20 rounded" />
+        <div className="h-1.5 w-full bg-muted rounded" />
+        <div className="h-1.5 w-full bg-muted rounded" />
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          <div className="h-8 bg-muted rounded" />
+          <div className="h-8 bg-muted rounded" />
+        </div>
+      </div>
+    )
+  },
+  { 
+    id: 'analyzer', 
+    title: "AI Resume Analyzer", 
+    color: "text-purple-500", 
+    bg: "bg-purple-500/10", 
+    icon: Sparkles, 
+    desc: "Instant feedback on strengths and critical gaps.",
+    preview: (
+      <div className="w-full h-full flex flex-col items-center justify-center p-2 space-y-2">
+        <div className="relative w-12 h-12 flex items-center justify-center">
+          <svg className="w-full h-full" viewBox="0 0 36 36">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" className="text-purple-500/20" strokeWidth="3" />
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" className="text-purple-500" strokeWidth="3" strokeDasharray="75, 100" />
+          </svg>
+          <span className="absolute text-[10px] font-black">75%</span>
+        </div>
+        <div className="h-1.5 w-full bg-muted rounded" />
+      </div>
+    )
+  },
+  { 
+    id: 'optimizer', 
+    title: "ATS Optimizer", 
+    color: "text-green-500", 
+    bg: "bg-green-500/10", 
+    icon: Target, 
+    desc: "Match your resume to specific job descriptions.",
+    preview: (
+      <div className="w-full h-full p-2 flex flex-wrap gap-1 items-center justify-center">
+        <Badge className="bg-green-500/10 text-green-500 text-[8px] h-4">React ✓</Badge>
+        <Badge className="bg-green-500/10 text-green-500 text-[8px] h-4">API ✓</Badge>
+        <Badge className="bg-destructive/10 text-destructive text-[8px] h-4">Swift ✗</Badge>
+        <Badge className="bg-green-500/10 text-green-500 text-[8px] h-4">Python ✓</Badge>
+      </div>
+    )
+  },
+  { 
+    id: 'matcher', 
+    title: "Smart Job Matching", 
+    color: "text-amber-500", 
+    bg: "bg-amber-500/10", 
+    icon: Briefcase, 
+    desc: "Discover roles that perfectly fit your unique skills.",
+    preview: (
+      <div className="w-full h-full p-2 space-y-2">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-amber-500/20" />
+          <div className="h-2 w-2/3 bg-muted rounded" />
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-amber-500/20" />
+          <div className="h-2 w-1/2 bg-muted rounded" />
+        </div>
+      </div>
+    )
+  },
+  { 
+    id: 'cover', 
+    title: "Cover Letter Generator", 
+    color: "text-pink-500", 
+    bg: "bg-pink-500/10", 
+    icon: Mail, 
+    desc: "Generate tailored letters in under 2 minutes.",
+    preview: (
+      <div className="w-full h-full p-3 space-y-1.5 opacity-50">
+        <div className="h-1.5 w-1/3 bg-pink-500/20 rounded" />
+        <div className="h-1 w-full bg-muted rounded" />
+        <div className="h-1 w-full bg-muted rounded" />
+        <div className="h-1 w-full bg-muted rounded" />
+        <div className="h-1 w-2/3 bg-muted rounded" />
+      </div>
+    )
+  },
+  { 
+    id: 'recruiter', 
+    title: "Candidate Matching", 
+    color: "text-cyan-500", 
+    bg: "bg-cyan-500/10", 
+    icon: Users, 
+    desc: "Recruiter tools to rank candidates by job fit.",
+    preview: (
+      <div className="w-full h-full p-2 space-y-2">
+        <div className="flex items-center justify-between p-1 bg-muted rounded border border-cyan-500/20">
+          <div className="w-2 h-2 rounded-full bg-cyan-500" />
+          <div className="h-1.5 w-12 bg-muted-foreground/20 rounded" />
+          <div className="h-1.5 w-4 bg-green-500/20 rounded" />
+        </div>
+        <div className="flex items-center justify-between p-1 bg-muted rounded">
+          <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
+          <div className="h-1.5 w-12 bg-muted-foreground/20 rounded" />
+          <div className="h-1.5 w-4 bg-amber-500/20 rounded" />
+        </div>
+      </div>
+    )
+  },
 ];
 
 function HomePageContent() {
@@ -94,15 +202,6 @@ function HomePageContent() {
                 <Button size="lg" variant="ghost" className="h-14 px-10 rounded-xl text-lg border hover:bg-muted/50 w-full sm:w-auto" asChild>
                   <Link href="#how-it-works">See How It Works</Link>
                 </Button>
-              </div>
-              <div className="flex items-center justify-center lg:justify-start gap-2 text-sm text-muted-foreground font-medium">
-                <div className="flex -space-x-2">
-                  {[1,2,3].map(i => <div key={i} className="w-8 h-8 rounded-full border-2 border-background bg-muted" />)}
-                </div>
-                <div className="flex items-center gap-1 ml-2">
-                  {[1,2,3,4,5].map(i => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
-                </div>
-                Trusted by 10,000+ professionals across India
               </div>
             </div>
 
@@ -192,15 +291,15 @@ function HomePageContent() {
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {features.map((f) => (
-                <Card key={f.id} className="card-hover overflow-hidden cursor-pointer" onClick={() => openAuth(f.title, f.desc)}>
+                <Card key={f.id} className="card-hover overflow-hidden cursor-pointer group" onClick={() => openAuth(f.title, f.desc)}>
                   <CardContent className="p-8">
                     <div className={cn("w-12 h-12 rounded-xl mb-6 flex items-center justify-center", f.bg, f.color)}>
                       <f.icon className="w-6 h-6" />
                     </div>
                     <h3 className="text-xl font-bold mb-3">{f.title}</h3>
                     <p className="text-muted-foreground text-sm mb-6 leading-relaxed">{f.desc}</p>
-                    <div className="h-24 bg-muted/50 rounded-xl flex items-center justify-center text-muted-foreground/30 border border-dashed">
-                      <Zap className="w-8 h-8" />
+                    <div className="h-24 bg-muted/50 rounded-xl flex items-center justify-center text-muted-foreground/30 border border-dashed relative overflow-hidden">
+                      {f.preview}
                     </div>
                     <div className="mt-6 flex items-center font-bold text-sm text-primary group">
                       Try it now <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />

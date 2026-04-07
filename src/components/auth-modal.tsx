@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GoogleAuthButton } from '@/components/auth/google-auth-button';
-import { Mail, Sparkles, CheckCircle2, ShieldCheck, Lock, Zap } from 'lucide-react';
+import { Mail, Sparkles, CheckCircle2, ShieldCheck, Lock, ZapOff} from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Input } from './ui/input';
@@ -117,7 +117,7 @@ export function AuthModal({ isOpen, onClose, title, description }: AuthModalProp
               { text: "AI Resume Audit", icon: Sparkles },
               { text: "ATS Optimizer", icon: ShieldCheck },
               { text: "Job Matching", icon: CheckCircle2 },
-              { text: "5 Free Credits", icon: Zap },
+              { text: "5 Free Credits", icon: ZapOff },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground">
                 <item.icon className="h-3.5 w-3.5 text-primary" />
