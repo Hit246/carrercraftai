@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GoogleAuthButton } from '@/components/auth/google-auth-button';
-import { Mail, Sparkles, CheckCircle2, ShieldCheck, Lock } from 'lucide-react';
+import { Mail, Sparkles, CheckCircle2, ShieldCheck, Lock, Zap } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Input } from './ui/input';
