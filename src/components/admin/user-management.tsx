@@ -23,13 +23,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Trash2, Crown, User, Shield, Trophy, AlertTriangle, Handshake, AlertCircle, Loader2, Calendar } from 'lucide-react';
+import { MoreHorizontal, Trash2, Crown, User, Shield, Trophy, Handshake, AlertCircle, Loader2, Calendar, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '../ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { differenceInDays, addDays, format } from 'date-fns';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Input } from '../ui/input';
 import { deleteUserAccountAction } from '@/lib/actions';
+import { cn } from '@/lib/utils';
 
 type Plan = 'free' | 'essentials' | 'pro' | 'recruiter' | 'pending' | 'cancellation_requested';
 
@@ -48,6 +49,7 @@ const ADMIN_EMAILS = ['support@careercraftai.tech', 'hello@careercraftai.tech', 
 
 export function UserManagementPage() {
   const [users, setUsers] = useState<UserData[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -82,40 +84,21 @@ export function UserManagementPage() {
           }
       }
 
-      const updateData: any = { 
-        plan: newPlan,
-      };
+      const updateData: any = { plan: newPlan };
 
       if (['essentials', 'pro', 'recruiter'].includes(newPlan)) {
           updateData.planUpdatedAt = new Date();
           updateData.amountPaid = amountPaid;
-          updateData.webhookVerified = false;
-          
-          if (newPlan === 'essentials') {
-              updateData.credits = increment(50);
-          } else if (newPlan === 'pro' || newPlan === 'recruiter') {
-              updateData.credits = 999999;
-          }
+          updateData.credits = newPlan === 'essentials' ? increment(50) : 999999;
       } else if (newPlan === 'free') {
           updateData.credits = 5;
       }
       
-      if (newPlan !== 'pending') {
-        updateData.requestedPlan = null;
-      }
-
-      await updateDoc(userRef, updateData);
-      toast({
-        title: 'Plan Updated',
-        description: `User's plan has been changed to ${newPlan}.`,
-      });
+      await updateDoc(userRef, { ...updateData, requestedPlan: null });
+      toast({ title: 'System Access Updated', description: `User role changed to ${newPlan}.` });
       fetchUsers();
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update user plan.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', variant: 'destructive' });
     }
   };
 
@@ -123,238 +106,150 @@ export function UserManagementPage() {
     setIsDeletingId(userId);
     try {
       await deleteDoc(doc(db, 'users', userId));
-      try {
-        await deleteUserAccountAction(userId);
-        toast({
-            title: 'User Fully Deleted',
-            description: 'Database record and authentication account have been removed.',
-        });
-      } catch (authError: any) {
-        console.warn("Auth deletion failed:", authError);
-        toast({
-            title: 'Firestore Doc Deleted',
-            description: 'Database record removed, but auth account requires manual deletion.',
-            variant: 'destructive',
-        });
-      }
-      
+      await deleteUserAccountAction(userId);
+      toast({ title: 'User Purged Successfully' });
       fetchUsers(); 
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete user document.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Deletion Error', variant: 'destructive' });
     } finally {
         setIsDeletingId(null);
     }
   };
 
-  const getPlanBadgeVariant = (plan: Plan) => {
+  const filteredUsers = users.filter(u => u.email.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  const getPlanStyle = (plan: Plan) => {
     switch (plan) {
-      case 'essentials':
-        return 'secondary';
-      case 'pro':
-        return 'secondary';
-      case 'recruiter':
-        return 'default';
-      case 'pending':
-      case 'cancellation_requested':
-          return 'destructive';
-      default:
-        return 'outline';
+      case 'essentials': return "bg-blue-500/10 text-blue-500 border-none font-black uppercase text-[10px]";
+      case 'pro': return "bg-amber-500/10 text-amber-500 border-none font-black uppercase text-[10px]";
+      case 'recruiter': return "bg-indigo-500/10 text-indigo-500 border-none font-black uppercase text-[10px]";
+      case 'pending': return "bg-red-500/10 text-red-500 border-none animate-pulse font-black uppercase text-[10px]";
+      default: return "bg-muted/50 text-muted-foreground border-none font-black uppercase text-[10px]";
     }
   };
-  
-  const getPlanDisplayName = (user: UserData) => {
-    switch (user.plan) {
-      case 'pending':
-        return `Pending (${user.requestedPlan})`;
-      case 'cancellation_requested':
-        return `Cancellation Requested`;
-      default:
-        return user.plan;
-    }
-  }
-
-  const getExpirationInfo = (user: UserData) => {
-    if (!user.planUpdatedAt || ['free', 'pending', 'cancellation_requested'].includes(user.plan)) {
-      return null;
-    }
-    const upgradeDate = new Date(user.planUpdatedAt.seconds * 1000);
-    const expirationDate = addDays(upgradeDate, 30);
-    const daysRemaining = differenceInDays(expirationDate, new Date());
-
-    if (daysRemaining < 0) {
-      return { status: 'expired' as const, date: expirationDate };
-    }
-    if (daysRemaining <= 7) {
-      return { status: 'expires_soon' as const, date: expirationDate };
-    }
-    return null;
-  }
-
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>User Management</CardTitle>
-        <CardDescription>View, manage, and edit all user profiles and permissions.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <TooltipProvider>
-            <Table>
-            <TableHeader>
-                <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Subscription Plan</TableHead>
-                <TableHead>Cycle</TableHead>
-                <TableHead>Joined Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+    <div className="space-y-8 fade-in">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="relative w-full sm:max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Filter by email..." 
+            value={searchQuery} 
+            onChange={(e) => setSearchQuery(e.target.value)} 
+            className="h-11 pl-10 rounded-xl bg-card/50 border-white/5"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="h-8 border-white/10 text-muted-foreground">{filteredUsers.length} total objects</Badge>
+        </div>
+      </div>
+
+      <Card className="border-white/5 bg-card/50 shadow-2xl overflow-hidden">
+        <Table>
+          <TableHeader className="bg-white/[0.02]">
+            <TableRow className="border-white/5">
+              <TableHead className="py-4">Account Holder</TableHead>
+              <TableHead>Access Level</TableHead>
+              <TableHead>Cycle</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead className="text-right">Ops</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              [...Array(6)].map((_, i) => (
+                <TableRow key={i} className="border-white/5">
+                  <TableCell colSpan={5} className="py-6"><Skeleton className="h-8 w-full rounded-lg" /></TableCell>
                 </TableRow>
-            </TableHeader>
-            <TableBody>
-                {isLoading
-                ? [...Array(5)].map((_, i) => (
-                    <TableRow key={i}>
-                        <TableCell><Skeleton className="h-10 w-48" /></TableCell>
-                        <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                        <TableCell><Skeleton className="h-6 w-16" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
-                    </TableRow>
-                    ))
-                : users.map((user) => {
-                    const isUserAdmin = ADMIN_EMAILS.includes(user.email);
-                    const expirationInfo = getExpirationInfo(user);
-                    return (
-                    <TableRow key={user.id}>
-                        <TableCell>
-                        <div className="flex items-center gap-3">
-                            <Avatar>
-                            <AvatarImage src={user.photoURL || `https://placehold.co/100x100.png?text=${user.email?.[0].toUpperCase()}`} />
-                            <AvatarFallback>{user.email[0].toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                            <p className="font-medium flex items-center gap-2">
-                                {user.email}
-                                {isUserAdmin && <Shield className="h-4 w-4 text-primary" />}
-                            </p>
-                            <p className="text-sm text-muted-foreground">{user.id}</p>
-                            </div>
-                        </div>
-                        </TableCell>
-                        <TableCell>
-                            <div className="flex items-center gap-2">
-                                {isUserAdmin ? (
-                                    <Badge>Admin</Badge>
-                                ) : (
-                                    <Badge variant={getPlanBadgeVariant(user.plan)}>
-                                    {getPlanDisplayName(user)}
-                                    </Badge>
-                                )}
-                                {expirationInfo?.status === 'expires_soon' && (
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <Badge variant="destructive" className="bg-yellow-500 hover:bg-yellow-500/80">Expires Soon</Badge>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Expires on {format(expirationInfo.date, 'MMM d, yyyy')}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                )}
-                                 {expirationInfo?.status === 'expired' && (
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                             <Badge variant="destructive">Expired</Badge>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Expired on {format(expirationInfo.date, 'MMM d, yyyy')}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                )}
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            {user.billingCycle ? (
-                                <Badge variant="outline" className="capitalize text-[10px]">
-                                    {user.billingCycle === 'annual' ? (
-                                        <span className="flex items-center gap-1"><Calendar className="h-3 w-3 text-green-500"/> Annual</span>
-                                    ) : 'Monthly'}
-                                </Badge>
-                            ) : '-'}
-                        </TableCell>
-                        <TableCell>
-                        {user.createdAt
-                            ? new Date(user.createdAt.seconds * 1000).toLocaleDateString()
-                            : 'N/A'}
-                        </TableCell>
-                        <TableCell className="text-right">
-                        {!isUserAdmin && (
-                            <AlertDialog>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild disabled={isDeletingId === user.id}>
-                                <Button variant="ghost" size="icon">
-                                    {isDeletingId === user.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <MoreHorizontal className="h-4 w-4" />}
-                                </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')}>
-                                    <User className="mr-2 h-4 w-4" />
-                                    Set to Free
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'essentials')}>
-                                    <Trophy className="mr-2 h-4 w-4" />
-                                    Set to Essentials
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pro')}>
-                                    <Crown className="mr-2 h-4 w-4" />
-                                    Set to Pro
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'recruiter')}>
-                                    <Handshake className="mr-2 h-4 w-4" />
-                                    Set to Recruiter
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem className="text-destructive focus:text-destructive">
-                                        <Trash2 className="mr-2 h-4 w-4" />
-                                        Delete User
-                                    </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                <AlertDialogTitle>Delete user account permanently?</AlertDialogTitle>
-                                <AlertDialogDescription asChild>
-                                    <div className="space-y-4">
-                                        <p>This action will delete the user's Firestore document <strong>and</strong> their Firebase Authentication account.</p>
-                                        <div className="p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900 rounded-md flex items-start gap-2 text-amber-800 dark:text-amber-200">
-                                            <AlertCircle className="h-5 w-5 shrink-0" />
-                                            <div className="text-xs">
-                                                <strong>Note:</strong> Authentication deletion requires a configured <code>FIREBASE_SERVICE_ACCOUNT_KEY</code>.
-                                            </div>
-                                        </div>
-                                    </div>
-                                </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="bg-destructive hover:bg-destructive/90">Confirm Delete</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                            </AlertDialog>
-                        )}
-                        </TableCell>
-                    </TableRow>
-                    )})}
-            </TableBody>
-            </Table>
-        </TooltipProvider>
-      </CardContent>
-    </Card>
+              ))
+            ) : filteredUsers.map((user) => {
+              const isUserAdmin = ADMIN_EMAILS.includes(user.email);
+              return (
+                <TableRow key={user.id} className="border-white/5 hover:bg-white/[0.01]">
+                  <TableCell className="py-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10 border border-white/10 shadow-lg">
+                        <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-black uppercase">
+                          {user.email[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm truncate flex items-center gap-2">
+                          {user.email}
+                          {isUserAdmin && <Shield className="h-3 w-3 text-red-500" />}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground font-mono">{user.id}</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={getPlanStyle(user.plan)}>
+                      {user.plan === 'pending' ? `Pending ${user.requestedPlan}` : user.plan}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-xs font-bold text-muted-foreground capitalize">
+                      {user.billingCycle || '---'}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                      {user.createdAt ? format(new Date(user.createdAt.seconds * 1000), 'MMM dd, yy') : 'N/A'}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {!isUserAdmin && (
+                      <AlertDialog>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild disabled={isDeletingId === user.id}>
+                            <Button variant="ghost" size="icon" className="rounded-xl h-9 w-9">
+                              {isDeletingId === user.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <MoreHorizontal className="h-4 w-4 text-muted-foreground" />}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 shadow-2xl">
+                            <DropdownMenuLabel className="text-[10px] font-black uppercase text-muted-foreground tracking-widest px-2 pb-2">Change Role</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'free')} className="rounded-lg gap-3">
+                              <User className="h-4 w-4 text-muted-foreground" /> Free
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'essentials')} className="rounded-lg gap-3">
+                              <Trophy className="h-4 w-4 text-blue-500" /> Essentials
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'pro')} className="rounded-lg gap-3">
+                              <Crown className="h-4 w-4 text-amber-500" /> Pro
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handlePlanChange(user.id, 'recruiter')} className="rounded-lg gap-3">
+                              <Handshake className="h-4 w-4 text-indigo-500" /> Recruiter
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-white/5 my-2" />
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem className="rounded-lg gap-3 text-red-500 focus:text-red-500 focus:bg-red-500/10">
+                                <Trash2 className="h-4 w-4" /> Terminate Account
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <AlertDialogContent className="rounded-3xl border-white/10 bg-[#111118]">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-2xl font-headline">Purge Subject?</AlertDialogTitle>
+                            <AlertDialogDescription className="text-muted-foreground">
+                              This will permanently erase all user data, including resumes and payment history. This action is logged and irreversible.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="mt-6">
+                            <AlertDialogCancel className="rounded-xl border-white/5">Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteUser(user.id)} className="rounded-xl bg-red-500 hover:bg-red-600 font-bold">Purge User</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
   );
 }

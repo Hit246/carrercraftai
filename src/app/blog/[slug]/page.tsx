@@ -5,7 +5,7 @@ import { HomeHeader } from "@/components/home-header";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, Clock, Share2 } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Share2, Facebook, Twitter, Linkedin } from "lucide-react";
 import { Metadata } from "next";
 
 interface Props {
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${post.title} | CareerCraft AI Blog`,
     description: post.description,
     alternates: {
-      canonical: `https://careercraftai.tech/blog/${slug}`, // ← ADD THIS
+      canonical: `https://careercraftai.tech/blog/${slug}`,
     },
     openGraph: {
       title: post.title,
@@ -40,7 +40,6 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post) return notFound();
 
-  // JSON-LD Structured Data for Google
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -63,59 +62,73 @@ export default async function BlogPostPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <HomeHeader />
-        <main className="flex-1">
+        
+        <main className="flex-1 pb-32">
           <div className="container mx-auto px-4 py-12">
-            <Button variant="ghost" asChild className="mb-8 -ml-4">
-              <Link href="/blog">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Resources
-              </Link>
-            </Button>
+            <div className="max-w-3xl mx-auto">
+              <Button variant="ghost" asChild className="mb-12 hover:bg-muted/50 rounded-xl px-4 font-bold text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/blog">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Resources Hub
+                </Link>
+              </Button>
 
-            <article className="max-w-3xl mx-auto">
-              <div className="space-y-6 mb-12">
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((t) => (
-                    <Badge key={t} variant="secondary">
-                      {t}
-                    </Badge>
-                  ))}
-                </div>
-                <h1 className="text-4xl md:text-5xl font-bold font-headline tracking-tight">
-                  {post.title}
-                </h1>
-                <div className="flex items-center justify-between border-y py-4">
-                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4" />
-                      {post.date}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Clock className="w-4 h-4" />
-                      {post.readTime}
-                    </span>
+              <article className="space-y-12">
+                <header className="space-y-8">
+                  <div className="flex flex-wrap gap-2">
+                    {post.tags.map((t) => (
+                      <Badge key={t} variant="secondary" className="bg-primary/10 text-primary border-none text-[10px] font-black uppercase tracking-widest px-3 py-1">
+                        {t}
+                      </Badge>
+                    ))}
                   </div>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <Share2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
+                  
+                  <h1 className="text-4xl md:text-6xl font-bold font-headline tracking-tight leading-[1.1]">
+                    {post.title}
+                  </h1>
 
-              <div 
-                className="prose prose-stone dark:prose-invert max-w-none prose-h2:font-headline prose-h3:font-headline prose-h2:text-2xl prose-h3:text-xl"
-                dangerouslySetInnerHTML={{ __html: post.content }}
-              />
+                  <div className="flex items-center justify-between border-y border-border/40 py-6">
+                    <div className="flex items-center gap-8 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                      <span className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-primary" />
+                        {post.date}
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-primary" />
+                        {post.readTime} Read
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 h-10 w-10"><Twitter className="w-4 h-4"/></Button>
+                      <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 h-10 w-10"><Linkedin className="w-4 h-4"/></Button>
+                      <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 h-10 w-10"><Share2 className="w-4 h-4" /></Button>
+                    </div>
+                  </div>
+                </header>
 
-              <div className="mt-16 p-8 rounded-2xl bg-primary/5 border border-primary/10 text-center">
-                <h3 className="text-2xl font-bold font-headline mb-4">Ready to land your dream job?</h3>
-                <p className="text-muted-foreground mb-6">
-                  Put these tips into practice with our AI-powered resume tools.
-                </p>
-                <Button size="lg" asChild>
-                  <Link href="/signup">Get Started for Free</Link>
-                </Button>
-              </div>
-            </article>
+                <div 
+                  className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-headline prose-headings:font-bold prose-headings:tracking-tight prose-p:text-muted-foreground prose-p:leading-relaxed prose-li:text-muted-foreground"
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
+
+                <footer className="mt-20 pt-12 border-t border-border/40">
+                  <div className="p-10 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/5 border border-primary/20 text-center space-y-6">
+                    <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-primary/20 rotate-3">
+                      <Sparkles className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-3xl font-bold font-headline">Ready to take the next step?</h3>
+                      <p className="text-muted-foreground max-w-md mx-auto">
+                        Put these insights into practice. Build your ATS-optimized resume with CareerCraft AI today.
+                      </p>
+                    </div>
+                    <Button size="lg" className="btn-gradient px-10 h-12 rounded-xl font-bold shadow-xl shadow-primary/20" asChild>
+                      <Link href="/signup">Start Building Free</Link>
+                    </Button>
+                  </div>
+                </footer>
+              </article>
+            </div>
           </div>
         </main>
       </div>

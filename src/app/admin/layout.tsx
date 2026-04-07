@@ -13,12 +13,13 @@ import {
   Users,
   Shield,
   ArrowLeft,
-  CheckCircle,
   Settings,
   Bell,
   Wallet,
   Tag,
   Mail,
+  ChevronRight,
+  Monitor
 } from 'lucide-react';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -30,8 +31,8 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuButton,
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
@@ -42,8 +43,9 @@ import { db } from '@/lib/firebase';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
+import { cn } from '@/lib/utils';
 
-function AdminLayoutContent({ children }: { children: ReactNode }) {
+function AdminLayoutContent({ children }: { ReactNode: any }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout, isAdmin, userData } = useAuth();
@@ -54,24 +56,21 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isAdmin) return;
 
-    // Listen for users with 'pending' status
     const q = query(collection(db, 'users'), where('plan', '==', 'pending'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setPendingUpgradesCount(snapshot.size);
       
-      // Skip the initial notification for existing requests on load
       if (isInitialLoad.current) {
         isInitialLoad.current = false;
         return;
       }
 
-      // Show toast only for newly added requests
       snapshot.docChanges().forEach((change) => {
         if (change.type === "added") {
           const newUser = change.doc.data();
           toast({
             title: "New Upgrade Request",
-            description: `${newUser.email} has requested a plan upgrade.`,
+            description: `${newUser.email} has requested an upgrade.`,
             action: (
               <ToastAction altText="View" onClick={() => router.push('/admin/upgrades')}>
                 View
@@ -96,7 +95,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
 
   if (loading || !user || !isAdmin) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
+      <div className="flex h-screen w-full items-center justify-center bg-[#0A0A0F]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -105,194 +104,128 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
   const isActive = (path: string) => pathname.startsWith(path);
 
   const getPageTitle = () => {
-    if (isActive('/admin/dashboard')) return 'Admin Dashboard';
-    if (isActive('/admin/users')) return 'User Management';
-    if (isActive('/admin/pricing')) return 'Pricing & Promos';
-    if (isActive('/admin/subscriptions')) return 'Subscription Management';
-    if (isActive('/admin/upgrades')) return 'Upgrade Requests';
-    if (isActive('/admin/cancellations')) return 'Cancellation Requests';
-    if (isActive('/admin/support')) return 'Support Tickets';
-    if (isActive('/admin/payment-history')) return 'Payment History';
-    if (isActive('/admin/email-broadcast')) return 'Email Broadcast';
-    return 'Admin Panel';
+    if (isActive('/admin/dashboard')) return 'System Overview';
+    if (isActive('/admin/users')) return 'User Directory';
+    if (isActive('/admin/pricing')) return 'Rev. Management';
+    if (isActive('/admin/subscriptions')) return 'Billing Desk';
+    if (isActive('/admin/upgrades')) return 'Growth Queue';
+    if (isActive('/admin/support')) return 'Incident Inbox';
+    if (isActive('/admin/email-broadcast')) return 'Comm. Center';
+    return 'Admin Command';
   };
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/');
-  };
-
-  const userInitial = (userData?.displayName?.[0] || user?.email?.[0] || 'A').toUpperCase();
-  const userName = userData?.displayName || user?.displayName || user?.email || 'Admin';
+  const menuItems = [
+    { label: 'Dashboard', icon: LayoutGrid, href: '/admin/dashboard' },
+    { label: 'Users', icon: Users, href: '/admin/users' },
+    { label: 'Revenue', icon: Tag, href: '/admin/pricing' },
+    { label: 'Subscriptions', icon: Wallet, href: '/admin/subscriptions' },
+    { label: 'Upgrades', icon: Bell, href: '/admin/upgrades', badge: pendingUpgradesCount },
+    { label: 'Support', icon: LifeBuoy, href: '/admin/support' },
+    { label: 'Broadcast', icon: Mail, href: '/admin/email-broadcast' },
+    { label: 'Payments', icon: History, href: '/admin/payment-history' },
+  ];
 
   return (
     <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader className="p-4">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/logo.webp"
-              alt="CareerCraft AI"
-              width={28}
-              height={28}
-              className="rounded-full object-cover"
-            />
-            <span className="text-lg font-semibold font-headline">
-              Admin Panel
-            </span>
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/admin/dashboard')}
-              >
-                <Link href="/admin/dashboard">
-                  <LayoutGrid />
-                  <span>Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/admin/users')}>
-                <Link href="/admin/users">
-                  <Users />
-                  <span>Users</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/admin/pricing')}>
-                <Link href="/admin/pricing">
-                  <Tag />
-                  <span>Pricing & Promos</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/admin/subscriptions')}
-              >
-                <Link href="/admin/subscriptions">
-                  <Wallet />
-                  <span>Subscriptions</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/admin/upgrades')}
-              >
-                <Link href="/admin/upgrades" className="flex items-center gap-2">
-                  <Bell />
-                  <span>Upgrade Requests</span>
-                  {pendingUpgradesCount > 0 && (
-                    <Badge className="ml-auto h-5 w-5 justify-center p-0 animate-pulse bg-destructive text-destructive-foreground">
-                      {pendingUpgradesCount}
-                    </Badge>
-                  )}
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/admin/support')}
-              >
-                <Link href="/admin/support">
-                  <LifeBuoy />
-                  <span>Support</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/admin/email-broadcast')}
-              >
-                <Link href="/admin/email-broadcast">
-                  <Mail />
-                  <span>Email Broadcast</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/admin/cancellations')}
-              >
-                <Link href="/admin/cancellations">
-                  <FileX />
-                  <span>Cancellations</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/admin/payment-history')}
-              >
-                <Link href="/admin/payment-history">
-                  <History />
-                  <span>Payment History</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link href="/dashboard">
-                  <ArrowLeft />
-                  <span>Back to App</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter className="p-4 mt-auto border-t bg-sidebar/50 backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9">
-              <AvatarImage 
-                src={userData?.photoURL || user.photoURL || `https://placehold.co/100x100.png?text=${userInitial}`} 
-                alt={userName} 
-              />
-              <AvatarFallback>
-                {userInitial}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col truncate flex-1">
-              <span className="text-sm font-medium truncate">
-                {userName}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="text-xs text-muted-foreground hover:text-foreground text-left flex items-center gap-1"
-              >
-                <LogOut className="w-3 h-3" />
-                Logout
-              </button>
+      <div className="flex h-screen w-full bg-[#0A0A0F] overflow-hidden">
+        <Sidebar className="border-r border-white/5 w-[260px] bg-[#111118]">
+          <SidebarHeader className="p-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-red-500/10 p-1.5 rounded-lg border border-red-500/20 shadow-lg shadow-red-500/5">
+                <Shield className="w-5 h-5 text-red-500" />
+              </div>
+              <span className="font-bold text-lg tracking-tight">Admin Terminal</span>
             </div>
-            <Shield className="ml-auto h-4 w-4 text-primary shrink-0" />
-          </div>
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sm:px-6 shadow-md">
-          <SidebarTrigger />
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold font-headline">
-              {getPageTitle()}
-            </h2>
-          </div>
-          <ThemeSwitcher />
-        </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto bg-muted/40">
-          {children}
-        </main>
-      </SidebarInset>
+          </SidebarHeader>
+          
+          <SidebarContent className="px-4">
+            <SidebarMenu className="space-y-1">
+              {menuItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-6 rounded-xl transition-all duration-200",
+                      isActive(item.href) && "sidebar-active-gradient"
+                    )}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className={cn("h-5 w-5", isActive(item.href) ? "text-primary" : "text-muted-foreground")} />
+                      <span className="flex-1">{item.label}</span>
+                      {item.badge && item.badge > 0 ? (
+                        <Badge className="bg-red-500 text-white border-none h-5 min-w-[20px] px-1 justify-center font-black text-[10px] animate-pulse">
+                          {item.badge}
+                        </Badge>
+                      ) : null}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+
+            <div className="my-6 border-t border-white/5 mx-4" />
+
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="flex items-center gap-3 px-4 py-6 rounded-xl text-muted-foreground hover:text-foreground">
+                  <Link href="/dashboard">
+                    <ArrowLeft className="h-5 w-5" />
+                    <span>Back to App</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarContent>
+
+          <SidebarFooter className="p-4 mt-auto border-t border-white/5 bg-black/20">
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
+              <Avatar className="h-10 w-10 ring-2 ring-primary/20">
+                <AvatarImage src={userData?.photoURL || ''} />
+                <AvatarFallback className="bg-primary/10 text-primary font-black uppercase">
+                  {(userData?.displayName?.[0] || user?.email?.[0] || 'A').toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-sm font-bold truncate">{userData?.displayName || 'Root Admin'}</span>
+                <Badge variant="outline" className="text-[9px] h-4 py-0 px-1 bg-red-500/10 text-red-500 border-none w-fit uppercase font-black tracking-tighter">
+                  Superuser
+                </Badge>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => logout()} className="h-8 w-8 text-muted-foreground hover:text-red-500">
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </SidebarFooter>
+        </Sidebar>
+
+        <SidebarInset className="flex flex-col flex-1 overflow-hidden bg-[#0A0A0F]">
+          <header className="flex h-16 shrink-0 items-center justify-between gap-4 px-6 border-b border-white/5 bg-[#0A0A0F]/80 backdrop-blur-md sticky top-0 z-30">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="md:hidden" />
+              <h2 className="text-lg font-bold tracking-tight font-headline flex items-center gap-2">
+                <Monitor className="w-4 h-4 text-muted-foreground" />
+                {getPageTitle()}
+              </h2>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                Cluster: Production-Asia
+              </div>
+              <ThemeSwitcher />
+              <Button variant="ghost" size="icon" className="rounded-xl border border-white/10 hover:bg-white/5">
+                <Bell className="h-5 w-5 text-muted-foreground" />
+              </Button>
+            </div>
+          </header>
+
+          <main className="flex-1 overflow-y-auto p-6 lg:p-10 space-y-10 pb-24">
+            {children}
+          </main>
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   );
 }
@@ -300,7 +233,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
+      <AdminLayoutContent children={children} />
     </AuthProvider>
   );
 }
