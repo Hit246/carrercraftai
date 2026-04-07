@@ -14,11 +14,10 @@ import {
   Trophy, 
   Check, 
   ArrowRight, 
-  Star,
   ShieldCheck,
   ChevronDown,
   Mail,
-  Zap,
+  ZapOff,
   LayoutDashboard
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -63,8 +62,8 @@ const features = [
       <div className="w-full h-full flex flex-col items-center justify-center p-2 space-y-2">
         <div className="relative w-12 h-12 flex items-center justify-center">
           <svg className="w-full h-full" viewBox="0 0 36 36">
-            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" className="text-purple-500/20" strokeWidth="3" />
-            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" className="text-purple-500" strokeWidth="3" strokeDasharray="75, 100" />
+            <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" className="text-purple-500/20" strokeWidth="3" />
+            <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" className="text-purple-500" strokeWidth="3" strokeDasharray="75, 100" />
           </svg>
           <span className="absolute text-[10px] font-black">75%</span>
         </div>
@@ -199,7 +198,7 @@ function HomePageContent() {
                     Build My Resume Free <ArrowRight className="ml-2 w-5 h-5" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="ghost" className="h-14 px-10 rounded-xl text-lg border hover:bg-muted/50 w-full sm:w-auto" asChild>
+                <Button size="lg" variant="ghost" className="h-14 px-10 rounded-xl text-lg border border-foreground/20 hover:bg-muted/50 w-full sm:w-auto" asChild>
                   <Link href="#how-it-works">See How It Works</Link>
                 </Button>
               </div>
@@ -298,7 +297,7 @@ function HomePageContent() {
                     </div>
                     <h3 className="text-xl font-bold mb-3">{f.title}</h3>
                     <p className="text-muted-foreground text-sm mb-6 leading-relaxed">{f.desc}</p>
-                    <div className="h-24 bg-muted/50 rounded-xl flex items-center justify-center text-muted-foreground/30 border border-dashed relative overflow-hidden">
+                    <div className="h-24 bg-muted/50 rounded-xl flex items-center justify-center border border-dashed relative overflow-hidden">
                       {f.preview}
                     </div>
                     <div className="mt-6 flex items-center font-bold text-sm text-primary group">

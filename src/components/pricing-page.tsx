@@ -16,7 +16,7 @@ import { createPaymentLink } from "@/lib/razorpay"
 import { db } from "@/lib/firebase";
 import { notifyAdminOfUpgradeAction } from "@/lib/actions";
 
-import { Check, Crown, Trophy, Diamond, Loader2, Star, PartyPopper, Tag } from "lucide-react"
+import { Check, Crown, Trophy, Diamond, Loader2, Sparkles, PartyPopper, Tag } from "lucide-react"
 
 type Plan = "free" | "essentials" | "pro" | "recruiter"
 
@@ -261,7 +261,7 @@ export function PricingPage() {
         <Card className="flex flex-col">
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
-              <Star className="text-yellow-500" /> Free
+              <Sparkles className="text-yellow-500" /> Free
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 flex-1">

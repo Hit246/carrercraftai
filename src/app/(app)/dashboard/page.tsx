@@ -20,7 +20,7 @@ import {
   CalendarClock,
   ExternalLink,
   ChevronRight,
-  Zap,
+  ZapOff,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,6 @@ import { format } from 'date-fns';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface RecentResume {
   id: string;
@@ -168,7 +167,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold flex items-center gap-2">
-              <Zap className="h-5 w-5 text-primary" /> Quick Actions
+              <ZapOff className="h-5 w-5 text-primary" /> Quick Actions
             </h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
