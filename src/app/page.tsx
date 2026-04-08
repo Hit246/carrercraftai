@@ -438,20 +438,6 @@ function HomePageContent() {
             </Accordion>
           </div>
         </section>
-
-        {/* Final CTA */}
-        <section className="py-20 px-4">
-          <div className="max-w-6xl mx-auto rounded-3xl bg-gradient-to-br from-primary to-accent p-12 text-center text-white relative overflow-hidden shadow-2xl shadow-primary/20">
-            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/dot-grid.png')] opacity-10" />
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 relative z-10">Ready to Build Your Dream Career?</h2>
-            <p className="text-xl mb-10 text-white/80 max-w-2xl mx-auto relative z-10">
-              Join thousands of professionals landing roles at top tech companies like Google, Microsoft, and TCS.
-            </p>
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-14 px-12 rounded-xl text-lg font-bold relative z-10 shadow-xl" onClick={() => openAuth()}>
-              Start for Free <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </div>
-        </section>
       </main>
 
       <footer className="border-t py-20 bg-card/30">
