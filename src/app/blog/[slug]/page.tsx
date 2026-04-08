@@ -5,7 +5,8 @@ import { HomeHeader } from "@/components/home-header";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, Clock, Share2, Facebook, Twitter, Linkedin } from "lucide-react";
+import { ArrowLeft,Sparkles, Calendar, Clock, Share2 } from "lucide-react";
+import { FaFacebook, FaTwitter, FaLinkedin } from 'react-icons/fa'
 import { Metadata } from "next";
 
 interface Props {
@@ -99,8 +100,8 @@ export default async function BlogPostPage({ params }: Props) {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 h-10 w-10"><Twitter className="w-4 h-4"/></Button>
-                      <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 h-10 w-10"><Linkedin className="w-4 h-4"/></Button>
+                      <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 h-10 w-10"><FaTwitter className="w-4 h-4"/></Button>
+                      <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 h-10 w-10"><FaLinkedin className="w-4 h-4"/></Button>
                       <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 h-10 w-10"><Share2 className="w-4 h-4" /></Button>
                     </div>
                   </div>
