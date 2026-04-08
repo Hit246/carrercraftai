@@ -21,7 +21,8 @@ import {
   Trash2,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  ShieldCheck
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
@@ -30,32 +31,30 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import Image from 'next/image';
 import Link from 'next/link';
-import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { updatePassword } from 'firebase/auth';
 
 export default function SettingsPage() {
   const { user, userData, credits, effectivePlan, plan, updateUserProfile, logout } = useAuth();
   const { toast } = useToast();
   
-  // Profile State
   const [isSaving, setIsSaving] = useState(false);
   const [displayName, setDisplayName] = useState('');
-
-  // Security State
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [showPasswords, setShowPasswords] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [mounted, setMounted] = useState(false);
 
-  // Sync display name with userData when it loads
   useEffect(() => {
+    setMounted(true);
     if (userData?.displayName) {
       setDisplayName(userData.displayName);
     } else if (user?.displayName) {
       setDisplayName(user.displayName);
     }
   }, [userData, user]);
+
+  if (!mounted) return null;
 
   const handleProfileUpdate = async () => {
     setIsSaving(true);
@@ -71,7 +70,7 @@ export default function SettingsPage() {
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !user.email) return;
+    if (!user) return;
 
     if (newPassword.length < 6) {
       toast({ title: "Weak Password", description: "New password must be at least 6 characters.", variant: "destructive" });
@@ -85,12 +84,10 @@ export default function SettingsPage() {
 
     setIsUpdatingPassword(true);
     try {
-      // Direct update attempt
       await updatePassword(user, newPassword);
       toast({ title: "Password Changed", description: "Your security credentials have been updated." });
       setNewPassword('');
       setConfirmPassword('');
-      setCurrentPassword('');
     } catch (error: any) {
       console.error("Password update error:", error);
       if (error.code === 'auth/requires-recent-login') {
@@ -115,7 +112,7 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="bg-muted/50 p-1 rounded-xl h-12 w-full max-w-md">
+        <TabsList className="bg-muted/50 p-1 rounded-xl h-12 w-full max-w-md border border-border/40">
           <TabsTrigger value="profile" className="flex-1 gap-2 rounded-lg"><User className="w-4 h-4" /> Profile</TabsTrigger>
           <TabsTrigger value="subscription" className="flex-1 gap-2 rounded-lg"><CreditCard className="w-4 h-4" /> Billing</TabsTrigger>
           <TabsTrigger value="security" className="flex-1 gap-2 rounded-lg"><Shield className="w-4 h-4" /> Security</TabsTrigger>
@@ -283,7 +280,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 rounded-xl bg-muted/20 border border-border/40">
                 <div className="flex items-center gap-4">
                   <div className="p-2.5 rounded-lg bg-background border shadow-sm">
-                    <Shield className="w-6 h-6 text-primary" />
+                    <ShieldCheck className="w-6 h-6 text-primary" />
                   </div>
                   <div>
                     <p className="text-sm font-bold">Authentication Provider</p>
@@ -343,7 +340,14 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-6">Once you delete your account, there is no going back. All your saved resumes, analysis history, and AI credits will be permanently removed.</p>
-              <Button variant="destructive" className="h-11 rounded-xl font-bold">Permanently Delete Account</Button>
+              <div className="flex items-center gap-4">
+                <Button variant="destructive" className="h-11 rounded-xl font-bold" disabled>
+                  Permanently Delete Account
+                </Button>
+                <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 uppercase font-black text-[10px] tracking-widest px-3 py-1">
+                  Coming Soon
+                </Badge>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
