@@ -118,7 +118,7 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            {greeting}, {userData?.displayName?.split(' ')[0] || 'User'}! 👋
+            {greeting}, {userData?.displayName?.split(' ')[0] || user?.displayName?.split(' ')[0] || 'User'}! 👋
           </h1>
           <p className="text-muted-foreground font-medium">
             Welcome to your career command center.
