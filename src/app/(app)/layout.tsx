@@ -17,7 +17,6 @@ import {
   Settings,
   LogOut,
   Loader2,
-  Bell,
   ShieldAlert
 } from 'lucide-react';
 import {
@@ -151,7 +150,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
               <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-sm">
                 <AvatarImage src={userData?.photoURL || user.photoURL || ''} />
                 <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                  {user.email?.[0].toUpperCase()}
+                  {(userData?.displayName?.[0] || user.email?.[0] || 'U').toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col min-w-0 flex-1">
@@ -182,12 +181,11 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             
             <div className="flex items-center gap-3">
               <ThemeSwitcher />
-              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-muted">
-                <Bell className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-muted md:hidden" asChild>
-                <Link href="/settings"><Settings className="h-5 w-5" /></Link>
-              </Button>
+              {pathname !== '/settings' && (
+                <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-muted md:hidden" asChild>
+                  <Link href="/settings"><Settings className="h-5 w-5" /></Link>
+                </Button>
+              )}
             </div>
           </header>
 

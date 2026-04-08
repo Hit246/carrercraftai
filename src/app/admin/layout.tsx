@@ -14,7 +14,6 @@ import {
   Shield,
   ArrowLeft,
   Settings,
-  Bell,
   Wallet,
   Tag,
   Mail,
@@ -215,9 +214,6 @@ function AdminLayoutContent({ children }: { ReactNode: any }) {
                 Cluster: Production-Asia
               </div>
               <ThemeSwitcher />
-              <Button variant="ghost" size="icon" className="rounded-xl border border-white/10 hover:bg-white/5">
-                <Bell className="h-5 w-5 text-muted-foreground" />
-              </Button>
             </div>
           </header>
 

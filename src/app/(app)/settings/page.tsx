@@ -11,18 +11,18 @@ import { Progress } from '@/components/ui/progress';
 import { 
   User, 
   CreditCard, 
-  Bell, 
   Shield, 
   Loader2, 
   Crown, 
   CheckCircle2, 
   AlertCircle,
-  LogOut,
   Trash2,
   Lock,
   Eye,
   EyeOff,
-  ShieldCheck
+  ShieldCheck,
+  Upload,
+  X
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
@@ -32,6 +32,7 @@ import { Switch } from '@/components/ui/switch';
 import Image from 'next/image';
 import Link from 'next/link';
 import { updatePassword } from 'firebase/auth';
+import { uploadFile } from '@/lib/firebase';
 
 export default function SettingsPage() {
   const { user, userData, credits, effectivePlan, plan, updateUserProfile, logout } = useAuth();
@@ -43,6 +44,7 @@ export default function SettingsPage() {
   const [showPasswords, setShowPasswords] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -65,6 +67,39 @@ export default function SettingsPage() {
       toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "File Too Large", description: "Image must be under 2MB.", variant: "destructive" });
+      return;
+    }
+
+    setIsUploadingPhoto(true);
+    try {
+      const downloadURL = await uploadFile(file, `avatars/${user.uid}/${Date.now()}-${file.name}`);
+      await updateUserProfile({ photoURL: downloadURL });
+      toast({ title: "Avatar Updated", description: "Your profile picture has been changed." });
+    } catch (error) {
+      toast({ title: "Upload Failed", description: "Could not upload image.", variant: "destructive" });
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    setIsUploadingPhoto(true);
+    try {
+      await updateUserProfile({ photoURL: null });
+      toast({ title: "Avatar Removed", description: "Your profile picture has been cleared." });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to remove avatar.", variant: "destructive" });
+    } finally {
+      setIsUploadingPhoto(false);
     }
   };
 
@@ -119,26 +154,55 @@ export default function SettingsPage() {
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
-          <Card className="border-border/40">
+          <Card className="border-border/40 overflow-hidden">
             <CardHeader>
               <CardTitle>Personal Information</CardTitle>
               <CardDescription>Update your public profile details.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
-              <div className="flex items-center gap-6 p-4 rounded-2xl bg-muted/20 border border-dashed">
-                <Avatar className="h-24 w-24 border-4 border-background shadow-xl">
+              <div className="flex flex-col sm:flex-row items-center gap-6 p-6 rounded-2xl bg-muted/20 border border-dashed border-border/60">
+                <Avatar className="h-24 w-24 border-4 border-background shadow-xl shrink-0">
                   <AvatarImage src={userData?.photoURL || user?.photoURL || ''} />
                   <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
-                    {user?.email?.[0].toUpperCase()}
+                    {(userData?.displayName?.[0] || user?.email?.[0] || 'U').toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="space-y-2">
-                  <Label>Profile Photo</Label>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline">Change Avatar</Button>
-                    <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10">Remove</Button>
+                <div className="space-y-3 flex-1 w-full text-center sm:text-left">
+                  <Label className="font-bold text-sm">Profile Photo</Label>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                    <div className="relative">
+                      <input 
+                        type="file" 
+                        id="avatar-upload" 
+                        className="hidden" 
+                        accept="image/*" 
+                        onChange={handlePhotoUpload} 
+                        disabled={isUploadingPhoto} 
+                      />
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => document.getElementById('avatar-upload')?.click()}
+                        className="h-9 font-bold px-4"
+                        disabled={isUploadingPhoto}
+                      >
+                        {isUploadingPhoto ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
+                        Change Avatar
+                      </Button>
+                    </div>
+                    {(userData?.photoURL || user?.photoURL) && (
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-9 text-destructive hover:bg-destructive/10 font-bold px-4"
+                        onClick={handleRemovePhoto}
+                        disabled={isUploadingPhoto}
+                      >
+                        <X className="w-4 h-4 mr-2" /> Remove
+                      </Button>
+                    )}
                   </div>
-                  <p className="text-[10px] text-muted-foreground uppercase font-black tracking-tight">JPG, PNG, max 2MB.</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-black tracking-tight">JPG, PNG or WEBP. Max 2MB.</p>
                 </div>
               </div>
 
@@ -159,10 +223,10 @@ export default function SettingsPage() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="border-t bg-muted/10 py-4 flex justify-between">
-              <p className="text-xs text-muted-foreground italic">Last profile sync: Today</p>
-              <Button className="btn-gradient px-8 h-11" onClick={handleProfileUpdate} disabled={isSaving}>
-                {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Save Changes"}
+            <CardFooter className="border-t bg-muted/10 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <p className="text-xs text-muted-foreground italic">Profile synced with cloud vault</p>
+              <Button className="btn-gradient px-10 h-11 font-bold w-full sm:w-auto" onClick={handleProfileUpdate} disabled={isSaving}>
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Save Profile"}
               </Button>
             </CardFooter>
           </Card>
@@ -178,7 +242,7 @@ export default function SettingsPage() {
                 { label: "New feature announcements", desc: "Stay updated with the latest AI career tools." },
                 { label: "Resume analysis complete", desc: "Get an email as soon as your PDF is audited." }
               ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-border/40">
+                <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-border/40 bg-card/50">
                   <div className="space-y-0.5">
                     <p className="text-sm font-bold">{item.label}</p>
                     <p className="text-xs text-muted-foreground">{item.desc}</p>
@@ -229,7 +293,7 @@ export default function SettingsPage() {
               </CardFooter>
             </Card>
 
-            <Card className="border-border/40 flex flex-col justify-center items-center text-center p-8">
+            <Card className="border-border/40 flex flex-col justify-center items-center text-center p-8 bg-card/50">
               <AlertCircle className="w-12 h-12 text-muted-foreground mb-4 opacity-20" />
               <h3 className="font-bold">Billing Support</h3>
               <p className="text-xs text-muted-foreground mt-2 max-w-[200px]">Have questions about your payments or invoice?</p>
@@ -246,14 +310,14 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               {userData?.paymentId ? (
-                <div className="rounded-xl border border-border/40 overflow-hidden">
+                <div className="rounded-xl border border-border/40 overflow-hidden shadow-sm">
                   <div className="p-4 bg-muted/30 grid grid-cols-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                     <span>Date</span>
                     <span>Plan</span>
                     <span>Amount</span>
                     <span className="text-right">Status</span>
                   </div>
-                  <div className="p-4 grid grid-cols-4 text-sm items-center border-t border-border/40">
+                  <div className="p-4 grid grid-cols-4 text-sm items-center border-t border-border/40 bg-card/20">
                     <span className="font-medium">{userData.planUpdatedAt ? format(userData.planUpdatedAt.seconds * 1000, 'MMM dd, yyyy') : 'Recently'}</span>
                     <Badge variant="secondary" className="w-fit capitalize">{plan}</Badge>
                     <span className="font-bold">₹{userData.amountPaid || '---'}</span>
@@ -261,7 +325,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="py-12 text-center text-muted-foreground border-2 border-dashed rounded-2xl">
+                <div className="py-12 text-center text-muted-foreground border-2 border-dashed rounded-2xl bg-muted/5">
                   <CreditCard className="w-8 h-8 mx-auto mb-2 opacity-20" />
                   <p className="text-sm font-medium">No transaction history found.</p>
                 </div>
@@ -326,7 +390,7 @@ export default function SettingsPage() {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="btn-gradient px-8 h-11" disabled={isUpdatingPassword}>
+                <Button type="submit" className="btn-gradient px-8 h-11 font-bold" disabled={isUpdatingPassword}>
                   {isUpdatingPassword ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Updating...</> : "Update Password"}
                 </Button>
               </form>
