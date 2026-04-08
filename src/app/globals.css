@@ -72,6 +72,27 @@
     --sidebar-accent: 240 6% 12%;
     --sidebar-border: 240 6% 18%;
   }
+
+  /* VIOLET */
+[data-color="violet"] {
+  --primary: 262 83% 58%;
+  --sidebar-primary: 262 83% 58%;
+  --ring: 262 83% 58%;
+}
+
+/* GREEN */
+[data-color="green"] {
+  --primary: 142 71% 45%;
+  --sidebar-primary: 142 71% 45%;
+  --ring: 142 71% 45%;
+}
+
+/* ORANGE */
+[data-color="orange"] {
+  --primary: 25 95% 53%;
+  --sidebar-primary: 25 95% 53%;
+  --ring: 25 95% 53%;
+}
 }
 
 @layer base {

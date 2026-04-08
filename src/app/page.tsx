@@ -5,15 +5,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  FileText, 
-  Sparkles, 
-  Target, 
-  Briefcase, 
-  Users, 
-  Trophy, 
-  Check, 
-  ArrowRight, 
+import {
+  FileText,
+  Sparkles,
+  Target,
+  Briefcase,
+  Users,
+  Trophy,
+  Check,
+  ArrowRight,
   Mail,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -22,18 +22,15 @@ import { HomeHeader } from '@/components/home-header';
 import { AuthModal } from '@/components/auth-modal';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from '@/lib/utils';
-
-const socialProofLogos = [
-  "IIT Bombay", "IIM Ahmedabad", "BITS Pilani", "TCS", "Infosys", "Google", "Microsoft", "Wipro", "Accenture", "Flipkart"
-];
+import { FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa';
 
 const features = [
-  { 
-    id: 'builder', 
-    title: "Resume Builder", 
-    color: "text-blue-500", 
-    bg: "bg-blue-500/10", 
-    icon: FileText, 
+  {
+    id: 'builder',
+    title: "Resume Builder",
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+    icon: FileText,
     desc: "Drag and drop builder with ATS-optimized templates.",
     preview: (
       <div className="w-full h-full p-2 space-y-2">
@@ -47,12 +44,12 @@ const features = [
       </div>
     )
   },
-  { 
-    id: 'analyzer', 
-    title: "AI Resume Analyzer", 
-    color: "text-purple-500", 
-    bg: "bg-purple-500/10", 
-    icon: Sparkles, 
+  {
+    id: 'analyzer',
+    title: "AI Resume Analyzer",
+    color: "text-purple-500",
+    bg: "bg-purple-500/10",
+    icon: Sparkles,
     desc: "Instant feedback on strengths and critical gaps.",
     preview: (
       <div className="w-full h-full flex flex-col items-center justify-center p-2 space-y-2">
@@ -67,12 +64,12 @@ const features = [
       </div>
     )
   },
-  { 
-    id: 'optimizer', 
-    title: "ATS Optimizer", 
-    color: "text-green-500", 
-    bg: "bg-green-500/10", 
-    icon: Target, 
+  {
+    id: 'optimizer',
+    title: "ATS Optimizer",
+    color: "text-green-500",
+    bg: "bg-green-500/10",
+    icon: Target,
     desc: "Match your resume to specific job descriptions.",
     preview: (
       <div className="w-full h-full p-2 flex flex-wrap gap-1 items-center justify-center">
@@ -83,12 +80,12 @@ const features = [
       </div>
     )
   },
-  { 
-    id: 'matcher', 
-    title: "Smart Job Matching", 
-    color: "text-amber-500", 
-    bg: "bg-amber-500/10", 
-    icon: Briefcase, 
+  {
+    id: 'matcher',
+    title: "Smart Job Matching",
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+    icon: Briefcase,
     desc: "Discover roles that perfectly fit your unique skills.",
     preview: (
       <div className="w-full h-full p-2 space-y-2">
@@ -103,12 +100,12 @@ const features = [
       </div>
     )
   },
-  { 
-    id: 'cover', 
-    title: "Cover Letter Generator", 
-    color: "text-pink-500", 
-    bg: "bg-pink-500/10", 
-    icon: Mail, 
+  {
+    id: 'cover',
+    title: "Cover Letter Generator",
+    color: "text-pink-500",
+    bg: "bg-pink-500/10",
+    icon: Mail,
     desc: "Generate tailored letters in under 2 minutes.",
     preview: (
       <div className="w-full h-full p-3 space-y-1.5 opacity-50">
@@ -120,12 +117,12 @@ const features = [
       </div>
     )
   },
-  { 
-    id: 'recruiter', 
-    title: "Candidate Matching", 
-    color: "text-cyan-500", 
-    bg: "bg-cyan-500/10", 
-    icon: Users, 
+  {
+    id: 'recruiter',
+    title: "Candidate Matching",
+    color: "text-cyan-500",
+    bg: "bg-cyan-500/10",
+    icon: Users,
     desc: "Recruiter tools to rank candidates by job fit.",
     preview: (
       <div className="w-full h-full p-2 space-y-2">
@@ -158,13 +155,36 @@ function HomePageContent() {
     setIsAuthModalOpen(true);
   };
 
+  const faqData = [
+    {
+      q: "Is CareerCraft AI free to use?",
+      a: "Yes, our Free plan includes 5 AI credits every month and basic templates to get you started.",
+    },
+    {
+      q: "What is an ATS and why does it matter?",
+      a: "ATS stands for Applicant Tracking System. Most large companies use them to filter resumes automatically. We help you optimize your content to ensure you pass these machine filters.",
+    },
+    {
+      q: "How do AI credits work?",
+      a: "Credits are used for intense AI tasks like generating a full resume analysis or creating tailored cover letters. They reset every month on your billing date.",
+    },
+    {
+      q: "Can I export my resume to PDF or Word?",
+      a: "Yes, you can export to professional PDF format instantly. DOCX export is available on all paid plans.",
+    },
+    {
+      q: "Is my data secure?",
+      a: "Absolutely. We encrypt all your personal and resume data and never share it with third parties without your explicit consent.",
+    },
+  ];
+
   if (!mounted) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <HomeHeader onOpenAuth={() => openAuth()} />
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
+      <AuthModal
+        isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         title={modalMode.title}
         description={modalMode.description}
@@ -250,17 +270,6 @@ function HomePageContent() {
                 </Card>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* ── MARQUEE ── */}
-        <section className="py-10 bg-muted/30 border-y border-border/40 overflow-hidden">
-          <div className="marquee gap-12 text-sm font-black text-muted-foreground/40 uppercase tracking-[4px]">
-            {[...socialProofLogos, ...socialProofLogos].map((logo, i) => (
-              <span key={i} className="flex items-center gap-12 whitespace-nowrap">
-                {logo} <span className="text-primary/50">•</span>
-              </span>
-            ))}
           </div>
         </section>
 
@@ -465,18 +474,17 @@ function HomePageContent() {
               Frequently Asked Questions
             </h2>
             <Accordion type="single" collapsible className="w-full">
-              {[
-                { q: "Is CareerCraft AI free to use?", a: "Yes, our Free plan includes 5 AI credits every month and basic templates to get you started." },
-                { q: "What is an ATS and why does it matter?", a: "ATS stands for Applicant Tracking System. Most large companies use them to filter resumes automatically. We help you optimize your content to ensure you pass these machine filters." },
-                { q: "How do AI credits work?", a: "Credits are used for intense AI tasks like generating a full resume analysis or creating tailored cover letters. They reset every month on your billing date." },
-                { q: "Can I export my resume to PDF or Word?", a: "Yes, you can export to professional PDF format instantly. DOCX export is available on all paid plans." },
-                { q: "Is my data secure?", a: "Absolutely. We encrypt all your personal and resume data and never share it with third parties without your explicit consent." },
-              ].map((faq, i) => (
-                <AccordionItem key={i} value={`item-${i}`} className="border-b border-border/40 last:border-0">
-                  <AccordionTrigger className="text-left font-bold text-base md:text-lg hover:no-underline py-5 md:py-6">
+              {faqData.map((faq, i) => (
+                <AccordionItem
+                  key={i}
+                  value={`item-${i}`}
+                  className="border-b border-border/40 last:border-0"
+                >
+                  <AccordionTrigger className="group text-left font-semibold tracking-tight text-base md:text-lg py-4 md:py-6 hover:text-primary transition-colors">
                     {faq.q}
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground text-base leading-relaxed pb-5 md:pb-6">
+
+                  <AccordionContent className="text-foreground/80 text-base leading-relaxed pb-2 md:pb-6">
                     {faq.a}
                   </AccordionContent>
                 </AccordionItem>
@@ -484,84 +492,90 @@ function HomePageContent() {
             </Accordion>
           </div>
         </section>
-
-        {/* ── FINAL CTA ── */}
-        <section className="py-16 md:py-20 px-4">
-          <div className="max-w-6xl mx-auto rounded-3xl bg-gradient-to-br from-primary to-accent p-8 md:p-12 text-center text-white relative overflow-hidden shadow-2xl shadow-primary/20">
-            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/dot-grid.png')] opacity-10" />
-            <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 md:mb-6 relative z-10">
-              Ready to Build Your Dream Career?
-            </h2>
-            <p className="text-lg md:text-xl mb-8 md:mb-10 text-white/80 max-w-2xl mx-auto relative z-10">
-              Join thousands of professionals landing roles at top tech companies like Google, Microsoft, and TCS.
-            </p>
-            <Button
-              size="lg"
-              className="bg-white text-primary hover:bg-white/90 h-12 md:h-14 px-10 md:px-12 rounded-xl text-base md:text-lg font-bold relative z-10 shadow-xl"
-              onClick={() => openAuth()}
-            >
-              Start for Free <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </div>
-        </section>
       </main>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-border/40 py-16 md:py-20 bg-card/30">
-        <div className="container mx-auto px-4 md:px-8 lg:px-6 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+      <footer className="border-t border-border/40 py-16 md:py-20 bg-gradient-to-b from-muted/40 to-background">
+        <div className="container mx-auto px-4 md:px-8 py-4 lg:px-6 grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-16">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1 space-y-5">
             <Link href="/" className="flex items-center gap-2">
               <div className="rounded-[12px] p-1">
                 <Image src="/logo.webp" alt="Logo" width={42} height={42} className="rounded-sm" />
               </div>
-              <span className="text-xl font-bold font-headline tracking-tighter">CareerCraft AI</span>
+              <span className="text-2xl font-bold tracking-tight">CareerCraft AI</span>
             </Link>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
+            <p className="text-foreground/70 text-sm leading-relaxed max-w-xs">
               Empowering the next generation of Indian professionals with AI-powered career tools.
             </p>
           </div>
 
           {/* Product */}
           <div className="space-y-4">
-            <h4 className="font-black uppercase text-[10px] tracking-[2px] text-muted-foreground">Product</h4>
-            <ul className="space-y-2.5 text-sm font-medium text-muted-foreground">
-              <li><Link href="#features" className="hover:text-primary transition-colors">Features</Link></li>
-              <li><Link href="#pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
-              <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
-              <li><Link href="/resume-builder" className="hover:text-primary transition-colors">Resume Builder</Link></li>
+            <h4 className="font-black uppercase text-[10px] tracking-[2px] text-foreground/70">Product</h4>
+            <ul className="space-y-2.5 text-sm font-medium text-foreground/70">
+              <li><Link href="#features" className="hover:text-primary transition-colors mb-2">Features</Link></li>
+              <li><Link href="#pricing" className="hover:text-primary transition-colors mb-2">Pricing</Link></li>
+              <li><Link href="/blog" className="hover:text-primary transition-colors mb-2">Blog</Link></li>
+              <li><Link href="/resume-builder" className="hover:text-primary transition-colors mb-2">Resume Builder</Link></li>
             </ul>
           </div>
 
           {/* For You */}
           <div className="space-y-4">
-            <h4 className="font-black uppercase text-[10px] tracking-[2px] text-muted-foreground">For You</h4>
-            <ul className="space-y-2.5 text-sm font-medium text-muted-foreground">
-              <li><Link href="/signup" className="hover:text-primary transition-colors">For Students</Link></li>
-              <li><Link href="/signup" className="hover:text-primary transition-colors">For Professionals</Link></li>
-              <li><Link href="/candidate-matcher" className="hover:text-primary transition-colors">For Recruiters</Link></li>
-              <li><Link href="/job-matcher" className="hover:text-primary transition-colors">Job Matcher</Link></li>
+            <h4 className="font-black uppercase text-[10px] tracking-[2px] text-foreground/70">For You</h4>
+            <ul className="space-y-2.5 text-sm font-medium text-foreground/70">
+              <li><Link href="/signup" className="hover:text-primary transition-colors mb-2">For Students</Link></li>
+              <li><Link href="/signup" className="hover:text-primary transition-colors mb-2">For Professionals</Link></li>
+              <li><Link href="/candidate-matcher" className="hover:text-primary transition-colors mb-2">For Recruiters</Link></li>
+              <li><Link href="/job-matcher" className="hover:text-primary transition-colors mb-2">Job Matcher</Link></li>
             </ul>
           </div>
 
           {/* Support */}
           <div className="space-y-4">
-            <h4 className="font-black uppercase text-[10px] tracking-[2px] text-muted-foreground">Support</h4>
-            <ul className="space-y-2.5 text-sm font-medium text-muted-foreground">
-              <li><Link href="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
-              <li><Link href="/support" className="hover:text-primary transition-colors">Help Center</Link></li>
-              <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
-              <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+            <h4 className="font-black uppercase text-[10px] tracking-[2px] text-foreground/70">Support</h4>
+            <ul className="space-y-2.5 text-sm font-medium text-foreground/70">
+              <li><Link href="/contact" className="hover:text-primary transition-colors mb-2">Contact Us</Link></li>
+              <li><Link href="/support" className="hover:text-primary transition-colors mb-2">Help Center</Link></li>
+              <li><Link href="/terms" className="hover:text-primary transition-colors mb-2">Terms of Service</Link></li>
+              <li><Link href="/privacy" className="hover:text-primary transition-colors mb-2">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 md:px-8 lg:px-6 mt-16 pt-8 border-t border-border/10 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-          <p>© 2026 CareerCraft AI • Built by Hitarth Chauhan</p>
-          <div className="flex gap-6 md:gap-8">
-            <Link href="https://linkedin.com/in/chauhanhitarth6" className="hover:text-primary transition-colors">LinkedIn</Link>
-            <Link href="https://twitter.com" className="hover:text-primary transition-colors">Twitter</Link>
-            <Link href="https://github.com/Hit246" className="hover:text-primary transition-colors">GitHub</Link>
+        <div className="container mx-auto px-4 md:px-8 lg:px-6 mt-16 pt-8 border-t border-border/20 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-semibold uppercase tracking-widest text-foreground/50">
+
+          <p className="text-center md:text-left">
+            © 2026 CareerCraft AI • Built by Hitarth Chauhan
+          </p>
+
+          <div className="flex items-center gap-8">
+
+            <Link
+              href="https://linkedin.com/in/chauhanhitarth6"
+              target="_blank"
+              className="hover:text-primary transition-all duration-200 hover:-translate-y-0.5"
+            >
+              <FaLinkedin size={18} />
+            </Link>
+
+            <Link
+              href="https://twitter.com"
+              target="_blank"
+              className="hover:text-primary transition-all duration-200 hover:-translate-y-0.5"
+            >
+              <FaTwitter size={18} />
+            </Link>
+
+            <Link
+              href="https://github.com/Hit246"
+              target="_blank"
+              className="hover:text-primary transition-all duration-200 hover:-translate-y-0.5"
+            >
+              <FaGithub size={18} />
+            </Link>
+
           </div>
         </div>
       </footer>
