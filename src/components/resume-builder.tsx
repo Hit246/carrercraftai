@@ -30,7 +30,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
 import { doc, setDoc, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Skeleton } from './ui/skeleton';
 import jsPDF from 'jspdf';
 import { useRouter } from 'next/navigation';
 import { suggestResumeVersionNameAction } from '@/lib/actions';
@@ -1078,7 +1077,7 @@ export const ResumeBuilder = () => {
     );
 
     return (
-        <div className="flex flex-col h-screen max-h-screen bg-background overflow-hidden">
+        <div className="flex flex-col bg-background">
             <div className="sticky top-0 p-4 space-y-4 border-b bg-card z-30 shrink-0 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
@@ -1214,8 +1213,8 @@ export const ResumeBuilder = () => {
                 )}
             </div>
 
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                <div className="bg-card border-b p-4 lg:hidden sticky top-0 z-10 shrink-0">
+            <div className="flex-1 flex flex-col min-h-0">
+                <div className="bg-card border-b p-4 lg:hidden sticky top-[164px] z-10 shrink-0 shadow-md">
                     <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="edit" className="flex items-center gap-2">
@@ -1228,9 +1227,9 @@ export const ResumeBuilder = () => {
                     </Tabs>
                 </div>
 
-                <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[500px_1fr] min-h-0">
+                <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[500px_1fr]">
                     <div className={cn(
-                        "flex-1 overflow-y-auto p-4 md:p-6 border-r bg-background transition-all h-full custom-scrollbar",
+                        "p-4 md:p-6 border-r bg-background",
                         activeTab === 'preview' && "hidden lg:block"
                     )}>
                         <div className="max-w-2xl mx-auto">
@@ -1239,10 +1238,10 @@ export const ResumeBuilder = () => {
                     </div>
 
                     <div className={cn(
-                        "flex-1 overflow-y-auto bg-slate-100 dark:bg-slate-900/20 transition-all h-full custom-scrollbar",
+                        "bg-slate-100 dark:bg-slate-900/20",
                         activeTab === 'edit' && "hidden lg:block"
                     )}>
-                        <div className="p-4 md:p-8 lg:p-12 min-h-full flex justify-center">
+                        <div className="p-4 md:p-8 lg:p-12 flex justify-center">
                             <div className="w-full max-w-[800px] shadow-2xl origin-top h-fit bg-white">
                                 {resumeData.template === 'modern' ? <PreviewModern /> : 
                                 resumeData.template === 'minimalist' ? <PreviewMinimalist /> : 

@@ -145,12 +145,12 @@ export default function SettingsPage() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">Display Name</Label>
-                  <Input 
+                  <input 
                     id="name" 
                     value={displayName} 
                     onChange={(e) => setDisplayName(e.target.value)} 
                     placeholder="Full Name" 
-                    className="h-11 rounded-xl" 
+                    className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </div>
                 <div className="space-y-2">
@@ -333,20 +333,22 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-destructive/20 bg-destructive/5">
+          <Card className="border-destructive/20 bg-destructive/5 relative overflow-hidden">
             <CardHeader>
-              <CardTitle className="text-destructive flex items-center gap-2"><Trash2 className="w-5 h-5" /> Danger Zone</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-destructive flex items-center gap-2"><Trash2 className="w-5 h-5" /> Danger Zone</CardTitle>
+                <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 uppercase font-black text-[10px] tracking-widest px-3 py-1">
+                  Coming Soon
+                </Badge>
+              </div>
               <CardDescription>Irreversible actions for your account.</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-6">Once you delete your account, there is no going back. All your saved resumes, analysis history, and AI credits will be permanently removed.</p>
               <div className="flex items-center gap-4">
-                <Button variant="destructive" className="h-11 rounded-xl font-bold" disabled>
+                <Button variant="destructive" className="h-11 rounded-xl font-bold opacity-50 cursor-not-allowed" disabled>
                   Permanently Delete Account
                 </Button>
-                <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20 uppercase font-black text-[10px] tracking-widest px-3 py-1">
-                  Coming Soon
-                </Badge>
               </div>
             </CardContent>
           </Card>

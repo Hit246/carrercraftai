@@ -18,8 +18,6 @@ import {
   LogOut,
   Loader2,
   Bell,
-  Sun,
-  Moon,
   ShieldAlert
 } from 'lucide-react';
 import {
@@ -38,7 +36,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
-import { useTheme } from 'next-themes';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
@@ -46,7 +44,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout, effectivePlan, userData, isAdmin } = useAuth();
-  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -184,9 +181,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             </div>
             
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-muted" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </Button>
+              <ThemeSwitcher />
               <Button variant="ghost" size="icon" className="rounded-xl border border-border/40 hover:bg-muted">
                 <Bell className="h-5 w-5" />
               </Button>
@@ -197,12 +192,12 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           </header>
 
           <main className={cn(
-            "flex-1 overflow-hidden",
-            !isBuilder && "overflow-y-auto p-6 md:p-10"
+            "flex-1",
+            !isBuilder ? "overflow-y-auto p-6 md:p-10" : "overflow-y-auto"
           )}>
             <div className={cn(
               "mx-auto h-full",
-              !isBuilder && "max-w-7xl space-y-12 pb-20"
+              !isBuilder ? "max-w-7xl space-y-12 pb-20" : ""
             )}>
               {children}
             </div>
