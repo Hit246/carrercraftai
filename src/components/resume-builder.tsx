@@ -750,15 +750,6 @@ export const ResumeBuilder = () => {
         toast({ title: "Template Applied", description: `Switched to ${template} layout.` });
     }
 
-    if (isLoading || authLoading) {
-        return (
-             <div className="grid lg:grid-cols-2 gap-8 h-full">
-                <div className="space-y-6"><Card><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card></div>
-                <div className="flex flex-col gap-4"><Skeleton className="h-10 w-full" /><Card className="flex-1"><CardContent className="p-6"><Skeleton className="h-full w-full" /></CardContent></Card></div>
-            </div>
-        )
-    }
-
     const PreviewClassic = () => (
         <div className="p-8 sm:p-12 font-body text-sm bg-white text-gray-800 shadow-xl h-full min-h-[1000px]">
             <div className="text-center border-b-2 border-gray-100 pb-6 mb-8">
@@ -1093,9 +1084,9 @@ export const ResumeBuilder = () => {
     );
 
     return (
-        <div className="flex flex-col min-h-screen -m-4 md:-m-6 lg:-m-8">
+        <div className="flex flex-col h-full bg-background">
             {/* Global Sticky Toolbar */}
-            <div className="sticky top-0 p-4 space-y-4 border-b bg-card z-20 shrink-0 shadow-sm">
+            <div className="sticky top-0 p-4 space-y-4 border-b bg-card z-30 shrink-0 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
                         <PopoverTrigger asChild>

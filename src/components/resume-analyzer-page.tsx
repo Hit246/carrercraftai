@@ -34,6 +34,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Badge } from './ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from '@/lib/utils';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const formSchema = z.object({
   resumeFile: z.instanceof(File).refine(

@@ -89,6 +89,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   ];
 
   const isActive = (href: string) => pathname === href;
+  const isBuilder = pathname === '/resume-builder';
 
   return (
     <SidebarProvider>
@@ -194,8 +195,14 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto p-6 md:p-10">
-            <div className="max-w-7xl mx-auto space-y-12 pb-20">
+          <main className={cn(
+            "flex-1 overflow-y-auto",
+            isBuilder ? "overflow-hidden" : "p-6 md:p-10"
+          )}>
+            <div className={cn(
+              "mx-auto",
+              !isBuilder && "max-w-7xl space-y-12 pb-20"
+            )}>
               {children}
             </div>
           </main>
