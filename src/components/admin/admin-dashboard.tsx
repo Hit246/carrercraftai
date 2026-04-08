@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, orderBy, query, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, UserPlus, Crown, Handshake, Trophy, IndianRupee, TrendingUp, Activity, ShieldCheck } from "lucide-react";
+import { Users, UserPlus, Crown, Handshake, Trophy, IndianRupee, TrendingUp, Activity, ShieldCheck, ChevronRight } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
