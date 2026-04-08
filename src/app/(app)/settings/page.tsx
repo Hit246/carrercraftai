@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,18 +26,29 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export default function SettingsPage() {
   const { user, userData, credits, effectivePlan, plan, updateUserProfile, logout } = useAuth();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
-  const [displayName, setDisplayName] = useState(userData?.displayName || '');
+  const [displayName, setDisplayName] = useState('');
+
+  // Sync display name with userData when it loads
+  useEffect(() => {
+    if (userData?.displayName) {
+      setDisplayName(userData.displayName);
+    } else if (user?.displayName) {
+      setDisplayName(user.displayName);
+    }
+  }, [userData, user]);
 
   const handleProfileUpdate = async () => {
     setIsSaving(true);
     try {
       await updateUserProfile({ displayName });
-      toast({ title: "Profile Updated", description: "Your changes have been saved." });
+      toast({ title: "Profile Updated", description: "Your changes have been saved permanently." });
     } catch (e) {
       toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
     } finally {
@@ -68,7 +79,7 @@ export default function SettingsPage() {
             <CardContent className="space-y-8">
               <div className="flex items-center gap-6 p-4 rounded-2xl bg-muted/20 border border-dashed">
                 <Avatar className="h-24 w-24 border-4 border-background shadow-xl">
-                  <AvatarImage src={userData?.photoURL || ''} />
+                  <AvatarImage src={userData?.photoURL || user?.photoURL || ''} />
                   <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
                     {user?.email?.[0].toUpperCase()}
                   </AvatarFallback>
@@ -86,7 +97,13 @@ export default function SettingsPage() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="name">Display Name</Label>
-                  <Input id="name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Full Name" className="h-11 rounded-xl" />
+                  <Input 
+                    id="name" 
+                    value={displayName} 
+                    onChange={(e) => setDisplayName(e.target.value)} 
+                    placeholder="Full Name" 
+                    className="h-11 rounded-xl" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
@@ -143,9 +160,9 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm font-bold">
                     <span>AI Credits Used</span>
-                    <span>{effectivePlan === 'pro' ? '∞' : `${credits} / 50`}</span>
+                    <span>{effectivePlan === 'pro' || effectivePlan === 'recruiter' ? '∞' : `${credits} / 50`}</span>
                   </div>
-                  <Progress value={effectivePlan === 'pro' ? 100 : (credits / 50) * 100} className="h-2" />
+                  <Progress value={effectivePlan === 'pro' || effectivePlan === 'recruiter' ? 100 : (credits / 50) * 100} className="h-2" />
                 </div>
                 <div className="space-y-3">
                   {["Unlimited Resumes", "Advanced ATS Check", "Cover Letters", "Priority Support"].map((item, i) => (
@@ -168,7 +185,9 @@ export default function SettingsPage() {
               <AlertCircle className="w-12 h-12 text-muted-foreground mb-4 opacity-20" />
               <h3 className="font-bold">Billing Support</h3>
               <p className="text-xs text-muted-foreground mt-2 max-w-[200px]">Have questions about your payments or invoice?</p>
-              <Button variant="link" className="mt-4 text-primary font-bold">Contact Support →</Button>
+              <Button variant="link" className="mt-4 text-primary font-bold" asChild>
+                <Link href="/support">Contact Support →</Link>
+              </Button>
             </Card>
           </div>
 
@@ -187,7 +206,7 @@ export default function SettingsPage() {
                     <span className="text-right">Status</span>
                   </div>
                   <div className="p-4 grid grid-cols-4 text-sm items-center border-t border-border/40">
-                    <span className="font-medium">{userData.planUpdatedAt ? format(userData.planUpdatedAt.toDate(), 'MMM dd, yyyy') : 'Recently'}</span>
+                    <span className="font-medium">{userData.planUpdatedAt ? format(userData.planUpdatedAt.seconds * 1000, 'MMM dd, yyyy') : 'Recently'}</span>
                     <Badge variant="secondary" className="w-fit capitalize">{plan}</Badge>
                     <span className="font-bold">₹{userData.amountPaid || '---'}</span>
                     <Badge className="bg-green-500/10 text-green-500 ml-auto border-none">Success</Badge>
@@ -213,7 +232,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 rounded-xl bg-muted/20 border border-border/40">
                 <div className="flex items-center gap-4">
                   <div className="p-2.5 rounded-lg bg-background border shadow-sm">
-                    <Image src="https://picsum.photos/seed/google/24/24" alt="Google" width={24} height={24} className="rounded-sm" />
+                    <Shield className="w-6 h-6 text-primary" />
                   </div>
                   <div>
                     <p className="text-sm font-bold">Google Account</p>

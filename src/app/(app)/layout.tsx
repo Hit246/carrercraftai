@@ -17,12 +17,10 @@ import {
   Settings,
   LogOut,
   Loader2,
-  Menu,
-  Crown,
   Bell,
   Sun,
   Moon,
-  TextSearch
+  ShieldAlert
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -47,7 +45,7 @@ import { cn } from '@/lib/utils';
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logout, effectivePlan, userData } = useAuth();
+  const { user, loading, logout, effectivePlan, userData, isAdmin } = useAuth();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -79,6 +77,11 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
     { label: 'Recruiter Dash', icon: LayoutDashboard, href: '/recruiter-dashboard' },
     { label: 'Candidate Sum.', icon: NotebookPen, href: '/candidate-summarizer' },
   ];
+
+  // Admin section
+  if (isAdmin) {
+    menuItems.push({ label: 'Admin Terminal', icon: ShieldAlert, href: '/admin/dashboard' });
+  }
 
   const secondaryItems = [
     { label: 'Support', icon: LifeBuoy, href: '/support' },
@@ -153,7 +156,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col min-w-0 flex-1">
-                <span className="text-sm font-bold truncate">{userData?.displayName || 'User'}</span>
+                <span className="text-sm font-bold truncate">{userData?.displayName || user?.displayName || 'User'}</span>
                 <Badge variant="outline" className={cn(
                   "text-[10px] h-4 py-0 px-1.5 uppercase font-black tracking-tighter border-none w-fit",
                   effectivePlan === 'pro' ? "bg-amber-500/10 text-amber-500" : 
