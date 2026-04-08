@@ -72,8 +72,8 @@ export default function SettingsPage() {
     e.preventDefault();
     if (!user) return;
 
-    if (newPassword.length < 6) {
-      toast({ title: "Weak Password", description: "New password must be at least 6 characters.", variant: "destructive" });
+    if (!newPassword || newPassword.length < 6) {
+      toast({ title: "Invalid Password", description: "New password must be at least 6 characters.", variant: "destructive" });
       return;
     }
 
@@ -97,7 +97,7 @@ export default function SettingsPage() {
           variant: "destructive" 
         });
       } else {
-        toast({ title: "Error", description: error.message || "Failed to update password.", variant: "destructive" });
+        toast({ title: "Update Failed", description: error.message || "Failed to update password. Please try again.", variant: "destructive" });
       }
     } finally {
       setIsUpdatingPassword(false);

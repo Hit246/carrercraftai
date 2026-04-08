@@ -302,7 +302,6 @@ export const ResumeBuilder = () => {
             }
         };
 
-        // Header Rendering
         if (resumeData.template === 'modern') {
             doc.setFontSize(26).setFont('helvetica', 'bold').setTextColor(textColor);
             doc.text(resumeData.name || 'Your Name', margin, y);
@@ -389,7 +388,6 @@ export const ResumeBuilder = () => {
             y += 30;
         }
 
-        // Summary
         if (resumeData.summary) {
             addSectionHeader(resumeData.template === 'minimalist' ? 'Profile' : 'Summary');
             y = addWrappedText(resumeData.summary, margin + (resumeData.template === 'modern' ? 10 : 0), y, { 
@@ -400,7 +398,6 @@ export const ResumeBuilder = () => {
             y += 20;
         }
 
-        // Experience
         if ((resumeData.experience || []).length > 0) {
             addSectionHeader('Experience');
             resumeData.experience.forEach(exp => {
@@ -408,9 +405,9 @@ export const ResumeBuilder = () => {
                 
                 if (resumeData.template === 'modern') {
                     doc.setDrawColor(229, 231, 235).setLineWidth(1);
-                    doc.line(margin + 5, y - 5, margin + 5, y + 40); // Timeline line
+                    doc.line(margin + 5, y - 5, margin + 5, y + 40);
                     doc.setFillColor(255, 255, 255).setDrawColor(primaryColor).setLineWidth(1.5);
-                    doc.circle(margin + 5, y, 4, 'FD'); // Timeline marker
+                    doc.circle(margin + 5, y, 4, 'FD');
                     
                     doc.setFontSize(11).setFont('helvetica', 'bold').setTextColor(textColor);
                     doc.text(exp.title || '', margin + 20, y);
@@ -457,7 +454,6 @@ export const ResumeBuilder = () => {
             y += 10;
         }
 
-        // Projects
         if((resumeData.projects || []).length > 0) {
             addSectionHeader('Projects');
             resumeData.projects.forEach(proj => {
@@ -515,7 +511,6 @@ export const ResumeBuilder = () => {
             y += 10;
         }
 
-        // Education
         if ((resumeData.education || []).length > 0) {
             addSectionHeader('Education');
             resumeData.education.forEach(edu => {
@@ -542,7 +537,6 @@ export const ResumeBuilder = () => {
             y += 10;
         }
         
-        // Skills
         if (resumeData.skills) {
             addSectionHeader('Skills');
             const skills = (resumeData.skills || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -1084,8 +1078,7 @@ export const ResumeBuilder = () => {
     );
 
     return (
-        <div className="flex flex-col h-full bg-background overflow-hidden">
-            {/* Global Sticky Toolbar */}
+        <div className="flex flex-col h-screen max-h-screen bg-background overflow-hidden">
             <div className="sticky top-0 p-4 space-y-4 border-b bg-card z-30 shrink-0 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
@@ -1221,9 +1214,8 @@ export const ResumeBuilder = () => {
                 )}
             </div>
 
-            <div className="flex-1 flex flex-col min-h-0">
-                {/* Mobile/Tablet Tabs */}
-                <div className="bg-card border-b p-4 lg:hidden sticky top-0 z-10">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                <div className="bg-card border-b p-4 lg:hidden sticky top-0 z-10 shrink-0">
                     <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="edit" className="flex items-center gap-2">
@@ -1237,9 +1229,8 @@ export const ResumeBuilder = () => {
                 </div>
 
                 <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[500px_1fr] min-h-0">
-                    {/* Editor Section */}
                     <div className={cn(
-                        "flex-1 overflow-y-auto p-4 md:p-6 border-r bg-background transition-all h-full",
+                        "flex-1 overflow-y-auto p-4 md:p-6 border-r bg-background transition-all h-full custom-scrollbar",
                         activeTab === 'preview' && "hidden lg:block"
                     )}>
                         <div className="max-w-2xl mx-auto">
@@ -1247,9 +1238,8 @@ export const ResumeBuilder = () => {
                         </div>
                     </div>
 
-                    {/* Preview Section */}
                     <div className={cn(
-                        "flex-1 overflow-y-auto bg-slate-100 dark:bg-slate-900/20 transition-all h-full",
+                        "flex-1 overflow-y-auto bg-slate-100 dark:bg-slate-900/20 transition-all h-full custom-scrollbar",
                         activeTab === 'edit' && "hidden lg:block"
                     )}>
                         <div className="p-4 md:p-8 lg:p-12 min-h-full flex justify-center">

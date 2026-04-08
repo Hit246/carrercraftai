@@ -78,7 +78,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
     { label: 'Candidate Sum.', icon: NotebookPen, href: '/candidate-summarizer' },
   ];
 
-  // Admin section
   if (isAdmin) {
     menuItems.push({ label: 'Admin Terminal', icon: ShieldAlert, href: '/admin/dashboard' });
   }
@@ -97,8 +96,10 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         <Sidebar className="border-r border-border/40 w-[260px]">
           <SidebarHeader className="p-6">
             <Link href="/" className="flex items-center gap-3">
-              <div className="bg-primary p-1.5 rounded-lg shadow-lg shadow-primary/20">
-                <Image src="/logo.webp" alt="Logo" width={24} height={24} className="rounded-sm" />
+              <div className="bg-[#3B82F6] p-1.5 rounded-[12px] shadow-lg shadow-blue-500/20">
+                <div className="bg-[#0A0A0F] rounded-[8px] p-1">
+                  <Image src="/logo.webp" alt="Logo" width={20} height={20} className="rounded-sm" />
+                </div>
               </div>
               <span className="font-bold text-lg tracking-tight">CareerCraft AI</span>
             </Link>
@@ -196,11 +197,11 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           </header>
 
           <main className={cn(
-            "flex-1 overflow-y-auto",
-            isBuilder ? "overflow-hidden" : "p-6 md:p-10"
+            "flex-1 overflow-hidden",
+            !isBuilder && "overflow-y-auto p-6 md:p-10"
           )}>
             <div className={cn(
-              "mx-auto",
+              "mx-auto h-full",
               !isBuilder && "max-w-7xl space-y-12 pb-20"
             )}>
               {children}
