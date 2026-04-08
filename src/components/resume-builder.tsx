@@ -1084,7 +1084,7 @@ export const ResumeBuilder = () => {
     );
 
     return (
-        <div className="flex flex-col h-full bg-background">
+        <div className="flex flex-col h-full bg-background overflow-hidden">
             {/* Global Sticky Toolbar */}
             <div className="sticky top-0 p-4 space-y-4 border-b bg-card z-30 shrink-0 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1223,7 +1223,7 @@ export const ResumeBuilder = () => {
 
             <div className="flex-1 flex flex-col min-h-0">
                 {/* Mobile/Tablet Tabs */}
-                <div className="bg-card border-b p-4 lg:hidden sticky top-[180px] z-10">
+                <div className="bg-card border-b p-4 lg:hidden sticky top-0 z-10">
                     <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="edit" className="flex items-center gap-2">
@@ -1236,10 +1236,10 @@ export const ResumeBuilder = () => {
                     </Tabs>
                 </div>
 
-                <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[500px_1fr] min-h-0 overflow-hidden">
+                <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[500px_1fr] min-h-0">
                     {/* Editor Section */}
                     <div className={cn(
-                        "flex-1 overflow-y-auto p-4 md:p-6 border-r bg-background transition-all",
+                        "flex-1 overflow-y-auto p-4 md:p-6 border-r bg-background transition-all h-full",
                         activeTab === 'preview' && "hidden lg:block"
                     )}>
                         <div className="max-w-2xl mx-auto">
@@ -1249,7 +1249,7 @@ export const ResumeBuilder = () => {
 
                     {/* Preview Section */}
                     <div className={cn(
-                        "flex-1 overflow-y-auto bg-slate-100 dark:bg-slate-900/20 transition-all",
+                        "flex-1 overflow-y-auto bg-slate-100 dark:bg-slate-900/20 transition-all h-full",
                         activeTab === 'edit' && "hidden lg:block"
                     )}>
                         <div className="p-4 md:p-8 lg:p-12 min-h-full flex justify-center">

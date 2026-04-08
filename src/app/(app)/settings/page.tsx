@@ -19,7 +19,9 @@ import {
   AlertCircle,
   LogOut,
   Trash2,
-  Lock
+  Lock,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
@@ -28,12 +30,23 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import Image from 'next/image';
 import Link from 'next/link';
+import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export default function SettingsPage() {
   const { user, userData, credits, effectivePlan, plan, updateUserProfile, logout } = useAuth();
   const { toast } = useToast();
+  
+  // Profile State
   const [isSaving, setIsSaving] = useState(false);
   const [displayName, setDisplayName] = useState('');
+
+  // Security State
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // Sync display name with userData when it loads
   useEffect(() => {
@@ -53,6 +66,44 @@ export default function SettingsPage() {
       toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !user.email) return;
+
+    if (newPassword.length < 6) {
+      toast({ title: "Weak Password", description: "New password must be at least 6 characters.", variant: "destructive" });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Mismatch", description: "Passwords do not match.", variant: "destructive" });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      // Direct update attempt
+      await updatePassword(user, newPassword);
+      toast({ title: "Password Changed", description: "Your security credentials have been updated." });
+      setNewPassword('');
+      setConfirmPassword('');
+      setCurrentPassword('');
+    } catch (error: any) {
+      console.error("Password update error:", error);
+      if (error.code === 'auth/requires-recent-login') {
+        toast({ 
+          title: "Session Expired", 
+          description: "Please log out and log back in to change your password for security reasons.", 
+          variant: "destructive" 
+        });
+      } else {
+        toast({ title: "Error", description: error.message || "Failed to update password.", variant: "destructive" });
+      }
+    } finally {
+      setIsUpdatingPassword(false);
     }
   };
 
@@ -235,30 +286,53 @@ export default function SettingsPage() {
                     <Shield className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold">Google Account</p>
-                    <p className="text-xs text-muted-foreground">Connected as {user?.email}</p>
+                    <p className="text-sm font-bold">Authentication Provider</p>
+                    <p className="text-xs text-muted-foreground">Connected via {user?.providerData[0]?.providerId === 'google.com' ? 'Google' : 'Email'}</p>
                   </div>
                 </div>
                 <Badge className="bg-green-500/10 text-green-500 border-none">Connected</Badge>
               </div>
 
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label>Current Password</Label>
-                  <Input type="password" placeholder="••••••••" className="h-11 rounded-xl" />
-                </div>
+              <form onSubmit={handlePasswordUpdate} className="space-y-4 pt-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>New Password</Label>
-                    <Input type="password" placeholder="Min. 8 characters" className="h-11 rounded-xl" />
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <div className="relative">
+                      <Input 
+                        id="newPassword" 
+                        type={showPasswords ? "text" : "password"} 
+                        placeholder="Min. 6 characters" 
+                        className="h-11 rounded-xl pr-10" 
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowPasswords(!showPasswords)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      >
+                        {showPasswords ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Confirm New Password</Label>
-                    <Input type="password" placeholder="Repeat new password" className="h-11 rounded-xl" />
+                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Input 
+                      id="confirmPassword" 
+                      type={showPasswords ? "text" : "password"} 
+                      placeholder="Repeat new password" 
+                      className="h-11 rounded-xl" 
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                    />
                   </div>
                 </div>
-                <Button className="btn-gradient px-8 h-11">Update Password</Button>
-              </div>
+                <Button type="submit" className="btn-gradient px-8 h-11" disabled={isUpdatingPassword}>
+                  {isUpdatingPassword ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Updating...</> : "Update Password"}
+                </Button>
+              </form>
             </CardContent>
           </Card>
 
