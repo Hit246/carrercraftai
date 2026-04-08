@@ -1078,7 +1078,7 @@ export const ResumeBuilder = () => {
 
     return (
         <div className="flex flex-col bg-background">
-            <div className="sticky top-0 p-4 space-y-4 border-b bg-card z-30 shrink-0 shadow-sm">
+            <div className="relative p-4 space-y-4 border-b bg-card z-50 shrink-0 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <Popover open={versionManagerOpen} onOpenChange={setVersionManagerOpen}>
                         <PopoverTrigger asChild>
@@ -1214,7 +1214,7 @@ export const ResumeBuilder = () => {
             </div>
 
             <div className="flex-1 flex flex-col min-h-0">
-                <div className="bg-card border-b p-4 lg:hidden sticky top-[164px] z-10 shrink-0 shadow-md">
+                <div className="bg-card border-b p-4 lg:hidden shrink-0 shadow-md">
                     <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="edit" className="flex items-center gap-2">
