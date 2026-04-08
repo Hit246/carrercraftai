@@ -92,10 +92,8 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         <Sidebar className="border-r border-border/40 w-[260px] bg-sidebar text-sidebar-foreground">
           <SidebarHeader className="p-6">
             <Link href="/" className="flex items-center gap-3">
-              <div className="bg-[#3B82F6] p-1.5 rounded-[12px] shadow-lg shadow-blue-500/20">
-                <div className="bg-[#0A0A0F] rounded-[8px] p-1">
-                  <Image src="/logo.webp" alt="Logo" width={20} height={20} className="rounded-sm" />
-                </div>
+            <div className="rounded-[12px] p-1">
+                <Image src="/logo.webp" alt="Logo" width={42} height={42} className="rounded-sm" />
               </div>
               <span className="font-bold text-lg tracking-tight">CareerCraft AI</span>
             </Link>

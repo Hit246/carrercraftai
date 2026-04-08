@@ -57,7 +57,7 @@ export function HomeHeader({ onOpenAuth }: HomeHeaderProps) {
                 <Link href="/dashboard">
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">Dashboard</span>
-                  <span className="sm:hidden">Home</span>
+                  <span className="sm:hidden">Dashboard</span>
                 </Link>
               </Button>
             ) : (

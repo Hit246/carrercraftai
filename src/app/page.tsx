@@ -14,11 +14,7 @@ import {
   Trophy, 
   Check, 
   ArrowRight, 
-  ShieldCheck,
-  ChevronDown,
   Mail,
-  ZapOff,
-  LayoutDashboard
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
@@ -38,7 +34,7 @@ const features = [
     color: "text-blue-500", 
     bg: "bg-blue-500/10", 
     icon: FileText, 
-    desc: "Drag & drop builder with ATS-optimized templates.",
+    desc: "Drag and drop builder with ATS-optimized templates.",
     preview: (
       <div className="w-full h-full p-2 space-y-2">
         <div className="h-2 w-1/2 bg-blue-500/20 rounded" />
@@ -175,61 +171,79 @@ function HomePageContent() {
       />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative pt-20 pb-32 overflow-hidden">
+
+        {/* ── HERO ── */}
+        <section className="relative pt-12 pb-24 lg:pt-20 lg:pb-32 overflow-hidden">
           <div className="absolute top-0 right-0 -z-10 w-[600px] h-[600px] bg-primary/10 blur-[120px] rounded-full" />
           <div className="absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] bg-accent/10 blur-[100px] rounded-full" />
-          
-          <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-12">
-            <div className="lg:w-[60%] space-y-8 text-center lg:text-left">
-              <Badge variant="outline" className="py-1.5 px-4 bg-primary/5 border-primary/20 text-primary font-medium">
-                <Sparkles className="w-3.5 h-3.5 mr-2" /> ✨ Powered by Advanced Generative AI
+
+          <div className="container mx-auto px-4 md:px-8 lg:px-6 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+
+            {/* Left text */}
+            <div className="w-full lg:w-[55%] space-y-8 text-center lg:text-left">
+              <Badge variant="outline" className="py-1.5 px-4 bg-primary/5 border-primary/20 text-primary font-bold tracking-tight">
+                ✨ Powered by Advanced Generative AI
               </Badge>
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]">
-                Land Your Dream Job <br />
-                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Faster with AI</span>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
+                Land Your Dream Job <br className="hidden sm:block" />
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  Faster with AI
+                </span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                Build ATS-optimized resumes, get instant AI feedback, and discover jobs that match your skills — all in one platform.
+              <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                Build ATS-optimized resumes, get instant AI feedback, and discover jobs that match your skills. All in one platform.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                <Button size="lg" className="btn-gradient h-14 px-10 rounded-xl text-lg font-bold w-full sm:w-auto" asChild>
-                  <Link href={user ? "/dashboard" : "#"} onClick={(e) => !user && (e.preventDefault(), openAuth("Build Your Resume", "Sign up free to create your first ATS-optimized resume."))}>
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
+                <Button
+                  size="lg"
+                  className="btn-gradient h-12 md:h-14 px-8 md:px-10 rounded-xl text-base md:text-lg font-bold w-full sm:w-auto shadow-xl shadow-primary/30"
+                  asChild
+                >
+                  <Link
+                    href={user ? "/dashboard" : "#"}
+                    onClick={(e) => !user && (e.preventDefault(), openAuth("Build Your Resume", "Sign up free to create your first ATS-optimized resume."))}
+                  >
                     Build My Resume Free <ArrowRight className="ml-2 w-5 h-5" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="ghost" className="h-14 px-10 rounded-xl text-lg border border-foreground/20 hover:bg-muted/50 w-full sm:w-auto" asChild>
+                <Button
+                  size="lg"
+                  variant="ghost"
+                  className="h-12 md:h-14 px-8 md:px-10 rounded-xl text-base md:text-lg border border-foreground/10 hover:bg-muted/50 w-full sm:w-auto font-bold"
+                  asChild
+                >
                   <Link href="#how-it-works">See How It Works</Link>
                 </Button>
               </div>
             </div>
 
-            <div className="lg:w-[40%] relative">
-              <div className="floating">
-                <Card className="glass p-6 w-full max-w-[400px] shadow-2xl rotate-2">
+            {/* Right card */}
+            <div className="w-full lg:w-[45%] flex justify-center lg:justify-end">
+              <div className="floating w-full max-w-[380px] md:max-w-[420px]">
+                <Card className="glass p-6 w-full shadow-2xl rotate-2 border-primary/20">
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
-                        <p className="text-xs font-bold text-muted-foreground uppercase">Resume Strength</p>
-                        <p className="text-3xl font-bold">87%</p>
+                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Resume Strength</p>
+                        <p className="text-4xl font-black text-primary">87%</p>
                       </div>
                       <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
                     </div>
-                    <div className="space-y-2">
-                      <p className="text-xs font-bold text-muted-foreground">Detected Skills</p>
+                    <div className="space-y-3">
+                      <p className="text-xs font-bold text-muted-foreground uppercase tracking-tight">Detected Skills</p>
                       <div className="flex flex-wrap gap-2">
-                        <Badge className="bg-green-500/10 text-green-500 border-none">React ✓</Badge>
-                        <Badge className="bg-green-500/10 text-green-500 border-none">Node.js ✓</Badge>
-                        <Badge className="bg-destructive/10 text-destructive border-none">Docker ✗</Badge>
+                        <Badge className="bg-green-500/10 text-green-500 border-none font-bold">React ✓</Badge>
+                        <Badge className="bg-green-500/10 text-green-500 border-none font-bold">Node.js ✓</Badge>
+                        <Badge className="bg-destructive/10 text-destructive border-none font-bold">Docker ✗</Badge>
                       </div>
                     </div>
-                    <div className="space-y-2 pt-2 border-t border-white/5">
+                    <div className="space-y-3 pt-4 border-t border-border/40">
                       <div className="flex justify-between text-xs mb-1">
-                        <span className="font-medium text-muted-foreground">ATS Match Probability</span>
-                        <span className="font-bold text-primary">91%</span>
+                        <span className="font-bold text-muted-foreground">ATS Match Probability</span>
+                        <span className="font-black text-primary">91%</span>
                       </div>
-                      <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-primary" style={{ width: '91%' }} />
+                      <div className="h-2.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary transition-all duration-1000" style={{ width: '91%' }} />
                       </div>
                     </div>
                   </div>
@@ -239,39 +253,42 @@ function HomePageContent() {
           </div>
         </section>
 
-        {/* Marquee social proof */}
-        <section className="py-12 bg-muted/30 border-y overflow-hidden">
-          <div className="marquee gap-12 text-lg font-bold text-muted-foreground/50 uppercase tracking-[4px]">
+        {/* ── MARQUEE ── */}
+        <section className="py-10 bg-muted/30 border-y border-border/40 overflow-hidden">
+          <div className="marquee gap-12 text-sm font-black text-muted-foreground/40 uppercase tracking-[4px]">
             {[...socialProofLogos, ...socialProofLogos].map((logo, i) => (
-              <span key={i} className="flex items-center gap-12">
-                {logo} <span className="text-primary">•</span>
+              <span key={i} className="flex items-center gap-12 whitespace-nowrap">
+                {logo} <span className="text-primary/50">•</span>
               </span>
             ))}
           </div>
         </section>
 
-        {/* How it Works */}
-        <section id="how-it-works" className="py-24">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-5xl font-bold font-headline mb-4">Get Hired in 3 Simple Steps</h2>
-            <p className="text-muted-foreground text-lg mb-16">The smartest path from a blank page to your next big offer.</p>
-            
-            <div className="relative flex flex-col md:flex-row gap-12 md:gap-4 max-w-5xl mx-auto">
-              <div className="absolute top-1/2 left-0 w-full h-[2px] bg-gradient-to-r from-primary to-accent hidden md:block -translate-y-1/2 opacity-20 dashed" />
+        {/* ── HOW IT WORKS ── */}
+        <section id="how-it-works" className="py-20 md:py-24">
+          <div className="container mx-auto px-4 md:px-8 lg:px-6 text-center">
+            <h2 className="text-3xl md:text-5xl font-bold font-headline mb-4 tracking-tight">Get Hired in 3 Simple Steps</h2>
+            <p className="text-muted-foreground text-lg mb-16 max-w-2xl mx-auto">The smartest path from a blank page to your next big offer.</p>
+
+            <div className="relative flex flex-col md:flex-row gap-10 md:gap-6 max-w-5xl mx-auto">
+              <div className="absolute top-[28%] left-0 w-full h-[2px] bg-gradient-to-r from-primary to-accent hidden md:block opacity-20" />
               {[
                 { step: 1, title: "Upload or Build", icon: FileText, color: "bg-blue-500", desc: "Start from scratch or upload your existing PDF." },
                 { step: 2, title: "Get AI Feedback", icon: Sparkles, color: "bg-purple-500", desc: "Our AI audits your resume against 23 key checkpoints." },
-                { step: 3, title: "Apply & Get hired", icon: Trophy, color: "bg-green-500", desc: "Download as PDF and send to your dream company." },
+                { step: 3, title: "Apply and Get Hired", icon: Trophy, color: "bg-green-500", desc: "Download as PDF and send to your dream company." },
               ].map((item, i) => (
                 <div key={i} className="flex-1 relative z-10 group">
-                  <div className={cn("w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center text-white shadow-xl transform transition-transform group-hover:scale-110", item.color)}>
-                    <item.icon className="w-10 h-10" />
+                  <div className={cn(
+                    "w-16 h-16 md:w-20 md:h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center text-white shadow-2xl transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-3",
+                    item.color
+                  )}>
+                    <item.icon className="w-8 h-8 md:w-10 md:h-10" />
                   </div>
                   <div className="bg-background px-4">
-                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-muted border text-xs font-bold mb-4">
+                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-muted border border-border/60 text-sm font-black mb-4">
                       {item.step}
                     </div>
-                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                    <h3 className="text-lg md:text-xl font-bold mb-2 tracking-tight">{item.title}</h3>
                     <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
@@ -280,28 +297,32 @@ function HomePageContent() {
           </div>
         </section>
 
-        {/* Features Grid */}
-        <section id="features" className="py-24 bg-muted/20">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-bold font-headline mb-4">Everything You Need to Level Up</h2>
-              <p className="text-muted-foreground text-lg">Powerful tools built for modern Indian students and professionals.</p>
+        {/* ── FEATURES ── */}
+        <section id="features" className="py-20 md:py-24 bg-muted/20 border-y border-border/40">
+          <div className="container mx-auto px-4 md:px-8 lg:px-6">
+            <div className="text-center mb-12 md:mb-16 space-y-4">
+              <h2 className="text-3xl md:text-5xl font-bold font-headline tracking-tight">Everything You Need to Level Up</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Powerful tools built for modern Indian students and professionals.</p>
             </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
               {features.map((f) => (
-                <Card key={f.id} className="card-hover overflow-hidden cursor-pointer group" onClick={() => openAuth(f.title, f.desc)}>
-                  <CardContent className="p-8">
-                    <div className={cn("w-12 h-12 rounded-xl mb-6 flex items-center justify-center", f.bg, f.color)}>
-                      <f.icon className="w-6 h-6" />
+                <Card
+                  key={f.id}
+                  className="card-hover overflow-hidden cursor-pointer group border-border/40 bg-card/50"
+                  onClick={() => openAuth(f.title, f.desc)}
+                >
+                  <CardContent className="p-6 md:p-8 flex flex-col h-full">
+                    <div className={cn("w-11 h-11 md:w-12 md:h-12 rounded-xl mb-5 md:mb-6 flex items-center justify-center shadow-lg", f.bg, f.color)}>
+                      <f.icon className="w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <h3 className="text-xl font-bold mb-3">{f.title}</h3>
-                    <p className="text-muted-foreground text-sm mb-6 leading-relaxed">{f.desc}</p>
-                    <div className="h-24 bg-muted/50 rounded-xl flex items-center justify-center border border-dashed relative overflow-hidden">
+                    <h3 className="text-lg md:text-xl font-bold mb-2 md:mb-3 tracking-tight">{f.title}</h3>
+                    <p className="text-muted-foreground text-sm mb-6 leading-relaxed flex-1">{f.desc}</p>
+                    <div className="h-28 md:h-32 bg-muted/40 rounded-2xl flex items-center justify-center border border-dashed border-border/60 relative overflow-hidden group-hover:bg-muted/60 transition-colors">
                       {f.preview}
                     </div>
-                    <div className="mt-6 flex items-center font-bold text-sm text-primary group">
-                      Try it now <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    <div className="mt-6 flex items-center font-bold text-sm text-primary pt-4 border-t border-border/10">
+                      Try Tool Now <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </div>
                   </CardContent>
                 </Card>
@@ -310,116 +331,139 @@ function HomePageContent() {
           </div>
         </section>
 
-        {/* Pricing */}
-        <section id="pricing" className="py-24">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-16 space-y-4">
-              <h2 className="text-3xl md:text-5xl font-bold font-headline">Simple, Transparent Pricing</h2>
+        {/* ── PRICING ── */}
+        <section id="pricing" className="py-20 md:py-24">
+          <div className="container mx-auto px-4 md:px-8 lg:px-6">
+            <div className="text-center mb-12 md:mb-16 space-y-4">
+              <h2 className="text-3xl md:text-5xl font-bold font-headline tracking-tight">Simple, Transparent Pricing</h2>
               <p className="text-muted-foreground text-lg">Choose the perfect plan for your career goals.</p>
-              
-              <div className="flex items-center justify-center gap-4 pt-4">
-                <span className={cn("text-sm font-medium", !annual && "text-primary")}>Monthly</span>
-                <button 
+
+              <div className="flex items-center justify-center gap-4 pt-6">
+                <span className={cn("text-sm font-bold transition-colors", !annual ? "text-primary" : "text-muted-foreground")}>Monthly</span>
+                <button
                   onClick={() => setAnnual(!annual)}
-                  className="relative w-14 h-7 rounded-full bg-muted transition-colors focus:outline-none"
+                  className="relative w-14 h-7 rounded-full bg-muted border border-border/60 transition-colors focus:outline-none"
                 >
-                  <div className={cn("absolute top-1 left-1 w-5 h-5 rounded-full bg-primary transition-transform", annual ? "translate-x-7" : "translate-x-0")} />
+                  <div className={cn("absolute top-1 left-1 w-5 h-5 rounded-full bg-primary transition-transform duration-300", annual ? "translate-x-7" : "translate-x-0")} />
                 </button>
-                <span className={cn("text-sm font-medium flex items-center gap-2", annual && "text-primary")}>
-                  Annual <Badge variant="secondary" className="text-[10px] bg-green-500/10 text-green-500">Save 20%</Badge>
+                <span className={cn("text-sm font-bold flex items-center gap-2 transition-colors", annual ? "text-primary" : "text-muted-foreground")}>
+                  Annual <Badge variant="secondary" className="text-[10px] bg-green-500/10 text-green-500 font-black border-none px-2 py-0.5">SAVE 20%</Badge>
                 </span>
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-              {/* Free Plan */}
-              <Card className="card-hover flex flex-col">
-                <CardContent className="p-8 flex-1">
+            {/* Pricing grid — 1 col mobile, 2 col tablet, 4 col desktop */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 max-w-7xl mx-auto items-start">
+
+              {/* Free */}
+              <Card className="card-hover flex flex-col border-border/40">
+                <CardContent className="p-6 md:p-8 flex-1 flex flex-col">
                   <h3 className="text-xl font-bold mb-2">Free</h3>
                   <div className="flex items-baseline gap-1 mb-6">
-                    <span className="text-4xl font-bold">₹0</span>
-                    <span className="text-muted-foreground text-sm">/mo</span>
+                    <span className="text-4xl font-black">₹0</span>
+                    <span className="text-muted-foreground text-sm font-bold">/mo</span>
                   </div>
-                  <ul className="space-y-4 text-sm mb-8">
-                    {[ "5 AI credits/month", "Basic templates", "2 resume drafts" ].map(item => (
-                      <li key={item} className="flex items-center gap-3"><Check className="w-4 h-4 text-green-500" /> {item}</li>
+                  <ul className="space-y-3 text-sm mb-8 flex-1">
+                    {["5 AI credits/month", "Basic templates", "2 resume drafts"].map(item => (
+                      <li key={item} className="flex items-center gap-3 font-medium">
+                        <Check className="w-4 h-4 text-green-500 shrink-0" /> {item}
+                      </li>
                     ))}
                   </ul>
-                  <Button className="w-full h-12 rounded-xl font-bold" variant="outline" onClick={() => openAuth()}>Get Started Free</Button>
+                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => openAuth()}>
+                    Get Started Free
+                  </Button>
                 </CardContent>
               </Card>
 
               {/* Essentials */}
-              <Card className="card-hover flex flex-col border-primary/20">
-                <CardContent className="p-8 flex-1">
+              <Card className="card-hover flex flex-col border-primary/20 bg-primary/[0.02]">
+                <CardContent className="p-6 md:p-8 flex-1 flex flex-col">
                   <h3 className="text-xl font-bold mb-2">Essentials</h3>
                   <div className="flex flex-col mb-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold">₹{annual ? '159' : '199'}</span>
-                      <span className="text-muted-foreground text-sm">/mo</span>
+                      <span className="text-4xl font-black">₹{annual ? '159' : '199'}</span>
+                      <span className="text-muted-foreground text-sm font-bold">/mo</span>
                     </div>
-                    {annual && <span className="text-xs text-muted-foreground line-through">₹199/mo</span>}
+                    {annual && <span className="text-xs text-muted-foreground line-through font-bold">₹199/mo</span>}
                   </div>
-                  <ul className="space-y-4 text-sm mb-8">
-                    {[ "50 AI credits", "ATS keyword suggestions", "10 resumes", "Cover letter generator" ].map(item => (
-                      <li key={item} className="flex items-center gap-3"><Check className="w-4 h-4 text-green-500" /> {item}</li>
+                  <ul className="space-y-3 text-sm mb-8 flex-1">
+                    {["50 AI credits", "ATS keyword suggestions", "10 resumes", "Cover letter generator"].map(item => (
+                      <li key={item} className="flex items-center gap-3 font-medium">
+                        <Check className="w-4 h-4 text-green-500 shrink-0" /> {item}
+                      </li>
                     ))}
                   </ul>
-                  <Button className="w-full h-12 rounded-xl font-bold" variant="outline" onClick={() => openAuth()}>Choose Essentials</Button>
+                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => openAuth()}>
+                    Choose Essentials
+                  </Button>
                 </CardContent>
               </Card>
 
-              {/* Pro */}
-              <Card className="card-hover flex flex-col border-primary shadow-primary/10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-black px-3 py-1 rounded-bl-lg">POPULAR</div>
-                <CardContent className="p-8 flex-1">
+              {/* Pro — highlighted with ring instead of scale */}
+              <Card className="card-hover flex flex-col ring-2 ring-primary shadow-2xl shadow-primary/10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-black px-4 py-1.5 rounded-bl-xl uppercase tracking-widest">
+                  POPULAR
+                </div>
+                <CardContent className="p-6 md:p-8 flex-1 flex flex-col">
                   <h3 className="text-xl font-bold mb-2">Pro</h3>
                   <div className="flex flex-col mb-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold">₹{annual ? '319' : '399'}</span>
-                      <span className="text-muted-foreground text-sm">/mo</span>
+                      <span className="text-4xl font-black">₹{annual ? '319' : '399'}</span>
+                      <span className="text-muted-foreground text-sm font-bold">/mo</span>
                     </div>
-                    {annual && <span className="text-xs text-muted-foreground line-through">₹399/mo</span>}
+                    {annual && <span className="text-xs text-muted-foreground line-through font-bold">₹399/mo</span>}
                   </div>
-                  <ul className="space-y-4 text-sm mb-8">
-                    {[ "Unlimited AI generation", "Advanced ATS optimization", "Unlimited resumes", "Job matching" ].map(item => (
-                      <li key={item} className="flex items-center gap-3"><Check className="w-4 h-4 text-green-500" /> {item}</li>
+                  <ul className="space-y-3 text-sm mb-8 flex-1">
+                    {["Unlimited AI generation", "Advanced ATS optimization", "Unlimited resumes", "Job matching"].map(item => (
+                      <li key={item} className="flex items-center gap-3 font-medium">
+                        <Check className="w-4 h-4 text-green-500 shrink-0" /> {item}
+                      </li>
                     ))}
                   </ul>
-                  <Button className="w-full btn-gradient h-12 rounded-xl font-bold" onClick={() => openAuth()}>Choose Pro</Button>
+                  <Button className="w-full btn-gradient h-11 rounded-xl font-bold" onClick={() => openAuth()}>
+                    Choose Pro
+                  </Button>
                 </CardContent>
               </Card>
 
               {/* Recruiter */}
-              <Card className="card-hover flex flex-col">
-                <CardContent className="p-8 flex-1">
+              <Card className="card-hover flex flex-col border-border/40">
+                <CardContent className="p-6 md:p-8 flex-1 flex flex-col">
                   <h3 className="text-xl font-bold mb-2">Recruiter</h3>
                   <div className="flex flex-col mb-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold">₹{annual ? '799' : '999'}</span>
-                      <span className="text-muted-foreground text-sm">/mo</span>
+                      <span className="text-4xl font-black">₹{annual ? '799' : '999'}</span>
+                      <span className="text-muted-foreground text-sm font-bold">/mo</span>
                     </div>
-                    {annual && <span className="text-xs text-muted-foreground line-through">₹999/mo</span>}
+                    {annual && <span className="text-xs text-muted-foreground line-through font-bold">₹999/mo</span>}
                   </div>
-                  <ul className="space-y-4 text-sm mb-8">
-                    {[ "Everything in Pro", "AI Candidate Ranking", "Team Management", "Recruiter analytics" ].map(item => (
-                      <li key={item} className="flex items-center gap-3"><Check className="w-4 h-4 text-green-500" /> {item}</li>
+                  <ul className="space-y-3 text-sm mb-8 flex-1">
+                    {["Everything in Pro", "AI Candidate Ranking", "Team Management", "Recruiter analytics"].map(item => (
+                      <li key={item} className="flex items-center gap-3 font-medium">
+                        <Check className="w-4 h-4 text-green-500 shrink-0" /> {item}
+                      </li>
                     ))}
                   </ul>
-                  <Button className="w-full h-12 rounded-xl font-bold" variant="outline" onClick={() => openAuth()}>Choose Recruiter</Button>
+                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => openAuth()}>
+                    Choose Recruiter
+                  </Button>
                 </CardContent>
               </Card>
             </div>
-            <p className="text-center mt-12 text-sm text-muted-foreground">
+
+            <p className="text-center mt-12 text-xs font-bold text-muted-foreground uppercase tracking-widest">
               🔒 Secure payments via Razorpay · Cancel anytime · No hidden fees
             </p>
           </div>
         </section>
 
-        {/* FAQ */}
-        <section className="py-24 bg-muted/20">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12">Frequently Asked Questions</h2>
+        {/* ── FAQ ── */}
+        <section className="py-20 md:py-24 bg-muted/20 border-y border-border/40">
+          <div className="container mx-auto px-4 md:px-8 lg:px-6 max-w-3xl">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12 tracking-tight">
+              Frequently Asked Questions
+            </h2>
             <Accordion type="single" collapsible className="w-full">
               {[
                 { q: "Is CareerCraft AI free to use?", a: "Yes, our Free plan includes 5 AI credits every month and basic templates to get you started." },
@@ -428,9 +472,11 @@ function HomePageContent() {
                 { q: "Can I export my resume to PDF or Word?", a: "Yes, you can export to professional PDF format instantly. DOCX export is available on all paid plans." },
                 { q: "Is my data secure?", a: "Absolutely. We encrypt all your personal and resume data and never share it with third parties without your explicit consent." },
               ].map((faq, i) => (
-                <AccordionItem key={i} value={`item-${i}`} className="border-b last:border-0">
-                  <AccordionTrigger className="text-left font-bold text-lg hover:no-underline">{faq.q}</AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                <AccordionItem key={i} value={`item-${i}`} className="border-b border-border/40 last:border-0">
+                  <AccordionTrigger className="text-left font-bold text-base md:text-lg hover:no-underline py-5 md:py-6">
+                    {faq.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-base leading-relaxed pb-5 md:pb-6">
                     {faq.a}
                   </AccordionContent>
                 </AccordionItem>
@@ -438,53 +484,84 @@ function HomePageContent() {
             </Accordion>
           </div>
         </section>
+
+        {/* ── FINAL CTA ── */}
+        <section className="py-16 md:py-20 px-4">
+          <div className="max-w-6xl mx-auto rounded-3xl bg-gradient-to-br from-primary to-accent p-8 md:p-12 text-center text-white relative overflow-hidden shadow-2xl shadow-primary/20">
+            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/dot-grid.png')] opacity-10" />
+            <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 md:mb-6 relative z-10">
+              Ready to Build Your Dream Career?
+            </h2>
+            <p className="text-lg md:text-xl mb-8 md:mb-10 text-white/80 max-w-2xl mx-auto relative z-10">
+              Join thousands of professionals landing roles at top tech companies like Google, Microsoft, and TCS.
+            </p>
+            <Button
+              size="lg"
+              className="bg-white text-primary hover:bg-white/90 h-12 md:h-14 px-10 md:px-12 rounded-xl text-base md:text-lg font-bold relative z-10 shadow-xl"
+              onClick={() => openAuth()}
+            >
+              Start for Free <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+          </div>
+        </section>
       </main>
 
-      <footer className="border-t py-20 bg-card/30">
-        <div className="container mx-auto px-4 grid md:grid-cols-4 gap-12">
-          <div className="space-y-6">
+      {/* ── FOOTER ── */}
+      <footer className="border-t border-border/40 py-16 md:py-20 bg-card/30">
+        <div className="container mx-auto px-4 md:px-8 lg:px-6 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1 space-y-5">
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/logo.webp" alt="Logo" width={32} height={32} className="rounded-lg" />
-              <span className="text-2xl font-bold font-headline">CareerCraft AI</span>
+              <div className="rounded-[12px] p-1">
+                <Image src="/logo.webp" alt="Logo" width={42} height={42} className="rounded-sm" />
+              </div>
+              <span className="text-xl font-bold font-headline tracking-tighter">CareerCraft AI</span>
             </Link>
-            <p className="text-muted-foreground text-sm leading-relaxed">
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
               Empowering the next generation of Indian professionals with AI-powered career tools.
             </p>
           </div>
+
+          {/* Product */}
           <div className="space-y-4">
-            <h4 className="font-bold uppercase text-xs tracking-widest text-muted-foreground">Product</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="#features" className="hover:text-primary">Features</Link></li>
-              <li><Link href="#pricing" className="hover:text-primary">Pricing</Link></li>
-              <li><Link href="/blog" className="hover:text-primary">Blog</Link></li>
-              <li><Link href="/resume-builder" className="hover:text-primary">Resume Builder</Link></li>
+            <h4 className="font-black uppercase text-[10px] tracking-[2px] text-muted-foreground">Product</h4>
+            <ul className="space-y-2.5 text-sm font-medium text-muted-foreground">
+              <li><Link href="#features" className="hover:text-primary transition-colors">Features</Link></li>
+              <li><Link href="#pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
+              <li><Link href="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
+              <li><Link href="/resume-builder" className="hover:text-primary transition-colors">Resume Builder</Link></li>
             </ul>
           </div>
+
+          {/* For You */}
           <div className="space-y-4">
-            <h4 className="font-bold uppercase text-xs tracking-widest text-muted-foreground">For You</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/signup" className="hover:text-primary">For Students</Link></li>
-              <li><Link href="/signup" className="hover:text-primary">For Professionals</Link></li>
-              <li><Link href="/candidate-matcher" className="hover:text-primary">For Recruiters</Link></li>
-              <li><Link href="/job-matcher" className="hover:text-primary">Job Matcher</Link></li>
+            <h4 className="font-black uppercase text-[10px] tracking-[2px] text-muted-foreground">For You</h4>
+            <ul className="space-y-2.5 text-sm font-medium text-muted-foreground">
+              <li><Link href="/signup" className="hover:text-primary transition-colors">For Students</Link></li>
+              <li><Link href="/signup" className="hover:text-primary transition-colors">For Professionals</Link></li>
+              <li><Link href="/candidate-matcher" className="hover:text-primary transition-colors">For Recruiters</Link></li>
+              <li><Link href="/job-matcher" className="hover:text-primary transition-colors">Job Matcher</Link></li>
             </ul>
           </div>
+
+          {/* Support */}
           <div className="space-y-4">
-            <h4 className="font-bold uppercase text-xs tracking-widest text-muted-foreground">Support</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/contact" className="hover:text-primary">Contact Us</Link></li>
-              <li><Link href="/support" className="hover:text-primary">Help Center</Link></li>
-              <li><Link href="/terms" className="hover:text-primary">Terms of Service</Link></li>
-              <li><Link href="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
+            <h4 className="font-black uppercase text-[10px] tracking-[2px] text-muted-foreground">Support</h4>
+            <ul className="space-y-2.5 text-sm font-medium text-muted-foreground">
+              <li><Link href="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
+              <li><Link href="/support" className="hover:text-primary transition-colors">Help Center</Link></li>
+              <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+              <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>
-        <div className="container mx-auto px-4 mt-20 pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium text-muted-foreground">
-          <p>© 2026 CareerCraft AI. Built by Hitarth Chauhan</p>
-          <div className="flex gap-6">
-            <Link href="https://linkedin.com" className="hover:text-primary">LinkedIn</Link>
-            <Link href="https://twitter.com" className="hover:text-primary">Twitter</Link>
-            <Link href="https://github.com" className="hover:text-primary">GitHub</Link>
+
+        <div className="container mx-auto px-4 md:px-8 lg:px-6 mt-16 pt-8 border-t border-border/10 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+          <p>© 2026 CareerCraft AI • Built by Hitarth Chauhan</p>
+          <div className="flex gap-6 md:gap-8">
+            <Link href="https://linkedin.com/in/chauhanhitarth6" className="hover:text-primary transition-colors">LinkedIn</Link>
+            <Link href="https://twitter.com" className="hover:text-primary transition-colors">Twitter</Link>
+            <Link href="https://github.com/Hit246" className="hover:text-primary transition-colors">GitHub</Link>
           </div>
         </div>
       </footer>
