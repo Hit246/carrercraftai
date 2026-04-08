@@ -89,7 +89,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full bg-background overflow-hidden">
-        <Sidebar className="border-r border-border/40 w-[260px]">
+        <Sidebar className="border-r border-border/40 w-[260px] bg-sidebar text-sidebar-foreground">
           <SidebarHeader className="p-6">
             <Link href="/" className="flex items-center gap-3">
               <div className="bg-[#3B82F6] p-1.5 rounded-[12px] shadow-lg shadow-blue-500/20">
