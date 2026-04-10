@@ -140,6 +140,369 @@ const formatUrl = (url: string) => {
     return `https://${url}`;
 };
 
+// --- Sub-components defined outside to prevent focus loss ---
+
+interface EditorProps {
+    resumeData: ResumeData;
+    handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    handleNestedChange: (section: 'experience' | 'education' | 'projects', id: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    handleAddExperience: () => void;
+    handleRemoveExperience: (id: number) => void;
+    handleAddEducation: () => void;
+    handleRemoveEducation: (id: number) => void;
+    handleAddProject: () => void;
+    handleRemoveProject: (id: number) => void;
+    fillSampleData: () => void;
+    hasVersions: boolean;
+}
+
+const EditorContent = ({ 
+    resumeData, 
+    handleInputChange, 
+    handleNestedChange, 
+    handleAddExperience, 
+    handleRemoveExperience,
+    handleAddEducation,
+    handleRemoveEducation,
+    handleAddProject,
+    handleRemoveProject,
+    fillSampleData,
+    hasVersions
+}: EditorProps) => (
+    <div className="space-y-6 pb-20">
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-lg">Personal Information</CardTitle>
+                {!hasVersions && (
+                    <Button variant="outline" size="sm" onClick={fillSampleData}>
+                        <FileJson className="mr-2 h-4 w-4" /> Load Sample
+                    </Button>
+                )}
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5"><Label htmlFor="name">Full Name</Label><Input id="name" value={resumeData.name} onChange={handleInputChange} placeholder="e.g. John Doe" /></div>
+                    <div className="space-y-1.5"><Label htmlFor="title">Title</Label><Input id="title" value={resumeData.title} onChange={handleInputChange} placeholder="e.g. Software Engineer" /></div>
+                    <div className="space-y-1.5"><Label htmlFor="phone">Phone</Label><Input id="phone" value={resumeData.phone} onChange={handleInputChange} placeholder="e.g. 123-456-7890" /></div>
+                    <div className="space-y-1.5"><Label htmlFor="email">Email</Label><Input id="email" value={resumeData.email} onChange={handleInputChange} placeholder="e.g. john@example.com" /></div>
+                </div>
+                <div className="space-y-1.5"><Label htmlFor="linkedin">LinkedIn</Label><Input id="linkedin" value={resumeData.linkedin} onChange={handleInputChange} placeholder="linkedin.com/in/username" /></div>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader><CardTitle className="text-lg">Professional Summary</CardTitle></CardHeader>
+            <CardContent><Textarea id="summary" value={resumeData.summary} onChange={handleInputChange} rows={5} placeholder="Briefly describe your career goals and achievements..." /></CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-lg">Work Experience</CardTitle>
+                <Button variant="ghost" size="sm" onClick={handleAddExperience}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {(resumeData.experience || []).map((exp) => (
+                    <div key={exp.id} className="p-4 border rounded-lg relative space-y-2">
+                        <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveExperience(exp.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <Input name="title" placeholder="Job Title" value={exp.title} onChange={(e) => handleNestedChange('experience', exp.id, e)} />
+                        <Input name="company" placeholder="Company" value={exp.company} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
+                        <Input name="dates" placeholder="Dates" value={exp.dates} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
+                        <Textarea name="description" placeholder="Achievements (use bullet points)" value={exp.description} onChange={(e) => handleNestedChange('experience', exp.id, e)} rows={4}/>
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-lg">Projects</CardTitle>
+                <Button variant="ghost" size="sm" onClick={handleAddProject}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {(resumeData.projects || []).map((proj) => (
+                    <div key={proj.id} className="p-4 border rounded-lg relative space-y-2">
+                        <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveProject(proj.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <Input name="name" placeholder="Project Name" value={proj.name} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
+                        <Input name="url" placeholder="Project URL (e.g. github.com/user/repo)" value={proj.url} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
+                        <Textarea name="description" placeholder="Project description..." value={proj.description} onChange={(e) => handleNestedChange('projects', proj.id, e)} rows={3} />
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-lg">Education</CardTitle>
+                <Button variant="ghost" size="sm" onClick={handleAddEducation}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {(resumeData.education || []).map((edu) => (
+                    <div key={edu.id} className="p-4 border rounded-lg relative space-y-2">
+                        <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveEducation(edu.id)}><Trash2 className="h-4 w-4" /></Button>
+                        <Input name="school" placeholder="School" value={edu.school} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                        <Input name="degree" placeholder="Degree" value={edu.degree} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input name="dates" placeholder="Dates" value={edu.dates} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                            <Input name="cgpa" placeholder="CGPA" value={edu.cgpa || ''} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
+                        </div>
+                    </div>
+                ))}
+            </CardContent>
+        </Card>
+        <Card>
+            <CardHeader><CardTitle className="text-lg">Skills</CardTitle></CardHeader>
+            <CardContent><Textarea id="skills" placeholder="Comma-separated skills..." value={resumeData.skills} onChange={handleInputChange} rows={3} /></CardContent>
+        </Card>
+    </div>
+);
+
+const PreviewClassic = ({ resumeData }: { resumeData: ResumeData }) => (
+    <div className="p-8 sm:p-12 font-body text-sm bg-white text-gray-800 shadow-xl h-full min-h-[1000px]">
+        <div className="text-center border-b-2 border-gray-100 pb-6 mb-8">
+            <h2 className="text-3xl md:text-5xl font-bold font-headline text-gray-900">{resumeData.name || 'Your Name'}</h2>
+            <p className="text-lg md:text-xl text-primary font-semibold mt-2">{resumeData.title || 'Professional Title'}</p>
+            <div className="flex flex-wrap justify-center gap-x-4 text-xs text-gray-500 mt-4">
+                {resumeData.phone && <a href={`tel:${resumeData.phone}`} className="hover:text-primary transition-colors">{resumeData.phone}</a>}
+                {resumeData.email && <a href={`mailto:${resumeData.email}`} className="hover:text-primary transition-colors">{resumeData.email}</a>}
+                {resumeData.linkedin && <a href={formatUrl(resumeData.linkedin)} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{resumeData.linkedin}</a>}
+            </div>
+        </div>
+        {resumeData.summary && (
+            <div className="mb-8">
+                <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Summary</h3>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{resumeData.summary}</p>
+            </div>
+        )}
+        {(resumeData.experience || []).length > 0 && (
+            <div className="mb-8">
+                <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Work Experience</h3>
+                {resumeData.experience.map(exp => (exp.title || exp.company) && (
+                    <div key={exp.id} className="mb-6">
+                        <div className="flex justify-between items-baseline">
+                            <h4 className="font-bold text-gray-900 text-base">{exp.title}</h4>
+                            <p className="text-xs font-medium text-gray-500">{exp.dates}</p>
+                        </div>
+                        <p className="text-sm font-bold text-gray-600 mb-2">{exp.company}</p>
+                        <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{(exp.description || '')}</div>
+                    </div>
+                ))}
+            </div>
+        )}
+        {(resumeData.projects || []).length > 0 && (
+            <div className="mb-8">
+                <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Projects</h3>
+                {resumeData.projects.map(proj => (proj.name) && (
+                    <div key={proj.id} className="mb-6">
+                        <div className="flex justify-between items-center mb-1">
+                            <h4 className="font-bold text-gray-900">{proj.name}</h4>
+                            {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-bold hover:underline">{proj.url}</a>}
+                        </div>
+                        <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{(proj.description || '')}</div>
+                    </div>
+                ))}
+            </div>
+        )}
+        {(resumeData.education || []).length > 0 && (
+            <div className="mb-8">
+                <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Education</h3>
+                {resumeData.education.map(edu => (edu.school) && (
+                    <div key={edu.id} className="mb-4">
+                        <div className="flex justify-between items-baseline">
+                            <h4 className="font-bold text-gray-900">{edu.school}</h4>
+                            <p className="text-xs text-gray-500 font-medium">{edu.dates}</p>
+                        </div>
+                        <p className="text-sm text-gray-700">{edu.degree} {edu.cgpa ? `• CGPA: ${edu.cgpa}` : ''}</p>
+                    </div>
+                ))}
+            </div>
+        )}
+        {resumeData.skills && (
+            <div>
+                <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Core Competencies</h3>
+                <div className="flex flex-wrap gap-2">
+                    {(resumeData.skills || '').split(',').map(skill => skill.trim() && (
+                        <span key={skill} className="bg-primary/5 text-primary border border-primary/10 text-xs px-3 py-1 rounded-full font-medium">{skill.trim()}</span>
+                    ))}
+                </div>
+            </div>
+        )}
+    </div>
+);
+
+const PreviewModern = ({ resumeData }: { resumeData: ResumeData }) => (
+    <div className="p-8 sm:p-12 font-body text-sm bg-white text-gray-800 shadow-xl h-full min-h-[1000px]">
+        <div className="mb-10">
+            <h2 className="text-4xl font-bold font-headline text-gray-900 tracking-tight">{resumeData.name || 'Your Name'}</h2>
+            <p className="text-xl text-primary font-bold mt-1">{resumeData.title || 'Professional Title'}</p>
+            <div className="flex flex-wrap gap-4 text-xs font-medium text-gray-500 mt-4">
+                {resumeData.phone && <a href={`tel:${resumeData.phone}`} className="hover:text-primary transition-colors">{resumeData.phone}</a>}
+                {resumeData.email && <a href={`mailto:${resumeData.email}`} className="hover:text-primary transition-colors">{resumeData.email}</a>}
+                {resumeData.linkedin && <a href={formatUrl(resumeData.linkedin)} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{resumeData.linkedin}</a>}
+            </div>
+            <div className="h-1 w-20 bg-primary mt-6 rounded-full" />
+        </div>
+
+        <div className="space-y-8">
+            {resumeData.summary && (
+                <section>
+                    <h3 className="text-lg font-bold font-headline text-gray-900 mb-3 flex items-center gap-2">
+                        <span className="w-1.5 h-6 bg-primary rounded-full" /> Summary
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{resumeData.summary}</p>
+                </section>
+            )}
+
+            {(resumeData.experience || []).length > 0 && (
+                <section>
+                    <h3 className="text-lg font-bold font-headline text-gray-900 mb-6 flex items-center gap-2">
+                        <span className="w-1.5 h-6 bg-primary rounded-full" /> Experience
+                    </h3>
+                    <div className="space-y-8">
+                        {resumeData.experience.map(exp => (exp.title || exp.company) && (
+                            <div key={exp.id} className="relative pl-6 border-l-2 border-gray-100">
+                                <div className="absolute -left-[9px] top-0 w-4 h-4 bg-white border-2 border-primary rounded-full" />
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-1">
+                                    <h4 className="font-bold text-gray-900 text-base">{exp.title}</h4>
+                                    <span className="text-xs font-bold text-primary uppercase">{exp.dates}</span>
+                                </div>
+                                <p className="text-sm font-bold text-gray-500 italic mb-3">{exp.company}</p>
+                                <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">{(exp.description || '')}</div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {(resumeData.projects || []).length > 0 && (
+                <section>
+                    <h3 className="text-lg font-bold font-headline text-gray-900 mb-6 flex items-center gap-2">
+                        <span className="w-1.5 h-6 bg-primary rounded-full" /> Projects
+                    </h3>
+                    <div className="space-y-6">
+                        {resumeData.projects.map(proj => (proj.name) && (
+                            <div key={proj.id} className="relative pl-6 border-l-2 border-gray-100">
+                                <div className="absolute -left-[9px] top-0 w-4 h-4 bg-white border-2 border-primary rounded-full" />
+                                <div className="flex justify-between items-baseline mb-1">
+                                    <h4 className="font-bold text-gray-900">{proj.name}</h4>
+                                    {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-bold hover:underline">{proj.url}</a>}
+                                </div>
+                                <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">{(proj.description || '')}</div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            <div className="grid sm:grid-cols-2 gap-10">
+                {(resumeData.education || []).length > 0 && (
+                    <section>
+                        <h3 className="text-lg font-bold font-headline text-gray-900 mb-4">Education</h3>
+                        {resumeData.education.map(edu => (edu.school) && (
+                            <div key={edu.id} className="mb-4">
+                                <h4 className="font-bold text-gray-800">{edu.school}</h4>
+                                <p className="text-xs text-primary font-bold">{edu.dates}</p>
+                                <p className="text-sm text-gray-600">{edu.degree} {edu.cgpa && `| CGPA: ${edu.cgpa}`}</p>
+                            </div>
+                        ))}
+                    </section>
+                )}
+                {resumeData.skills && (
+                    <section>
+                        <h3 className="text-lg font-bold font-headline text-gray-900 mb-4">Skills</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {(resumeData.skills || '').split(',').map(skill => skill.trim() && (
+                                <span key={skill} className="bg-gray-100 text-gray-800 text-[10px] uppercase font-bold px-2 py-1 rounded">{skill.trim()}</span>
+                            ))}
+                        </div>
+                    </section>
+                )}
+            </div>
+        </div>
+    </div>
+);
+
+const PreviewMinimalist = ({ resumeData }: { resumeData: ResumeData }) => (
+    <div className="p-8 sm:p-12 font-body text-sm bg-white text-black shadow-xl h-full min-h-[1000px]">
+        <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold tracking-tight mb-1">{resumeData.name || 'YOUR NAME'}</h2>
+            <div className="text-sm font-medium space-x-2">
+                {resumeData.title && <span className="uppercase tracking-widest">{resumeData.title}</span>}
+            </div>
+            <div className="text-xs mt-3 flex justify-center flex-wrap gap-x-3 gap-y-1">
+                {resumeData.phone && <a href={`tel:${resumeData.phone}`} className="hover:font-bold">{resumeData.phone}</a>}
+                {resumeData.email && <a href={`mailto:${resumeData.email}`} className="font-bold hover:underline">{resumeData.email}</a>}
+                {resumeData.linkedin && <a href={formatUrl(resumeData.linkedin)} target="_blank" rel="noopener noreferrer" className="hover:underline">{resumeData.linkedin}</a>}
+            </div>
+        </div>
+
+        <div className="space-y-8">
+            {resumeData.summary && (
+                <section>
+                    <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-3 pb-1">Profile</h3>
+                    <p className="text-gray-800 leading-normal whitespace-pre-wrap">{resumeData.summary}</p>
+                </section>
+            )}
+
+            {(resumeData.experience || []).length > 0 && (
+                <section>
+                    <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-4 pb-1">Experience</h3>
+                    {resumeData.experience.map(exp => (exp.title || exp.company) && (
+                        <div key={exp.id} className="mb-6">
+                            <div className="flex justify-between font-bold text-sm">
+                                <span>{(exp.company || '').toUpperCase()}</span>
+                                <span>{exp.dates}</span>
+                            </div>
+                            <div className="italic text-xs mb-2">{exp.title}</div>
+                            <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap">{(exp.description || '')}</div>
+                        </div>
+                    ))}
+                </section>
+            )}
+
+            {(resumeData.projects || []).length > 0 && (
+                <section>
+                    <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-4 pb-1">Projects</h3>
+                    {resumeData.projects.map(proj => (proj.name) && (
+                        <div key={proj.id} className="mb-6">
+                            <div className="flex justify-between font-bold text-sm">
+                                <span>{(proj.name || '').toUpperCase()}</span>
+                                {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-[10px] font-normal hover:underline">{proj.url}</a>}
+                            </div>
+                            <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap">{(proj.description || '')}</div>
+                        </div>
+                    ))}
+                </section>
+            )}
+
+            <div className="grid sm:grid-cols-2 gap-x-12 gap-y-8">
+                {(resumeData.education || []).length > 0 && (
+                    <section>
+                        <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-3 pb-1">Education</h3>
+                        {resumeData.education.map(edu => (edu.school) && (
+                            <div key={edu.id} className="mb-3">
+                                <div className="font-bold text-xs">{edu.school}</div>
+                                <div className="text-[11px] text-gray-600">{edu.degree} • {edu.dates} {edu.cgpa && `• ${edu.cgpa}`}</div>
+                            </div>
+                        ))}
+                    </section>
+                )}
+                {resumeData.skills && (
+                    <section>
+                        <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-3 pb-1">Skills</h3>
+                        <p className="text-xs leading-relaxed">
+                            {(resumeData.skills || '').split(',').map((s, i, arr) => (
+                                <span key={i}>{s.trim()}{i < arr.length - 1 ? ' • ' : ''}</span>
+                            ))}
+                        </p>
+                    </section>
+                )}
+            </div>
+        </div>
+    </div>
+);
+
+// --- Main component ---
+
 export const ResumeBuilder = () => {
     const { toast } = useToast();
     const router = useRouter();
@@ -743,339 +1106,6 @@ export const ResumeBuilder = () => {
         toast({ title: "Template Applied", description: `Switched to ${template} layout.` });
     }
 
-    const PreviewClassic = () => (
-        <div className="p-8 sm:p-12 font-body text-sm bg-white text-gray-800 shadow-xl h-full min-h-[1000px]">
-            <div className="text-center border-b-2 border-gray-100 pb-6 mb-8">
-                <h2 className="text-3xl md:text-5xl font-bold font-headline text-gray-900">{resumeData.name || 'Your Name'}</h2>
-                <p className="text-lg md:text-xl text-primary font-semibold mt-2">{resumeData.title || 'Professional Title'}</p>
-                <div className="flex flex-wrap justify-center gap-x-4 text-xs text-gray-500 mt-4">
-                    {resumeData.phone && <a href={`tel:${resumeData.phone}`} className="hover:text-primary transition-colors">{resumeData.phone}</a>}
-                    {resumeData.email && <a href={`mailto:${resumeData.email}`} className="hover:text-primary transition-colors">{resumeData.email}</a>}
-                    {resumeData.linkedin && <a href={formatUrl(resumeData.linkedin)} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{resumeData.linkedin}</a>}
-                </div>
-            </div>
-            {resumeData.summary && (
-                <div className="mb-8">
-                    <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Summary</h3>
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{resumeData.summary}</p>
-                </div>
-            )}
-            {(resumeData.experience || []).length > 0 && (
-                <div className="mb-8">
-                    <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Work Experience</h3>
-                    {resumeData.experience.map(exp => (exp.title || exp.company) && (
-                        <div key={exp.id} className="mb-6">
-                            <div className="flex justify-between items-baseline">
-                                <h4 className="font-bold text-gray-900 text-base">{exp.title}</h4>
-                                <p className="text-xs font-medium text-gray-500">{exp.dates}</p>
-                            </div>
-                            <p className="text-sm font-bold text-gray-600 mb-2">{exp.company}</p>
-                            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{(exp.description || '')}</div>
-                        </div>
-                    ))}
-                </div>
-            )}
-            {(resumeData.projects || []).length > 0 && (
-                <div className="mb-8">
-                    <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Projects</h3>
-                    {resumeData.projects.map(proj => (proj.name) && (
-                        <div key={proj.id} className="mb-6">
-                            <div className="flex justify-between items-center mb-1">
-                                <h4 className="font-bold text-gray-900">{proj.name}</h4>
-                                {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-bold hover:underline">{proj.url}</a>}
-                            </div>
-                            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">{(proj.description || '')}</div>
-                        </div>
-                    ))}
-                </div>
-            )}
-            {(resumeData.education || []).length > 0 && (
-                <div className="mb-8">
-                    <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Education</h3>
-                    {resumeData.education.map(edu => (edu.school) && (
-                        <div key={edu.id} className="mb-4">
-                            <div className="flex justify-between items-baseline">
-                                <h4 className="font-bold text-gray-900">{edu.school}</h4>
-                                <p className="text-xs text-gray-500 font-medium">{edu.dates}</p>
-                            </div>
-                            <p className="text-sm text-gray-700">{edu.degree} {edu.cgpa ? `• CGPA: ${edu.cgpa}` : ''}</p>
-                        </div>
-                    ))}
-                </div>
-            )}
-            {resumeData.skills && (
-                <div>
-                    <h3 className="text-sm font-bold font-headline uppercase tracking-widest text-primary border-b border-gray-200 pb-1 mb-4">Core Competencies</h3>
-                    <div className="flex flex-wrap gap-2">
-                        {(resumeData.skills || '').split(',').map(skill => skill.trim() && (
-                            <span key={skill} className="bg-primary/5 text-primary border border-primary/10 text-xs px-3 py-1 rounded-full font-medium">{skill.trim()}</span>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-
-    const PreviewModern = () => (
-        <div className="p-8 sm:p-12 font-body text-sm bg-white text-gray-800 shadow-xl h-full min-h-[1000px]">
-            <div className="mb-10">
-                <h2 className="text-4xl font-bold font-headline text-gray-900 tracking-tight">{resumeData.name || 'Your Name'}</h2>
-                <p className="text-xl text-primary font-bold mt-1">{resumeData.title || 'Professional Title'}</p>
-                <div className="flex flex-wrap gap-4 text-xs font-medium text-gray-500 mt-4">
-                    {resumeData.phone && <a href={`tel:${resumeData.phone}`} className="hover:text-primary transition-colors">{resumeData.phone}</a>}
-                    {resumeData.email && <a href={`mailto:${resumeData.email}`} className="hover:text-primary transition-colors">{resumeData.email}</a>}
-                    {resumeData.linkedin && <a href={formatUrl(resumeData.linkedin)} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{resumeData.linkedin}</a>}
-                </div>
-                <div className="h-1 w-20 bg-primary mt-6 rounded-full" />
-            </div>
-
-            <div className="space-y-8">
-                {resumeData.summary && (
-                    <section>
-                        <h3 className="text-lg font-bold font-headline text-gray-900 mb-3 flex items-center gap-2">
-                            <span className="w-1.5 h-6 bg-primary rounded-full" /> Summary
-                        </h3>
-                        <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{resumeData.summary}</p>
-                    </section>
-                )}
-
-                {(resumeData.experience || []).length > 0 && (
-                    <section>
-                        <h3 className="text-lg font-bold font-headline text-gray-900 mb-6 flex items-center gap-2">
-                            <span className="w-1.5 h-6 bg-primary rounded-full" /> Experience
-                        </h3>
-                        <div className="space-y-8">
-                            {resumeData.experience.map(exp => (exp.title || exp.company) && (
-                                <div key={exp.id} className="relative pl-6 border-l-2 border-gray-100">
-                                    <div className="absolute -left-[9px] top-0 w-4 h-4 bg-white border-2 border-primary rounded-full" />
-                                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-1">
-                                        <h4 className="font-bold text-gray-900 text-base">{exp.title}</h4>
-                                        <span className="text-xs font-bold text-primary uppercase">{exp.dates}</span>
-                                    </div>
-                                    <p className="text-sm font-bold text-gray-500 italic mb-3">{exp.company}</p>
-                                    <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">{(exp.description || '')}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {(resumeData.projects || []).length > 0 && (
-                    <section>
-                        <h3 className="text-lg font-bold font-headline text-gray-900 mb-6 flex items-center gap-2">
-                            <span className="w-1.5 h-6 bg-primary rounded-full" /> Projects
-                        </h3>
-                        <div className="space-y-6">
-                            {resumeData.projects.map(proj => (proj.name) && (
-                                <div key={proj.id} className="relative pl-6 border-l-2 border-gray-100">
-                                    <div className="absolute -left-[9px] top-0 w-4 h-4 bg-white border-2 border-primary rounded-full" />
-                                    <div className="flex justify-between items-baseline mb-1">
-                                        <h4 className="font-bold text-gray-900">{proj.name}</h4>
-                                        {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-bold hover:underline">{proj.url}</a>}
-                                    </div>
-                                    <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">{(proj.description || '')}</div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                <div className="grid sm:grid-cols-2 gap-10">
-                    {(resumeData.education || []).length > 0 && (
-                        <section>
-                            <h3 className="text-lg font-bold font-headline text-gray-900 mb-4">Education</h3>
-                            {resumeData.education.map(edu => (edu.school) && (
-                                <div key={edu.id} className="mb-4">
-                                    <h4 className="font-bold text-gray-800">{edu.school}</h4>
-                                    <p className="text-xs text-primary font-bold">{edu.dates}</p>
-                                    <p className="text-sm text-gray-600">{edu.degree} {edu.cgpa && `| CGPA: ${edu.cgpa}`}</p>
-                                </div>
-                            ))}
-                        </section>
-                    )}
-                    {resumeData.skills && (
-                        <section>
-                            <h3 className="text-lg font-bold font-headline text-gray-900 mb-4">Skills</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {(resumeData.skills || '').split(',').map(skill => skill.trim() && (
-                                    <span key={skill} className="bg-gray-100 text-gray-800 text-[10px] uppercase font-bold px-2 py-1 rounded">{skill.trim()}</span>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-
-    const PreviewMinimalist = () => (
-        <div className="p-8 sm:p-12 font-body text-sm bg-white text-black shadow-xl h-full min-h-[1000px]">
-            <div className="text-center mb-10">
-                <h2 className="text-3xl font-bold tracking-tight mb-1">{resumeData.name || 'YOUR NAME'}</h2>
-                <div className="text-sm font-medium space-x-2">
-                    {resumeData.title && <span className="uppercase tracking-widest">{resumeData.title}</span>}
-                </div>
-                <div className="text-xs mt-3 flex justify-center flex-wrap gap-x-3 gap-y-1">
-                    {resumeData.phone && <a href={`tel:${resumeData.phone}`} className="hover:font-bold">{resumeData.phone}</a>}
-                    {resumeData.email && <a href={`mailto:${resumeData.email}`} className="font-bold hover:underline">{resumeData.email}</a>}
-                    {resumeData.linkedin && <a href={formatUrl(resumeData.linkedin)} target="_blank" rel="noopener noreferrer" className="hover:underline">{resumeData.linkedin}</a>}
-                </div>
-            </div>
-
-            <div className="space-y-8">
-                {resumeData.summary && (
-                    <section>
-                        <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-3 pb-1">Profile</h3>
-                        <p className="text-gray-800 leading-normal whitespace-pre-wrap">{resumeData.summary}</p>
-                    </section>
-                )}
-
-                {(resumeData.experience || []).length > 0 && (
-                    <section>
-                        <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-4 pb-1">Experience</h3>
-                        {resumeData.experience.map(exp => (exp.title || exp.company) && (
-                            <div key={exp.id} className="mb-6">
-                                <div className="flex justify-between font-bold text-sm">
-                                    <span>{(exp.company || '').toUpperCase()}</span>
-                                    <span>{exp.dates}</span>
-                                </div>
-                                <div className="italic text-xs mb-2">{exp.title}</div>
-                                <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap">{(exp.description || '')}</div>
-                            </div>
-                        ))}
-                    </section>
-                )}
-
-                {(resumeData.projects || []).length > 0 && (
-                    <section>
-                        <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-4 pb-1">Projects</h3>
-                        {resumeData.projects.map(proj => (proj.name) && (
-                            <div key={proj.id} className="mb-6">
-                                <div className="flex justify-between font-bold text-sm">
-                                    <span>{(proj.name || '').toUpperCase()}</span>
-                                    {proj.url && <a href={formatUrl(proj.url)} target="_blank" rel="noopener noreferrer" className="text-[10px] font-normal hover:underline">{proj.url}</a>}
-                                </div>
-                                <div className="text-xs text-gray-800 leading-relaxed whitespace-pre-wrap">{(proj.description || '')}</div>
-                            </div>
-                        ))}
-                    </section>
-                )}
-
-                <div className="grid sm:grid-cols-2 gap-x-12 gap-y-8">
-                    {(resumeData.education || []).length > 0 && (
-                        <section>
-                            <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-3 pb-1">Education</h3>
-                            {resumeData.education.map(edu => (edu.school) && (
-                                <div key={edu.id} className="mb-3">
-                                    <div className="font-bold text-xs">{edu.school}</div>
-                                    <div className="text-[11px] text-gray-600">{edu.degree} • {edu.dates} {edu.cgpa && `• ${edu.cgpa}`}</div>
-                                </div>
-                            ))}
-                        </section>
-                    )}
-                    {resumeData.skills && (
-                        <section>
-                            <h3 className="text-[11px] font-black uppercase tracking-[3px] border-b border-black mb-3 pb-1">Skills</h3>
-                            <p className="text-xs leading-relaxed">
-                                {(resumeData.skills || '').split(',').map((s, i, arr) => (
-                                    <span key={i}>{s.trim()}{i < arr.length - 1 ? ' • ' : ''}</span>
-                                ))}
-                            </p>
-                        </section>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-
-    const EditorContent = () => (
-        <div className="space-y-6 pb-20">
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-lg">Personal Information</CardTitle>
-                    {versions.length === 0 && (
-                        <Button variant="outline" size="sm" onClick={fillSampleData}>
-                            <FileJson className="mr-2 h-4 w-4" /> Load Sample
-                        </Button>
-                    )}
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5"><Label htmlFor="name">Full Name</Label><Input id="name" value={resumeData.name} onChange={handleInputChange} placeholder="e.g. John Doe" /></div>
-                        <div className="space-y-1.5"><Label htmlFor="title">Title</Label><Input id="title" value={resumeData.title} onChange={handleInputChange} placeholder="e.g. Software Engineer" /></div>
-                        <div className="space-y-1.5"><Label htmlFor="phone">Phone</Label><Input id="phone" value={resumeData.phone} onChange={handleInputChange} placeholder="e.g. 123-456-7890" /></div>
-                        <div className="space-y-1.5"><Label htmlFor="email">Email</Label><Input id="email" value={resumeData.email} onChange={handleInputChange} placeholder="e.g. john@example.com" /></div>
-                    </div>
-                    <div className="space-y-1.5"><Label htmlFor="linkedin">LinkedIn</Label><Input id="linkedin" value={resumeData.linkedin} onChange={handleInputChange} placeholder="linkedin.com/in/username" /></div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader><CardTitle className="text-lg">Professional Summary</CardTitle></CardHeader>
-                <CardContent><Textarea id="summary" value={resumeData.summary} onChange={handleInputChange} rows={5} placeholder="Briefly describe your career goals and achievements..." /></CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-lg">Work Experience</CardTitle>
-                    <Button variant="ghost" size="sm" onClick={handleAddExperience}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {(resumeData.experience || []).map((exp) => (
-                        <div key={exp.id} className="p-4 border rounded-lg relative space-y-2">
-                            <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveExperience(exp.id)}><Trash2 className="h-4 w-4" /></Button>
-                            <Input name="title" placeholder="Job Title" value={exp.title} onChange={(e) => handleNestedChange('experience', exp.id, e)} />
-                            <Input name="company" placeholder="Company" value={exp.company} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
-                            <Input name="dates" placeholder="Dates" value={exp.dates} onChange={(e) => handleNestedChange('experience', exp.id, e)}/>
-                            <Textarea name="description" placeholder="Achievements (use bullet points)" value={exp.description} onChange={(e) => handleNestedChange('experience', exp.id, e)} rows={4}/>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-lg">Projects</CardTitle>
-                    <Button variant="ghost" size="sm" onClick={handleAddProject}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {(resumeData.projects || []).map((proj) => (
-                        <div key={proj.id} className="p-4 border rounded-lg relative space-y-2">
-                            <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveProject(proj.id)}><Trash2 className="h-4 w-4" /></Button>
-                            <Input name="name" placeholder="Project Name" value={proj.name} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
-                            <Input name="url" placeholder="Project URL (e.g. github.com/user/repo)" value={proj.url} onChange={(e) => handleNestedChange('projects', proj.id, e)} />
-                            <Textarea name="description" placeholder="Project description..." value={proj.description} onChange={(e) => handleNestedChange('projects', proj.id, e)} rows={3} />
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-lg">Education</CardTitle>
-                    <Button variant="ghost" size="sm" onClick={handleAddEducation}><PlusCircle className="mr-2 h-4 w-4" /> Add</Button>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {(resumeData.education || []).map((edu) => (
-                        <div key={edu.id} className="p-4 border rounded-lg relative space-y-2">
-                            <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleRemoveEducation(edu.id)}><Trash2 className="h-4 w-4" /></Button>
-                            <Input name="school" placeholder="School" value={edu.school} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
-                            <Input name="degree" placeholder="Degree" value={edu.degree} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input name="dates" placeholder="Dates" value={edu.dates} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
-                                <Input name="cgpa" placeholder="CGPA" value={edu.cgpa || ''} onChange={(e) => handleNestedChange('education', edu.id, e)}/>
-                            </div>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader><CardTitle className="text-lg">Skills</CardTitle></CardHeader>
-                <CardContent><Textarea id="skills" placeholder="Comma-separated skills..." value={resumeData.skills} onChange={handleInputChange} rows={3} /></CardContent>
-            </Card>
-        </div>
-    );
-
     return (
         <div className="flex flex-col bg-background">
             <div className="relative p-4 space-y-4 border-b bg-card z-50 shrink-0 shadow-sm">
@@ -1233,7 +1263,19 @@ export const ResumeBuilder = () => {
                         activeTab === 'preview' && "hidden lg:block"
                     )}>
                         <div className="max-w-2xl mx-auto">
-                            <EditorContent />
+                            <EditorContent 
+                                resumeData={resumeData}
+                                handleInputChange={handleInputChange}
+                                handleNestedChange={handleNestedChange}
+                                handleAddExperience={handleAddExperience}
+                                handleRemoveExperience={handleRemoveExperience}
+                                handleAddEducation={handleAddEducation}
+                                handleRemoveEducation={handleRemoveEducation}
+                                handleAddProject={handleAddProject}
+                                handleRemoveProject={handleRemoveProject}
+                                fillSampleData={fillSampleData}
+                                hasVersions={versions.length > 0}
+                            />
                         </div>
                     </div>
 
@@ -1243,9 +1285,9 @@ export const ResumeBuilder = () => {
                     )}>
                         <div className="p-4 md:p-8 lg:p-12 flex justify-center">
                             <div className="w-full max-w-[800px] shadow-2xl origin-top h-fit bg-white">
-                                {resumeData.template === 'modern' ? <PreviewModern /> : 
-                                resumeData.template === 'minimalist' ? <PreviewMinimalist /> : 
-                                <PreviewClassic />}
+                                {resumeData.template === 'modern' ? <PreviewModern resumeData={resumeData} /> : 
+                                resumeData.template === 'minimalist' ? <PreviewMinimalist resumeData={resumeData} /> : 
+                                <PreviewClassic resumeData={resumeData} />}
                             </div>
                         </div>
                     </div>
