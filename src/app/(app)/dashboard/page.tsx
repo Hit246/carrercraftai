@@ -21,6 +21,8 @@ import {
   ExternalLink,
   ChevronRight,
   ZapOff,
+  AlertCircle,
+  CreditCard
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -112,8 +114,35 @@ export default function DashboardPage() {
     { title: 'Candidate Match', desc: 'For hiring teams & recruiters', icon: Users, href: '/candidate-matcher', color: 'bg-cyan-500', locked: effectivePlan !== 'recruiter' },
   ];
 
+  const isPaymentPending = plan === 'pending' && !userData?.paymentProofURL;
+
   return (
     <div className="space-y-10 fade-in">
+      {/* Pending Payment Banner */}
+      {isPaymentPending && userData?.lastPaymentLink && (
+        <Card className="border-amber-500/20 bg-amber-500/5 dark:bg-amber-500/10 overflow-hidden">
+          <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-amber-500/20 flex items-center justify-center shrink-0">
+                <CreditCard className="h-6 w-6 text-amber-600" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-bold text-amber-800 dark:text-amber-400">Finish Your Upgrade</h4>
+                <p className="text-xs text-muted-foreground max-w-md">Your request for the <strong>{userData.requestedPlan}</strong> plan is waiting. Complete payment to unlock all features.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="flex-1 sm:flex-none border-amber-500/20 text-amber-700 dark:text-amber-400" asChild>
+                <Link href="/order-status">Status</Link>
+              </Button>
+              <Button size="sm" className="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-700 text-white font-bold" asChild>
+                <a href={userData.lastPaymentLink}>Pay Now <ArrowRight className="ml-2 h-4 w-4" /></a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Header Row */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-1">

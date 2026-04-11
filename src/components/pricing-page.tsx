@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc, serverTimestamp } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,7 +16,7 @@ import { createPaymentLink } from "@/lib/razorpay"
 import { db } from "@/lib/firebase";
 import { notifyAdminOfUpgradeAction } from "@/lib/actions";
 
-import { Check, Crown, Trophy, Diamond, Loader2, Sparkles, PartyPopper, Tag } from "lucide-react"
+import { Check, Crown, Trophy, Diamond, Loader2, Sparkles, PartyPopper, Tag, ArrowRight } from "lucide-react"
 
 type Plan = "free" | "essentials" | "pro" | "recruiter"
 
@@ -131,7 +131,7 @@ export function PricingPage() {
             title: "Profile Incomplete",
             description: "Please save your name and phone number in your profile before making a payment.",
             variant: "destructive",
-            action: <Button variant="secondary" onClick={() => router.push('/profile')}>Go to Profile</Button>
+            action: <Button variant="secondary" onClick={() => router.push('/settings')}>Go to Settings</Button>
         });
         return;
     }
@@ -145,32 +145,6 @@ export function PricingPage() {
     const promoDiscount = appliedPromo?.discount || 0;
     const promoCode = appliedPromo?.code || null;
 
-    try {
-        const userRef = doc(db, 'users', user.uid);
-        await updateDoc(userRef, { 
-            previousPlan: plan,
-            plan: 'pending',
-            requestedPlan: selectedPlan,
-            billingCycle: annual ? 'annual' : 'monthly',
-            // Temporarily store intended breakdown for history sync if webhook is slow
-            tempBasePrice: basePrice,
-            tempFestiveDiscount: festiveDiscount,
-            tempPromoDiscount: promoDiscount,
-            tempPromoCode: promoCode,
-        });
-        
-        await notifyAdminOfUpgradeAction({
-          userEmail: user.email,
-          plan: `${selectedPlan} (${annual ? 'Annual' : 'Monthly'})`,
-          type: 'MANUAL_REQUEST'
-        });
-
-    } catch (dbError) {
-        toast({ title: "Error", description: "Could not initiate upgrade.", variant: "destructive" });
-        setIsProcessing(null);
-        return;
-    }
-  
     try {
       const res = await createPaymentLink(
         finalAmount, 
@@ -190,6 +164,27 @@ export function PricingPage() {
       );
   
       if (res.success && res.url) {
+        // Save request data ONLY after successful link creation
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, { 
+            previousPlan: plan,
+            plan: 'pending',
+            requestedPlan: selectedPlan,
+            billingCycle: annual ? 'annual' : 'monthly',
+            lastPaymentLink: res.url,
+            planUpdatedAt: serverTimestamp(),
+            tempBasePrice: basePrice,
+            tempFestiveDiscount: festiveDiscount,
+            tempPromoDiscount: promoDiscount,
+            tempPromoCode: promoCode,
+        });
+        
+        await notifyAdminOfUpgradeAction({
+          userEmail: user.email,
+          plan: `${selectedPlan} (${annual ? 'Annual' : 'Monthly'})`,
+          type: 'MANUAL_REQUEST'
+        });
+
         window.location.href = res.url;
       } else {
         toast({ title: "Payment Error", description: res.error || "Failed to create link.", variant: "destructive" });
@@ -359,6 +354,22 @@ export function PricingPage() {
         </Card>
       </div>
       
+      {plan === 'pending' && userData?.lastPaymentLink && (
+        <Card className="mt-12 max-w-2xl w-full border-amber-500/20 bg-amber-500/5">
+          <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-left space-y-1">
+              <p className="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-2">
+                <Tag className="h-4 w-4" /> Unfinished Upgrade
+              </p>
+              <p className="text-xs text-muted-foreground">You have a pending request for {userData.requestedPlan}. Finish it now to unlock features.</p>
+            </div>
+            <Button variant="default" className="bg-amber-600 hover:bg-amber-700 text-white font-bold" asChild>
+              <a href={userData.lastPaymentLink}>Complete Payment <ArrowRight className="ml-2 h-4 w-4" /></a>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Trust signals */}
       <p className="text-center text-xs text-muted-foreground mt-12 font-medium uppercase tracking-widest">
         🔒 Secure payments via Razorpay · Cancel anytime · No hidden fees

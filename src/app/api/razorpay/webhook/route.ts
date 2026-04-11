@@ -1,6 +1,5 @@
-
 import { db } from '@/lib/firebase';
-import { doc, updateDoc, serverTimestamp, getDoc, increment } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, getDoc, increment, deleteField } from 'firebase/firestore';
 import * as crypto from 'crypto';
 import { notifyAdminOfUpgradeAction } from '@/lib/actions';
 
@@ -66,6 +65,10 @@ export async function POST(req: Request) {
             festiveDiscount: festiveDiscount,
             promoDiscount: promoDiscount,
             appliedPromoCode: promoCode,
+            // Clear payment resumption data
+            lastPaymentLink: deleteField(),
+            requestedPlan: deleteField(),
+            previousPlan: deleteField(),
         });
 
         await notifyAdminOfUpgradeAction({
