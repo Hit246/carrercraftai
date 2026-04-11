@@ -1,5 +1,14 @@
-import { ProfilePage } from '@/components/profile-page';
+'use client';
 
-export default function Profile() {
-    return <ProfilePage />;
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function ProfileRedirect() {
+    const router = useRouter();
+    
+    useEffect(() => {
+        router.replace('/settings');
+    }, [router]);
+
+    return null;
 }

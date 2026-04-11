@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
@@ -91,7 +90,6 @@ function PaymentStatusContent() {
         const downloadURL = await uploadFile(proofFile, filePath);
         await updatePaymentProof(downloadURL);
         
-        // Notify Admin of proof upload via Email
         await notifyAdminOfUpgradeAction({
           userEmail: user.email!,
           plan: userData?.requestedPlan || 'Unknown',
@@ -168,8 +166,8 @@ function PaymentStatusContent() {
                 <Button onClick={() => router.push('/dashboard')} className="w-full">
                     Go to Dashboard
                 </Button>
-                <Button onClick={() => router.push('/profile')} className="w-full" variant="outline">
-                    View My Profile
+                <Button onClick={() => router.push('/settings')} className="w-full" variant="outline">
+                    View Settings
                 </Button>
                </div>
             )}
