@@ -22,7 +22,9 @@ import {
   ChevronRight,
   ZapOff,
   AlertCircle,
-  CreditCard
+  CreditCard,
+  ShieldCheck,
+  Hourglass
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -114,30 +116,47 @@ export default function DashboardPage() {
     { title: 'Candidate Match', desc: 'For hiring teams & recruiters', icon: Users, href: '/candidate-matcher', color: 'bg-cyan-500', locked: effectivePlan !== 'recruiter' },
   ];
 
-  const isPaymentPending = plan === 'pending' && !userData?.paymentProofURL;
+  const isPaymentPending = plan === 'pending';
+  const isAwaitingReview = isPaymentPending && (!!userData?.paymentProofURL || !!userData?.paymentId);
+  const needsCheckout = isPaymentPending && !isAwaitingReview && !!userData?.lastPaymentLink;
 
   return (
     <div className="space-y-10 fade-in">
-      {/* Pending Payment Banner */}
-      {isPaymentPending && userData?.lastPaymentLink && (
-        <Card className="border-amber-500/20 bg-amber-500/5 dark:bg-amber-500/10 overflow-hidden">
+      {/* Pending Payment or Review Banner */}
+      {isPaymentPending && (
+        <Card className={cn(
+          "overflow-hidden border-none shadow-lg",
+          isAwaitingReview ? "bg-blue-500/10 dark:bg-blue-500/20" : "bg-amber-500/10 dark:bg-amber-500/20"
+        )}>
           <CardContent className="p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-amber-500/20 flex items-center justify-center shrink-0">
-                <CreditCard className="h-6 w-6 text-amber-600" />
+              <div className={cn(
+                "h-12 w-12 rounded-2xl flex items-center justify-center shrink-0",
+                isAwaitingReview ? "bg-blue-500/20 text-blue-600" : "bg-amber-500/20 text-amber-600"
+              )}>
+                {isAwaitingReview ? <ShieldCheck className="h-6 w-6" /> : <CreditCard className="h-6 w-6" />}
               </div>
-              <div className="space-y-1">
-                <h4 className="font-bold text-amber-800 dark:text-amber-400">Finish Your Upgrade</h4>
-                <p className="text-xs text-muted-foreground max-w-md">Your request for the <strong>{userData.requestedPlan}</strong> plan is waiting. Complete payment to unlock all features.</p>
+              <div className="space-y-1 text-center sm:text-left">
+                <h4 className={cn("font-bold", isAwaitingReview ? "text-blue-800 dark:text-blue-400" : "text-amber-800 dark:text-amber-400")}>
+                  {isAwaitingReview ? "Payment Under Review" : "Finish Your Upgrade"}
+                </h4>
+                <p className="text-xs text-muted-foreground max-w-md">
+                  {isAwaitingReview 
+                    ? "We're verifying your transaction for the " + (userData?.requestedPlan || 'Pro') + " plan. Hang tight!"
+                    : "Your request for the " + (userData?.requestedPlan || 'Pro') + " plan is waiting. Complete checkout to unlock features."
+                  }
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Button variant="outline" size="sm" className="flex-1 sm:flex-none border-amber-500/20 text-amber-700 dark:text-amber-400" asChild>
-                <Link href="/order-status">Status</Link>
+              <Button variant="outline" size="sm" className="flex-1 sm:flex-none border-border/40" asChild>
+                <Link href="/order-status">Check Status</Link>
               </Button>
-              <Button size="sm" className="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-700 text-white font-bold" asChild>
-                <a href={userData.lastPaymentLink}>Pay Now <ArrowRight className="ml-2 h-4 w-4" /></a>
-              </Button>
+              {needsCheckout && (
+                <Button size="sm" className="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-700 text-white font-bold" asChild>
+                  <a href={userData.lastPaymentLink}>Pay Now <ArrowRight className="ml-2 h-4 w-4" /></a>
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

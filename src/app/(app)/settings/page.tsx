@@ -39,6 +39,13 @@ import { Switch } from '@/components/ui/switch';
 import { updatePassword } from 'firebase/auth';
 import { uploadFile } from '@/lib/firebase';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 
@@ -57,6 +64,7 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [showPasswords, setShowPasswords] = useState(false);
   const [newPassword, setNewPassword] = useState('');
@@ -68,7 +76,19 @@ export default function SettingsPage() {
     setMounted(true);
     if (userData) {
       setDisplayName(userData.displayName || '');
-      setPhoneNumber(userData.phoneNumber || '');
+      // Extract country code if present, otherwise default to +91
+      const rawPhone = userData.phoneNumber || '';
+      if (rawPhone.startsWith('+')) {
+        const parts = rawPhone.split(' ');
+        if (parts.length > 1) {
+          setCountryCode(parts[0]);
+          setPhoneNumber(parts[1]);
+        } else {
+          setPhoneNumber(rawPhone);
+        }
+      } else {
+        setPhoneNumber(rawPhone);
+      }
     } else if (user) {
       setDisplayName(user.displayName || '');
     }
@@ -100,9 +120,15 @@ export default function SettingsPage() {
   if (!mounted) return null;
 
   const handleProfileUpdate = async () => {
+    if (phoneNumber && phoneNumber.length !== 10) {
+      toast({ title: "Invalid Phone", description: "Please enter a valid 10-digit mobile number.", variant: "destructive" });
+      return;
+    }
+
     setIsSaving(true);
     try {
-      await updateUserProfile({ displayName, phoneNumber });
+      const fullPhone = phoneNumber ? `${countryCode} ${phoneNumber}` : '';
+      await updateUserProfile({ displayName, phoneNumber: fullPhone });
       toast({ title: "Profile Updated", description: "Your changes have been saved permanently." });
     } catch (e) {
       toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
@@ -248,7 +274,30 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="e.g. 9876543210" className="h-11 rounded-xl" />
+                  <div className="flex gap-2">
+                    <Select value={countryCode} onValueChange={setCountryCode}>
+                      <SelectTrigger className="w-[100px] h-11 rounded-xl">
+                        <SelectValue placeholder="+91" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="+91">+91 (IN)</SelectItem>
+                        <SelectItem value="+1">+1 (US)</SelectItem>
+                        <SelectItem value="+44">+44 (UK)</SelectItem>
+                        <SelectItem value="+971">+971 (UAE)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input 
+                      id="phone" 
+                      value={phoneNumber} 
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                        setPhoneNumber(val);
+                      }} 
+                      placeholder="9876543210" 
+                      className="h-11 rounded-xl flex-1" 
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-tight">10 digits without country code</p>
                 </div>
               </div>
             </CardContent>
