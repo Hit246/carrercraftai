@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -15,6 +17,7 @@ import {
   Check,
   ArrowRight,
   Mail,
+  PartyPopper,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
@@ -23,6 +26,14 @@ import { AuthModal } from '@/components/auth-modal';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from '@/lib/utils';
 import { FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa';
+
+interface PricingSettings {
+  essentials: number;
+  pro: number;
+  recruiter: number;
+  festiveDiscount: number;
+  festiveName: string;
+}
 
 const features = [
   {
@@ -148,7 +159,45 @@ function HomePageContent() {
   const [annual, setAnnual] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  // Pricing State
+  const [settings, setSettings] = useState<PricingSettings>({
+    essentials: 199,
+    pro: 399,
+    recruiter: 999,
+    festiveDiscount: 0,
+    festiveName: '',
+  });
+  const [isLoadingPricing, setIsLoadingPricing] = useState(true);
+
+  useEffect(() => {
+    setMounted(true);
+    
+    const fetchPricing = async () => {
+      try {
+        const docRef = doc(db, 'settings', 'pricing');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setSettings(docSnap.data() as PricingSettings);
+        }
+      } catch (e) {
+        console.error("Error fetching dynamic pricing:", e);
+      } finally {
+        setIsLoadingPricing(false);
+      }
+    };
+    fetchPricing();
+  }, []);
+
+  const calculateMonthlyPrice = (base: number) => {
+    let final = base;
+    if (settings.festiveDiscount > 0) {
+      final = final * (1 - settings.festiveDiscount / 100);
+    }
+    if (annual) {
+      final = final * 0.8; // 20% Annual Discount
+    }
+    return Math.floor(final);
+  };
 
   const openAuth = (title?: string, desc?: string) => {
     setModalContext({ title, description: desc });
@@ -345,7 +394,14 @@ function HomePageContent() {
           <div className="container mx-auto px-4 md:px-8 lg:px-6">
             <div className="text-center mb-12 md:mb-16 space-y-4">
               <h2 className="text-3xl md:text-5xl font-bold font-headline tracking-tight">Simple, Transparent Pricing</h2>
-              <p className="text-muted-foreground text-lg">Choose the perfect plan for your career goals.</p>
+              <p className="text-muted-foreground text-lg">
+                {settings.festiveDiscount > 0 ? (
+                  <span className="flex items-center justify-center gap-2 text-primary font-bold">
+                    <PartyPopper className="h-5 w-5" /> 
+                    {settings.festiveName}: {settings.festiveDiscount}% Off Applied Automatically!
+                  </span>
+                ) : 'Choose the perfect plan for your career goals.'}
+              </p>
 
               <div className="flex items-center justify-center gap-4 pt-6">
                 <span className={cn("text-sm font-bold transition-colors", !annual ? "text-primary" : "text-muted-foreground")}>Monthly</span>
@@ -391,10 +447,12 @@ function HomePageContent() {
                   <h3 className="text-xl font-bold mb-2">Essentials</h3>
                   <div className="flex flex-col mb-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black">₹{annual ? '159' : '199'}</span>
+                      <span className="text-4xl font-black">₹{calculateMonthlyPrice(settings.essentials)}</span>
                       <span className="text-muted-foreground text-sm font-bold">/mo</span>
                     </div>
-                    {annual && <span className="text-xs text-muted-foreground line-through font-bold">₹199/mo</span>}
+                    {(settings.festiveDiscount > 0 || annual) && (
+                      <span className="text-xs text-muted-foreground line-through font-bold">₹{settings.essentials}/mo</span>
+                    )}
                   </div>
                   <ul className="space-y-3 text-sm mb-8 flex-1">
                     {["50 AI credits", "ATS keyword suggestions", "10 resumes", "Cover letter generator"].map(item => (
@@ -409,7 +467,7 @@ function HomePageContent() {
                 </CardContent>
               </Card>
 
-              {/* Pro — highlighted with ring instead of scale */}
+              {/* Pro — highlighted with ring */}
               <Card className="card-hover flex flex-col ring-2 ring-primary shadow-2xl shadow-primary/10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-black px-4 py-1.5 rounded-bl-xl uppercase tracking-widest">
                   POPULAR
@@ -418,10 +476,12 @@ function HomePageContent() {
                   <h3 className="text-xl font-bold mb-2">Pro</h3>
                   <div className="flex flex-col mb-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black">₹{annual ? '319' : '399'}</span>
+                      <span className="text-4xl font-black">₹{calculateMonthlyPrice(settings.pro)}</span>
                       <span className="text-muted-foreground text-sm font-bold">/mo</span>
                     </div>
-                    {annual && <span className="text-xs text-muted-foreground line-through font-bold">₹399/mo</span>}
+                    {(settings.festiveDiscount > 0 || annual) && (
+                      <span className="text-xs text-muted-foreground line-through font-bold">₹{settings.pro}/mo</span>
+                    )}
                   </div>
                   <ul className="space-y-3 text-sm mb-8 flex-1">
                     {["Unlimited AI generation", "Advanced ATS optimization", "Unlimited resumes", "Job matching"].map(item => (
@@ -442,10 +502,12 @@ function HomePageContent() {
                   <h3 className="text-xl font-bold mb-2">Recruiter</h3>
                   <div className="flex flex-col mb-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black">₹{annual ? '799' : '999'}</span>
+                      <span className="text-4xl font-black">₹{calculateMonthlyPrice(settings.recruiter)}</span>
                       <span className="text-muted-foreground text-sm font-bold">/mo</span>
                     </div>
-                    {annual && <span className="text-xs text-muted-foreground line-through font-bold">₹999/mo</span>}
+                    {(settings.festiveDiscount > 0 || annual) && (
+                      <span className="text-xs text-muted-foreground line-through font-bold">₹{settings.recruiter}/mo</span>
+                    )}
                   </div>
                   <ul className="space-y-3 text-sm mb-8 flex-1">
                     {["Everything in Pro", "AI Candidate Ranking", "Team Management", "Recruiter analytics"].map(item => (
