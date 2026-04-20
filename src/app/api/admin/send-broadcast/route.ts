@@ -58,9 +58,9 @@ function buildEmailHTML(bodyContent: string) {
 function initAdmin() {
   if (admin.apps.length > 0) return admin.app();
 
-  const keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+  const keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_NEW;
   if (!keyString) {
-    throw new Error("FIREBASE_SERVICE_ACCOUNT_KEY is missing in environment variables.");
+    throw new Error("FIREBASE_SERVICE_ACCOUNT_KEY_NEW is missing in environment variables.");
   }
 
   try {
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
   try {
     initAdmin();
     const db = admin.firestore();
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    const resend = new Resend(process.env.RESEND_API_KEY_NEW);
 
     const { subject, bodyContent, audience } = await req.json();
 

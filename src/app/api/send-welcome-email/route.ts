@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY_NEW;
   
   if (!apiKey) {
     console.warn("⚠️ Resend API key is missing in .env. Skipping welcome email sequence.");

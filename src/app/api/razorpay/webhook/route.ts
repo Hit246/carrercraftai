@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   const body = await req.text();
   const sig = req.headers.get('x-razorpay-signature');
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET_NEW;
 
   if (!sig || !secret) {
     console.error('Webhook Error: Missing signature or secret.');

@@ -36,7 +36,7 @@ async function getAdmin() {
   const admin = await import('firebase-admin');
   if (!admin.apps.length) {
     try {
-      const keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+      const keyString = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_NEW;
       if (keyString) {
         let sanitizedKey = keyString.trim();
         if ((sanitizedKey.startsWith("'") && sanitizedKey.endsWith("'")) || 
@@ -50,7 +50,7 @@ async function getAdmin() {
         });
       }
     } catch (e) {
-      console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY.", e);
+      console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY_NEW.", e);
     }
   }
   adminModule = admin;
@@ -74,23 +74,23 @@ export async function notifyAdminOfUpgradeAction(data: {
   amount?: number;
   type: 'MANUAL_REQUEST' | 'PROOF_UPLOADED' | 'WEBHOOK_PAID' | 'CANCELLATION_REQUEST' | 'PLAN_EXPIRED';
 }) {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, ADMIN_EMAIL } = process.env;
+  const { SMTP_HOST_NEW, SMTP_PORT, SMTP_USER_NEW, SMTP_PASS_NEW, ADMIN_EMAIL } = process.env;
 
   // Use the new support email as the primary contact if defined in env, otherwise fallback to admin
   const targetAdminEmail = ADMIN_EMAIL || 'support@careercraftai.tech';
 
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+  if (!SMTP_HOST_NEW || !SMTP_USER_NEW || !SMTP_PASS_NEW) {
     return { success: false, error: 'SMTP configuration missing' };
   }
 
   const nodemailer = await import('nodemailer');
   const transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
+    host: SMTP_HOST_NEW,
     port: parseInt(SMTP_PORT || '587'),
     secure: parseInt(SMTP_PORT || '587') === 465,
     auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS,
+      user: SMTP_USER_NEW,
+      pass: SMTP_PASS_NEW,
     },
   });
 
@@ -113,7 +113,7 @@ export async function notifyAdminOfUpgradeAction(data: {
   try {
     // Notify ADMIN
     await transporter.sendMail({
-      from: `"CareerCraft AI System" <${SMTP_USER}>`,
+      from: `"CareerCraft AI System" <${SMTP_USER_NEW}>`,
       to: targetAdminEmail,
       subject: subjectMap[data.type],
       html: `<p>${bodyMap[data.type]}</p>`,

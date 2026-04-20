@@ -7,7 +7,7 @@ import Image from 'next/image';
 
 function initAdmin() {
   if (admin.apps.length > 0) return admin.app();
-  let sanitizedKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY!.trim();
+  let sanitizedKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_NEW!.trim();
   if (
     (sanitizedKey.startsWith("'") && sanitizedKey.endsWith("'")) ||
     (sanitizedKey.startsWith('"') && sanitizedKey.endsWith('"'))

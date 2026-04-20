@@ -6,8 +6,8 @@ import { doc, updateDoc, getDoc, deleteField } from 'firebase/firestore';
 import * as crypto from 'crypto';
 
 function getRazorpay() {
-  const id = process.env.RAZORPAY_KEY_ID;
-  const secret = process.env.RAZORPAY_KEY_SECRET;
+  const id = process.env.RAZORPAY_KEY_ID_NEW;
+  const secret = process.env.RAZORPAY_KEY_SECRET_NEW;
 
   if (!id || !secret) {
     console.error('Razorpay ENV missing on server ❌', {
@@ -112,7 +112,7 @@ export async function verifyAndUpgrade(
   userId: string
 ) {
   try {
-    const secret = process.env.RAZORPAY_KEY_SECRET;
+    const secret = process.env.RAZORPAY_KEY_SECRET_NEW;
     if (!secret) {
         console.error('Razorpay secret key is not configured.');
         return { success: false, message: 'Server configuration error.' };

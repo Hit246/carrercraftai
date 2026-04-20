@@ -216,30 +216,30 @@ Copy `.env.example` and fill in your values:
 
 ```env
 # ── Firebase Client (Public) ──────────────────────────────
-NEXT_PUBLIC_FIREBASE_PROJECT_ID='your-project-id'
-NEXT_PUBLIC_FIREBASE_APP_ID='your-app-id'
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET='your-bucket.appspot.com'
-NEXT_PUBLIC_FIREBASE_API_KEY='your-api-key'
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN='your-project.firebaseapp.com'
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID='your-sender-id'
+NEXT_PUBLIC_FIREBASE_PROJECT_ID_NEW='your-project-id'
+NEXT_PUBLIC_FIREBASE_APP_ID_NEW='your-app-id'
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET_NEW='your-bucket.appspot.com'
+NEXT_PUBLIC_FIREBASE_API_KEY_NEW='your-api-key'
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN_NEW='your-project.firebaseapp.com'
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID_NEW='your-sender-id'
 
 # ── Firebase Admin (Server) ───────────────────────────────
-FIREBASE_SERVICE_ACCOUNT_KEY='{"type":"service_account",...}'
+FIREBASE_SERVICE_ACCOUNT_KEY_NEW='{"type":"service_account",...}'
 
 # ── AI ────────────────────────────────────────────────────
-GEMINI_API_KEY='your-gemini-key'
+GEMINI_API_KEY_NEW='your-gemini-key'
 
 # ── Payments ──────────────────────────────────────────────
-NEXT_PUBLIC_RAZORPAY_KEY_ID='rzp_live_...'
-RAZORPAY_KEY_SECRET='your-secret'
-RAZORPAY_WEBHOOK_SECRET='your-webhook-secret'
+NEXT_PUBLIC_RAZORPAY_KEY_ID_NEW_NEW='rzp_live_...'
+RAZORPAY_KEY_SECRET_NEW='your-secret'
+RAZORPAY_WEBHOOK_SECRET_NEW='your-webhook-secret'
 
 # ── Email ─────────────────────────────────────────────────
-RESEND_API_KEY='re_...'
-SMTP_HOST='smtp.gmail.com'
+RESEND_API_KEY_NEW='re_...'
+SMTP_HOST_NEW='smtp.gmail.com'
 SMTP_PORT=587
-SMTP_USER='your-email@gmail.com'
-SMTP_PASS='your-16-char-app-password'
+SMTP_USER_NEW='your-email@gmail.com'
+SMTP_PASS_NEW='your-16-char-app-password'
 ADMIN_EMAIL='support@careercraftai.tech'
 
 # ── App ───────────────────────────────────────────────────
