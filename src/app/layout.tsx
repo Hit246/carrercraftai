@@ -100,7 +100,7 @@ export default function RootLayout({
           <FirebaseErrorListener />
         </ThemeProvider>
         <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6941887967099080"
-     crossOrigin="anonymous" strategy="afterInteractive" />
+     crossOrigin="anonymous" strategy="beforeInteractive" />
       </body>
     </html>
   );
