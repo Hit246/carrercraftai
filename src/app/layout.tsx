@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -99,8 +98,6 @@ export default function RootLayout({
           <Toaster />
           <FirebaseErrorListener />
         </ThemeProvider>
-        <Script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6941887967099080"
-     crossOrigin="anonymous" strategy="beforeInteractive" />
       </body>
     </html>
   );
