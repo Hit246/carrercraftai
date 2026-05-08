@@ -146,10 +146,38 @@ CareerCraft AI is an all-in-one, AI-powered career platform designed specificall
 ## 🔑 Environment Variables
 Check `.env.example` for the full list of required keys.
 ```env
+
+# ── AI ────────────────────────────────────────────────────
 GEMINI_API_KEY_NEW=
+
+# ── Firebase Client (Public) ──────────────────────────────
 NEXT_PUBLIC_FIREBASE_PROJECT_ID_NEW=
 NEXT_PUBLIC_FIREBASE_APP_ID_NEW=
-...
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET_NEW=
+NEXT_PUBLIC_FIREBASE_API_KEY_NEW=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN_NEW=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID_NEW=
+
+# ── Firebase Admin (Server) ───────────────────────────────
+# Note: Should be a JSON string of your service account key
+FIREBASE_SERVICE_ACCOUNT_KEY_NEW=
+
+# ── Payments (Razorpay) ──────────────────────────────────
+NEXT_PUBLIC_RAZORPAY_KEY_ID_NEW_NEW=
+RAZORPAY_KEY_ID_NEW=
+RAZORPAY_KEY_SECRET_NEW=
+RAZORPAY_WEBHOOK_SECRET_NEW=
+
+# ── Email ─────────────────────────────────────────────────
+RESEND_API_KEY_NEW=
+SMTP_HOST_NEW=
+SMTP_PORT=587
+SMTP_USER_NEW=
+SMTP_PASS_NEW=
+ADMIN_EMAIL=support@careercraftai.tech
+
+# ── App ───────────────────────────────────────────────────
+NEXT_PUBLIC_APP_URL=https://careercraftai.tech
 ```
 
 ---
