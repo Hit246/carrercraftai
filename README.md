@@ -80,9 +80,18 @@ CareerCraft AI is an all-in-one, AI-powered career platform designed specificall
 
 <a name="demo"></a>
 ## 📸 Demo
-<!-- ![Dashboard Preview](https://careercraftai.tech/og-image.webp) -->
-<!-- ![Resume Builder](public/screenshots/builder.png) -->
-<!-- ![ATS Scorer](public/screenshots/ats.png) -->
+
+### Landing Page
+![Home Page](public/docs/Home-page.png)
+
+### User Dashboard
+![User Dashboard](public/docs/User%20Dashboard.png)
+
+### AI Resume Builder
+![Resume Builder](public/docs/resume-builder.png)
+
+### ATS Optimization & Professional Audit
+![ATS Optimizer](public/docs/ats-optimizer.png)
 
 ---
 
@@ -135,26 +144,12 @@ CareerCraft AI is an all-in-one, AI-powered career platform designed specificall
 
 <a name="env"></a>
 ## 🔑 Environment Variables
+Check `.env.example` for the full list of required keys.
 ```env
 GEMINI_API_KEY_NEW=
 NEXT_PUBLIC_FIREBASE_PROJECT_ID_NEW=
 NEXT_PUBLIC_FIREBASE_APP_ID_NEW=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET_NEW=
-NEXT_PUBLIC_FIREBASE_API_KEY_NEW=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN_NEW=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID_NEW=
-NEXT_PUBLIC_RAZORPAY_KEY_ID_NEW_NEW=
-RAZORPAY_KEY_ID_NEW=
-RAZORPAY_KEY_SECRET_NEW=
-NEXT_PUBLIC_APP_URL=
-RAZORPAY_WEBHOOK_SECRET_NEW=
-FIREBASE_SERVICE_ACCOUNT_KEY_NEW=
-SMTP_HOST_NEW=
-SMTP_PORT=
-SMTP_USER_NEW=
-SMTP_PASS_NEW=
-ADMIN_EMAIL=
-RESEND_API_KEY_NEW=
+...
 ```
 
 ---
