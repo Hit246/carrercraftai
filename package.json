@@ -55,6 +55,7 @@
     "jspdf": "^2.5.2",
     "lucide-react": "^1.7.0",
     "next": "^15.1.0",
+    "next-pwa": "^5.6.0",
     "next-themes": "^0.4.4",
     "nodemailer": "^6.9.16",
     "patch-package": "^8.0.0",
