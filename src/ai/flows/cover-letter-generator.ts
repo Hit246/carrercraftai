@@ -68,6 +68,9 @@ const generateCoverLetterFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("AI failed to generate a response. Please try again with more detailed job info.");
+    }
+    return output;
   }
 );

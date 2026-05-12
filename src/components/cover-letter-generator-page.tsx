@@ -12,13 +12,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, FileText, Upload, Crown, Copy, Download, RotateCcw, Zap, Sparkles, Check } from 'lucide-react';
+import { Loader2, FileText, Upload, Crown, Copy, Download, Zap, Sparkles, Check, AlertCircle } from 'lucide-react';
 import type { GenerateCoverLetterOutput } from '@/ai/flows/cover-letter-generator';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/hooks/use-auth';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
+import jsPDF from 'jspdf';
 
 const formSchema = z.object({
     resumeFile: z.instanceof(File).refine(
@@ -27,7 +27,7 @@ const formSchema = z.object({
         (file) => file.type === 'application/pdf',
         "Please upload a valid PDF file."
       ),
-    jobDescription: z.string().min(50, { message: 'Please provide a detailed job description.' }),
+    jobDescription: z.string().min(50, { message: 'Please provide at least 50 characters of job details.' }),
     companyName: z.string().min(2, { message: 'Please enter company name.' }),
     jobTitle: z.string().min(2, { message: 'Please enter job title.' }),
 });
@@ -44,7 +44,7 @@ const fileToDataUri = (file: File): Promise<string> => {
 };
 
 export function CoverLetterGeneratorPage() {
-  const [coverLetter, setCoverLetter] = useState<GenerateCoverLetterOutput['coverLetter'] | null>(null);
+  const [coverLetter, setCoverLetter] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [tone, setTone] = useState<'professional' | 'friendly' | 'confident'>('professional');
   const [isCopied, setIsCopied] = useState(false);
@@ -62,13 +62,14 @@ export function CoverLetterGeneratorPage() {
     }
   });
   
-  const canUseFeature = effectivePlan !== 'free' || credits > 0;
+  const isPro = effectivePlan === 'pro' || effectivePlan === 'recruiter';
+  const canUseFeature = isPro || credits > 0;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if(!canUseFeature) {
         toast({
           title: "Upgrade Plan",
-          description: "You've used all your free credits. Please upgrade to continue.",
+          description: "You've used all your free credits. Upgrade to Pro for unlimited generation.",
           variant: "destructive",
         })
         router.push('/pricing');
@@ -79,23 +80,32 @@ export function CoverLetterGeneratorPage() {
     setCoverLetter(null);
 
     try {
-        if (effectivePlan === 'free') {
-            await useCredit();
-        }
+        console.log("🚀 Starting cover letter generation...");
+        
         const resumeDataUri = await fileToDataUri(values.resumeFile);
+        
         const result = await generateCoverLetterAction({ 
             resumeDataUri,
             jobDescription: `Role: ${values.jobTitle} at ${values.companyName}\n\n${values.jobDescription}\n\nTone: ${tone}`,
-            userName: user?.displayName || user?.email || 'The Applicant'
+            userName: user?.displayName || user?.email?.split('@')[0] || 'Applicant'
          });
-        setCoverLetter(result.coverLetter);
-    } catch (error) {
-        console.error(error);
+
+        if (result && result.coverLetter) {
+            if (!isPro) {
+                await useCredit();
+            }
+            setCoverLetter(result.coverLetter);
+            toast({ title: "Letter Generated!", description: "Your custom cover letter is ready." });
+        } else {
+            throw new Error("Empty response from AI");
+        }
+    } catch (error: any) {
+        console.error("❌ Generation error:", error);
         toast({
           title: "Generation Failed",
-          description: "Something went wrong. Please try again.",
+          description: error.message || "Something went wrong. Please check your internet and try again.",
           variant: "destructive",
-        })
+        });
     } finally {
         setIsLoading(false);
     }
@@ -110,6 +120,28 @@ export function CoverLetterGeneratorPage() {
     }
   };
 
+  const handleDownloadPDF = () => {
+    if (!coverLetter) return;
+    
+    const doc = new jsPDF();
+    const margin = 40;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const textWidth = pageWidth - (margin * 2);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text('Cover Letter', margin, 40);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    
+    const splitText = doc.splitTextToSize(coverLetter, textWidth);
+    doc.text(splitText, margin, 60);
+    
+    doc.save(`${form.getValues('companyName')}_Cover_Letter.pdf`);
+    toast({ title: "PDF Downloaded" });
+  };
+
   return (
     <div className="space-y-8 fade-in">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -119,7 +151,7 @@ export function CoverLetterGeneratorPage() {
           </h1>
           <p className="text-muted-foreground">Generate a perfectly tailored letter for any role in seconds.</p>
         </div>
-        {effectivePlan === 'free' && (
+        {!isPro && (
           <Badge variant="secondary" className="h-8 px-4 bg-primary/10 text-primary border-none font-bold">
             <Zap className="w-3.5 h-3.5 mr-2" /> Uses 1 AI Credit
           </Badge>
@@ -135,7 +167,10 @@ export function CoverLetterGeneratorPage() {
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit, (err) => {
+                    console.warn("Validation Errors:", err);
+                    toast({ title: "Validation Error", description: "Please fill all required fields correctly.", variant: "destructive" });
+                })} className="space-y-6">
                   <FormField
                     control={form.control}
                     name="resumeFile"
@@ -197,7 +232,7 @@ export function CoverLetterGeneratorPage() {
                       <FormItem>
                         <FormLabel className="text-xs font-black uppercase tracking-widest text-muted-foreground">Job Description</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Paste job details..." className="h-32 rounded-xl resize-none" {...field} />
+                          <Textarea placeholder="Paste job details (min. 50 chars)..." className="h-32 rounded-xl resize-none" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -222,7 +257,7 @@ export function CoverLetterGeneratorPage() {
                   </div>
 
                   <Button type="submit" disabled={isLoading || !canUseFeature} className="w-full h-12 btn-gradient font-bold rounded-xl text-lg">
-                    {isLoading ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Drafting...</> : 'Generate Letter'}
+                    {isLoading ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Drafting Story...</> : 'Generate Letter'}
                   </Button>
                 </form>
               </Form>
@@ -234,10 +269,13 @@ export function CoverLetterGeneratorPage() {
           {isLoading ? (
             <Card className="border-border/40 h-full min-h-[600px]">
               <CardContent className="p-12 flex flex-col items-center justify-center h-full text-center space-y-4">
-                <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                <div className="relative">
+                    <Loader2 className="w-16 h-16 animate-spin text-primary opacity-20" />
+                    <Sparkles className="w-6 h-6 text-primary absolute inset-0 m-auto animate-pulse" />
+                </div>
                 <h3 className="text-xl font-bold">Writing Your Story...</h3>
                 <p className="text-muted-foreground max-w-xs mx-auto text-sm italic">
-                  "Our AI is selecting your most relevant achievements to highlight for this specific role."
+                  "Our AI is scanning your resume to find the most relevant achievements for this role."
                 </p>
               </CardContent>
             </Card>
@@ -253,7 +291,7 @@ export function CoverLetterGeneratorPage() {
                     {isCopied ? <Check className="w-4 h-4 mr-2 text-green-500" /> : <Copy className="w-4 h-4 mr-2" />}
                     Copy
                   </Button>
-                  <Button variant="outline" size="sm" className="rounded-xl h-9 font-bold">
+                  <Button variant="outline" size="sm" className="rounded-xl h-9 font-bold" onClick={handleDownloadPDF}>
                     <Download className="w-4 h-4 mr-2" /> PDF
                   </Button>
                 </div>
@@ -271,7 +309,7 @@ export function CoverLetterGeneratorPage() {
                   <Sparkles className="w-8 h-8 text-muted-foreground/40" />
                 </div>
                 <h3 className="text-xl font-bold">Preview Result</h3>
-                <p className="text-sm text-muted-foreground">Your AI-generated cover letter will appear here formatted and ready to send.</p>
+                <p className="text-sm text-muted-foreground">Your AI-generated cover letter will appear here, professionally formatted and ready to use.</p>
               </div>
             </Card>
           )}
