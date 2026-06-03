@@ -20,7 +20,7 @@ import {
   CalendarClock,
   ExternalLink,
   ChevronRight,
-  ZapOff,
+  Zap,
   AlertCircle,
   CreditCard,
   ShieldCheck,
@@ -109,11 +109,11 @@ export default function DashboardPage() {
 
   const quickActions = [
     { title: 'Resume Builder', desc: 'Craft your professional story', icon: FileText, href: '/resume-builder', color: 'bg-blue-500', locked: false },
+    { title: 'AI Transformer', desc: 'Auto-rewrite for specific roles', icon: Zap, href: '/resume-transformer', color: 'bg-amber-600', locked: effectivePlan === 'free' },
     { title: 'Resume Analyzer', desc: 'Get instant AI performance feedback', icon: Sparkles, href: '/resume-analyzer', color: 'bg-purple-500', locked: effectivePlan === 'free' },
     { title: 'ATS Optimizer', desc: 'Beat the bots with keyword match', icon: Target, href: '/ats-optimizer', color: 'bg-emerald-500', locked: effectivePlan === 'free' },
     { title: 'Job Matcher', desc: 'Find roles that fit your skills', icon: Briefcase, href: '/job-matcher', color: 'bg-amber-500', locked: effectivePlan === 'free' },
     { title: 'Cover Letter', desc: 'Tailored letters in seconds', icon: FileEdit, href: '/cover-letter-generator', color: 'bg-pink-500', locked: effectivePlan === 'free' },
-    { title: 'Candidate Match', desc: 'For hiring teams & recruiters', icon: Users, href: '/candidate-matcher', color: 'bg-cyan-500', locked: effectivePlan !== 'recruiter' },
   ];
 
   const isPaymentPending = plan === 'pending';
@@ -215,7 +215,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold flex items-center gap-2">
-              <ZapOff className="h-5 w-5 text-primary" /> Quick Actions
+              <Zap className="h-5 w-5 text-primary" /> Quick Actions
             </h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -237,7 +237,7 @@ export default function DashboardPage() {
                       </div>
                       <p className="text-xs text-muted-foreground truncate">{action.desc}</p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
+                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all duration-200 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0" />
                   </CardContent>
                 </Card>
               </Link>

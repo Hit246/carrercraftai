@@ -17,7 +17,8 @@ import {
   Settings,
   LogOut,
   Loader2,
-  ShieldAlert
+  ShieldAlert,
+  Zap
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -65,6 +66,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const menuItems = [
     { label: 'Home', icon: Home, href: '/dashboard' },
     { label: 'Resume Builder', icon: SquarePen, href: '/resume-builder' },
+    { label: 'AI Transformer', icon: Zap, href: '/resume-transformer', badge: 'New' },
     { label: 'Resume Analyzer', icon: Sparkles, href: '/resume-analyzer' },
     { label: 'ATS Optimizer', icon: Target, href: '/ats-optimizer' },
     { label: 'Job Matcher', icon: Briefcase, href: '/job-matcher' },
@@ -113,7 +115,12 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                   >
                     <Link href={item.href}>
                       <item.icon className={cn("h-5 w-5", isActive(item.href) ? "text-primary" : "text-muted-foreground")} />
-                      <span>{item.label}</span>
+                      <span className="flex-1">{item.label}</span>
+                      {item.badge && (
+                        <Badge className="bg-primary text-white text-[8px] h-4 py-0 px-1 border-none font-black uppercase">
+                            {item.badge}
+                        </Badge>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

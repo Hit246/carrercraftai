@@ -25,6 +25,7 @@ import { atsOptimizer, AtsOptimizerInput, AtsOptimizerOutput } from '@/ai/flows/
 import { submitSupportRequest, replyToSupportRequest } from '@/ai/flows/support-request';
 import { suggestResumeVersionName, SuggestResumeVersionNameInput, SuggestResumeVersionNameOutput } from '@/ai/flows/resume-version-namer';
 import { summarizeCandidate, SummarizeCandidateInput, SummarizeCandidateOutput } from '@/ai/flows/candidate-summarizer';
+import { transformResume, ResumeTransformerInput, ResumeTransformerOutput } from '@/ai/flows/resume-transformer';
 import { db } from './firebase';
 import type { SupportRequestInput, ReplySupportRequestInput } from './types';
 
@@ -184,4 +185,8 @@ export async function suggestResumeVersionNameAction(input: SuggestResumeVersion
 
 export async function summarizeCandidateAction(input: SummarizeCandidateInput): Promise<SummarizeCandidateOutput> {
   return await summarizeCandidate(input);
+}
+
+export async function transformResumeAction(input: ResumeTransformerInput): Promise<ResumeTransformerOutput> {
+  return await transformResume(input);
 }
