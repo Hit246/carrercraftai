@@ -19,6 +19,7 @@ import {
   ArrowRight,
   Mail,
   PartyPopper,
+  Star,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
@@ -153,12 +154,11 @@ const features = [
 ];
 
 function HomePageContent() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [annual, setAnnual] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-  // Pricing State
   const [settings, setSettings] = useState<PricingSettings>({
     essentials: 199,
     pro: 399,
@@ -166,7 +166,6 @@ function HomePageContent() {
     festiveDiscount: 0,
     festiveName: '',
   });
-  const [isLoadingPricing, setIsLoadingPricing] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -180,8 +179,6 @@ function HomePageContent() {
         }
       } catch (e) {
         console.error("Error fetching dynamic pricing:", e);
-      } finally {
-        setIsLoadingPricing(false);
       }
     };
     fetchPricing();
@@ -193,7 +190,7 @@ function HomePageContent() {
       final = final * (1 - settings.festiveDiscount / 100);
     }
     if (annual) {
-      final = final * 0.8; // 20% Annual Discount
+      final = final * 0.8;
     }
     return Math.floor(final);
   };
@@ -231,9 +228,11 @@ function HomePageContent() {
     }
   };
 
+  const getPricingLink = () => user ? "/pricing" : "/signup";
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <HomeHeader onOpenAuth={() => router.push('/login')} />
+      <HomeHeader />
 
       <main className="flex-1">
 
@@ -410,7 +409,6 @@ function HomePageContent() {
               </div>
             </div>
 
-            {/* Pricing grid — 1 col mobile, 2 col tablet, 4 col desktop */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 max-w-7xl mx-auto items-start">
 
               {/* Free */}
@@ -428,8 +426,8 @@ function HomePageContent() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => handleCta()}>
-                    Get Started Free
+                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" asChild>
+                    <Link href={getPricingLink()}>Get Started Free</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -454,13 +452,13 @@ function HomePageContent() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => handleCta("/pricing")}>
-                    Choose Essentials
+                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" asChild>
+                    <Link href={getPricingLink()}>Choose Essentials</Link>
                   </Button>
                 </CardContent>
               </Card>
 
-              {/* Pro — highlighted with ring */}
+              {/* Pro */}
               <Card className="card-hover flex flex-col ring-2 ring-primary shadow-2xl shadow-primary/10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-black px-4 py-1.5 rounded-bl-xl uppercase tracking-widest">
                   POPULAR
@@ -483,8 +481,8 @@ function HomePageContent() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full btn-gradient h-11 rounded-xl font-bold" onClick={() => handleCta("/pricing")}>
-                    Choose Pro
+                  <Button className="w-full btn-gradient h-11 rounded-xl font-bold" asChild>
+                    <Link href={getPricingLink()}>Choose Pro</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -509,8 +507,8 @@ function HomePageContent() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => handleCta("/pricing")}>
-                    Choose Recruiter
+                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" asChild>
+                    <Link href={getPricingLink()}>Choose Recruiter</Link>
                   </Button>
                 </CardContent>
               </Card>

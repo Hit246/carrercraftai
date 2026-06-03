@@ -8,11 +8,7 @@ import { Skeleton } from './ui/skeleton';
 import Image from 'next/image';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 
-interface HomeHeaderProps {
-  onOpenAuth?: () => void;
-}
-
-export function HomeHeader({ onOpenAuth }: HomeHeaderProps) {
+export function HomeHeader() {
   const { user, loading } = useAuth();
 
   const navLinks = [
