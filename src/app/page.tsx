@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { AuthProvider, useAuth } from '@/hooks/use-auth';
 import { HomeHeader } from '@/components/home-header';
-import { AuthModal } from '@/components/auth-modal';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from '@/lib/utils';
 import { FaGithub, FaLinkedin, FaTwitter } from 'react-icons/fa';
@@ -154,8 +154,7 @@ const features = [
 
 function HomePageContent() {
   const { user } = useAuth();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [modalMode, setModalContext] = useState<{ title?: string; description?: string }>({});
+  const router = useRouter();
   const [annual, setAnnual] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -199,11 +198,6 @@ function HomePageContent() {
     return Math.floor(final);
   };
 
-  const openAuth = (title?: string, desc?: string) => {
-    setModalContext({ title, description: desc });
-    setIsAuthModalOpen(true);
-  };
-
   const faqData = [
     {
       q: "Is CareerCraft AI free to use?",
@@ -229,15 +223,17 @@ function HomePageContent() {
 
   if (!mounted) return null;
 
+  const handleCta = (href: string = "/signup") => {
+    if (user) {
+      router.push("/dashboard");
+    } else {
+      router.push(href);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <HomeHeader onOpenAuth={() => openAuth()} />
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        title={modalMode.title}
-        description={modalMode.description}
-      />
+      <HomeHeader onOpenAuth={() => router.push('/login')} />
 
       <main className="flex-1">
 
@@ -268,10 +264,7 @@ function HomePageContent() {
                   className="btn-gradient h-12 md:h-14 px-8 md:px-10 rounded-xl text-base md:text-lg font-bold w-full sm:w-auto shadow-xl shadow-primary/30"
                   asChild
                 >
-                  <Link
-                    href={user ? "/dashboard" : "#"}
-                    onClick={(e) => !user && (e.preventDefault(), openAuth("Build Your Resume", "Sign up free to create your first ATS-optimized resume."))}
-                  >
+                  <Link href={user ? "/dashboard" : "/signup"}>
                     Build My Resume Free <ArrowRight className="ml-2 w-5 h-5" />
                   </Link>
                 </Button>
@@ -368,7 +361,7 @@ function HomePageContent() {
                 <Card
                   key={f.id}
                   className="card-hover overflow-hidden cursor-pointer group border-border/40 bg-card/50"
-                  onClick={() => openAuth(f.title, f.desc)}
+                  onClick={() => handleCta()}
                 >
                   <CardContent className="p-6 md:p-8 flex flex-col h-full">
                     <div className={cn("w-11 h-11 md:w-12 md:h-12 rounded-xl mb-5 md:mb-6 flex items-center justify-center shadow-lg", f.bg, f.color)}>
@@ -435,7 +428,7 @@ function HomePageContent() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => openAuth()}>
+                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => handleCta()}>
                     Get Started Free
                   </Button>
                 </CardContent>
@@ -461,7 +454,7 @@ function HomePageContent() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => openAuth()}>
+                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => handleCta("/pricing")}>
                     Choose Essentials
                   </Button>
                 </CardContent>
@@ -490,7 +483,7 @@ function HomePageContent() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full btn-gradient h-11 rounded-xl font-bold" onClick={() => openAuth()}>
+                  <Button className="w-full btn-gradient h-11 rounded-xl font-bold" onClick={() => handleCta("/pricing")}>
                     Choose Pro
                   </Button>
                 </CardContent>
@@ -516,7 +509,7 @@ function HomePageContent() {
                       </li>
                     ))}
                   </ul>
-                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => openAuth()}>
+                  <Button className="w-full h-11 rounded-xl font-bold" variant="outline" onClick={() => handleCta("/pricing")}>
                     Choose Recruiter
                   </Button>
                 </CardContent>

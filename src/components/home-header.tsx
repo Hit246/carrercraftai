@@ -19,8 +19,8 @@ export function HomeHeader({ onOpenAuth }: HomeHeaderProps) {
     { label: "Features", href: "/#features" },
     { label: "Pricing", href: "/#pricing" },
     { label: "Blog", href: "/blog" },
-    { label: "Resume Builder", href: user ? "/dashboard" : "#", onClick: (e: any) => !user && onOpenAuth?.() },
-    { label: "For Recruiters", href: user ? "/candidate-matcher" : "#", onClick: (e: any) => !user && onOpenAuth?.() },
+    { label: "Resume Builder", href: user ? "/dashboard" : "/signup" },
+    { label: "For Recruiters", href: user ? "/candidate-matcher" : "/signup" },
   ];
 
   return (
@@ -39,7 +39,6 @@ export function HomeHeader({ onOpenAuth }: HomeHeaderProps) {
               <Link 
                 key={link.label} 
                 href={link.href} 
-                onClick={link.onClick}
                 className="text-muted-foreground transition-colors hover:text-foreground"
               >
                 {link.label}
@@ -65,10 +64,12 @@ export function HomeHeader({ onOpenAuth }: HomeHeaderProps) {
                 <Button variant="ghost" size="sm" asChild className="hidden xs:flex">
                   <Link href="/login">Log In</Link>
                 </Button>
-                <Button size="sm" onClick={() => onOpenAuth?.()} className="shadow-lg shadow-primary/20">
-                  <span className="hidden sm:inline">Get Started Free</span>
-                  <span className="sm:hidden">Get Started</span>
-                  <MoveRight className="ml-2 h-4 w-4 hidden xs:inline-block"/>
+                <Button size="sm" asChild className="shadow-lg shadow-primary/20">
+                  <Link href="/signup">
+                    <span className="hidden sm:inline">Get Started Free</span>
+                    <span className="sm:hidden">Get Started</span>
+                    <MoveRight className="ml-2 h-4 w-4 hidden xs:inline-block"/>
+                  </Link>
                 </Button>
               </div>
             )}
@@ -88,7 +89,6 @@ export function HomeHeader({ onOpenAuth }: HomeHeaderProps) {
                     <Link
                       key={link.label}
                       href={link.href}
-                      onClick={link.onClick}
                       className="text-lg font-medium transition-colors hover:text-primary py-2 border-b border-muted"
                     >
                       {link.label}
@@ -99,8 +99,8 @@ export function HomeHeader({ onOpenAuth }: HomeHeaderProps) {
                       <Button variant="outline" asChild className="w-full justify-start">
                         <Link href="/login">Log In</Link>
                       </Button>
-                      <Button onClick={() => onOpenAuth?.()} className="w-full justify-start shadow-xl shadow-primary/10">
-                        Create Free Account
+                      <Button asChild className="w-full justify-start shadow-xl shadow-primary/10">
+                        <Link href="/signup">Create Free Account</Link>
                       </Button>
                     </div>
                   )}
