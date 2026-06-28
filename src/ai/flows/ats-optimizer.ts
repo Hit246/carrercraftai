@@ -87,6 +87,7 @@ Evaluate the document itself based on professional standards:
 Rules:
 - Output valid JSON only.
 - Identify the top 3 'Critical Fixes' for the document quality.
+- **DATE EVALUATION RULE**: Do not flag dates in the past or current year as 'future' errors. 'Present' is a valid date for ongoing roles. Only flag dates if they are logically impossible (e.g., end date before start date).
 - Ensure the breakdown matches the overall_score.
 `,
 });
