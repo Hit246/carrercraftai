@@ -8,9 +8,6 @@ const withPWA = require('next-pwa')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverActions: {
-    bodySizeLimit: '10mb',
-  },
   async redirects() {
     return [
       {
@@ -33,6 +30,9 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
     optimizePackageImports: [
       'firebase/app',
       'firebase/auth',
