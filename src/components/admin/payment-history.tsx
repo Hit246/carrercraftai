@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -32,6 +31,7 @@ interface UserData {
   id: string;
   email: string;
   plan: Plan;
+  photoURL?: string;
   createdAt?: { seconds: number };
   planUpdatedAt?: { seconds: number };
   paymentProofURL?: string;
@@ -155,7 +155,7 @@ export function PaymentHistory() {
                         <TableCell>
                         <div className="flex items-center gap-3">
                             <Avatar className="h-8 w-8">
-                                <AvatarImage src={`https://placehold.co/100x100.png?text=${user.email[0].toUpperCase()}`} />
+                                <AvatarImage src={user.photoURL} />
                                 <AvatarFallback>{user.email[0].toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div>

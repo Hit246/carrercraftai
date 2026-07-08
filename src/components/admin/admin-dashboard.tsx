@@ -19,6 +19,7 @@ interface UserData {
     id: string;
     email: string;
     plan: 'free' | 'essentials' | 'pro' | 'recruiter';
+    photoURL?: string;
     createdAt?: { seconds: number, nanoseconds: number };
     amountPaid?: number;
 }
@@ -175,6 +176,7 @@ export function AdminDashboard() {
                                         <TableCell className="py-4">
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-10 w-10 ring-2 ring-primary/10">
+                                                    <AvatarImage src={user.photoURL} />
                                                     <AvatarFallback className="bg-muted text-[10px] font-black uppercase">{user.email[0]}</AvatarFallback>
                                                 </Avatar>
                                                 <div className="flex-1 min-w-0">

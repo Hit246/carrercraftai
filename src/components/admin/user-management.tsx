@@ -170,6 +170,7 @@ export function UserManagementPage() {
                   <TableCell className="py-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border border-white/10 shadow-lg">
+                        <AvatarImage src={user.photoURL} />
                         <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-black uppercase">
                           {user.email[0]}
                         </AvatarFallback>

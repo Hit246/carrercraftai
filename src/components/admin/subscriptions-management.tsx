@@ -34,6 +34,7 @@ interface UserData {
   id: string;
   email: string;
   plan: Plan;
+  photoURL?: string;
   requestedPlan?: 'essentials' | 'pro' | 'recruiter';
   billingCycle?: 'monthly' | 'annual';
   createdAt?: { seconds: number };
@@ -198,7 +199,7 @@ export function SubscriptionsManagementPage() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar>
-                            <AvatarImage src={`https://placehold.co/100x100.png?text=${user.email[0].toUpperCase()}`} />
+                            <AvatarImage src={user.photoURL} />
                             <AvatarFallback>{user.email[0].toUpperCase()}</AvatarFallback>
                           </Avatar>
                           <div>
