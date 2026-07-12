@@ -1,7 +1,7 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { browserLocalPersistence, getAuth, GoogleAuthProvider, setPersistence } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { browserLocalPersistence, getAuth, GoogleAuthProvider, setPersistence, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL, FirebaseStorage } from 'firebase/storage';
 
 const firebaseConfig = {
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID_NEW,
@@ -13,32 +13,58 @@ const firebaseConfig = {
 };
 
 // Check if config is valid to avoid crashing with obscure Firebase errors
-const isConfigValid = !!firebaseConfig.apiKey && !!firebaseConfig.projectId;
+const isConfigValid = !!firebaseConfig.apiKey && firebaseConfig.apiKey !== 'undefined' && !!firebaseConfig.projectId;
 
-if (!isConfigValid && typeof window !== 'undefined') {
-    console.error(
-        "❌ Firebase configuration is missing. Please ensure your .env file has all NEXT_PUBLIC_FIREBASE_* variables set correctly.",
-        "Current Config:", firebaseConfig
-    );
+let app: FirebaseApp | undefined;
+let auth: Auth;
+let db: Firestore;
+let storage: FirebaseStorage;
+
+if (isConfigValid) {
+    try {
+        app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+        auth = getAuth(app);
+        db = getFirestore(app);
+        storage = getStorage(app);
+
+        // Only set persistence in a browser environment
+        if (typeof window !== 'undefined') {
+            setPersistence(auth, browserLocalPersistence).catch((err) => {
+                console.warn("Firebase persistence could not be initialized:", err);
+            });
+        }
+    } catch (error) {
+        console.error("❌ Firebase initialization failed:", error);
+        // Fallback to stubs to prevent total app failure
+        auth = {} as Auth;
+        db = {} as Firestore;
+        storage = {} as FirebaseStorage;
+    }
+} else {
+    if (typeof window !== 'undefined') {
+        console.error(
+            "❌ Firebase configuration is missing or invalid. Please check your .env file.",
+            "Expected: NEXT_PUBLIC_FIREBASE_API_KEY_NEW, etc.",
+            "Current State:", {
+                hasApiKey: !!firebaseConfig.apiKey,
+                hasProjectId: !!firebaseConfig.projectId,
+                apiKeyVal: firebaseConfig.apiKey === 'undefined' ? 'Literal "undefined" string detected' : 'Missing'
+            }
+        );
+    }
+    // Provide empty objects to prevent immediate crashes in components importing these
+    auth = {} as Auth;
+    db = {} as Firestore;
+    storage = {} as FirebaseStorage;
 }
-
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const auth = getAuth(app);
-
-// Only set persistence in a browser environment and if config is valid
-if (typeof window !== 'undefined' && isConfigValid) {
-    setPersistence(auth, browserLocalPersistence).catch((err) => {
-        console.warn("Firebase persistence could not be initialized:", err);
-    });
-}
-
-const db = getFirestore(app);
-const storage = getStorage(app);
 
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 export const uploadFile = async (file: File, path: string): Promise<string> => {
+    if (!isConfigValid || !storage) {
+        throw new Error("Firebase Storage is not configured. Check your environment variables.");
+    }
     const storageRef = ref(storage, path);
     const snapshot = await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(snapshot.ref);
