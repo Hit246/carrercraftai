@@ -12,9 +12,26 @@ const firebaseConfig = {
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID_NEW,
 };
 
+// Check if config is valid to avoid crashing with obscure Firebase errors
+const isConfigValid = !!firebaseConfig.apiKey && !!firebaseConfig.projectId;
+
+if (!isConfigValid && typeof window !== 'undefined') {
+    console.error(
+        "❌ Firebase configuration is missing. Please ensure your .env file has all NEXT_PUBLIC_FIREBASE_* variables set correctly.",
+        "Current Config:", firebaseConfig
+    );
+}
+
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
-setPersistence(auth, browserLocalPersistence);
+
+// Only set persistence in a browser environment and if config is valid
+if (typeof window !== 'undefined' && isConfigValid) {
+    setPersistence(auth, browserLocalPersistence).catch((err) => {
+        console.warn("Firebase persistence could not be initialized:", err);
+    });
+}
+
 const db = getFirestore(app);
 const storage = getStorage(app);
 
